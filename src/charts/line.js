@@ -1,6 +1,6 @@
 import React from 'react'
 import { Motion, spring } from 'react-motion'
-import { line } from 'd3-shape'
+import { line, curveBasis } from 'd3-shape'
 import { scaleLinear } from 'd3-scale'
 
 const getX = d => Array.isArray(d) ? d[0] : d.x
@@ -175,7 +175,8 @@ const Curve = React.createClass({
             interpolated[pathYPrefix + i]
           ])
           // Create the path using the interpolated data
-          const path = line()(interData)
+          const path = line()
+          .curve(curveBasis)(interData)
           return (
             <path
               {...rest}
