@@ -35,6 +35,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "d3-interpolate-path": "^1.1.1",
+    "d3-scale": "^1.0.4",
     "d3-shape": "^1.0.5",
     "react-motion": "^0.4.7"
   },

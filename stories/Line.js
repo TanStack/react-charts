@@ -30,6 +30,8 @@ class Line extends Component {
 
         <LineChart
           data={data}
+          width={500}
+          height={200}
         />
 
         <br />
@@ -49,8 +51,8 @@ function makeData () {
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
   const length = 30
-  return _.map(_.range(length), d => [
-    d * 10,
-    Math.round(Math.random() * 100)
-  ])
+  return _.map(_.range(length), d => ({
+    x: d * 10,
+    y: Math.round(Math.random() * 100)
+  }))
 }
