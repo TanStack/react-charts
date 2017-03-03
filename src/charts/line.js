@@ -6,19 +6,7 @@ import { scaleLinear } from 'd3-scale'
 const getX = d => Array.isArray(d) ? d[0] : d.x
 const getY = d => Array.isArray(d) ? d[1] : d.y
 
-const Stack = React.createClass({
-  render () {
-    const {
-      children
-    } = this.props
-
-    return (
-      <g>
-        {children}
-      </g>
-    )
-  }
-})
+// Primitives
 
 const Line = React.createClass({
   getDefaultProps () {
@@ -36,17 +24,107 @@ const Line = React.createClass({
       y2,
       ...rest
     } = this.props
+
+    const animated = {
+      x1: spring(x1),
+      y1: spring(y1),
+      x2: spring(x2),
+      y2: spring(y2)
+    }
+
     return (
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        {...rest}
-      />
+      <Motion
+        style={{
+          // anything being animated should have a key/value here
+          ...animated
+        }}
+      >
+        {({
+          x1,
+          y1,
+          x2,
+          y2
+        }) => (
+          <line
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            {...rest}
+          />
+        )}
+      </Motion>
     )
   }
 })
+
+const Text = React.createClass({
+  getDefaultProps () {
+    return {
+      fontFamily: 'Helvetica',
+      fontSize: 10
+    }
+  },
+  render () {
+    const {
+      x,
+      y,
+      ...rest
+    } = this.props
+
+    const animated = {
+      x: spring(x),
+      y: spring(y)
+    }
+
+    return (
+      <Motion
+        style={{
+          // anything being animated should have a key/value here
+          ...animated
+        }}
+      >
+        {({
+          x,
+          y
+        }) => (
+          <text
+            x={x}
+            y={y}
+            {...rest}
+          />
+        )}
+      </Motion>
+    )
+  }
+})
+
+// const Circle = React.createClass({
+//   getDefaultProps () {
+//     return {
+//       r: 3,
+//       strokeWidth: '2',
+//       stroke: 'red',
+//       fill: 'transparent'
+//     }
+//   },
+//   render () {
+//     const {
+//       x,
+//       y,
+//       r,
+//       ...rest
+//     } = this.props
+//     return (
+//       <circle
+//         {...rest}
+//         cx={x}
+//         cy={y}
+//         r={r}
+//       />
+//     )
+//   }
+// })
 
 const Curve = React.createClass({
   getDefaultProps () {
@@ -110,6 +188,22 @@ const Curve = React.createClass({
   }
 })
 
+// Components
+
+const Stack = React.createClass({
+  render () {
+    const {
+      children
+    } = this.props
+
+    return (
+      <g>
+        {children}
+      </g>
+    )
+  }
+})
+
 const Scale = ({
   data,
   axis,
@@ -137,18 +231,20 @@ const Axis = React.createClass({
   render () {
     const {
       axis,
-      scale
+      scale,
+      height,
+      width
     } = this.props
 
     const range = scale.range()
-    const x1 = range[0]
-    const y1 = range[0]
-    const x2 = axis === 'x' ? range[1] : range[0]
-    const y2 = axis === 'x' ? range[0] : range[1]
+
+    const x1 = 0
+    const y1 = axis === 'x' ? height : 0
+
+    const x2 = axis === 'x' ? width : 0
+    const y2 = axis === 'x' ? height : range[1]
 
     const ticks = scale.ticks()
-
-    console.log(ticks)
 
     return (
       <g>
@@ -157,7 +253,44 @@ const Axis = React.createClass({
           y1={y1}
           x2={x2}
           y2={y2}
+          stroke={axis === 'y' ? 'red' : 'green'}
         />
+        <g>
+          {ticks.map((d, i) => {
+            const zero = 0
+            const val = scale(d)
+            const x = axis === 'y' ? zero : val
+            const y = axis === 'y' ? val : height
+            return (
+              <Line
+                key={i}
+                x1={x}
+                y1={y}
+                x2={axis === 'y' ? x + 5 : x}
+                y2={axis === 'y' ? y : y - 5}
+                stroke={axis === 'y' ? 'red' : 'green'}
+              />
+            )
+          })}
+        </g>
+        <g>
+          {ticks.map((d, i) => {
+            const zero = 0
+            const val = scale(d)
+            const x = axis === 'y' ? zero : val
+            const y = axis === 'y' ? val : height
+            return (
+              <Text
+                key={i}
+                x={axis === 'y' ? x + 5 : x}
+                y={axis === 'y' ? y : y - 5}
+                stroke={axis === 'y' ? 'red' : 'green'}
+              >
+                {d}
+              </Text>
+            )
+          })}
+        </g>
       </g>
     )
   }
@@ -204,10 +337,14 @@ export default React.createClass({
         <Axis
           axis='x'
           scale={scaleX}
+          height={height}
+          width={width}
         />
         <Axis
           axis='y'
           scale={scaleY}
+          height={height}
+          width={width}
         />
       </svg>
     )
