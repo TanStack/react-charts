@@ -28,18 +28,22 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(10).map((d, i) => (
-          <LineChart
-            key={d}
-            data={data}
-            width={500}
-            height={70}
-          />
+        {_.range(1).map((d, i) => (
+          <div
+            key={i}
+            style={{
+              width: '100%',
+              height: '400px'
+            }}
+          >
+            <LineChart
+              data={data}
+            />
+          </div>
         ))}
 
         <br />
         <br />
-        {/* <pre><code>{JSON.stringify(data, null, 2)}</code></pre> */}
       </div>
     )
   }
@@ -48,13 +52,14 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(4), d => makeSeries())
+  return _.map(_.range(5), d => makeSeries())
 }
 
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
   const length = 30
-  const multiplier = Math.round(Math.random() * 10)
+  const multiplier = 10
+  // const multiplier = Math.round(Math.random() * 10)
   return _.map(_.range(length), d => ({
     x: d * multiplier,
     y: Math.round(Math.random() * 100)
