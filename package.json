@@ -33,7 +33,10 @@
     "docs": "build-storybook -o docs && cp .storybook/CNAME docs/CNAME"
   },
   "dependencies": {
-    "classnames": "^2.2.5"
+    "classnames": "^2.2.5",
+    "d3-interpolate-path": "^1.1.1",
+    "d3-shape": "^1.0.5",
+    "react-motion": "^0.4.7"
   },
   "peerDependencies": {
     "react": "^15.3.1"
@@ -50,6 +53,7 @@
     "browserify": "^13.1.0",
     "github-markdown-css": "^2.4.1",
     "html-loader": "^0.4.4",
+    "lodash": "^4.17.4",
     "markdown-loader": "^0.1.7",
     "nib": "^1.1.2",
     "npm-run-all": "^3.1.1",

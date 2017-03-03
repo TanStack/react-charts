@@ -9,7 +9,7 @@ import 'github-markdown-css/github-markdown.css'
 //
 import Readme from '../README.md'
 //
-import Simple from '../stories/Simple.js'
+import Line from '../stories/Line.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -19,11 +19,11 @@ configure(() => {
           return <span className='markdown-body' dangerouslySetInnerHTML={{__html: Readme}} />
         },
         componentDidMount () {
-          global.Prism.highlightAll()
+          global.Prism && global.Prism.highlightAll()
         }
       })
       return <ReadmeCmp />
     })
   storiesOf('2. Demos')
-    .add('Simple', Simple)
+    .add('Line', Line)
 }, module)
