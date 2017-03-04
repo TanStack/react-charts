@@ -57,9 +57,9 @@ function makeData () {
 
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
-  const length = 30
-  const multiplier = 10
-  // const multiplier = Math.round(Math.random() * 10)
+  const length = 10
+  // const multiplier = 10
+  const multiplier = Math.round((Math.random() * 10) + 3)
   return _.map(_.range(length), d => ({
     x: d * multiplier,
     y: Math.round(Math.random() * 100)

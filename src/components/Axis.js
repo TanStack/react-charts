@@ -12,6 +12,8 @@ export default React.createClass({
       width
     } = this.props
 
+    const getGraphY = value => height - value
+
     const range = scale.range()
 
     const x1 = 0
@@ -36,7 +38,7 @@ export default React.createClass({
             const zero = 0
             const val = scale(d)
             const x = axis === 'y' ? zero : val
-            const y = axis === 'y' ? val : height
+            const y = axis === 'y' ? getGraphY(val) : height
             return (
               <Line
                 key={i}
@@ -54,7 +56,7 @@ export default React.createClass({
             const zero = 0
             const val = scale(d)
             const x = axis === 'y' ? zero : val
-            const y = axis === 'y' ? val : height
+            const y = axis === 'y' ? getGraphY(val) : height
             return (
               <Text
                 key={i}

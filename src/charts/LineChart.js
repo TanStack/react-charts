@@ -1,11 +1,11 @@
 import React from 'react'
 import 'javascript-detect-element-resize'
 //
-import Scale from '../utils/scale'
-import throttle from '../utils/throttle'
+import Stack from '../components/Stack'
 import Axis from '../components/Axis'
-import Group from '../primitives/Group'
-import Curve from '../primitives/Curve'
+
+import Scale from '../utils/Scale'
+import throttle from '../utils/throttle'
 
 const ResponsiveWrapper = (WrappedComponent) => {
   return React.createClass({
@@ -70,41 +70,37 @@ export default ResponsiveWrapper(React.createClass({
     const {
       data,
       width,
-      height
+      height,
+      style,
+      ...rest
     } = this.props
 
+    // Should only run on update
     const scaleX = Scale({
-      data,
       axis: 'x',
+      data,
+      width,
+      height
+    })
+    const scaleY = Scale({
+      axis: 'y',
+      data,
       width,
       height
     })
 
-    const scaleY = Scale({
-      data,
-      axis: 'y',
-      width,
-      height
-    })
+    // TODO: Calculate Axis Bounds
 
     return (
       <svg
         viewBox={`0 0 ${width} ${height}`}
         style={{
           width: width,
-          height: height
+          height: height,
+          ...style
         }}
+        {...rest}
       >
-        <Group>
-          {data.map((series, i) => (
-            <Curve
-              key={i}
-              data={series}
-              scaleX={scaleX}
-              scaleY={scaleY}
-            />
-          ))}
-        </Group>
         <Axis
           axis='x'
           scale={scaleX}
@@ -113,7 +109,14 @@ export default ResponsiveWrapper(React.createClass({
         />
         <Axis
           axis='y'
-          scale={scaleY}
+          scale={scaleX}
+          height={height}
+          width={width}
+        />
+        <Stack
+          {...this.props}
+          scaleX={scaleX}
+          scaleY={scaleY}
           height={height}
           width={width}
         />

@@ -1,4 +1,4 @@
-import LineChart from './charts/line'
+import LineChart from './charts/LineChart'
 
 module.exports = {
   LineChart
