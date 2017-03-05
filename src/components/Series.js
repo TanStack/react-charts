@@ -24,7 +24,6 @@ export default React.createClass({
       height
     } = this.props
 
-    const getGraphY = value => height - value
 
     // For react-motion to interpolate correctly, it needs to interpolate
     // the x and y values independently for each point. So we create an
@@ -37,7 +36,7 @@ export default React.createClass({
     data.forEach((d, i) => {
       // Interpolate each x and y with the default spring
       pathSpringMap[pathXPrefix + i] = spring(scaleX(getX(d)))
-      pathSpringMap[pathYPrefix + i] = spring(getGraphY(scaleY(getY(d))))
+      pathSpringMap[pathYPrefix + i] = spring(scaleY(getY(d)))
     })
 
     return (

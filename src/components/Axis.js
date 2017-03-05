@@ -12,15 +12,15 @@ export default React.createClass({
       width
     } = this.props
 
-    const getGraphY = value => height - value
-
-    const range = scale.range()
-
     const x1 = 0
-    const y1 = axis === 'x' ? height : 0
+    const y1 = height
 
-    const x2 = axis === 'x' ? width : 0
-    const y2 = axis === 'x' ? height : range[1]
+    const isYAxis = axis === 'y'
+
+    const x2 = isYAxis ? 0 : width
+    const y2 = isYAxis ? 0 : height
+
+    const zero = isYAxis ? 0 : height
 
     const ticks = scale.ticks()
 
@@ -31,38 +31,36 @@ export default React.createClass({
           y1={y1}
           x2={x2}
           y2={y2}
-          stroke={axis === 'y' ? 'red' : 'green'}
+          stroke={isYAxis ? 'red' : 'green'}
         />
         <g>
           {ticks.map((d, i) => {
-            const zero = 0
             const val = scale(d)
-            const x = axis === 'y' ? zero : val
-            const y = axis === 'y' ? getGraphY(val) : height
+            const x = isYAxis ? zero : val
+            const y = isYAxis ? val : zero
             return (
               <Line
                 key={i}
                 x1={x}
                 y1={y}
-                x2={axis === 'y' ? x + 5 : x}
-                y2={axis === 'y' ? y : y - 5}
-                stroke={axis === 'y' ? 'red' : 'green'}
+                x2={isYAxis ? x + 5 : x}
+                y2={isYAxis ? y : y - 5}
+                stroke={isYAxis ? 'red' : 'green'}
               />
             )
           })}
         </g>
         <g>
           {ticks.map((d, i) => {
-            const zero = 0
             const val = scale(d)
-            const x = axis === 'y' ? zero : val
-            const y = axis === 'y' ? getGraphY(val) : height
+            const x = isYAxis ? zero : val
+            const y = isYAxis ? val : zero
             return (
               <Text
                 key={i}
-                x={axis === 'y' ? x + 5 : x}
-                y={axis === 'y' ? y : y - 5}
-                stroke={axis === 'y' ? 'red' : 'green'}
+                x={isYAxis ? x + 5 : x}
+                y={isYAxis ? y : y - 5}
+                stroke={isYAxis ? 'red' : 'green'}
               >
                 {d}
               </Text>

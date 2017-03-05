@@ -18,8 +18,8 @@ export default React.createClass({
       data,
       scaleX,
       scaleY,
-      height,
-      width
+      height
+      // width
     } = this.props
     const {
       tooltip
@@ -28,7 +28,6 @@ export default React.createClass({
     const flatData = data.reduce((prev, now) => prev.concat(now), [])
     const mappedData = flatData.map(d => [scaleX(getX(d)), height - scaleY(getY(d))])
     const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[1]]]
-    console.log(mappedData)
 
     const vor = voronoi()
       .extent(extent)(mappedData)

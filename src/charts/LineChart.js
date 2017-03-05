@@ -110,7 +110,7 @@ export default ResponsiveWrapper(React.createClass({
         />
         <Axis
           axis='y'
-          scale={scaleX}
+          scale={scaleY}
           height={height}
           width={width}
         />

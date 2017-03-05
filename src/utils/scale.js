@@ -23,7 +23,10 @@ export default ({
   const min = Math.min(...vals)
   const max = Math.max(...vals)
 
+  const domain = [min, max]
+  const range = axis === 'y' ? [height, 0] : [0, width]
+
   return scaleLinear()
-    .domain([min, max])
-    .range([0, axis === 'y' ? height : width])
+    .domain(domain)
+    .range(range)
 }
