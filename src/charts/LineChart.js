@@ -120,6 +120,7 @@ export default ResponsiveWrapper(React.createClass({
           scaleY={scaleY}
           height={height}
           width={width}
+          type='line'
         />
         <Tooltip
           {...this.props}

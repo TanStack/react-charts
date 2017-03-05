@@ -28,12 +28,12 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(10).map((d, i) => (
           <div
             key={i}
             style={{
               width: '100%',
-              height: '400px'
+              height: '50px'
             }}
           >
             <LineChart
@@ -41,7 +41,7 @@ class Line extends Component {
             />
           </div>
         ))}
-        
+
         <br />
         <br />
       </div>
@@ -57,7 +57,7 @@ function makeData () {
 
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
-  const length = 10
+  const length = 30
   // const multiplier = 10
   const multiplier = Math.round((Math.random() * 10) + 3)
   return _.map(_.range(length), d => ({
