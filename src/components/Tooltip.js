@@ -17,8 +17,7 @@ export default React.createClass({
     const {
       data,
       scaleX,
-      scaleY,
-      height
+      scaleY
       // width
     } = this.props
     const {
@@ -26,8 +25,8 @@ export default React.createClass({
     } = this.state
 
     const flatData = data.reduce((prev, now) => prev.concat(now), [])
-    const mappedData = flatData.map(d => [scaleX(getX(d)), height - scaleY(getY(d))])
-    const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[1]]]
+    const mappedData = flatData.map(d => [scaleX(getX(d)), scaleY(getY(d))])
+    const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[0]]]
 
     const vor = voronoi()
       .extent(extent)(mappedData)
@@ -36,27 +35,32 @@ export default React.createClass({
 
     return (
       <g
+        className='tooltips'
         onMouseLeave={e => {
           this.setState({
             tooltip: null
           })
         }}
       >
-        {polygons.map((poly, i) => (
-          <Curve
-            key={i}
-            points={poly}
-            showPoints={false}
-            stroke='transparent'
-            onMouseEnter={e => {
-              this.setState({
-                tooltip: poly.data
-              })
-            }}
-          />
-        ))}
+        <g>
+          {polygons.map((poly, i) => (
+            <Curve
+              key={i}
+              className='tooltip-voronoi'
+              points={poly}
+              showPoints={false}
+              stroke='transparent'
+              onMouseEnter={e => {
+                this.setState({
+                  tooltip: poly.data
+                })
+              }}
+            />
+          ))}
+        </g>
         {!!tooltip && (
           <Text
+            className='tooltip'
             x={tooltip[0]}
             y={tooltip[1]}
           >

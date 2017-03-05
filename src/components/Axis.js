@@ -25,7 +25,9 @@ export default React.createClass({
     const ticks = scale.ticks()
 
     return (
-      <g>
+      <g
+        className='axis'
+      >
         <Line
           x1={x1}
           y1={y1}
