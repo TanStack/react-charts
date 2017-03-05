@@ -8,12 +8,14 @@ export default React.createClass({
     return {
       strokeWidth: '2',
       stroke: 'royalblue',
-      fill: 'transparent'
+      fill: 'transparent',
+      showPoints: true
     }
   },
   render () {
     const {
       points,
+      showPoints,
       ...rest
     } = this.props
     const path = line()(points)
@@ -24,7 +26,7 @@ export default React.createClass({
           {...rest}
           d={path}
         />
-        {points.map((d, i) => (
+        {showPoints && points.map((d, i) => (
           <Circle
             key={i}
             x={d[0]}

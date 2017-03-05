@@ -3,6 +3,7 @@ import 'javascript-detect-element-resize'
 //
 import Stack from '../components/Stack'
 import Axis from '../components/Axis'
+import Tooltip from '../components/Tooltip'
 
 import Scale from '../utils/Scale'
 import throttle from '../utils/throttle'
@@ -114,6 +115,13 @@ export default ResponsiveWrapper(React.createClass({
           width={width}
         />
         <Stack
+          {...this.props}
+          scaleX={scaleX}
+          scaleY={scaleY}
+          height={height}
+          width={width}
+        />
+        <Tooltip
           {...this.props}
           scaleX={scaleX}
           scaleY={scaleY}
