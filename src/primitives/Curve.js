@@ -1,5 +1,9 @@
 import React from 'react'
-import { line, curveBasis } from 'd3-shape'
+import {
+  line,
+  curveCardinal,
+  curveMonotoneX
+} from 'd3-shape'
 //
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
@@ -10,7 +14,7 @@ export default React.createClass({
       strokeWidth: '2',
       stroke: 'royalblue',
       fill: 'transparent',
-      showPoints: true
+      showPoints: false
     }
   },
   render () {
@@ -19,8 +23,15 @@ export default React.createClass({
       showPoints,
       ...rest
     } = this.props
-    const path = line()(points)
-    // const path = line().curve(curveBasis)(points)
+
+    const lineFn = line()
+      .curve(
+        // curveCardinal.tension(0.5)
+        curveMonotoneX
+      )
+
+    const path = lineFn(points)
+
     return (
       <g>
         <Path

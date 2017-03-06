@@ -5,6 +5,8 @@ export default React.createClass({
   getDefaultProps () {
     return {
       fontFamily: 'Helvetica',
+      stroke: 'none',
+      fill: '#535353',
       fontSize: 10
     }
   },

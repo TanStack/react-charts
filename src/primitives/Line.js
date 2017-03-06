@@ -5,7 +5,7 @@ export default React.createClass({
   getDefaultProps () {
     return {
       strokeWidth: '1',
-      stroke: 'black',
+      stroke: '#aaa',
       fill: 'transparent'
     }
   },

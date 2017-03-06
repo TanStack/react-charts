@@ -29,4 +29,5 @@ export default ({
   return scaleLinear()
     .domain(domain)
     .range(range)
+    .nice()
 }

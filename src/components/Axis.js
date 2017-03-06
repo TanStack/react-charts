@@ -19,7 +19,8 @@ export default React.createClass({
       tickFormat: null,
       tickSizeInner: 6,
       tickSizeOuter: 6,
-      tickPadding: 3
+      tickPadding: 3,
+      showGrid: true
     }
   },
   componentWillReceiveProps (newProps) {
@@ -34,6 +35,7 @@ export default React.createClass({
       position,
       width,
       height,
+      showGrid,
       tickArguments,
       tickValues,
       tickFormat,
@@ -43,6 +45,16 @@ export default React.createClass({
     } = this.props
 
     const isVertical = position === left || position === right
+    const min =
+      position === bottom ? height
+      : position === left ? 0
+      : position === top ? 0
+      : width
+    const max =
+      position === bottom ? -height
+      : position === left ? width
+      : position === top ? height
+      : -width
     const k = position === top || position === left ? -1 : 1
     const transform = !isVertical ? translateX : translateY
     const ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
@@ -56,8 +68,8 @@ export default React.createClass({
     return (
       <Motion
         style={{
-          width: spring(width),
-          height: spring(height),
+          min: spring(min),
+          max: spring(max),
           range0: spring(range0),
           range1: spring(range1),
           k: spring(k),
@@ -65,8 +77,8 @@ export default React.createClass({
         }}
       >
         {({
-          width,
-          height,
+          min,
+          max,
           range0,
           range1,
           k,
@@ -82,7 +94,7 @@ export default React.createClass({
               fontSize='10'
               fontFamily='sans-serif'
               textAnchor={position === right ? 'start' : position === left ? 'end' : 'middle'}
-              transform={position === right ? translateX(width) : position === bottom ? translateY(height) : undefined}
+              transform={position === right ? translateX(max) : position === bottom ? translateY(min) : undefined}
             >
               <Path
                 className='domain'
@@ -127,8 +139,16 @@ export default React.createClass({
                               y1={isVertical ? '0.5' : '0.5'}
                               y2={isVertical ? '0.5' : k * tickSizeInner}
                             />
+                            {showGrid && (
+                              <Line
+                                x1={isVertical ? '0.5' : '0.5'}
+                                x2={isVertical ? max : '0.5'}
+                                y1={isVertical ? '0.5' : '0.5'}
+                                y2={isVertical ? '0.5' : max}
+                                opacity='0.2'
+                              />
+                            )}
                             <Text
-                              fill='#000'
                               x={isVertical ? k * spacing : '0.5'}
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === top ? '0em' : position === bottom ? '0.71em' : '0.32em'}
