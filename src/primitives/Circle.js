@@ -4,8 +4,8 @@ import { Motion, spring } from 'react-motion'
 export default React.createClass({
   getDefaultProps () {
     return {
-      r: 3,
-      strokeWidth: '2',
+      r: 2,
+      strokeWidth: '1',
       stroke: '#3f007e',
       fill: 'transparent'
     }

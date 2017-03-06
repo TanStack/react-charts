@@ -1,7 +1,8 @@
 import React from 'react'
 import { line, curveBasis } from 'd3-shape'
 //
-import Circle from './Circle'
+import Path from '../primitives/Path'
+import Circle from '../primitives/Circle'
 
 export default React.createClass({
   getDefaultProps () {
@@ -22,7 +23,7 @@ export default React.createClass({
     // const path = line().curve(curveBasis)(points)
     return (
       <g>
-        <path
+        <Path
           {...rest}
           d={path}
         />

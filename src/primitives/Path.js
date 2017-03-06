@@ -1,6 +1,5 @@
 import React from 'react'
-import { line } from 'd3-shape'
-
+//
 export default React.createClass({
   getDefaultProps () {
     return {
@@ -11,7 +10,7 @@ export default React.createClass({
   },
   render () {
     return (
-      <line
+      <path
         {...this.props}
       />
     )

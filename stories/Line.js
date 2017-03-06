@@ -28,12 +28,12 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(10).map((d, i) => (
+        {_.range(1).map((d, i) => (
           <div
             key={i}
             style={{
               width: '100%',
-              height: '50px'
+              height: '300px'
             }}
           >
             <LineChart

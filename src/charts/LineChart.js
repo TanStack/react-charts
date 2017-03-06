@@ -55,9 +55,9 @@ const ResponsiveWrapper = (WrappedComponent) => {
         >
           {ready && (
             <WrappedComponent
-              {...rest}
               width={width}
               height={height}
+              {...rest}
             />
           )}
         </div>
@@ -67,68 +67,114 @@ const ResponsiveWrapper = (WrappedComponent) => {
 }
 
 export default ResponsiveWrapper(React.createClass({
+  // getInitialState () {
+  //   const {
+  //     width,
+  //     height
+  //   } = this.props
+  //   return {
+  //     layout: {
+  //       width,
+  //       height
+  //     }
+  //   }
+  // },
+  // componentWillReceiveProps (nextProps, nextState) {
+  //   console.log(nextProps)
+  //   const prevProps = this.props
+  //   if (
+  //     prevProps.width !== nextProps.width ||
+  //     prevProps.height !== nextProps.height
+  //   ) {
+  //     this.setState({
+  //       width: nextProps.width,
+  //       height: nextProps.width
+  //     })
+  //   }
+  // },
+  // updateLayout (state) {
+  //   this.setState({
+  //     layout: {
+  //       ...this.state.layout,
+  //       ...state
+  //     }
+  //   })
+  // },
   render () {
     const {
       data,
+      style,
       width,
       height,
-      style,
       ...rest
     } = this.props
+
+    const marginLeft = 50
+    const marginRight = 50
+    const marginTop = 50
+    const marginBottom = 50
+
+    const layout = {
+      width: width - marginLeft - marginRight,
+      height: height - marginTop - marginBottom,
+      marginLeft,
+      marginRight,
+      marginTop,
+      marginBottom
+    }
 
     // Should only run on update
     const scaleX = Scale({
       axis: 'x',
       data,
-      width,
-      height
+      ...layout
     })
     const scaleY = Scale({
       axis: 'y',
       data,
-      width,
-      height
+      ...layout
     })
 
     // TODO: Calculate Axis Bounds
 
     return (
       <svg
-        viewBox={`0 0 ${width} ${height}`}
         style={{
           width: width,
           height: height,
+          border: '1px solid black',
           ...style
         }}
         {...rest}
       >
-        <Axis
-          axis='x'
-          scale={scaleX}
-          height={height}
-          width={width}
-        />
-        <Axis
-          axis='y'
-          scale={scaleY}
-          height={height}
-          width={width}
-        />
-        <Stack
-          {...this.props}
-          scaleX={scaleX}
-          scaleY={scaleY}
-          height={height}
-          width={width}
-          type='line'
-        />
-        <Tooltip
-          {...this.props}
-          scaleX={scaleX}
-          scaleY={scaleY}
-          height={height}
-          width={width}
-        />
+        <g
+          transform={`translate(${marginLeft}, ${marginTop})`}
+        >
+          <Axis
+            position='bottom'
+            scale={scaleX}
+            {...layout}
+          />
+          <Axis
+            position='left'
+            scale={scaleY}
+            {...layout}
+          />
+          <Stack
+            {...this.props}
+            scaleX={scaleX}
+            scaleY={scaleY}
+            layout={layout}
+            updateLayout={this.updateLayout}
+          />
+          {/* <Tooltip
+            {...this.props}
+            scaleX={scaleX}
+            scaleY={scaleY}
+            layout={layout}
+            updateLayout={this.updateLayout}
+          /> */}
+        </g>
       </svg>
     )
   }
