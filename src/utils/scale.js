@@ -1,14 +1,13 @@
 import { scaleLinear } from 'd3-scale'
 //
 
-const getX = d => Array.isArray(d) ? d[0] : d.x
-const getY = d => Array.isArray(d) ? d[1] : d.y
-
 export default ({
   data,
   axis,
   width,
   height,
+  getX,
+  getY,
   children
 }) => {
   const getter = axis === 'y' ? getY : getX

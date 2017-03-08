@@ -1,29 +1,22 @@
 import React from 'react'
-import { Motion, spring } from 'react-motion'
 //
+import Animated from './Animated'
 import Curve from '../primitives/Curve'
 
-const getX = d => Array.isArray(d) ? d[0] : d.x
-const getY = d => Array.isArray(d) ? d[1] : d.y
-
 export default React.createClass({
-  getDefaultProps () {
-    return {
-      // Set up some default getters for our x and y values
-      getX,
-      getY
-    }
-  },
   render () {
     const {
       data,
-      getX,
-      getY,
       scaleX,
       scaleY,
-      height
+      getX,
+      getY,
+      height,
+      hovered,
+      active,
+      isRed,
+      ...rest
     } = this.props
-
 
     // For react-motion to interpolate correctly, it needs to interpolate
     // the x and y values independently for each point. So we create an
@@ -32,33 +25,44 @@ export default React.createClass({
     const pathXPrefix = pathKeyPrefix + 'x_'
     const pathYPrefix = pathKeyPrefix + 'y_'
 
-    const pathSpringMap = {}
-    data.forEach((d, i) => {
-      // Interpolate each x and y with the default spring
-      pathSpringMap[pathXPrefix + i] = spring(scaleX(getX(d)))
-      pathSpringMap[pathYPrefix + i] = spring(scaleY(getY(d)))
-    })
+    const color = isRed ? 'red' : 'blue'
+    const width = isRed ? '20' : '4'
 
     return (
-      <Motion
-        style={{
-          // anything being animated should have a key/value here
-          ...pathSpringMap
+      <Animated
+        style={spring => {
+          const pathSpringMap = {}
+          data.forEach((d, i) => {
+            // Interpolate each x and y with the default spring
+            pathSpringMap[pathXPrefix + i] = spring(scaleX(getX(d)))
+            pathSpringMap[pathYPrefix + i] = spring(scaleY(getY(d)))
+          })
+          return {
+            // anything being animated should have a key/value here
+            ...pathSpringMap,
+            color: spring(color, { stiffness: 100 }),
+            width: spring(width, { stiffness: 250, damping: 8 })
+          }
         }}
       >
-        {interpolated => {
-          // Map back through the data, using the interpolated data point
-          const interData = data.map((d, i) => [
-            interpolated[pathXPrefix + i],
-            interpolated[pathYPrefix + i]
+        {inter => {
+          // Map back through the data, using the inter data point
+          const interPoints = data.map((d, i) => [
+            inter[pathXPrefix + i],
+            inter[pathYPrefix + i]
           ])
           return (
             <Curve
-              points={interData}
+              points={interPoints}
+              hovered={hovered}
+              active={active}
+              {...rest}
+              stroke={inter.color}
+              strokeWidth={inter.width}
             />
           )
         }}
-      </Motion>
+      </Animated>
     )
   }
 })

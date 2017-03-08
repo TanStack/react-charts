@@ -11,9 +11,6 @@ import Circle from '../primitives/Circle'
 export default React.createClass({
   getDefaultProps () {
     return {
-      strokeWidth: '2',
-      stroke: 'royalblue',
-      fill: 'transparent',
       showPoints: false
     }
   },
@@ -25,10 +22,7 @@ export default React.createClass({
     } = this.props
 
     const lineFn = line()
-      .curve(
-        // curveCardinal.tension(0.5)
-        curveMonotoneX
-      )
+      .curve(curveMonotoneX)
 
     const path = lineFn(points)
 

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Motion, spring } from 'react-motion'
 //
+import Animated from './Animated'
 import AnimatedGroup from './AnimatedGroup'
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
@@ -66,15 +66,15 @@ export default React.createClass({
     const scaleCopy = (scale.bandwidth ? center : identity)(scale.copy())
 
     return (
-      <Motion
-        style={{
+      <Animated
+        style={spring => ({
           min: spring(min),
           max: spring(max),
           range0: spring(range0),
           range1: spring(range1),
           k: spring(k),
           tickSizeOuter: spring(tickSizeOuter)
-        }}
+        })}
       >
         {({
           min,
@@ -165,7 +165,7 @@ export default React.createClass({
             </g>
           )
         }}
-      </Motion>
+      </Animated>
     )
   }
 })

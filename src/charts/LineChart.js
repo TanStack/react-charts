@@ -3,7 +3,7 @@ import 'javascript-detect-element-resize'
 //
 import Stack from '../components/Stack'
 import Axis from '../components/Axis'
-import Tooltip from '../components/Tooltip'
+import Interaction from '../components/Interaction'
 
 import Scale from '../utils/Scale'
 import throttle from '../utils/throttle'
@@ -46,6 +46,7 @@ const ResponsiveWrapper = (WrappedComponent) => {
       } = this.state
       return (
         <div
+          className='ResponsiveWrapper'
           ref={el => { this.el = el }}
           style={{
             width: '100%',
@@ -67,39 +68,12 @@ const ResponsiveWrapper = (WrappedComponent) => {
 }
 
 export default ResponsiveWrapper(React.createClass({
-  // getInitialState () {
-  //   const {
-  //     width,
-  //     height
-  //   } = this.props
-  //   return {
-  //     layout: {
-  //       width,
-  //       height
-  //     }
-  //   }
-  // },
-  // componentWillReceiveProps (nextProps, nextState) {
-  //   console.log(nextProps)
-  //   const prevProps = this.props
-  //   if (
-  //     prevProps.width !== nextProps.width ||
-  //     prevProps.height !== nextProps.height
-  //   ) {
-  //     this.setState({
-  //       width: nextProps.width,
-  //       height: nextProps.width
-  //     })
-  //   }
-  // },
-  // updateLayout (state) {
-  //   this.setState({
-  //     layout: {
-  //       ...this.state.layout,
-  //       ...state
-  //     }
-  //   })
-  // },
+  getInitialState () {
+    return {
+      active: null,
+      hovered: null
+    }
+  },
   render () {
     const {
       data,
@@ -108,6 +82,11 @@ export default ResponsiveWrapper(React.createClass({
       height,
       ...rest
     } = this.props
+
+    const {
+      hovered,
+      active
+    } = this.state
 
     const marginLeft = 50
     const marginRight = 50
@@ -123,59 +102,92 @@ export default ResponsiveWrapper(React.createClass({
       marginBottom
     }
 
+    const getX = d => Array.isArray(d) ? d[0] : d.x
+    const getY = d => Array.isArray(d) ? d[1] : d.y
+
     // Should only run on update
     const scaleX = Scale({
       axis: 'x',
       data,
+      getX,
+      getY,
       ...layout
     })
     const scaleY = Scale({
       axis: 'y',
       data,
+      getX,
+      getY,
       ...layout
     })
 
     // TODO: Calculate Axis Bounds
 
     return (
-      <svg
-        style={{
-          width: width,
-          height: height,
-          border: '1px solid black',
-          ...style
-        }}
-        {...rest}
+      <div
+        className='Chart'
       >
-        <g
-          transform={`translate(${marginLeft}, ${marginTop})`}
+        <svg
+          style={{
+            width: width,
+            height: height,
+            border: '1px solid black',
+            ...style
+          }}
+          {...rest}
         >
-          <Axis
-            position='bottom'
-            scale={scaleX}
-            {...layout}
-          />
-          <Axis
-            position='left'
-            scale={scaleY}
-            {...layout}
-          />
-          <Stack
-            {...this.props}
-            scaleX={scaleX}
-            scaleY={scaleY}
-            layout={layout}
-            updateLayout={this.updateLayout}
-          />
-          {/* <Tooltip
-            {...this.props}
-            scaleX={scaleX}
-            scaleY={scaleY}
-            layout={layout}
-            updateLayout={this.updateLayout}
-          /> */}
-        </g>
-      </svg>
+          <g
+            transform={`translate(${marginLeft}, ${marginTop})`}
+          >
+            <Axis
+              position='bottom'
+              scale={scaleX}
+              getX={getX}
+              getY={getY}
+              {...layout}
+            />
+            <Axis
+              position='left'
+              scale={scaleY}
+              getX={getX}
+              getY={getY}
+              {...layout}
+            />
+            <Stack
+              {...this.props}
+              scaleX={scaleX}
+              scaleY={scaleY}
+              getX={getX}
+              getY={getY}
+              {...layout}
+              hovered={hovered}
+              active={active}
+            />
+            {/* <Interaction
+              {...this.props}
+              scaleX={scaleX}
+              scaleY={scaleY}
+              getX={getX}
+              getY={getY}
+              {...layout}
+              onHover={(hovered, e) => this.setState({hovered})}
+              onActivate={(active, e) => {
+                if (this.state.active === active) {
+                  return this.setState({active: null})
+                }
+                this.setState({active})
+              }}
+            /> */}
+          </g>
+        </svg>
+        {/* <Tooltip
+          {...this.props}
+          scaleX={scaleX}
+          scaleY={scaleY}
+          {...layout}
+          hovered={hovered}
+        /> */}
+      </div>
     )
   }
 }))
