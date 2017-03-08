@@ -3,11 +3,13 @@ import { Motion, spring } from 'react-motion'
 import { interpolate } from 'd3-interpolate'
 
 export default React.createClass({
-  oldValues: {},
-  newInters: {},
-  currentStepValues: {},
-  stepValues: {},
-  stepInterpolators: {},
+  componentWillMount () {
+    this.oldValues = {}
+    this.newInters = {}
+    this.currentStepValues = {}
+    this.stepValues = {}
+    this.stepInterpolators = {}
+  },
   render () {
     const {
       style,

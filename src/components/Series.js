@@ -52,14 +52,16 @@ export default React.createClass({
             inter[pathYPrefix + i]
           ])
           return (
-            <Curve
-              points={interPoints}
-              hovered={hovered}
-              active={active}
-              {...rest}
-              stroke={inter.color}
-              strokeWidth={inter.width}
-            />
+            <g>
+              <Curve
+                points={interPoints}
+                hovered={hovered}
+                active={active}
+                {...rest}
+                stroke={inter.color}
+                strokeWidth={inter.width}
+              />
+            </g>
           )
         }}
       </Animated>

@@ -90,8 +90,8 @@ export default ResponsiveWrapper(React.createClass({
 
     const marginLeft = 50
     const marginRight = 50
-    const marginTop = 50
-    const marginBottom = 50
+    const marginTop = 10
+    const marginBottom = 30
 
     const layout = {
       width: width - marginLeft - marginRight,
