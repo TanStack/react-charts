@@ -26,7 +26,7 @@ export default React.createClass({
     const pathYPrefix = pathKeyPrefix + 'y_'
 
     const color = isRed ? 'red' : 'blue'
-    const width = isRed ? '20' : '4'
+    const width = isRed ? '10' : '4'
 
     return (
       <Animated

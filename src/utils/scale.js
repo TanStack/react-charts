@@ -3,14 +3,13 @@ import { scaleLinear } from 'd3-scale'
 
 export default ({
   data,
-  axis,
+  type,
   width,
   height,
   getX,
-  getY,
-  children
+  getY
 }) => {
-  const getter = axis === 'y' ? getY : getX
+  const getter = type === 'y' ? getY : getX
   const vals = []
 
   data.forEach(series => {
@@ -23,7 +22,7 @@ export default ({
   const max = Math.max(...vals)
 
   const domain = [min, max]
-  const range = axis === 'y' ? [height, 0] : [0, width]
+  const range = type === 'y' ? [height, 0] : [0, width]
 
   return scaleLinear()
     .domain(domain)

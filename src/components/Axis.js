@@ -6,12 +6,36 @@ import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 import Text from '../primitives/Text'
 
+import Connect from '../utils/Connect'
+import Selectors from '../utils/Selectors'
+
 const top = 'top'
 const right = 'right'
 const bottom = 'bottom'
 const left = 'left'
 
-export default React.createClass({
+export default Connect((state, props) => {
+  const {
+    type
+  } = props
+
+  return {
+    data: state.data,
+    width: Selectors.gridWidth(state),
+    height: Selectors.gridHeight(state),
+    getX: state.getX,
+    getY: state.getY,
+    scale: state.scales && state.scales[type],
+    position: state.position,
+    showGrid: state.showGrid,
+    tickArguments: state.tickArguments,
+    tickValues: state.tickValues,
+    tickFormat: state.tickFormat,
+    tickSizeInner: state.tickSizeInner,
+    tickSizeOuter: state.tickSizeOuter,
+    tickPadding: state.tickPadding
+  }
+})(React.createClass({
   getDefaultProps () {
     return {
       tickArguments: [],
@@ -29,6 +53,37 @@ export default React.createClass({
       this.prevScale = oldProps.scale
     }
   },
+  // componentDidMount () {
+  //   const {
+  //     tickSizeInner,
+  //     tickSizeOuter,
+  //     tickPadding,
+  //     position,
+  //     dispatch
+  //   } = this.props
+  //
+  //   const sizeMetric = (position === left || position === right) ? 'width' : 'height'
+  //
+  //   const largestLabelSize = Math.max(
+  //     ...Array(
+  //       ...this.el.querySelectorAll('text')).map(
+  //         el => Math.ceil(parseFloat(window.getComputedStyle(el)[sizeMetric])
+  //       )
+  //     )
+  //   )
+  //   const overflow =
+  //     Math.max(tickSizeInner, tickSizeOuter) +
+  //     tickPadding +
+  //     largestLabelSize
+  //
+  //   dispatch(state => ({
+  //     ...state,
+  //     axisPadding: {
+  //       ...state.axisPadding,
+  //       [position]: overflow
+  //     }
+  //   }))
+  // },
   render () {
     const {
       scale,
@@ -43,6 +98,10 @@ export default React.createClass({
       tickSizeOuter,
       tickPadding
     } = this.props
+
+    if (!scale) {
+      return null
+    }
 
     const isVertical = position === left || position === right
     const min =
@@ -90,7 +149,8 @@ export default React.createClass({
 
           return (
             <g
-              fill='none'
+              className='Axis'
+              fill='black'
               fontSize='10'
               fontFamily='sans-serif'
               textAnchor={position === right ? 'start' : position === left ? 'end' : 'middle'}
@@ -124,7 +184,10 @@ export default React.createClass({
               >
                 {(inters) => {
                   return (
-                    <g>
+                    <g
+                      className='ticks'
+                      ref={el => { this.el = el }}
+                    >
                       {inters.map((inter) => {
                         return (
                           <g
@@ -168,7 +231,7 @@ export default React.createClass({
       </Animated>
     )
   }
-})
+}))
 
 function identity (x) {
   return x

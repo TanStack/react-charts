@@ -28,16 +28,19 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(5).map((d, i) => (
+        {_.range(1).map((d, i) => (
           <div
             key={i}
             style={{
               width: '100%',
-              height: '120px'
+              height: '200px'
             }}
           >
             <LineChart
               data={data}
+              // padding={{
+              //   left: 20
+              // }}
             />
           </div>
         ))}
@@ -52,7 +55,7 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 5)), 1)), d => makeSeries())
+  return _.map(_.range(Math.max(Math.round((Math.random() * 10)), 1)), d => makeSeries())
 }
 
 function makeSeries () {

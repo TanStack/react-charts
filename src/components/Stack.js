@@ -1,14 +1,33 @@
 import React from 'react'
 //
+import Selectors from '../utils/Selectors'
+import Connect from '../utils/Connect'
+
 import AnimatedGroup from './AnimatedGroup'
 import Series from './Series'
 
-export default React.createClass({
+export default Connect((state, props) => {
+  const {
+    type
+  } = props
+
+  return {
+    data: state.data,
+    width: Selectors.gridWidth(state),
+    height: Selectors.gridHeight(state),
+    scales: state.scales,
+    getX: state.getX,
+    getY: state.getY,
+    scale: state.scales && state.scales[type]
+  }
+})(React.createClass({
   render () {
     const {
       data,
-      scaleX,
-      scaleY,
+      scales: {
+        x: scaleX,
+        y: scaleY
+      } = {},
       getX,
       getY,
       height,
@@ -16,6 +35,10 @@ export default React.createClass({
       hovered,
       active
     } = this.props
+
+    if (!scaleX || !scaleY) {
+      return null
+    }
 
     return (
       <AnimatedGroup
@@ -72,7 +95,7 @@ export default React.createClass({
       </AnimatedGroup>
     )
   }
-})
+}))
 
 function isPointInSeries (point, series) {
   return !!series.find(d => d === point)
