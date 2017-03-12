@@ -64,6 +64,7 @@
     "onchange": "^3.0.2",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
+    "react-resizable": "^1.6.0",
     "standard": "^8.0.0",
     "stylus": "^0.54.5",
     "uglifyify": "^3.0.3"

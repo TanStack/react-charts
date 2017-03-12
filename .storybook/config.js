@@ -5,6 +5,7 @@ import './reset.css'
 import './fonts.css'
 import './layout.css'
 import '../stories/utils/prism.css'
+import 'react-resizable/css/styles.css'
 import 'github-markdown-css/github-markdown.css'
 //
 import Readme from '../README.md'

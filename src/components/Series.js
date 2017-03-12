@@ -34,8 +34,8 @@ export default React.createClass({
           const pathSpringMap = {}
           data.forEach((d, i) => {
             // Interpolate each x and y with the default spring
-            pathSpringMap[pathXPrefix + i] = spring(scaleX(getX(d)))
-            pathSpringMap[pathYPrefix + i] = spring(scaleY(getY(d)))
+            pathSpringMap[pathXPrefix + i] = spring(scaleX(getX(d)), {damping: 10})
+            pathSpringMap[pathYPrefix + i] = spring(scaleY(getY(d)), {damping: 10})
           })
           return {
             // anything being animated should have a key/value here

@@ -81,3 +81,7 @@ em {
 .form_wrapper{
 	padding: 20px;
 }
+
+.react-resizable{
+  max-width: 100%;
+}

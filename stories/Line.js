@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
+import { Resizable, ResizableBox } from 'react-resizable'
+//
 import { LineChart } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
@@ -36,12 +38,17 @@ class Line extends Component {
               height: '200px'
             }}
           >
-            <LineChart
-              data={data}
-              // padding={{
-              //   left: 20
-              // }}
-            />
+            <ResizableBox
+              width={500}
+              height={200}
+            >
+              <LineChart
+                data={data}
+                // padding={{
+                //   left: 20
+                // }}
+              />
+            </ResizableBox>
           </div>
         ))}
 
