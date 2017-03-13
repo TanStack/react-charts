@@ -42,12 +42,15 @@ class Axis extends PureComponent {
     this.measure()
   }
   componentDidUpdate () {
-    setTimeout(this.measure, 1)
-    // this.measure()
+    window.requestAnimationFrame(this.measure)
   }
   measure () {
     // Measure finds the amount of overflow this axis produces and
-    // updates the margins to ensure they the axis is visible
+    // updates the margins to ensure that the axis is visible
+    // Unfortunately, this currently happens after a render, but potentially
+    // could happen pre-render if we could reliably predict the size of the
+    // labels before they render. Considering that ticks could be anything,
+    // even a react component, this could get very tough.
     const {
       tickSizeInner,
       tickSizeOuter,
@@ -58,6 +61,11 @@ class Axis extends PureComponent {
 
     const isHorizontal = position === positionTop || position === positionBottom
     const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => window.getComputedStyle(el))
+
+    if (labelDims.length !== this.ticks.length) {
+      window.requestAnimationFrame(this.measure)
+      return
+    }
 
     let width = 0
     let height = 0
@@ -131,7 +139,7 @@ class Axis extends PureComponent {
       : -width
     const k = position === positionTop || position === positionLeft ? -1 : 1
     const transform = !isVertical ? translateX : translateY
-    const ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
+    const ticks = this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
     const format = tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat
     const spacing = Math.max(tickSizeInner, 0) + tickPadding
     const range = scale.range()
@@ -182,21 +190,21 @@ class Axis extends PureComponent {
                   return {
                     tick: spring(scaleCopy(d)),
                     opacity: spring(1),
-                    leaving: 0
+                    measureable: 1
                   }
                 }}
                 willEnter={(inter, spring) => {
                   return {
                     tick: this.prevScale(inter.data),
                     opacity: 0,
-                    leaving: 0
+                    measureable: 1
                   }
                 }}
                 willLeave={(inter, spring) => {
                   return {
                     tick: spring(scaleCopy(inter.data)),
                     opacity: spring(0),
-                    leaving: spring(1)
+                    measureable: 0
                   }
                 }}
               >
@@ -233,7 +241,7 @@ class Axis extends PureComponent {
                               x={isVertical ? k * spacing : '0.5'}
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
-                              className={inter.style.leaving > 0 ? '' : '-measureable'}
+                              className={inter.style.measureable && '-measureable'}
                             >
                               {format(inter.data)}
                             </Text>
