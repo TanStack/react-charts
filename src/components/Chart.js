@@ -4,6 +4,7 @@ import Stack from '../components/Stack'
 import Axis from '../components/Axis'
 import Scale from '../components/Scale'
 // import Interaction from '../components/Interaction'
+import Animated from '../components/Animated'
 
 import Selectors from '../utils/Selectors'
 
@@ -82,55 +83,67 @@ const ReactChart = Connect((state) => {
       <div
         className='Chart'
       >
-        <svg
-          ref={el => { this.el = el }}
-          style={{
-            width: width,
-            height: height,
-            border: '3px solid rgba(0,0,0, 0.2)',
-            ...style
-          }}
+        <Animated
+          style={spring => ({
+            gridX: spring(gridX),
+            gridY: spring(gridY),
+          })}
         >
-          <g
-            ref={el => { this.groupEl = el }}
-            transform={`translate(${gridX}, ${gridY})`}
-          >
-            <Scale
-              type='x'
-            >
-              <Axis
-                type='x'
-                position='bottom'
-              />
-            </Scale>
-            <Scale
-              type='y'
-            >
-              <Axis
-                type='y'
-                position='left'
-              />
-            </Scale>
-            <Stack
-              type='line'
-            />
-            {/* <Interaction
-              {...this.props}
-              scaleX={scaleX}
-              scaleY={scaleY}
-              getX={getX}
-              getY={getY}
-              {...layout}
-              onHover={(hovered, e) => this.setState({hovered})}
-              onActivate={(active, e) => {
-                if (this.state.active === active) {
-                  return this.setState({active: null})
-                }
-                this.setState({active})
+          {({
+            gridX,
+            gridY
+          }) => (
+            <svg
+              ref={el => { this.el = el }}
+              style={{
+                width: width,
+                height: height,
+                border: '3px solid rgba(0,0,0, 0.2)',
+                ...style
               }}
-            /> */}
-          </g>
-        </svg>
+            >
+              <g
+                ref={el => { this.groupEl = el }}
+                transform={`translate(${gridX}, ${gridY})`}
+              >
+                <Scale
+                  type='x'
+                >
+                  <Axis
+                    type='x'
+                    position='bottom'
+                  />
+                </Scale>
+                <Scale
+                  type='y'
+                >
+                  <Axis
+                    type='y'
+                    position='left'
+                  />
+                </Scale>
+                <Stack
+                  type='line'
+                />
+                {/* <Interaction
+                  {...this.props}
+                  scaleX={scaleX}
+                  scaleY={scaleY}
+                  getX={getX}
+                  getY={getY}
+                  {...layout}
+                  onHover={(hovered, e) => this.setState({hovered})}
+                  onActivate={(active, e) => {
+                  if (this.state.active === active) {
+                  return this.setState({active: null})
+                  }
+                  this.setState({active})
+                  }}
+                /> */}
+              </g>
+            </svg>
+          )}
+        </Animated>
         {/* <Tooltip
           {...this.props}
           scaleX={scaleX}

@@ -42,7 +42,8 @@ class Axis extends PureComponent {
     this.measure()
   }
   componentDidUpdate () {
-    this.measure()
+    setTimeout(this.measure, 1)
+    // this.measure()
   }
   measure () {
     // Measure finds the amount of overflow this axis produces and
@@ -56,7 +57,7 @@ class Axis extends PureComponent {
     } = this.props
 
     const isHorizontal = position === positionTop || position === positionBottom
-    const labelDims = Array(...this.el.querySelectorAll(textEl)).map(el => window.getComputedStyle(el))
+    const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => window.getComputedStyle(el))
 
     let width = 0
     let height = 0
@@ -180,19 +181,22 @@ class Axis extends PureComponent {
                 style={(d, i, spring) => {
                   return {
                     tick: spring(scaleCopy(d)),
-                    opacity: spring(1)
+                    opacity: spring(1),
+                    leaving: 0
                   }
                 }}
                 willEnter={(inter, spring) => {
                   return {
                     tick: this.prevScale(inter.data),
-                    opacity: 0
+                    opacity: 0,
+                    leaving: 0
                   }
                 }}
                 willLeave={(inter, spring) => {
                   return {
                     tick: spring(scaleCopy(inter.data)),
-                    opacity: spring(0)
+                    opacity: spring(0),
+                    leaving: spring(1)
                   }
                 }}
               >
@@ -229,6 +233,7 @@ class Axis extends PureComponent {
                               x={isVertical ? k * spacing : '0.5'}
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
+                              className={inter.style.leaving > 0 ? '' : '-measureable'}
                             >
                               {format(inter.data)}
                             </Text>

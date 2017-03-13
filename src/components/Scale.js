@@ -1,24 +1,18 @@
-import React from 'react'
+import { Component } from 'react'
 //
 
-import Scale from '../utils/Scale'
+import ScaleUtil from '../utils/Scale'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
-export default Connect((state, props) => {
-  const {
-    type
-  } = props
-
-  return {
-    data: state.data,
-    width: Selectors.gridWidth(state),
-    height: Selectors.gridHeight(state),
-    getX: state.getX,
-    getY: state.getY,
-    scale: state.scales && state.scales[type]
+class Scale extends Component {
+  constructor () {
+    super()
+    this.updateScale = this.updateScale.bind(this)
   }
-})(React.createClass({
+  componentDidMount () {
+    this.updateScale(this.props)
+  }
   componentWillUpdate (newProps) {
     const oldProps = this.props
     const {
@@ -38,22 +32,33 @@ export default Connect((state, props) => {
       getX !== oldProps.getX ||
       getY !== oldProps.getY
     ) {
-      const newScale = Scale({
-        type,
-        data,
-        width,
-        height,
-        getX,
-        getY
-      })
-      this.props.dispatch(state => ({
-        scales: {
-          ...state.scales,
-          [type]: newScale
-        }
-      }))
+      this.updateScale(newProps)
     }
-  },
+  }
+  updateScale (props) {
+    const {
+      type,
+      data,
+      width,
+      height,
+      getX,
+      getY
+    } = props
+    const newScale = ScaleUtil({
+      type,
+      data,
+      width,
+      height,
+      getX,
+      getY
+    })
+    this.props.dispatch(state => ({
+      scales: {
+        ...state.scales,
+        [type]: newScale
+      }
+    }))
+  }
   render () {
     const {
       scale,
@@ -66,4 +71,19 @@ export default Connect((state, props) => {
 
     return children
   }
-}))
+}
+
+export default Connect((state, props) => {
+  const {
+    type
+  } = props
+
+  return {
+    data: state.data,
+    width: Selectors.gridWidth(state),
+    height: Selectors.gridHeight(state),
+    getX: state.getX,
+    getY: state.getY,
+    scale: state.scales && state.scales[type]
+  }
+})(Scale)
