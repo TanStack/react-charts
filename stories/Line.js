@@ -44,9 +44,6 @@ class Line extends Component {
             >
               <LineChart
                 data={data}
-                // padding={{
-                //   left: 20
-                // }}
               />
             </ResizableBox>
           </div>

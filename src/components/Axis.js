@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 //
 import Animated from './Animated'
 import AnimatedGroup from './AnimatedGroup'
@@ -9,81 +9,95 @@ import Text from '../primitives/Text'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
-const top = 'top'
-const right = 'right'
-const bottom = 'bottom'
-const left = 'left'
+const positionTop = 'top'
+const positionRight = 'right'
+const positionBottom = 'bottom'
+const positionLeft = 'left'
 
-export default Connect((state, props) => {
-  const {
-    type
-  } = props
+const textEl = 'text'
 
-  return {
-    data: state.data,
-    width: Selectors.gridWidth(state),
-    height: Selectors.gridHeight(state),
-    getX: state.getX,
-    getY: state.getY,
-    scale: state.scales && state.scales[type],
-    position: state.position,
-    showGrid: state.showGrid,
-    tickArguments: state.tickArguments,
-    tickValues: state.tickValues,
-    tickFormat: state.tickFormat,
-    tickSizeInner: state.tickSizeInner,
-    tickSizeOuter: state.tickSizeOuter,
-    tickPadding: state.tickPadding
+const getPixel = d => parseFloat(d)
+
+class Axis extends PureComponent {
+  static defaultProps = {
+    tickArguments: [],
+    tickValues: null,
+    tickFormat: null,
+    tickSizeInner: 6,
+    tickSizeOuter: 6,
+    tickPadding: 3,
+    showGrid: true
   }
-})(React.createClass({
-  getDefaultProps () {
-    return {
-      tickArguments: [],
-      tickValues: null,
-      tickFormat: null,
-      tickSizeInner: 6,
-      tickSizeOuter: 6,
-      tickPadding: 3,
-      showGrid: true
-    }
-  },
+  constructor () {
+    super()
+    this.measure = this.measure.bind(this)
+  }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
     if (oldProps.scale !== newProps.scale) {
       this.prevScale = oldProps.scale
     }
-  },
-  // componentDidMount () {
-  //   const {
-  //     tickSizeInner,
-  //     tickSizeOuter,
-  //     tickPadding,
-  //     position,
-  //     dispatch
-  //   } = this.props
-  //
-  //   const sizeMetric = (position === left || position === right) ? 'width' : 'height'
-  //
-  //   const largestLabelSize = Math.max(
-  //     ...Array(
-  //       ...this.el.querySelectorAll('text')).map(
-  //         el => Math.ceil(parseFloat(window.getComputedStyle(el)[sizeMetric])
-  //       )
-  //     )
-  //   )
-  //   const overflow =
-  //     Math.max(tickSizeInner, tickSizeOuter) +
-  //     tickPadding +
-  //     largestLabelSize
-  //
-  //   dispatch(state => ({
-  //     ...state,
-  //     axisPadding: {
-  //       ...state.axisPadding,
-  //       [position]: overflow
-  //     }
-  //   }))
-  // },
+  }
+  componentDidMount () {
+    this.measure()
+  }
+  componentDidUpdate () {
+    this.measure()
+  }
+  measure () {
+    // Measure finds the amount of overflow this axis produces and
+    // updates the margins to ensure they the axis is visible
+    const {
+      tickSizeInner,
+      tickSizeOuter,
+      tickPadding,
+      position,
+      dispatch
+    } = this.props
+
+    const isHorizontal = position === positionTop || position === positionBottom
+    const labelDims = Array(...this.el.querySelectorAll(textEl)).map(el => window.getComputedStyle(el))
+
+    let width = 0
+    let height = 0
+    let top = 0
+    let bottom = 0
+    let left = 0
+    let right = 0
+
+    if (isHorizontal) {
+      // Add width overflow from the first and last ticks
+      left = Math.ceil(getPixel(labelDims[0].width) / 2)
+      right = Math.ceil(getPixel(labelDims[labelDims.length - 1].width) / 2)
+      height =
+        Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
+        tickPadding + // Add tick padding
+        Math.max(...labelDims.map(d => Math.ceil(getPixel(d.height)))) // Add the height of the largest label
+    } else {
+      // Add height overflow from the first and last ticks
+      top = Math.ceil(getPixel(labelDims[0].height) / 2)
+      bottom = Math.ceil(getPixel(labelDims[labelDims.length - 1].height) / 2)
+      width =
+        Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
+        tickPadding + // Add tick padding
+        Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width)))) // Add the width of the largest label
+    }
+
+    dispatch(state => ({
+      ...state,
+      axes: {
+        ...state.axes,
+        [position]: {
+          width,
+          height,
+          top,
+          bottom,
+          left,
+          right
+        }
+      }
+    }))
+  }
   render () {
     const {
       scale,
@@ -103,18 +117,18 @@ export default Connect((state, props) => {
       return null
     }
 
-    const isVertical = position === left || position === right
+    const isVertical = position === positionLeft || position === positionRight
     const min =
-      position === bottom ? height
-      : position === left ? 0
-      : position === top ? 0
+      position === positionBottom ? height
+      : position === positionLeft ? 0
+      : position === positionTop ? 0
       : width
     const max =
-      position === bottom ? -height
-      : position === left ? width
-      : position === top ? height
+      position === positionBottom ? -height
+      : position === positionLeft ? width
+      : position === positionTop ? height
       : -width
-    const k = position === top || position === left ? -1 : 1
+    const k = position === positionTop || position === positionLeft ? -1 : 1
     const transform = !isVertical ? translateX : translateY
     const ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
     const format = tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat
@@ -153,8 +167,8 @@ export default Connect((state, props) => {
               fill='black'
               fontSize='10'
               fontFamily='sans-serif'
-              textAnchor={position === right ? 'start' : position === left ? 'end' : 'middle'}
-              transform={position === right ? translateX(max) : position === bottom ? translateY(min) : undefined}
+              textAnchor={position === positionRight ? 'start' : position === positionLeft ? 'end' : 'middle'}
+              transform={position === positionRight ? translateX(max) : position === positionBottom ? translateY(min) : undefined}
             >
               <Path
                 className='domain'
@@ -214,7 +228,7 @@ export default Connect((state, props) => {
                             <Text
                               x={isVertical ? k * spacing : '0.5'}
                               y={isVertical ? '0.5' : k * spacing}
-                              dy={position === top ? '0em' : position === bottom ? '0.71em' : '0.32em'}
+                              dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
                             >
                               {format(inter.data)}
                             </Text>
@@ -231,7 +245,30 @@ export default Connect((state, props) => {
       </Animated>
     )
   }
-}))
+}
+
+export default Connect((state, props) => {
+  const {
+    type
+  } = props
+
+  return {
+    data: state.data,
+    width: Selectors.gridWidth(state),
+    height: Selectors.gridHeight(state),
+    getX: state.getX,
+    getY: state.getY,
+    scale: state.scales && state.scales[type],
+    position: state.position,
+    showGrid: state.showGrid,
+    tickArguments: state.tickArguments,
+    tickValues: state.tickValues,
+    tickFormat: state.tickFormat,
+    tickSizeInner: state.tickSizeInner,
+    tickSizeOuter: state.tickSizeOuter,
+    tickPadding: state.tickPadding
+  }
+})(Axis)
 
 function identity (x) {
   return x

@@ -87,7 +87,7 @@ const ReactChart = Connect((state) => {
           style={{
             width: width,
             height: height,
-            border: '1px solid black',
+            border: '3px solid rgba(0,0,0, 0.2)',
             ...style
           }}
         >

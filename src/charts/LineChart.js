@@ -11,12 +11,12 @@ export default (props) => {
       type='line'
       getX={getX}
       getY={getY}
-      padding={{
-        left: 40,
-        right: 10,
-        top: 10,
-        bottom: 20
-      }}
+      // padding={{
+      //   left: 40,
+      //   right: 10,
+      //   top: 10,
+      //   bottom: 20
+      // }}
       {...props}
     />
   )

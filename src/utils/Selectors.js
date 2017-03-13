@@ -4,54 +4,90 @@ import Memoize from './Memoize'
 export default {
   gridX: state => gridX(
     _.get(state, 'padding.left', 0),
-    _.get(state, 'gridOffsetX', 0),
+    _.get(state, 'axes.left.width', 0),
+    _.get(state, 'axes.top.left', 0),
+    _.get(state, 'axes.bottom.left', 0)
   ),
   gridY: state => gridY(
     _.get(state, 'padding.top', 0),
-    _.get(state, 'gridOffsetY', 0),
+    _.get(state, 'axes.top.height', 0),
+    _.get(state, 'axes.left.top', 0),
+    _.get(state, 'axes.right.top', 0)
   ),
   gridWidth: state => gridWidth(
     _.get(state, 'width', 0),
     _.get(state, 'padding.left', 0),
     _.get(state, 'padding.right', 0),
-    _.get(state, 'gridOffsetWidth', 0),
+    _.get(state, 'axes.left.width', 0),
+    _.get(state, 'axes.right.width', 0),
+    _.get(state, 'axes.top.left', 0),
+    _.get(state, 'axes.top.right', 0),
+    _.get(state, 'axes.bottom.left', 0),
+    _.get(state, 'axes.bottom.right', 0),
   ),
   gridHeight: state => gridHeight(
     _.get(state, 'height', 0),
     _.get(state, 'padding.top', 0),
     _.get(state, 'padding.bottom', 0),
-    _.get(state, 'gridOffsetHeight', 0),
+    _.get(state, 'axes.top.height', 0),
+    _.get(state, 'axes.bottom.height', 0),
+    _.get(state, 'axes.left.top', 0),
+    _.get(state, 'axes.left.bottom', 0),
+    _.get(state, 'axes.right.top', 0),
+    _.get(state, 'axes.right.bottom', 0),
   )
 }
 
 const gridX = Memoize((
   paddingLeft,
-  gridOffsetX
+  axesLeftWidth,
+  axesTopLeft,
+  axesBottomLeft
 ) => {
-  return paddingLeft + gridOffsetX
+  return paddingLeft + Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
 })
 
 const gridY = Memoize((
   paddingTop,
-  gridOffsetY
+  axesTopHeight,
+  axesLeftTop,
+  axesRightTop
 ) => {
-  return paddingTop + gridOffsetY
+  return paddingTop + Math.max(axesTopHeight, axesLeftTop, axesRightTop)
 })
 
 const gridWidth = Memoize((
   width,
   paddingLeft,
   paddingRight,
-  offset
+  axesLeftWidth,
+  axesRightWidth,
+  axesTopLeft,
+  axesTopRight,
+  axesBottomLeft,
+  axesBottomRight,
 ) => {
-  return width - paddingLeft - paddingRight + offset
+  return width -
+    paddingLeft -
+    paddingRight -
+    Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
+    Math.max(axesRightWidth, axesTopRight, axesBottomRight)
 })
 
 const gridHeight = Memoize((
   height,
   paddingTop,
   paddingBottom,
-  offset
+  axesTopHeight,
+  axesBottomHeight,
+  axesLeftTop,
+  axesLeftBottom,
+  axesRightTop,
+  axesRightBottom,
 ) => {
-  return height - paddingTop - paddingBottom + offset
+  return height -
+    paddingTop -
+    paddingBottom -
+    Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
+    Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
 })
