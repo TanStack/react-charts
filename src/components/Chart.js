@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { Component } from 'react'
 //
 import Stack from '../components/Stack'
 import Axis from '../components/Axis'
 import Scale from '../components/Scale'
-// import Interaction from '../components/Interaction'
+import Interaction from '../components/Interaction'
 import Animated from '../components/Animated'
+import Tooltip from '../components/Tooltip'
 
 import Selectors from '../utils/Selectors'
 
@@ -12,71 +13,42 @@ import HyperResponsive from '../utils/HyperResponsive'
 import Provider from '../utils/Provider'
 import Connect from '../utils/Connect'
 
-const ReactChart = Connect((state) => {
-  return {
-    width: state.width,
-    height: state.height,
-    gridX: Selectors.gridX(state),
-    gridY: Selectors.gridY(state)
+class Chart extends Component {
+  constructor () {
+    super()
+    this.measure = this.measure.bind(this)
   }
-})(React.createClass({
-  componentDidUpdate () {
-    // const {
-    //   dispatch
-    // } = this.props
-    //
-    // const dims = this.el.getBoundingClientRect()
-    // const groupDims = this.groupEl.getBoundingClientRect()
-    //
-    // if (!groupDims.width && !groupDims.height) {
-    //   return
-    // }
-    //
-    // const gridOffsetWidth = dims.width - groupDims.width
-    // const gridOffsetHeight = dims.height - groupDims.height
-    // // const gridOffsetX = dims.left - groupDims.left
-    // // const gridOffsetY = dims.top - groupDims.top
-    //
-    // console.log(
-    //   gridOffsetWidth,
-    //   gridOffsetHeight,
-    //   // gridOffsetX,
-    //   // gridOffsetY
-    // )
-    //
-    // if (
-    //   gridOffsetWidth !== 0 ||
-    //   gridOffsetHeight !== 0
-    // ) {
-    //   setTimeout(() => dispatch(state => {
-    //     return {
-    //       ...state,
-    //       gridOffsetWidth: (gridOffsetWidth || 0) + gridOffsetWidth,
-    //       gridOffsetHeight: (gridOffsetHeight || 0) + gridOffsetHeight
-    //     }
-    //   }), 500)
-    // }
-
-    // if (
-    //   gridOffsetX || gridOffsetY
-    // ) {
-    //   setTimeout(() => dispatch(state => {
-    //     return {
-    //       ...state,
-    //       gridOffsetX: (state.gridOffsetX || 0) - gridOffsetX,
-    //       gridOffsetY: (state.gridOffsetY || 0) - gridOffsetY
-    //     }
-    //   }), 500)
-    // }
-
-  },
+  componentDidMount () {
+    this.measure()
+  }
+  componentDidUpdate (prevProps) {
+    window.requestAnimationFrame(() => this.measure(prevProps))
+  }
+  measure (prevProps) {
+    if (prevProps && (
+      this.props.offset.left !== prevProps.offset.left ||
+      this.props.offset.top !== prevProps.offset.top
+    )) {
+      this.props.dispatch(state => ({
+        ...state,
+        offset: {
+          left: this.el.offsetLeft,
+          top: this.el.offsetTop
+        }
+      }))
+    }
+  }
   render () {
     const {
       style,
       width,
       height,
       gridX,
-      gridY
+      gridY,
+      active,
+      hovered,
+      dispatch,
+      offset
     } = this.props
 
     return (
@@ -98,7 +70,6 @@ const ReactChart = Connect((state) => {
               style={{
                 width: width,
                 height: height,
-                // border: '3px solid rgba(0,0,0, 0.2)',
                 overflow: 'visible',
                 ...style
               }}
@@ -126,35 +97,44 @@ const ReactChart = Connect((state) => {
                 <Stack
                   type='line'
                 />
-                {/* <Interaction
-                  {...this.props}
-                  scaleX={scaleX}
-                  scaleY={scaleY}
-                  getX={getX}
-                  getY={getY}
-                  {...layout}
-                  onHover={(hovered, e) => this.setState({hovered})}
-                  onActivate={(active, e) => {
-                  if (this.state.active === active) {
-                  return this.setState({active: null})
-                  }
-                  this.setState({active})
+                <Interaction
+                  onHover={(hovered, e) => dispatch(state => ({
+                    ...state,
+                    hovered
+                  }))}
+                  onActivate={(newActive, e) => {
+                    if (active === newActive) {
+                      return dispatch(state => ({
+                        ...state,
+                        active: null
+                      }))
+                    }
+                    dispatch(state => ({
+                      ...state,
+                      active: newActive
+                    }))
                   }}
-                /> */}
+                />
               </g>
             </svg>
           )}
         </Animated>
-        {/* <Tooltip
-          {...this.props}
-          scaleX={scaleX}
-          scaleY={scaleY}
-          {...layout}
-          hovered={hovered}
-        /> */}
+        <Tooltip />
       </div>
     )
   }
-}))
+}
+
+const ReactChart = Connect((state) => {
+  return {
+    width: state.width,
+    height: state.height,
+    gridX: Selectors.gridX(state),
+    gridY: Selectors.gridY(state),
+    active: state.active,
+    hovered: state.hovered,
+    offset: Selectors.offset(state)
+  }
+})(Chart)
 
 export default HyperResponsive(Provider(ReactChart))

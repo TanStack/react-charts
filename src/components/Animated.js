@@ -18,14 +18,14 @@ export default React.createClass({
     } = this.props
 
     const MagicSpring = (value, config) => {
-      // if (typeof value !== 'number') {
+      if (typeof value !== 'number') {
         return {
           value,
           config,
           interpolator: (config && config.interpolator) ? config.interpolator : interpolate
         }
-      // }
-      // return spring(value, config)
+      }
+      return spring(value, config)
     }
 
     const resolvedStyle = style(MagicSpring)

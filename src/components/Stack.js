@@ -31,9 +31,7 @@ export default Connect((state, props) => {
       getX,
       getY,
       height,
-      width,
-      hovered,
-      active
+      width
     } = this.props
 
     if (!scaleX || !scaleY) {
@@ -45,16 +43,8 @@ export default Connect((state, props) => {
         data={data}
         getKey={(d, i) => i}
         style={(d, i, spring) => {
-          let opacity = spring(1)
-          if (hovered) {
-            if (isPointInSeries(hovered, d)) {
-              opacity = spring(1)
-            } else {
-              opacity = spring(0.1)
-            }
-          }
           return {
-            opacity
+            opacity: spring(1)
           }
         }}
         willEnter={(inter) => {
@@ -83,9 +73,6 @@ export default Connect((state, props) => {
                     width={width}
                     height={height}
                     opacity={inter.style.opacity}
-                    hovered={hovered}
-                    active={active}
-                    isRed={inter.data[0].y > 150}
                   />
                 )
               })}
@@ -96,7 +83,3 @@ export default Connect((state, props) => {
     )
   }
 }))
-
-function isPointInSeries (point, series) {
-  return !!series.find(d => d === point)
-}

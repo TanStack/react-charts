@@ -1,28 +1,24 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { voronoi } from 'd3-voronoi'
 import { line } from 'd3-shape'
 //
 import Path from '../primitives/Path'
+import Connect from '../utils/Connect'
 
 const noop = () => null
 
-export default React.createClass({
-  getDefaultProps () {
-    return {
-      onHover: noop,
-      onActivate: noop
-    }
-  },
-  getInitialState () {
-    return {
-      tooltip: null
-    }
-  },
+class Interaction extends PureComponent {
+  static defaultProps = {
+    onHover: noop,
+    onActivate: noop
+  }
   render () {
     const {
       data,
-      scaleX,
-      scaleY,
+      scales: {
+        x: scaleX,
+        y: scaleY
+      } = {},
       getX,
       getY,
       onHover,
@@ -30,15 +26,19 @@ export default React.createClass({
     } = this.props
 
     const flatData = data.reduce((prev, now) => prev.concat(now), [])
-    const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[0]]]
 
+    // Bail out if the scale isn't available
+    if (!scaleX || !scaleY) {
+      return null
+    }
+
+    const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[0]]]
     const vor = voronoi()
       .x(d => scaleX(getX(d)))
       .y(d => scaleY(getY(d)))
       .extent(extent)(flatData)
 
     const polygons = vor.polygons()
-
     const lineFn = line()
 
     return (
@@ -57,7 +57,6 @@ export default React.createClass({
                 stroke='transparent'
                 onMouseEnter={e => onHover(points.data, e)}
                 onClick={e => onActivate(points.data, e)}
-                onTap={e => onActivate(points.data, e)}
               />
             )
           })}
@@ -66,4 +65,11 @@ export default React.createClass({
       </g>
     )
   }
-})
+}
+
+export default Connect(state => ({
+  data: state.data,
+  scales: state.scales,
+  getX: state.getX,
+  getY: state.getY
+}))(Interaction)

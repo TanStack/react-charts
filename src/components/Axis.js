@@ -16,7 +16,8 @@ const positionLeft = 'left'
 
 const textEl = 'text'
 
-const getPixel = d => parseFloat(d)
+// const getPixel = d => parseFloat(d)
+const getPixel = d => d
 
 class Axis extends PureComponent {
   static defaultProps = {
@@ -60,7 +61,7 @@ class Axis extends PureComponent {
     } = this.props
 
     const isHorizontal = position === positionTop || position === positionBottom
-    const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => window.getComputedStyle(el))
+    const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => el.getBoundingClientRect())
 
     if (labelDims.length !== this.ticks.length) {
       window.requestAnimationFrame(this.measure)

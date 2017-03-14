@@ -59,13 +59,13 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 1)), 1)), d => makeSeries())
+  return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), d => makeSeries())
 }
 
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
   const length = 30
-  const max = Math.random() > 0.5 ? 200000 : 20
+  const max = Math.random() > 0.5 ? 1000 : 100
   // const multiplier = 10
   const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({

@@ -11,6 +11,8 @@ import Circle from '../primitives/Circle'
 export default React.createClass({
   getDefaultProps () {
     return {
+      strokeWidth: 2,
+      stroke: '#212121',
       showPoints: false
     }
   },

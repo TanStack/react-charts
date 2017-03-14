@@ -12,8 +12,6 @@ export default React.createClass({
       getX,
       getY,
       height,
-      hovered,
-      active,
       isRed,
       ...rest
     } = this.props
@@ -24,9 +22,6 @@ export default React.createClass({
     const pathKeyPrefix = 'path_'
     const pathXPrefix = pathKeyPrefix + 'x_'
     const pathYPrefix = pathKeyPrefix + 'y_'
-
-    const color = isRed ? 'red' : 'blue'
-    const width = isRed ? '10' : '4'
 
     return (
       <Animated
@@ -39,9 +34,7 @@ export default React.createClass({
           })
           return {
             // anything being animated should have a key/value here
-            ...pathSpringMap,
-            color: spring(color, { stiffness: 100 }),
-            width: spring(width, { stiffness: 250, damping: 8 })
+            ...pathSpringMap
           }
         }}
       >
@@ -55,11 +48,7 @@ export default React.createClass({
             <g>
               <Curve
                 points={interPoints}
-                hovered={hovered}
-                active={active}
                 {...rest}
-                stroke={inter.color}
-                strokeWidth={inter.width}
               />
             </g>
           )

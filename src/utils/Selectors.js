@@ -2,6 +2,10 @@ import _ from './Utils'
 import Memoize from './Memoize'
 
 export default {
+  offset: state => offset(
+    _.get(state, 'offset.left', 0),
+    _.get(state, 'offset.top', 0)
+  ),
   gridX: state => gridX(
     _.get(state, 'padding.left', 0),
     _.get(state, 'axes.left.width', 0),
@@ -37,6 +41,16 @@ export default {
     _.get(state, 'axes.right.bottom', 0),
   )
 }
+
+const offset = Memoize((
+  left,
+  top
+) => {
+  return {
+    left,
+    top
+  }
+})
 
 const gridX = Memoize((
   paddingLeft,

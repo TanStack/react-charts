@@ -1,34 +1,36 @@
-import React from 'react'
+import React, { Component } from 'react'
 import 'javascript-detect-element-resize'
 //
 import throttle from '../utils/throttle'
 
 export default function HyperResponsive (WrappedComponent) {
-  return React.createClass({
-    getInitialState () {
-      return {
+  return class HyperResponsive extends Component {
+    constructor () {
+      super()
+      this.state = {
         ready: false,
         width: 0,
         height: 0
       }
-    },
+      this.resize = this.resize.bind(this)
+    }
     componentWillMount () {
       this.resize = throttle(this.resize, 16)
-    },
+    }
     componentDidMount () {
       window.addResizeListener(this.el, this.resize)
       this.resize()
-    },
+    }
     componentWillUnmount () {
       window.removeResizeListener(this.el, this.resize)
-    },
+    }
     resize (e) {
       this.setState({
         ready: true,
         width: parseInt(window.getComputedStyle(this.el).width),
         height: parseInt(window.getComputedStyle(this.el).height)
       })
-    },
+    }
     render () {
       const {
         style,
@@ -59,5 +61,5 @@ export default function HyperResponsive (WrappedComponent) {
         </div>
       )
     }
-  })
+  }
 }
