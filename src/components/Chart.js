@@ -86,7 +86,7 @@ const ReactChart = Connect((state) => {
         <Animated
           style={spring => ({
             gridX: spring(gridX),
-            gridY: spring(gridY),
+            gridY: spring(gridY)
           })}
         >
           {({
@@ -99,6 +99,7 @@ const ReactChart = Connect((state) => {
                 width: width,
                 height: height,
                 // border: '3px solid rgba(0,0,0, 0.2)',
+                overflow: 'visible',
                 ...style
               }}
             >

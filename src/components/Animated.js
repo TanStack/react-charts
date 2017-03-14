@@ -4,7 +4,7 @@ import { interpolate } from 'd3-interpolate'
 
 export default React.createClass({
   componentWillMount () {
-    this.oldValues = {}
+    this.currentValues = {}
     this.newInters = {}
     this.currentStepValues = {}
     this.stepValues = {}
@@ -18,45 +18,45 @@ export default React.createClass({
     } = this.props
 
     const MagicSpring = (value, config) => {
-      if (typeof value !== 'number') {
+      // if (typeof value !== 'number') {
         return {
           value,
           config,
           interpolator: (config && config.interpolator) ? config.interpolator : interpolate
         }
-      }
-      return spring(value, config)
+      // }
+      // return spring(value, config)
     }
 
     const resolvedStyle = style(MagicSpring)
-    for (let key in resolvedStyle) {
+    for (let prop in resolvedStyle) {
       if (
-        // If key is a non-numeric interpolation
-        resolvedStyle[key] &&
-        resolvedStyle[key].interpolator
+        // If prop is a non-numeric interpolation
+        resolvedStyle[prop] &&
+        resolvedStyle[prop].interpolator
       ) {
         // Make sure the steps start at 0
-        this.currentStepValues[key] = this.currentStepValues[key] || 0
+        this.currentValues[prop] = this.currentValues[prop] || 0
+        this.currentStepValues[prop] = this.currentStepValues[prop] || 0
         if (
-          // And the value has changed
-          typeof this.newInters[key] === 'undefined' ||
-          resolvedStyle[key].value !== this.newInters[key].value
+          // If the value has changed
+          typeof this.newInters[prop] === 'undefined' ||
+          resolvedStyle[prop].value !== this.newInters[prop].value
         ) {
           // Save the new value
-          this.newInters[key] = resolvedStyle[key]
+          this.newInters[prop] = resolvedStyle[prop]
 
-          // Increment the stepInterValue for this key by 1
-          this.stepValues[key] = this.currentStepValues[key] + 1
+          // Increment the stepInterValue for this prop by 1
+          this.stepValues[prop] = this.currentStepValues[prop] + 1
 
           // Set up the new interpolator
-          this.stepInterpolators[key] = this.newInters[key].interpolator(
-            this.oldValues[key],
-            this.newInters[key].value
+          this.stepInterpolators[prop] = this.newInters[prop].interpolator(
+            this.currentValues[prop],
+            this.newInters[prop].value
           )
         }
         // Return the spring with the destination stepValue and spring config
-        resolvedStyle[key] = spring(this.stepValues[key], this.newInters[key].config)
-        // console.log(resolvedStyle[key])
+        resolvedStyle[prop] = spring(this.stepValues[prop], this.newInters[prop].config)
       }
     }
 
@@ -67,14 +67,14 @@ export default React.createClass({
       >
         {values => {
           const newValues = {}
-          for (let key in values) {
-            if (this.stepValues[key]) {
+          for (let prop in values) {
+            if (this.stepValues[prop]) {
               // Save the currentStepValue
-              this.currentStepValues[key] = values[key]
+              this.currentStepValues[prop] = values[prop]
               // Figure the percentage
-              let percentage = this.currentStepValues[key] - this.stepValues[key] + 1
+              let percentage = this.currentStepValues[prop] - this.stepValues[prop] + 1
               // Save the current value and replace the value in the interpolated object
-              this.oldValues[key] = newValues[key] = this.stepInterpolators[key](percentage)
+              this.currentValues[prop] = newValues[prop] = this.stepInterpolators[prop](percentage)
             }
           }
           return children({

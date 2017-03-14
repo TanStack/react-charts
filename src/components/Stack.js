@@ -57,7 +57,7 @@ export default Connect((state, props) => {
             opacity
           }
         }}
-        willEnter={(inter, spring) => {
+        willEnter={(inter) => {
           return {
             opacity: 0
           }

@@ -193,16 +193,16 @@ class Axis extends PureComponent {
                     measureable: 1
                   }
                 }}
-                willEnter={(inter, spring) => {
+                willEnter={(data) => {
                   return {
-                    tick: this.prevScale(inter.data),
+                    tick: this.prevScale(data),
                     opacity: 0,
                     measureable: 1
                   }
                 }}
-                willLeave={(inter, spring) => {
+                willLeave={(data, spring) => {
                   return {
-                    tick: spring(scaleCopy(inter.data)),
+                    tick: spring(scaleCopy(data)),
                     opacity: spring(0),
                     measureable: 0
                   }

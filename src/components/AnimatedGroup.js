@@ -37,8 +37,8 @@ export default React.createClass({
       <TransitionMotion
         {...this.props}
         styles={resolvedStyles}
-        willEnter={(...args) => willEnter(...args, spring)}
-        willLeave={(...args) => willLeave(...args, spring)}
+        willEnter={(item) => willEnter(item.data)}
+        willLeave={(item) => willLeave(item.data, spring)}
       />
     )
   }
