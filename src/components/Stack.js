@@ -18,7 +18,8 @@ export default Connect((state, props) => {
     scales: state.scales,
     getX: state.getX,
     getY: state.getY,
-    scale: state.scales && state.scales[type]
+    scale: state.scales && state.scales[type],
+    hovered: state.hovered
   }
 })(React.createClass({
   render () {
@@ -31,7 +32,8 @@ export default Connect((state, props) => {
       getX,
       getY,
       height,
-      width
+      width,
+      hovered
     } = this.props
 
     if (!scaleX || !scaleY) {
@@ -61,7 +63,8 @@ export default Connect((state, props) => {
         {(inters) => {
           return (
             <g>
-              {inters.map((inter) => {
+              {inters.map((inter, i) => {
+                const isActive = hovered && hovered.seriesIndex === i
                 return (
                   <Series
                     key={inter.key}
@@ -73,6 +76,7 @@ export default Connect((state, props) => {
                     width={width}
                     height={height}
                     opacity={inter.style.opacity}
+                    isActive={isActive}
                   />
                 )
               })}

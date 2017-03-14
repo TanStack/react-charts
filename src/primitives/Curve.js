@@ -37,6 +37,7 @@ export default React.createClass({
         {showPoints && points.map((d, i) => (
           <Circle
             key={i}
+            {...rest}
             x={d[0]}
             y={d[1]}
           />

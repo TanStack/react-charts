@@ -12,7 +12,8 @@ export default React.createClass({
       getX,
       getY,
       height,
-      isRed,
+      isActive,
+      style,
       ...rest
     } = this.props
 
@@ -34,7 +35,8 @@ export default React.createClass({
           })
           return {
             // anything being animated should have a key/value here
-            ...pathSpringMap
+            ...pathSpringMap,
+            strokeWidth: spring(isActive ? '5' : '2')
           }
         }}
       >
@@ -48,6 +50,10 @@ export default React.createClass({
             <g>
               <Curve
                 points={interPoints}
+                style={{
+                  ...style,
+                  ...inter
+                }}
                 {...rest}
               />
             </g>
