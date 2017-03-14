@@ -25,7 +25,16 @@ class Interaction extends PureComponent {
       onActivate
     } = this.props
 
-    const flatData = data.reduce((prev, now) => prev.concat(now), [])
+    const decoratedData = data.map((series, i) => {
+      return series.map((d, ii) => {
+        return {
+          ...d,
+          seriesIndex: i,
+          index: ii
+        }
+      })
+    })
+    const flatData = decoratedData.reduce((prev, now) => prev.concat(now), [])
 
     // Bail out if the scale isn't available
     if (!scaleX || !scaleY) {

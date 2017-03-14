@@ -12,8 +12,8 @@ export default React.createClass({
   getDefaultProps () {
     return {
       strokeWidth: 2,
-      stroke: '#212121',
-      showPoints: false
+      stroke: '#494949',
+      showPoints: true
     }
   },
   render () {

@@ -19,15 +19,17 @@ class Tooltip extends PureComponent {
       offset: {
         left,
         top
-      }
+      },
+      gridX,
+      gridY
     } = this.props
 
     if (!scaleX || !scaleY || !hovered) {
       return null
     }
 
-    const x = scaleX(getX(hovered))
-    const y = scaleY(getY(hovered))
+    const x = gridX + scaleX(getX(hovered))
+    const y = gridY + scaleY(getY(hovered))
 
     const alignX = '-50%'
     const alignY = '-100%'
@@ -106,6 +108,8 @@ export default Connect(state => ({
   scales: state.scales,
   getX: state.getX,
   getY: state.getY,
+  gridX: Selectors.gridX(state),
+  gridY: Selectors.gridY(state),
   hovered: state.hovered,
   offset: Selectors.offset(state)
 }))(Tooltip)
