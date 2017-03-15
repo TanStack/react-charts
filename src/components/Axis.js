@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 //
-import Animated from './Animated'
-import AnimatedGroup from './AnimatedGroup'
+import Animate from '../utils/Animate'
+import Transition from '../utils/Transition'
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 import Text from '../primitives/Text'
@@ -149,15 +149,15 @@ class Axis extends PureComponent {
     const scaleCopy = (scale.bandwidth ? center : identity)(scale.copy())
 
     return (
-      <Animated
-        style={spring => ({
-          min: spring(min),
-          max: spring(max),
-          range0: spring(range0),
-          range1: spring(range1),
-          k: spring(k),
-          tickSizeOuter: spring(tickSizeOuter)
-        })}
+      <Animate
+        data={{
+          min: min,
+          max: max,
+          range0: range0,
+          range1: range1,
+          k: k,
+          tickSizeOuter: tickSizeOuter
+        }}
       >
         {({
           min,
@@ -183,28 +183,33 @@ class Axis extends PureComponent {
               <Path
                 className='domain'
                 d={axisPath}
+                style={{
+                  stroke: '#acacac',
+                  strokeWidth: '1',
+                  fill: 'transparent'
+                }}
               />
-              <AnimatedGroup
+              <Transition
                 data={ticks}
                 getKey={(d, i) => d}
                 style={(d, i, spring) => {
                   return {
                     tick: spring(scaleCopy(d)),
-                    opacity: spring(1),
+                    visible: 1,
                     measureable: 1
                   }
                 }}
                 willEnter={(data) => {
                   return {
                     tick: this.prevScale(data),
-                    opacity: 0,
+                    visible: 0,
                     measureable: 1
                   }
                 }}
                 willLeave={(data, spring) => {
                   return {
                     tick: spring(scaleCopy(data)),
-                    opacity: spring(0),
+                    visible: 0,
                     measureable: 0
                   }
                 }}
@@ -220,7 +225,6 @@ class Axis extends PureComponent {
                           <g
                             key={inter.key}
                             className='tick'
-                            opacity={inter.style.opacity}
                             transform={transform(inter.style.tick)}
                           >
                             <Line
@@ -228,6 +232,11 @@ class Axis extends PureComponent {
                               x2={isVertical ? k * tickSizeInner : '0.5'}
                               y1={isVertical ? '0.5' : '0.5'}
                               y2={isVertical ? '0.5' : k * tickSizeInner}
+                              visible={inter.style.visible}
+                              style={{
+                                strokeWidth: 1,
+                                opacity: 0.2
+                              }}
                             />
                             {showGrid && (
                               <Line
@@ -235,7 +244,11 @@ class Axis extends PureComponent {
                                 x2={isVertical ? max : '0.5'}
                                 y1={isVertical ? '0.5' : '0.5'}
                                 y2={isVertical ? '0.5' : max}
-                                opacity='0.2'
+                                visible={inter.style.visible}
+                                style={{
+                                  strokeWidth: 1,
+                                  opacity: 0.2
+                                }}
                               />
                             )}
                             <Text
@@ -243,6 +256,7 @@ class Axis extends PureComponent {
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
                               className={inter.style.measureable && '-measureable'}
+                              visible={inter.style.visible}
                             >
                               {format(inter.data)}
                             </Text>
@@ -252,11 +266,11 @@ class Axis extends PureComponent {
                     </g>
                   )
                 }}
-              </AnimatedGroup>
+              </Transition>
             </g>
           )
         }}
-      </Animated>
+      </Animate>
     )
   }
 }

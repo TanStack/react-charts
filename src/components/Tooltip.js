@@ -2,8 +2,7 @@ import React, { PureComponent } from 'react'
 //
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
-
-import Animated from './Animated'
+import Animate from '../utils/Animate'
 //
 
 class Tooltip extends PureComponent {
@@ -35,13 +34,13 @@ class Tooltip extends PureComponent {
     const alignY = '-100%'
 
     return (
-      <Animated
-        style={spring => ({
-          x: spring(x, { stiffneess: 250 }),
-          y: spring(y, { stiffneess: 250 }),
-          alignX: spring(alignX, { stiffneess: 250 }),
-          alignY: spring(alignY, { stiffneess: 250 })
-        })}
+      <Animate
+        data={{
+          x,
+          y,
+          alignX,
+          alignY
+        }}
       >
         {({
           x,
@@ -98,7 +97,7 @@ class Tooltip extends PureComponent {
             </div>
           </div>
         )}
-      </Animated>
+      </Animate>
     )
   }
 }

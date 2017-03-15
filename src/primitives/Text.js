@@ -1,45 +1,45 @@
 import React from 'react'
-import { Motion, spring } from 'react-motion'
+//
+import Animate from '../utils/Animate'
+
+const defaultStyle = {
+  fontFamily: 'Helvetica',
+  stroke: 'none',
+  fill: 'black',
+  fontSize: 10,
+  opacity: 1
+}
 
 export default React.createClass({
-  getDefaultProps () {
-    return {
-      fontFamily: 'Helvetica',
-      stroke: 'none',
-      fill: '#535353',
-      fontSize: 10
-    }
-  },
   render () {
     const {
-      x,
-      y,
+      isActive,
+      isInactive,
+      visible,
+      style,
       ...rest
     } = this.props
 
-    const animated = {
-      x: spring(x),
-      y: spring(y)
+    const resolvedStyle = {
+      ...defaultStyle,
+      ...style
     }
-
     return (
-      <Motion
-        style={{
-          // anything being animated should have a key/value here
-          ...animated
+      <Animate
+        data={{
+          ...resolvedStyle,
+          opacity: Number(visible || 0) * resolvedStyle.opacity
         }}
       >
-        {({
-          x,
-          y
-        }) => (
-          <text
-            x={x}
-            y={y}
-            {...rest}
-          />
-        )}
-      </Motion>
+        {(inter) => {
+          return (
+            <text
+              {...inter}
+              {...rest}
+            />
+          )
+        }}
+      </Animate>
     )
   }
 })

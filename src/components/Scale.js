@@ -69,7 +69,7 @@ class Scale extends Component {
       return null
     }
 
-    return children
+    return children || null
   }
 }
 

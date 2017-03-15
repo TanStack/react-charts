@@ -1,13 +1,18 @@
 import React from 'react'
-import { Motion, spring } from 'react-motion'
+//
+import Animate from '../utils/Animate'
+
+const defaultStyle = {
+  strokeWidth: '1',
+  stroke: '#000000',
+  fill: '#000000',
+  opacity: 1
+}
 
 export default React.createClass({
   getDefaultProps () {
     return {
-      r: 1,
-      strokeWidth: '1',
-      stroke: '#000000',
-      fill: 'transparent'
+      r: 1
     }
   },
   render () {
@@ -15,29 +20,38 @@ export default React.createClass({
       x,
       y,
       r,
+      isActive,
+      isInactive,
+      visible,
+      style,
       ...rest
     } = this.props
+
+    const resolvedStyle = {
+      ...defaultStyle,
+      ...style
+    }
     return (
-      // <Motion
-      //   style={{
-      //     x: spring(x),
-      //     y: spring(y),
-      //     r: spring(r)
-      //   }}
-      // >
-      //   {({
-      //     x,
-      //     y,
-      //     r
-      //   }) => (
-          <circle
-            {...rest}
-            cx={x}
-            cy={y}
-            r={r}
-          />
-      //   )}
-      // </Motion>
+      <Animate
+        data={{
+          ...resolvedStyle,
+          stroke: isActive ? 'red' : resolvedStyle.stroke,
+          fill: isActive ? 'red' : resolvedStyle.fill,
+          opacity: Number(visible || 0) * resolvedStyle.opacity
+        }}
+      >
+        {(inter) => {
+          return (
+            <circle
+              {...inter}
+              {...rest}
+              cx={x}
+              cy={y}
+              r={r}
+            />
+          )
+        }}
+      </Animate>
     )
   }
 })

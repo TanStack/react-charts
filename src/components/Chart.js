@@ -4,7 +4,7 @@ import Stack from '../components/Stack'
 import Axis from '../components/Axis'
 import Scale from '../components/Scale'
 import Interaction from '../components/Interaction'
-import Animated from '../components/Animated'
+import Animate from '../utils/Animate'
 import Tooltip from '../components/Tooltip'
 
 import Selectors from '../utils/Selectors'
@@ -55,11 +55,11 @@ class Chart extends Component {
       <div
         className='Chart'
       >
-        <Animated
-          style={spring => ({
-            gridX: spring(gridX),
-            gridY: spring(gridY)
-          })}
+        <Animate
+          data={{
+            gridX,
+            gridY
+          }}
         >
           {({
             gridX,
@@ -70,7 +70,6 @@ class Chart extends Component {
               style={{
                 width: width,
                 height: height,
-                overflow: 'visible',
                 ...style
               }}
             >
@@ -118,7 +117,7 @@ class Chart extends Component {
               </g>
             </svg>
           )}
-        </Animated>
+        </Animate>
         <Tooltip />
       </div>
     )

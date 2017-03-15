@@ -20,7 +20,8 @@ module.exports = (config, env) => {
         },
         include: path.resolve(__dirname, '../')
       }])
-    })
+    }),
+    devtool: 'inline-source-map'
   })
 
   return config
