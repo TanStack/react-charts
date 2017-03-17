@@ -37,8 +37,9 @@ export default React.createClass({
           ...resolvedStyle,
           stroke: isActive ? 'red' : resolvedStyle.stroke,
           fill: isActive ? 'red' : resolvedStyle.fill,
-          opacity: Number(visible || 0) * resolvedStyle.opacity
+          opacity: visible * resolvedStyle.opacity
         }}
+        duration={1000}
       >
         {(inter) => {
           return (

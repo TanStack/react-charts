@@ -43,6 +43,8 @@
     "d3-timer": "^1.0.5",
     "d3-voronoi": "^1.1.1",
     "javascript-detect-element-resize": "^0.5.3",
+    "performance-now": "^2.1.0",
+    "raf": "^3.3.0",
     "react-motion": "^0.4.7"
   },
   "peerDependencies": {

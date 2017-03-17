@@ -29,10 +29,12 @@ export default React.createClass({
         data={{
           ...resolvedStyle,
           stroke: isActive ? 'red' : resolvedStyle.stroke,
-          opacity: Number(visible || 0) * resolvedStyle.opacity
+          opacity: visible * resolvedStyle.opacity
         }}
+        duration={300}
       >
         {(inter) => {
+          // console.log('path', inter)
           return (
             <path
               {...inter}

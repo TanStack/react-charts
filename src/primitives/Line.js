@@ -27,8 +27,9 @@ export default React.createClass({
       <Animate
         data={{
           ...resolvedStyle,
-          opacity: Number(visible || 0) * resolvedStyle.opacity
+          opacity: visible * resolvedStyle.opacity
         }}
+        duration={300}
       >
         {(inter) => {
           return (

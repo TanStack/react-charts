@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 //
 import Transition from '../src/utils/Transition'
+import Animate from '../src/utils/Animate'
 //
 import CodeHighlight from './components/codeHighlight.js'
 
@@ -36,45 +37,67 @@ class Line extends Component {
         <br />
         <br />
 
-        <Transition
-          data={items}
-          getKey={d => d.value}
-          update={d => ({
-            translate: 1,
-            opacity: 1,
-            color: 'grey'
-          })}
-          enter={d => ({
-            translate: 0,
-            opacity: 0,
-            color: 'blue'
-          })}
-          leave={d => ({
-            translate: 2,
-            opacity: 0,
-            color: 'red'
-          })}
-          duration={1000}
+        <Animate
+          data={{
+            background: Math.random() > 0.5 ? 'pink' : 'lightgrey'
+          }}
         >
           {data => (
-            <ul style={{height: (20 * 10) + 'px'}}>
-              {data.map(d => (
-                <li
-                  key={d.key}
-                  style={{
-                    fontWeight: 'bold',
-                    position: 'absolute',
+            <div style={{background: data.background}}>
+              <Transition
+                data={items}
+                getKey={d => d.value}
+                update={d => ({
+                  translate: 1,
+                  opacity: 1,
+                  color: 'grey'
+                })}
+                enter={d => ({
+                  translate: 0,
+                  opacity: 0,
+                  color: 'blue'
+                })}
+                leave={d => ({
+                  translate: 2,
+                  opacity: 0,
+                  color: 'red'
+                })}
+                duration={1000}
+                ignore={['opacity']}
+              >
+                {data => (
+                  <ul style={{height: (20 * 10) + 'px'}}>
+                    {data.map(d => (
+                      <li
+                        key={d.key}
+                        style={{
+                          fontWeight: 'bold',
+                          position: 'absolute',
                     transform: `translate(${100 * d.state.translate}px, ${20 * d.key}px)`,
-                    opacity: d.state.opacity,
-                    color: d.state.color
-                  }}
-                >
-                  {d.key}
-                </li>
-              ))}
-            </ul>
+                          color: d.state.color
+                        }}
+                      >
+                        <Animate
+                          data={{
+                            opacity: d.state.opacity
+                          }}
+                        >
+                          {data => (
+                            <span
+                              style={{
+                                opacity: data.opacity
+                              }}
+                            >{data.opacity}</span>
+                          )}
+                        </Animate>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Transition>
+            </div>
           )}
-        </Transition>
+        </Animate>
 
         <br />
         <br />

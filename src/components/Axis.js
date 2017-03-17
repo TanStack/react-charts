@@ -148,6 +148,8 @@ class Axis extends PureComponent {
     const range1 = range[range.length - 1] + 0.5
     const scaleCopy = (scale.bandwidth ? center : identity)(scale.copy())
 
+    this.prevScale = this.prevScale || scaleCopy
+
     return (
       <Animate
         data={{
@@ -158,6 +160,7 @@ class Axis extends PureComponent {
           k: k,
           tickSizeOuter: tickSizeOuter
         }}
+        duration={300}
       >
         {({
           min,
@@ -192,27 +195,23 @@ class Axis extends PureComponent {
               <Transition
                 data={ticks}
                 getKey={(d, i) => d}
-                style={(d, i, spring) => {
-                  return {
-                    tick: spring(scaleCopy(d)),
-                    visible: 1,
-                    measureable: 1
-                  }
-                }}
-                willEnter={(data) => {
-                  return {
-                    tick: this.prevScale(data),
-                    visible: 0,
-                    measureable: 1
-                  }
-                }}
-                willLeave={(data, spring) => {
-                  return {
-                    tick: spring(scaleCopy(data)),
-                    visible: 0,
-                    measureable: 0
-                  }
-                }}
+                update={d => ({
+                  tick: scaleCopy(d),
+                  opacity: 1,
+                  measureable: 1
+                })}
+                enter={d => ({
+                  tick: this.prevScale(d),
+                  opacity: 0,
+                  measureable: 1
+                })}
+                leave={d => ({
+                  tick: scaleCopy(d),
+                  opacity: 0,
+                  measureable: 0
+                })}
+                ignore={['measureable']}
+                duration={300}
               >
                 {(inters) => {
                   return (
@@ -225,14 +224,14 @@ class Axis extends PureComponent {
                           <g
                             key={inter.key}
                             className='tick'
-                            transform={transform(inter.style.tick)}
+                            transform={transform(inter.state.tick)}
                           >
                             <Line
                               x1={isVertical ? '0.5' : '0.5'}
                               x2={isVertical ? k * tickSizeInner : '0.5'}
                               y1={isVertical ? '0.5' : '0.5'}
                               y2={isVertical ? '0.5' : k * tickSizeInner}
-                              visible={inter.style.visible}
+                              opacity={inter.state.opacity}
                               style={{
                                 strokeWidth: 1,
                                 opacity: 0.2
@@ -244,7 +243,7 @@ class Axis extends PureComponent {
                                 x2={isVertical ? max : '0.5'}
                                 y1={isVertical ? '0.5' : '0.5'}
                                 y2={isVertical ? '0.5' : max}
-                                visible={inter.style.visible}
+                                opacity={inter.state.opacity}
                                 style={{
                                   strokeWidth: 1,
                                   opacity: 0.2
@@ -255,8 +254,8 @@ class Axis extends PureComponent {
                               x={isVertical ? k * spacing : '0.5'}
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
-                              className={inter.style.measureable && '-measureable'}
-                              visible={inter.style.visible}
+                              className={inter.state.measureable && '-measureable'}
+                              opacity={inter.state.opacity}
                             >
                               {format(inter.data)}
                             </Text>

@@ -30,23 +30,15 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
-          <div
-            key={i}
-            style={{
-              width: '100%',
-              height: '200px'
-            }}
+        {_.range(2).map((d, i) => (
+          <ResizableBox
+            width={500}
+            height={300}
           >
-            <ResizableBox
-              width={500}
-              height={200}
-            >
-              <LineChart
-                data={data}
-              />
-            </ResizableBox>
-          </div>
+            <LineChart
+              data={data}
+            />
+          </ResizableBox>
         ))}
 
         <br />
@@ -65,10 +57,10 @@ function makeData () {
 function makeSeries () {
   // const length = Math.round(Math.random() * 30)
   const length = 30
-  const max = 100
-  // const max = Math.random() > 0.5 ? 100000 : 10
-  const multiplier = 10
-  // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
+  // const max = 100
+  const max = Math.random() > 0.5 ? 100000 : 10
+  // const multiplier = 10
+  const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({
     x: d * multiplier,
     y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),

@@ -22,24 +22,20 @@ export default Connect((state, props) => {
       <Transition
         data={data}
         getKey={(d, i) => i}
-        style={(d, i, spring) => {
-          return {
-            timer: spring(1),
-            visible: 1
-          }
-        }}
-        willEnter={(inter) => {
-          return {
-            timer: 0,
-            visible: 0
-          }
-        }}
-        willLeave={(inter, spring) => {
-          return {
-            timer: spring(0),
-            visible: 0
-          }
-        }}
+        update={d => ({
+          timer: 1,
+          visible: 1
+        })}
+        enter={d => ({
+          timer: 0,
+          visible: 0
+        })}
+        leave={d => ({
+          timer: 0,
+          visible: 0
+        })}
+        duration={500}
+        ignore={['visible']}
       >
         {(inters) => {
           return (
@@ -53,7 +49,7 @@ export default Connect((state, props) => {
                     data={inter.data}
                     isActive={isActive}
                     isInactive={isInactive}
-                    visible={inter.style.visible}
+                    visible={inter.state.visible}
                   />
                 )
               })}

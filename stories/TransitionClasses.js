@@ -5,6 +5,24 @@ import Transition from '../src/utils/Transition'
 //
 import CodeHighlight from './components/codeHighlight.js'
 
+const style = `
+.item {
+  transition: all 1s ease-out
+}
+.enter {
+  color: lightgreen;
+  transform: translateX(0px);
+}
+.stable {
+  color: blue;
+  transform: translateX(100px);
+}
+.leave {
+  color: red;
+  transform: translateX(200px);
+}
+`
+
 class Line extends Component {
   constructor () {
     super()
@@ -18,8 +36,10 @@ class Line extends Component {
     } = this.state
     return (
       <div>
+        <style children={style} />
+
         <p>
-          Transition can be used to animate just about anything. Here is an example:
+          You can also use the Transition component to animate between classes. It's definitely not as common and much more difficult to maintain, but it is possible. :)
         </p>
 
         <br />
@@ -40,33 +60,24 @@ class Line extends Component {
           data={items}
           getKey={d => d.value}
           update={d => ({
-            translate: 1,
-            opacity: 1,
-            color: 'grey'
+            className: 'stable'
           })}
           enter={d => ({
-            translate: 0,
-            opacity: 0,
-            color: 'blue'
+            className: 'enter'
           })}
           leave={d => ({
-            translate: 2,
-            opacity: 0,
-            color: 'red'
+            className: 'leave'
           })}
           duration={1000}
         >
           {data => (
-            <ul style={{height: (20 * 10) + 'px'}}>
+            <ul>
               {data.map(d => (
                 <li
                   key={d.key}
+                  className={`item ${d.state.className}`}
                   style={{
-                    fontWeight: 'bold',
-                    position: 'absolute',
-                    transform: `translate(${100 * d.state.translate}px, ${20 * d.key}px)`,
-                    opacity: d.state.opacity,
-                    color: d.state.color
+                    fontWeight: 'bold'
                   }}
                 >
                   {d.key}
@@ -79,39 +90,33 @@ class Line extends Component {
         <br />
         <br />
 
+        Styles:
+        <CodeHighlight>{() => style}</CodeHighlight>
+
         Code:
         <CodeHighlight>{() => `
 <Transition
   data={items}
   getKey={d => d.value}
   update={d => ({
-    translate: 1,
-    opacity: 1,
-    color: 'blue'
+    className: 'stable'
   })}
   enter={d => ({
-    translate: 0,
-    opacity: 0,
-    color: 'green'
+    className: 'enter'
   })}
-  exit={d => ({
-    translate: 2,
-    opacity: 0,
-    color: 'red'
+  leave={d => ({
+    className: 'leave'
   })}
   duration={1000}
 >
   {data => (
-    <ul style={{height: (20 * 10) + 'px'}}>
+    <ul>
       {data.map(d => (
         <li
           key={d.key}
+          className={\`item \${d.state.className}\`}
           style={{
-            fontWeight: 'bold',
-            position: 'absolute',
-            transform: \`translate(\${100 * d.state.translate}px, \${20 * d.key}px)\`,
-            opacity: d.state.opacity,
-            color: d.state.color
+            fontWeight: 'bold'
           }}
         >
           {d.key}
@@ -121,6 +126,7 @@ class Line extends Component {
   )}
 </Transition>
         `}</CodeHighlight>
+
 
         <br />
         <br />
