@@ -96,7 +96,7 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {showPoints && inter.points.map((d, i) => (
+              {/* {showPoints && inter.points.map((d, i) => (
                 <Circle
                   {...rest}
                   key={i}
@@ -104,7 +104,7 @@ export default Connect((state, props) => {
                   y={d.y}
                   r={d.r}
                 />
-              ))}
+              ))} */}
             </g>
           )
         }}

@@ -39,7 +39,6 @@ export default React.createClass({
           fill: isActive ? 'red' : resolvedStyle.fill,
           opacity: visible * resolvedStyle.opacity
         }}
-        duration={1000}
       >
         {(inter) => {
           return (

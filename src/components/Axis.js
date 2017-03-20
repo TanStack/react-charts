@@ -162,7 +162,6 @@ class Axis extends PureComponent {
           k: k,
           tickSizeOuter: tickSizeOuter
         }}
-        duration={300}
       >
         {({
           min,
@@ -213,7 +212,6 @@ class Axis extends PureComponent {
                   measureable: 0
                 })}
                 ignore={['measureable']}
-                duration={300}
               >
                 {(inters) => {
                   return (

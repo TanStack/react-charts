@@ -34,7 +34,6 @@ export default Connect((state, props) => {
           timer: 0,
           visible: 0
         })}
-        duration={500}
         ignore={['visible']}
       >
         {(inters) => {

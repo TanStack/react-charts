@@ -3,7 +3,9 @@ import now from 'performance-now'
 import RAF from 'raf'
 import { interpolate } from 'd3-interpolate'
 import * as Easing from 'd3-ease'
-
+//
+import { addIntertia } from './Animate'
+//
 const msPerFrame = 1000 / 60
 
 const defaultEasing = 'easeCubicOut'
@@ -12,14 +14,22 @@ const TransitionMotion = React.createClass({
   getDefaultProps () {
     return {
       data: [],
-      duration: 1000,
+      tension: 170,
+      damping: 26,
+      precision: 0.01,
       ignore: [],
       easing: defaultEasing,
+      enter: () => null,
+      leave: () => null,
       onRest: () => null
     }
   },
 
   getInitialState () {
+    this.progress = 0
+    this.progressOrigin = 0
+    this.progressVelocity = 0
+    this.progressDestination = 0
     return {
       items: []
     }
@@ -57,7 +67,8 @@ const TransitionMotion = React.createClass({
       enter,
       leave,
       easing,
-      ignore
+      ignore,
+      duration
     } = props
 
     // Detect if we need to animate
@@ -124,6 +135,10 @@ const TransitionMotion = React.createClass({
 
     // Give each items it's proper origin/destination states
     // and corresponding interpolators
+
+    this.progressOrigin = this.progress
+    this.progressDestination = this.progressOrigin + 1
+
     this.allItems = this.allItems.map(item => {
       let originState
       let destState
@@ -152,9 +167,14 @@ const TransitionMotion = React.createClass({
       }
     })
 
-    // Reset the startTime and progress
-    this.startTime = now()
-    this.progress = 0
+    // Reset the startTime and (if using duration) the progress
+    if (duration) {
+      this.startTime = now()
+      this.progress = 0
+    }
+
+    // Be sure to render the origin frame
+    this.updateProgress(0)
 
     // Animate if needed
     this.animate()
@@ -173,7 +193,10 @@ const TransitionMotion = React.createClass({
 
     const {
       onRest,
-      duration
+      duration,
+      tension,
+      damping,
+      precision
     } = this.props
 
     this.animationID = RAF((timestamp) => {
@@ -184,7 +207,14 @@ const TransitionMotion = React.createClass({
       }
 
       // If the animation is complete, tie up any loose ends...
-      if (this.progress === 1) {
+      if (
+        duration && this.progress === 1 || // this is for duration based animation
+        ( // this is for inertia based animations
+          !duration &&
+          this.progressVelocity === 0 &&
+          this.progress === this.progressDestination
+        )
+      ) {
         if (this.wasAnimating) {
           onRest()
         }
@@ -222,44 +252,83 @@ const TransitionMotion = React.createClass({
 
       // How many milliseconds behind are we?
       const timeToCatchUp = Math.max(Math.floor(this.accumulatedTime - msPerFrame), 0)
-
       // Add that to the previous time and currentTime
-      this.prevTime = this.prevTime + timeToCatchUp
       currentTime += timeToCatchUp
+      // Make sure the previous time is caught up too
+      this.prevTime = this.prevTime + timeToCatchUp
 
-      // Set the progress percentage
-      this.progress = Math.min((currentTime - this.startTime) / duration, 1)
+      let percentage
 
-      let newItems = this.allItems.map(item => {
-        const state = {}
-        const allKeys = dedupe(Object.keys(item.originState), Object.keys(item.destState))
-
-        allKeys.forEach(key => {
-          // If ignored, skip right to the value
-          if (!item.interpolators[key]) {
-            state[key] = item.destState[key]
-          } else {
-            // Otherwise, interpolate with the progress
-            state[key] = item.interpolators[key](this.easer(this.progress))
-          }
-        })
-
-        return {
-          ...item,
-          state
+      if (duration) {
+        // Set the progress percentage
+        this.progress = percentage = Math.min((currentTime - this.startTime) / duration, 1)
+      } else {
+        // If we are using inertia, start by looping over any
+        // frames we used to catch up. There will always be one frame,
+        // but if we are behind, it could be more.
+        const framesToCatchUp = Math.floor(timeToCatchUp / msPerFrame) + 1
+        let newProgress = this.progress
+        let newProgressVelocity = this.progressVelocity
+        for (var i = 0; i < framesToCatchUp; i++) {
+          [newProgress, newProgressVelocity] = addIntertia(
+            newProgress,
+            newProgressVelocity,
+            this.progressDestination,
+            tension,
+            damping,
+            precision
+          )
         }
-      })
+        this.progress = newProgress
+        this.progressVelocity = newProgressVelocity
+
+        const span = this.progressDestination - this.progressOrigin // (7 - 3) == 4
+        const progress = this.progress - this.progressOrigin // (4 - 3) == 1
+        percentage = progress / span // 0.25
+
+        this.updateProgress(percentage)
+      }
 
       // Mark the frame as done
       this.animationID = null
       // Reset the accumulatedTime
       this.accumulatedTime = 0
 
-      this.setState({
-        items: newItems
+      this.animate()
+    })
+  },
+
+  updateProgress (percentage) {
+    const {
+      duration
+    } = this.props
+
+    let newItems = this.allItems.map(item => {
+      const state = {}
+      const allKeys = dedupe(Object.keys(item.originState), Object.keys(item.destState))
+
+      allKeys.forEach(key => {
+        if (!percentage) {
+          // If at absolute 0, draw the origin state
+          state[key] = item.originState[key]
+        } else if (!item.interpolators[key]) {
+          // If ignored, skip right to the value
+          state[key] = item.destState[key]
+        } else {
+          // Otherwise, interpolate with the progress
+          state[key] = duration
+            ? item.interpolators[key](this.easer(percentage))
+            : item.interpolators[key](percentage)
+        }
       })
 
-      this.animate()
+      return {
+        ...item,
+        state
+      }
+    })
+    this.setState({
+      items: newItems
     })
   },
 

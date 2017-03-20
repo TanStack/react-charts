@@ -54,7 +54,8 @@ class Line extends Component {
             opacity: 0,
             color: 'red'
           })}
-          duration={1000}
+          damping={10}
+          // duration={1000}
         >
           {data => {
             return (

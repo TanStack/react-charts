@@ -41,6 +41,7 @@ class Line extends Component {
           data={{
             background: Math.random() > 0.5 ? 'pink' : 'lightgrey'
           }}
+          damping={14}
         >
           {data => (
             <div style={{background: data.background}}>
@@ -62,7 +63,9 @@ class Line extends Component {
                   opacity: 0,
                   color: 'red'
                 })}
-                duration={1000}
+                // duration={1000}
+                tension={50}
+                damping={10}
                 ignore={['opacity']}
               >
                 {data => (
@@ -78,20 +81,20 @@ class Line extends Component {
                         }}
                       >
                         <Animate
-                          default={{
-                            opacity: 0
-                          }}
                           data={{
                             opacity: d.state.opacity
                           }}
                         >
-                          {data => (
-                            <span
-                              style={{
-                                opacity: data.opacity
-                              }}
-                            >{d.key} - {data.opacity}</span>
-                          )}
+                          {data => {
+                            // console.log(data.opacity)
+                            return (
+                              <span
+                                style={{
+                                  opacity: data.opacity
+                                }}
+                              >{d.key} - {d.state.opacity} - {data.opacity}</span>
+                            )
+                          }}
                         </Animate>
                       </div>
                     ))}

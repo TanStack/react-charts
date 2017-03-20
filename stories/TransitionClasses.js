@@ -68,7 +68,7 @@ class Line extends Component {
           leave={d => ({
             className: 'leave'
           })}
-          duration={1000}
+          // duration={1000}
         >
           {data => (
             <ul>

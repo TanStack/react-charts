@@ -29,7 +29,6 @@ export default React.createClass({
           ...resolvedStyle,
           opacity: visible * resolvedStyle.opacity
         }}
-        duration={300}
       >
         {(inter) => {
           return (

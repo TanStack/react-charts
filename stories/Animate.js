@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { spring } from 'react-motion'
 //
 import Animate from '../src/utils/Animate'
 //
@@ -48,7 +47,9 @@ class Line extends Component {
                 rotate: 0
               }}
               data={d}
-              duration={700}
+              tension={100}
+              damping={5}
+              // duration={1000}
             >
               {data => {
                 return (
@@ -94,7 +95,7 @@ TDB
 export default () => <Line />
 
 function makeItems () {
-  return _.range(200).map(d => {
+  return _.range(5).map(d => {
     const colorNum = Math.random()
     const color = colorNum > 0.6 ? 'red' : colorNum > 0.3 ? 'gold' : 'blue'
     return {
