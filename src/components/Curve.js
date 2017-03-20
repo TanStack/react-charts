@@ -70,22 +70,21 @@ export default Connect((state, props) => {
       pathSpringMap[pathRPrefix + i] = getR(d)
     })
 
+    const lineFn = line()
+    .curve(curveMonotoneX)
+
     return (
       <Animate
-        data={pathSpringMap}
+        data={{
+          points: data.map(d => ({
+            x: scaleX(getX(d)),
+            y: scaleY(getY(d)),
+            r: getR(d)
+          }))
+        }}
       >
         {inter => {
-          // Map back through the data, using the inter data point
-          const points = data.map((d, i) => ({
-            x: inter[pathXPrefix + i],
-            y: inter[pathYPrefix + i],
-            r: inter[pathRPrefix + i]
-          }))
-
-          const lineFn = line()
-          .curve(curveMonotoneX)
-
-          const path = lineFn(points.map(point => ([point.x, point.y])))
+          const path = lineFn(inter.points.map(point => ([point.x, point.y])))
 
           return (
             <g>
@@ -97,7 +96,7 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {showPoints && points.map((d, i) => (
+              {showPoints && inter.points.map((d, i) => (
                 <Circle
                   {...rest}
                   key={i}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import _ from 'lodash'
-import { Resizable, ResizableBox } from 'react-resizable'
+import { ResizableBox } from 'react-resizable'
 //
 import { LineChart } from '../src'
 //
@@ -30,8 +30,9 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(2).map((d, i) => (
+        {_.range(1).map((d, i) => (
           <ResizableBox
+            key={i}
             width={500}
             height={300}
           >

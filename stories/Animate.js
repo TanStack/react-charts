@@ -9,7 +9,9 @@ import CodeHighlight from './components/codeHighlight.js'
 class Line extends Component {
   constructor () {
     super()
-    this.state = makeState()
+    this.state = {
+      items: makeItems()
+    }
   }
   render () {
     return (
@@ -22,7 +24,9 @@ class Line extends Component {
         <br />
 
         <button
-          onClick={() => this.setState(makeState())}
+          onClick={() => this.setState({
+            items: makeItems()
+          })}
         >
           Randomize Data
         </button>
@@ -35,37 +39,41 @@ class Line extends Component {
             height: '500px'
           }}
         >
-          <Animate
-            default={{
-              scale: 0,
-              color: 'blue',
-              rotate: 0
-            }}
-            data={this.state}
-            duration={700}
-          >
-            {data => {
-              return (
-                <div
-                  style={{
-                    width: '100px',
-                    height: '100px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    textAlign: 'center',
-                    borderRadius: ((data.rotate / 360) * 100) + 'px',
-                    transform: `translate(${data.scale * 50}%, ${data.scale * 50}%) scale(${data.scale}) rotate(${data.rotate}deg)`,
-                    background: data.color
-                  }}
-                >
-                  {Math.round(data.scale * 100) / 100}
-                </div>
-              )
-            }}
-          </Animate>
+          {this.state.items.map((d, i) => (
+            <Animate
+              key={i}
+              default={{
+                scale: 0,
+                color: 'blue',
+                rotate: 0
+              }}
+              data={d}
+              duration={700}
+            >
+              {data => {
+                return (
+                  <div
+                    style={{
+                      float: 'left',
+                      width: '100px',
+                      height: '100px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      textAlign: 'center',
+                      borderRadius: ((data.rotate / 360) * 100) + 'px',
+                      transform: `translate(${data.scale * 50}%, ${data.scale * 50}%) scale(${data.scale}) rotate(${data.rotate}deg)`,
+                      background: data.color
+                    }}
+                  >
+                    {Math.round(data.scale * 100) / 100}
+                  </div>
+                )
+              }}
+            </Animate>
+          ))}
         </div>
 
         <br />
@@ -85,12 +93,14 @@ TDB
 
 export default () => <Line />
 
-function makeState () {
-  const colorNum = Math.random()
-  const color = colorNum > 0.6 ? 'red' : colorNum > 0.3 ? 'gold' : 'blue'
-  return {
-    scale: spring(Math.random() * 5),
-    color: spring(color),
-    rotate: spring(Math.random() > 0.5 ? 360 : 0)
-  }
+function makeItems () {
+  return _.range(200).map(d => {
+    const colorNum = Math.random()
+    const color = colorNum > 0.6 ? 'red' : colorNum > 0.3 ? 'gold' : 'blue'
+    return {
+      scale: Math.random() * 1,
+      color,
+      rotate: Math.random() > 0.5 ? 360 : 0
+    }
+  })
 }

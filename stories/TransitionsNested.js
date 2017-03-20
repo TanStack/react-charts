@@ -66,18 +66,21 @@ class Line extends Component {
                 ignore={['opacity']}
               >
                 {data => (
-                  <ul style={{height: (20 * 10) + 'px'}}>
+                  <div style={{height: (20 * 10) + 'px'}}>
                     {data.map(d => (
-                      <li
+                      <div
                         key={d.key}
                         style={{
                           fontWeight: 'bold',
                           position: 'absolute',
-                    transform: `translate(${100 * d.state.translate}px, ${20 * d.key}px)`,
+                          transform: `translate(${100 * d.state.translate}px, ${20 * d.key}px)`,
                           color: d.state.color
                         }}
                       >
                         <Animate
+                          default={{
+                            opacity: 0
+                          }}
                           data={{
                             opacity: d.state.opacity
                           }}
@@ -87,12 +90,12 @@ class Line extends Component {
                               style={{
                                 opacity: data.opacity
                               }}
-                            >{data.opacity}</span>
+                            >{d.key} - {data.opacity}</span>
                           )}
                         </Animate>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </Transition>
             </div>

@@ -64,7 +64,9 @@ class Axis extends PureComponent {
     const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => el.getBoundingClientRect())
 
     if (labelDims.length !== this.ticks.length) {
-      window.requestAnimationFrame(this.measure)
+      window.setTimeout(() => {
+        window.requestAnimationFrame(this.measure)
+      }, 1)
       return
     }
 
