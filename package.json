@@ -31,7 +31,7 @@
     "postpublish": "git push --tags",
     "storybook": "start-storybook -p 8000 -c .storybook",
     "storybook:prod": "yarn run docs && pushd docs; python -m SimpleHTTPServer 8001; popd",
-    "docs": "build-storybook -o docs"
+    "docs": "build-storybook -o docs && cp .storybook/CNAME docs/CNAME"
   },
   "dependencies": {
     "classnames": "^2.2.5",
