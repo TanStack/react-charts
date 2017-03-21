@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
+import { Animate } from 'react-move'
 //
 import Stack from '../components/Stack'
 import Axis from '../components/Axis'
 import Scale from '../components/Scale'
 import Interaction from '../components/Interaction'
-import Animate from '../utils/Animate'
 import Tooltip from '../components/Tooltip'
 
 import Selectors from '../utils/Selectors'

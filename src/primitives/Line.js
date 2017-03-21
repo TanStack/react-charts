@@ -1,6 +1,6 @@
 import React from 'react'
-
-import Animate from '../utils/Animate'
+import { Animate } from 'react-move'
+//
 
 const defaultStyle = {
   strokeWidth: 1,
@@ -23,6 +23,7 @@ export default React.createClass({
       ...defaultStyle,
       ...style
     }
+
     return (
       <Animate
         data={{

@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
+import { Animate } from 'react-move'
 //
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
-import Animate from '../utils/Animate'
 //
 
 class Tooltip extends PureComponent {

@@ -1,6 +1,6 @@
 import React from 'react'
+import { Animate } from 'react-move'
 //
-import Animate from '../utils/Animate'
 
 const defaultStyle = {
   strokeWidth: 2,
@@ -31,9 +31,9 @@ export default React.createClass({
           stroke: isActive ? 'red' : resolvedStyle.stroke,
           opacity: visible * resolvedStyle.opacity
         }}
+        damping={10}
       >
         {(inter) => {
-          // console.log('path', inter)
           return (
             <path
               {...inter}

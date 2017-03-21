@@ -2,7 +2,7 @@ import React from 'react'
 //
 import Connect from '../utils/Connect'
 
-import Transition from '../utils/Transition'
+import { Transition } from 'react-move'
 import Curve from './Curve'
 
 export default Connect((state, props) => {

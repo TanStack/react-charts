@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
+import { Animate, Transition } from 'react-move'
 //
-import Animate from '../utils/Animate'
-import Transition from '../utils/Transition'
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 import Text from '../primitives/Text'
@@ -198,17 +197,17 @@ class Axis extends PureComponent {
                 getKey={(d, i) => d}
                 update={d => ({
                   tick: scaleCopy(d),
-                  opacity: 1,
+                  visible: 1,
                   measureable: 1
                 })}
                 enter={d => ({
                   tick: this.prevScale(d),
-                  opacity: 0,
+                  visible: 0,
                   measureable: 1
                 })}
                 leave={d => ({
                   tick: scaleCopy(d),
-                  opacity: 0,
+                  visible: 0,
                   measureable: 0
                 })}
                 ignore={['measureable']}
@@ -231,7 +230,7 @@ class Axis extends PureComponent {
                               x2={isVertical ? k * tickSizeInner : '0.5'}
                               y1={isVertical ? '0.5' : '0.5'}
                               y2={isVertical ? '0.5' : k * tickSizeInner}
-                              opacity={inter.state.opacity}
+                              visible={inter.state.visible}
                               style={{
                                 strokeWidth: 1,
                                 opacity: 0.2
@@ -243,7 +242,7 @@ class Axis extends PureComponent {
                                 x2={isVertical ? max : '0.5'}
                                 y1={isVertical ? '0.5' : '0.5'}
                                 y2={isVertical ? '0.5' : max}
-                                opacity={inter.state.opacity}
+                                visible={inter.state.visible}
                                 style={{
                                   strokeWidth: 1,
                                   opacity: 0.2
@@ -255,7 +254,7 @@ class Axis extends PureComponent {
                               y={isVertical ? '0.5' : k * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
                               className={inter.state.measureable && '-measureable'}
-                              opacity={inter.state.opacity}
+                              visible={inter.state.visible}
                             >
                               {format(inter.data)}
                             </Text>

@@ -10,11 +10,7 @@ import 'github-markdown-css/github-markdown.css'
 //
 import Readme from '../README.md'
 //
-import Transition from '../stories/Transition.js'
-import TransitionClasses from '../stories/TransitionClasses.js'
-import TransitionsNested from '../stories/TransitionsNested.js'
-import Animate from '../stories/Animate.js'
-import ChatHeads from '../stories/ChatHeads.js'
+import LineChart from '../stories/LineChart.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -30,9 +26,5 @@ configure(() => {
       return <ReadmeCmp />
     })
   storiesOf('2. Demos')
-    .add('Transition', Transition)
-    .add('Transition with Classes', TransitionClasses)
-    .add('Nested Transitions', TransitionsNested)
-    .add('Animate', Animate)
-    .add('Chat Heads', ChatHeads)
+    .add('Line Chart', LineChart)
 }, module)

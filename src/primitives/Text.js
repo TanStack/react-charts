@@ -1,6 +1,6 @@
 import React from 'react'
+import { Animate } from 'react-move'
 //
-import Animate from '../utils/Animate'
 
 const defaultStyle = {
   fontFamily: 'Helvetica',

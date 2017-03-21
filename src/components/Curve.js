@@ -1,4 +1,5 @@
 import React from 'react'
+import { Animate } from 'react-move'
 import {
   line,
   curveCardinal,
@@ -7,7 +8,6 @@ import {
 //
 //
 import Connect from '../utils/Connect'
-import Animate from '../utils//Animate'
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
@@ -96,7 +96,7 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {/* {showPoints && inter.points.map((d, i) => (
+              {showPoints && inter.points.map((d, i) => (
                 <Circle
                   {...rest}
                   key={i}
@@ -104,7 +104,7 @@ export default Connect((state, props) => {
                   y={d.y}
                   r={d.r}
                 />
-              ))} */}
+              ))}
             </g>
           )
         }}
