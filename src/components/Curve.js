@@ -71,20 +71,26 @@ export default Connect((state, props) => {
     })
 
     const lineFn = line()
-    .curve(curveMonotoneX)
+    .curve(curveCardinal)
+    // .curve(curveMonotoneX)
 
     return (
       <Animate
         data={{
-          points: data.map(d => ({
-            x: scaleX(getX(d)),
-            y: scaleY(getY(d)),
-            r: getR(d)
-          }))
+          ...pathSpringMap
         }}
+        // tension={50}
+        damping={10}
       >
         {inter => {
-          const path = lineFn(inter.points.map(point => ([point.x, point.y])))
+          const points = data.map((d, i) => {
+            return {
+              x: inter[pathXPrefix + i],
+              y: inter[pathYPrefix + i],
+              r: inter[pathRPrefix + i]
+            }
+          })
+          const path = lineFn(points.map(point => ([point.x, point.y])))
 
           return (
             <g>
@@ -96,7 +102,7 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {showPoints && inter.points.map((d, i) => (
+              {/* {showPoints && inter.points.map((d, i) => (
                 <Circle
                   {...rest}
                   key={i}
@@ -104,7 +110,7 @@ export default Connect((state, props) => {
                   y={d.y}
                   r={d.r}
                 />
-              ))}
+              ))} */}
             </g>
           )
         }}

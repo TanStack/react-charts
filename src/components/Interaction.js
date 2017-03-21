@@ -66,6 +66,7 @@ class Interaction extends PureComponent {
                 stroke='transparent'
                 onMouseEnter={e => onHover(points.data, e)}
                 onClick={e => onActivate(points.data, e)}
+                visible={0}
                 style={{
                   stroke: 'transparent',
                   fill: 'transparent',
