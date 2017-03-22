@@ -39,26 +39,28 @@ class Line extends Component {
             <Chart
               data={data}
             >
+              {/* Scales */}
               <Scale
-                orientation='x'
+                primary
+                id='x'
                 type='linear'
-              >
-                <Axis
-                  orientation='x'
-                  position='bottom'
-                />
-              </Scale>
+              />
               <Scale
-                orientation='y'
+                id='y'
                 type='linear'
-              >
-                <Axis
-                  orientation='y'
-                  position='left'
-                />
-              </Scale>
+              />
+              {/* Axes */}
+              <Axis
+                scaleID='x'
+                position='bottom'
+              />
+              <Axis
+                scaleID='y'
+                position='left'
+              />
+              {/* Stack */}
               <Stack
-                type='line'
+                type='bar'
               />
             </Chart>
           </ResizableBox>

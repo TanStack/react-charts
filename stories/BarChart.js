@@ -39,26 +39,28 @@ class Line extends Component {
             <Chart
               data={data}
             >
+              {/* Scales */}
               <Scale
-                orientation='x'
-                type='linear'
-              >
-                <Axis
-                  orientation='x'
-                  position='bottom'
-                />
-              </Scale>
+                primary
+                id='x'
+                type='time'
+              />
               <Scale
-                orientation='y'
-                type='linear'
-              >
-                <Axis
-                  orientation='y'
-                  position='left'
-                />
-              </Scale>
+                id='y'
+                type='log'
+              />
+              {/* Axes */}
+              <Axis
+                scaleID='x'
+                position='bottom'
+              />
+              <Axis
+                scaleID='y'
+                position='left'
+              />
+              {/* Stack */}
               <Stack
-                type='line'
+                type='bar'
               />
             </Chart>
           </ResizableBox>
@@ -78,6 +80,7 @@ function makeData () {
 }
 
 function makeSeries () {
+  const startDate = new Date()
   // const length = Math.round(Math.random() * 30)
   const length = 30
   const max = 100
@@ -85,7 +88,8 @@ function makeSeries () {
   const multiplier = 10
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({
-    x: d * multiplier,
+    // x: d * multiplier,
+    x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),
     y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
     r: Math.round(Math.random() * 10)
   }))

@@ -4,6 +4,12 @@ import Connect from '../utils/Connect'
 
 import { Transition } from 'react-move'
 import Curve from './Curve'
+import Bars from './Bars'
+
+const stackTypes = {
+  line: Curve,
+  bar: Bars
+}
 
 export default Connect((state, props) => {
   return {
@@ -13,10 +19,14 @@ export default Connect((state, props) => {
 })(React.createClass({
   render () {
     const {
+      type,
+      //
       data,
       hovered,
       ...rest
     } = this.props
+
+    const StackCmp = stackTypes[type]
 
     return (
       <Transition
@@ -38,12 +48,14 @@ export default Connect((state, props) => {
       >
         {(inters) => {
           return (
-            <g>
+            <g
+              className='Stack'
+            >
               {inters.map((inter, i) => {
                 const isActive = hovered && hovered.seriesIndex === i
                 const isInactive = hovered && hovered.seriesIndex !== i
                 return (
-                  <Curve
+                  <StackCmp
                     key={inter.key}
                     data={inter.data}
                     isActive={isActive}

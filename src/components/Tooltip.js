@@ -9,10 +9,8 @@ class Tooltip extends PureComponent {
   render () {
     const {
       hovered,
-      scales: {
-        x: scaleX,
-        y: scaleY
-      } = {},
+      primaryAxis,
+      secondaryAxis,
       getX,
       getY,
       offset: {
@@ -23,12 +21,12 @@ class Tooltip extends PureComponent {
       gridY
     } = this.props
 
-    if (!scaleX || !scaleY || !hovered) {
+    if (!primaryAxis || !secondaryAxis || !hovered) {
       return null
     }
 
-    const x = gridX + scaleX(getX(hovered))
-    const y = gridY + scaleY(getY(hovered))
+    const x = gridX + primaryAxis(getX(hovered))
+    const y = gridY + secondaryAxis(getY(hovered))
 
     const alignX = '-50%'
     const alignY = '-100%'
@@ -105,6 +103,8 @@ class Tooltip extends PureComponent {
 export default Connect(state => ({
   data: state.data,
   scales: state.scales,
+  primaryAxis: Selectors.primaryAxis(state),
+  secondaryAxis: Selectors.secondaryAxis(state),
   getX: state.getX,
   getY: state.getY,
   gridX: Selectors.gridX(state),

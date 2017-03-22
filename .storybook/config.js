@@ -11,6 +11,8 @@ import 'github-markdown-css/github-markdown.css'
 import Readme from '../README.md'
 //
 import LineChart from '../stories/LineChart.js'
+import ColumnChart from '../stories/ColumnChart.js'
+import BarChart from '../stories/BarChart.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -27,4 +29,6 @@ configure(() => {
     })
   storiesOf('2. Demos')
     .add('Line Chart', LineChart)
+    .add('Column Chart', ColumnChart)
+    .add('Bar Chart', BarChart)
 }, module)

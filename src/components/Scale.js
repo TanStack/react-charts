@@ -16,46 +16,57 @@ class Scale extends Component {
   componentWillUpdate (newProps) {
     const oldProps = this.props
     const {
+      primary,
       type,
+      id,
+      invert,
+      //
       data,
-      width,
-      height,
       getX,
-      getY
+      getY,
+      width,
+      height
     } = newProps
 
+    // If data, width, height, or any scale settings change, rebuild the scale
     if (
+      primary !== oldProps.primary ||
       type !== oldProps.type ||
+      id !== oldProps.id ||
+      invert !== oldProps.invert ||
       data !== oldProps.data ||
-      width !== oldProps.width ||
-      height !== oldProps.height ||
       getX !== oldProps.getX ||
-      getY !== oldProps.getY
+      getY !== oldProps.getY ||
+      height !== oldProps.height ||
+      width !== oldProps.width
     ) {
       this.updateScale(newProps)
     }
   }
   updateScale (props) {
     const {
+      primary,
+      id,
       type,
+      invert,
       data,
-      width,
-      height,
       getX,
       getY
     } = props
     const newScale = ScaleUtil({
+      primary,
+      id,
       type,
+      invert,
       data,
-      width,
-      height,
       getX,
       getY
     })
+    // Provide the scale to the rest of the chart
     this.props.dispatch(state => ({
       scales: {
         ...state.scales,
-        [type]: newScale
+        [id]: newScale
       }
     }))
   }
@@ -75,15 +86,15 @@ class Scale extends Component {
 
 export default Connect((state, props) => {
   const {
-    type
+    id
   } = props
 
   return {
     data: state.data,
-    width: Selectors.gridWidth(state),
-    height: Selectors.gridHeight(state),
     getX: state.getX,
     getY: state.getY,
-    scale: state.scales && state.scales[type]
+    width: Selectors.gridWidth(state),
+    height: Selectors.gridHeight(state),
+    scale: state.scales && state.scales[id]
   }
 })(Scale)

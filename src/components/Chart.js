@@ -1,9 +1,6 @@
 import React, { Component } from 'react'
 import { Animate } from 'react-move'
 //
-import Stack from '../components/Stack'
-import Axis from '../components/Axis'
-import Scale from '../components/Scale'
 import Interaction from '../components/Interaction'
 import Tooltip from '../components/Tooltip'
 
@@ -12,6 +9,12 @@ import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
 import Provider from '../utils/Provider'
 import Connect from '../utils/Connect'
+
+const defaultProps = {
+  getX: d => Array.isArray(d) ? d[0] : d.x,
+  getY: d => Array.isArray(d) ? d[1] : d.y,
+  getR: d => Array.isArray(d) ? d[0] : d.r
+}
 
 class Chart extends Component {
   constructor () {
@@ -46,9 +49,8 @@ class Chart extends Component {
       gridX,
       gridY,
       active,
-      hovered,
       dispatch,
-      offset
+      children
     } = this.props
 
     return (
@@ -77,25 +79,7 @@ class Chart extends Component {
                 ref={el => { this.groupEl = el }}
                 transform={`translate(${gridX}, ${gridY})`}
               >
-                <Scale
-                  type='x'
-                >
-                  <Axis
-                    type='x'
-                    position='bottom'
-                  />
-                </Scale>
-                <Scale
-                  type='y'
-                >
-                  <Axis
-                    type='y'
-                    position='left'
-                  />
-                </Scale>
-                <Stack
-                  type='line'
-                />
+                {children}
                 <Interaction
                   onHover={(hovered, e) => dispatch(state => ({
                     ...state,
@@ -136,4 +120,4 @@ const ReactChart = Connect((state) => {
   }
 })(Chart)
 
-export default HyperResponsive(Provider(ReactChart))
+export default HyperResponsive(Provider(ReactChart), defaultProps)

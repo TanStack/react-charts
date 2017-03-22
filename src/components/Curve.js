@@ -6,7 +6,8 @@ import {
   curveMonotoneX
 } from 'd3-shape'
 //
-//
+import Utils from '../utils/Utils'
+
 import Connect from '../utils/Connect'
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
@@ -16,16 +17,12 @@ const defaultStyle = {
 }
 
 export default Connect((state, props) => {
-  const {
-    type
-  } = props
-
   return {
-    scales: state.scales,
+    axisX: Utils.get(state, 'axes.x'),
+    axisY: Utils.get(state, 'axes.y'),
     getX: state.getX,
     getY: state.getY,
-    getR: state.getR,
-    scale: state.scales && state.scales[type]
+    getR: state.getR
   }
 })(React.createClass({
   getDefaultProps () {
@@ -38,10 +35,8 @@ export default Connect((state, props) => {
       data,
       style,
       //
-      scales: {
-        x: scaleX,
-        y: scaleY
-      } = {},
+      axisX,
+      axisY,
       getX,
       getY,
       getR,
@@ -50,7 +45,7 @@ export default Connect((state, props) => {
       ...rest
     } = this.props
 
-    if (!scaleX || !scaleY) {
+    if (!axisX || !axisY) {
       return null
     }
 
@@ -65,14 +60,14 @@ export default Connect((state, props) => {
     const pathSpringMap = {}
     data.forEach((d, i) => {
       // Interpolate each x and y with the default spring
-      pathSpringMap[pathXPrefix + i] = scaleX(getX(d))
-      pathSpringMap[pathYPrefix + i] = scaleY(getY(d))
+      pathSpringMap[pathXPrefix + i] = axisX(getX(d))
+      pathSpringMap[pathYPrefix + i] = axisY(getY(d))
       pathSpringMap[pathRPrefix + i] = getR(d)
     })
 
     const lineFn = line()
-    .curve(curveCardinal)
-    // .curve(curveMonotoneX)
+    // .curve(curveCardinal)
+    .curve(curveMonotoneX)
 
     return (
       <Animate
@@ -102,7 +97,7 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {/* {showPoints && inter.points.map((d, i) => (
+              {showPoints && inter.points.map((d, i) => (
                 <Circle
                   {...rest}
                   key={i}
@@ -110,7 +105,7 @@ export default Connect((state, props) => {
                   y={d.y}
                   r={d.r}
                 />
-              ))} */}
+              ))}
             </g>
           )
         }}

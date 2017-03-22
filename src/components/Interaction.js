@@ -4,6 +4,7 @@ import { line } from 'd3-shape'
 //
 import Path from '../primitives/Path'
 import Connect from '../utils/Connect'
+import Selectors from '../utils/Selectors'
 
 const noop = () => null
 
@@ -15,10 +16,8 @@ class Interaction extends PureComponent {
   render () {
     const {
       data,
-      scales: {
-        x: scaleX,
-        y: scaleY
-      } = {},
+      primaryAxis,
+      secondaryAxis,
       getX,
       getY,
       onHover,
@@ -37,14 +36,14 @@ class Interaction extends PureComponent {
     const flatData = decoratedData.reduce((prev, now) => prev.concat(now), [])
 
     // Bail out if the scale isn't available
-    if (!scaleX || !scaleY) {
+    if (!primaryAxis || !secondaryAxis) {
       return null
     }
 
-    const extent = [[0, 0], [scaleX.range()[1], scaleY.range()[0]]]
+    const extent = [[0, 0], [primaryAxis.range()[1], secondaryAxis.range()[0]]]
     const vor = voronoi()
-      .x(d => scaleX(getX(d)))
-      .y(d => scaleY(getY(d)))
+      .x(d => primaryAxis(getX(d)))
+      .y(d => secondaryAxis(getY(d)))
       .extent(extent)(flatData)
 
     const polygons = vor.polygons()
@@ -84,7 +83,8 @@ class Interaction extends PureComponent {
 
 export default Connect(state => ({
   data: state.data,
-  scales: state.scales,
+  primaryAxis: Selectors.primaryAxis(state),
+  secondaryAxis: Selectors.secondaryAxis(state),
   getX: state.getX,
   getY: state.getY
 }))(Interaction)

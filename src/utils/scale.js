@@ -1,15 +1,26 @@
-import { scaleLinear } from 'd3-scale'
+import {
+  scaleLinear,
+  scaleLog,
+  scaleTime
+ } from 'd3-scale'
 //
 
+const scales = {
+  linear: scaleLinear,
+  log: scaleLog,
+  time: scaleTime
+}
+
 export default ({
+  primary,
   data,
+  id,
   type,
-  width,
-  height,
   getX,
-  getY
+  getY,
+  invert
 }) => {
-  const getter = type === 'y' ? getY : getX
+  const getter = primary ? getX : getY
   const vals = []
 
   data.forEach(series => {
@@ -21,11 +32,14 @@ export default ({
   const min = Math.min(...vals)
   const max = Math.max(...vals)
 
-  const domain = [min, max]
-  const range = type === 'y' ? [height, 0] : [0, width]
+  const domain = invert ? [max, min] : [min, max]
 
-  return scaleLinear()
+  const scale = scales[type]()
     .domain(domain)
-    .range(range)
     .nice()
+
+  scale.isPrimary = !!primary
+  scale.isInverted = !!invert
+
+  return scale
 }

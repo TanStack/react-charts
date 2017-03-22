@@ -13,6 +13,9 @@ const positionRight = 'right'
 const positionBottom = 'bottom'
 const positionLeft = 'left'
 
+const detectVertical = position => [positionLeft, positionRight].indexOf(position) > -1
+const detectRTL = (position) => [positionTop, positionRight].indexOf(position) > -1
+
 const textEl = 'text'
 
 // const getPixel = d => parseFloat(d)
@@ -28,21 +31,100 @@ class Axis extends PureComponent {
     tickPadding: 3,
     showGrid: true
   }
+  // Lifecycle
   constructor () {
     super()
     this.measure = this.measure.bind(this)
+    this.updateAxis = this.updateAxis.bind(this)
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
-    if (oldProps.scale !== newProps.scale) {
-      this.prevScale = oldProps.scale
+    if (oldProps.axis !== newProps.axis) {
+      this.prevAxis = oldProps.axis
     }
   }
   componentDidMount () {
+    this.updateAxis(this.props)
     this.measure()
+  }
+  componentWillUpdate (newProps) {
+    const oldProps = this.props
+    const {
+      position,
+      scale
+    } = newProps
+
+    // If the position or any of the scales change,
+    // we need to update the axis
+    if (
+      position !== oldProps.position ||
+      scale !== oldProps.scale
+    ) {
+      this.updateAxis(newProps)
+    }
   }
   componentDidUpdate () {
     window.requestAnimationFrame(this.measure)
+  }
+  // Helpers
+  updateAxis (props) {
+    const {
+      id,
+      position,
+      scale,
+      width,
+      height,
+      invert,
+      primaryAxis
+    } = props
+
+    if (!scale) {
+      return
+    }
+
+    // Detect if the axis is vertical
+    const isVertical = detectVertical(position)
+    // Detect if the primary scale is in an RTL psotion (either right to left or top to bottom)
+    let isRTL = scale.isPrimary && detectRTL(position)
+    // Detect if axis is being inverted
+    let isInverted = !!invert
+    // If the scale was already inverted, swap it back. Let's not triple stamp a double stamp ;)
+    isInverted = scale.inverted ? !isInverted : isInverted
+
+    let range
+
+    range = isVertical // If the primaryAxis is vertical, we will use the gridWidth, else we use the height
+    ? isInverted ? [0, height] : [height, 0] // If the axis is being inverted, swap the range
+    : isInverted ? [width, 0] : [0, width]
+
+    if (!scale.isPrimary) {
+      // Secondary scales are dependent on primary scales for orientation
+      if (!primaryAxis) {
+        // But if we don't have the primary scale yet, we need to wait for it before we can proceed
+        return
+      }
+      // If the primaryAxis is in an RTL mode, we need to toggle the inversion on this secondary scale
+      if (primaryAxis.isRTL) {
+        isInverted = !isInverted
+        range = range.reverse()
+      }
+    }
+
+    const axis = scale.copy()
+
+    axis.range(range)
+    axis.isPrimary = scale.isPrimary
+    axis.isVertical = isVertical
+    axis.isRTL = isRTL
+    axis.isInverted = isInverted
+    axis.position = position
+
+    this.props.dispatch(state => ({
+      axes: {
+        ...state.axes,
+        [id]: axis
+      }
+    }))
   }
   measure () {
     // Measure finds the amount of overflow this axis produces and
@@ -58,6 +140,10 @@ class Axis extends PureComponent {
       position,
       dispatch
     } = this.props
+
+    if (!this.el) {
+      return
+    }
 
     const isHorizontal = position === positionTop || position === positionBottom
     const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => el.getBoundingClientRect())
@@ -96,8 +182,8 @@ class Axis extends PureComponent {
 
     dispatch(state => ({
       ...state,
-      axes: {
-        ...state.axes,
+      axisDimensions: {
+        ...state.axisDimensions,
         [position]: {
           width,
           height,
@@ -111,7 +197,8 @@ class Axis extends PureComponent {
   }
   render () {
     const {
-      scale,
+      primaryAxis,
+      axis,
       position,
       width,
       height,
@@ -124,55 +211,84 @@ class Axis extends PureComponent {
       tickPadding
     } = this.props
 
-    if (!scale) {
+    // Render Dependencies
+    if (!axis || !primaryAxis) {
       return null
     }
 
-    const isVertical = position === positionLeft || position === positionRight
-    const min =
-      position === positionBottom ? height
-      : position === positionLeft ? 0
-      : position === positionTop ? 0
-      : width
+    const isVertical = detectVertical(position)
     const max =
       position === positionBottom ? -height
       : position === positionLeft ? width
       : position === positionTop ? height
       : -width
-    const k = position === positionTop || position === positionLeft ? -1 : 1
+    const isRTL = (position === positionTop || position === positionLeft) ? -1 : 1
     const transform = !isVertical ? translateX : translateY
-    const ticks = this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
-    const format = tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat
+    const ticks = this.ticks = tickValues == null ? (axis.ticks ? axis.ticks.apply(axis, tickArguments) : axis.domain()) : tickValues
+    const format = tickFormat == null ? (axis.tickFormat ? axis.tickFormat.apply(axis, tickArguments) : identity) : tickFormat
     const spacing = Math.max(tickSizeInner, 0) + tickPadding
-    const range = scale.range()
+    const range = axis.range()
     const range0 = range[0] + 0.5
-    const range1 = range[range.length - 1] + 0.5
-    const scaleCopy = (scale.bandwidth ? center : identity)(scale.copy())
+    const range1 = range[1] + 0.5
+    const axisCopy = (axis.bandwidth ? center : identity)(axis.copy())
 
-    this.prevScale = this.prevScale || scaleCopy
+    this.prevAxis = this.prevAxis || axisCopy
 
     return (
       <Animate
         data={{
-          min: min,
+          width: width,
+          height: height,
           max: max,
           range0: range0,
           range1: range1,
-          k: k,
+          isRTL: isRTL,
           tickSizeOuter: tickSizeOuter
         }}
       >
         {({
-          min,
+          width,
+          height,
           max,
           range0,
           range1,
-          k,
+          isRTL,
           tickSizeOuter
         }) => {
-          const axisPath = isVertical
-            ? `M ${range1 + k * tickSizeOuter},${range0} H0.5 V${range1} H${range1 + k * tickSizeOuter}`
-            : `M ${range0},${k * tickSizeOuter} V0.5 H${range1} V${k * tickSizeOuter}`
+          let axisPath
+          if (isVertical) {
+            if (position === positionLeft) {
+              axisPath = `
+                M ${-tickSizeOuter}, ${range0}
+                H 0
+                V ${range1}
+                H ${-tickSizeOuter}
+              `
+            } else {
+              axisPath = `
+                M ${tickSizeOuter}, ${range0}
+                H 0
+                V ${range1}
+                H ${tickSizeOuter}
+              `
+            }
+          } else {
+            if (position === positionBottom) {
+              axisPath = `
+                M 0, ${tickSizeOuter}
+                V 0
+                H ${range1}
+                V ${tickSizeOuter}
+              `
+            } else {
+              axisPath = `
+                M 0, ${-tickSizeOuter}
+                V 0
+                H ${range1}
+                V ${-tickSizeOuter}
+              `
+            }
+          }
 
           return (
             <g
@@ -181,7 +297,7 @@ class Axis extends PureComponent {
               fontSize='10'
               fontFamily='sans-serif'
               textAnchor={position === positionRight ? 'start' : position === positionLeft ? 'end' : 'middle'}
-              transform={position === positionRight ? translateX(max) : position === positionBottom ? translateY(min) : undefined}
+              transform={position === positionRight ? translateX(width) : position === positionBottom ? translateY(height) : undefined}
             >
               <Path
                 className='domain'
@@ -196,17 +312,17 @@ class Axis extends PureComponent {
                 data={ticks}
                 getKey={(d, i) => d}
                 update={d => ({
-                  tick: scaleCopy(d),
+                  tick: axisCopy(d),
                   visible: 1,
                   measureable: 1
                 })}
                 enter={d => ({
-                  tick: this.prevScale(d),
+                  tick: this.prevAxis(d),
                   visible: 0,
                   measureable: 1
                 })}
                 leave={d => ({
-                  tick: scaleCopy(d),
+                  tick: axisCopy(d),
                   visible: 0,
                   measureable: 0
                 })}
@@ -227,9 +343,9 @@ class Axis extends PureComponent {
                           >
                             <Line
                               x1={isVertical ? '0.5' : '0.5'}
-                              x2={isVertical ? k * tickSizeInner : '0.5'}
+                              x2={isVertical ? isRTL * tickSizeInner : '0.5'}
                               y1={isVertical ? '0.5' : '0.5'}
-                              y2={isVertical ? '0.5' : k * tickSizeInner}
+                              y2={isVertical ? '0.5' : isRTL * tickSizeInner}
                               visible={inter.state.visible}
                               style={{
                                 strokeWidth: 1,
@@ -250,8 +366,8 @@ class Axis extends PureComponent {
                               />
                             )}
                             <Text
-                              x={isVertical ? k * spacing : '0.5'}
-                              y={isVertical ? '0.5' : k * spacing}
+                              x={isVertical ? isRTL * spacing : '0.5'}
+                              y={isVertical ? '0.5' : isRTL * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
                               className={inter.state.measureable && '-measureable'}
                               visible={inter.state.visible}
@@ -275,17 +391,22 @@ class Axis extends PureComponent {
 
 export default Connect((state, props) => {
   const {
-    type
+    scaleID,
+    position
   } = props
 
+  const id = `${scaleID}_${position}`
+
   return {
+    id,
     data: state.data,
     width: Selectors.gridWidth(state),
     height: Selectors.gridHeight(state),
     getX: state.getX,
     getY: state.getY,
-    scale: state.scales && state.scales[type],
-    position: state.position,
+    primaryAxis: Selectors.primaryAxis(state),
+    scale: state.scales && state.scales[scaleID],
+    axis: state.axes && state.axes[id],
     showGrid: state.showGrid,
     tickArguments: state.tickArguments,
     tickValues: state.tickValues,
