@@ -6,7 +6,7 @@ import {
   curveMonotoneX
 } from 'd3-shape'
 //
-import Utils from '../utils/Utils'
+import Selectors from '../utils/Selectors'
 
 import Connect from '../utils/Connect'
 import Path from '../primitives/Path'
@@ -18,8 +18,8 @@ const defaultStyle = {
 
 export default Connect((state, props) => {
   return {
-    axisX: Utils.get(state, 'axes.x'),
-    axisY: Utils.get(state, 'axes.y'),
+    primaryAxis: Selectors.primaryAxis(state),
+    secondaryAxis: Selectors.secondaryAxis(state),
     getX: state.getX,
     getY: state.getY,
     getR: state.getR
@@ -35,8 +35,8 @@ export default Connect((state, props) => {
       data,
       style,
       //
-      axisX,
-      axisY,
+      primaryAxis,
+      secondaryAxis,
       getX,
       getY,
       getR,
@@ -45,24 +45,23 @@ export default Connect((state, props) => {
       ...rest
     } = this.props
 
-    if (!axisX || !axisY) {
+    if (!primaryAxis || !secondaryAxis) {
       return null
     }
 
-    // For react-motion to interpolate correctly, it needs to interpolate
-    // the x and y values independently for each point. So we create an
-    // object that maps to the available points in the data array
-    const pathKeyPrefix = 'path_'
-    const pathXPrefix = pathKeyPrefix + 'x_'
-    const pathYPrefix = pathKeyPrefix + 'y_'
-    const pathRPrefix = pathKeyPrefix + 'r_'
+    const flipped = primaryAxis.isVertical
 
-    const pathSpringMap = {}
+    const keyPrefix = 'path_'
+    const xPrefix = keyPrefix + 'x_'
+    const yPrefix = keyPrefix + 'y_'
+    const rPrefix = keyPrefix + 'r_'
+
+    const springMap = {}
     data.forEach((d, i) => {
       // Interpolate each x and y with the default spring
-      pathSpringMap[pathXPrefix + i] = axisX(getX(d))
-      pathSpringMap[pathYPrefix + i] = axisY(getY(d))
-      pathSpringMap[pathRPrefix + i] = getR(d)
+      springMap[xPrefix + i] = flipped ? secondaryAxis(getY(d)) : primaryAxis(getX(d))
+      springMap[yPrefix + i] = flipped ? primaryAxis(getX(d)) : secondaryAxis(getY(d))
+      springMap[rPrefix + i] = getR(d)
     })
 
     const lineFn = line()
@@ -72,17 +71,16 @@ export default Connect((state, props) => {
     return (
       <Animate
         data={{
-          ...pathSpringMap
+          ...springMap
         }}
-        // tension={50}
         damping={10}
       >
         {inter => {
           const points = data.map((d, i) => {
             return {
-              x: inter[pathXPrefix + i],
-              y: inter[pathYPrefix + i],
-              r: inter[pathRPrefix + i]
+              x: inter[xPrefix + i],
+              y: inter[yPrefix + i],
+              r: inter[rPrefix + i]
             }
           })
           const path = lineFn(points.map(point => ([point.x, point.y])))
@@ -97,13 +95,13 @@ export default Connect((state, props) => {
                   ...style
                 }}
               />
-              {showPoints && inter.points.map((d, i) => (
+              {showPoints && points.map((point, i) => (
                 <Circle
                   {...rest}
                   key={i}
-                  x={d.x}
-                  y={d.y}
-                  r={d.r}
+                  x={point.x}
+                  y={point.y}
+                  r={Math.max(point.r, 0)}
                 />
               ))}
             </g>

@@ -43,20 +43,20 @@ class Line extends Component {
               <Scale
                 primary
                 id='x'
-                type='time'
+                type='linear'
               />
               <Scale
                 id='y'
-                type='log'
+                type='linear'
               />
               {/* Axes */}
               <Axis
                 scaleID='x'
-                position='bottom'
+                position='left'
               />
               <Axis
                 scaleID='y'
-                position='left'
+                position='bottom'
               />
               {/* Stack */}
               <Stack
@@ -80,7 +80,7 @@ function makeData () {
 }
 
 function makeSeries () {
-  const startDate = new Date()
+  // const startDate = new Date()
   // const length = Math.round(Math.random() * 30)
   const length = 30
   const max = 100
@@ -88,8 +88,8 @@ function makeSeries () {
   const multiplier = 10
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({
-    // x: d * multiplier,
-    x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),
+    x: d * multiplier,
+    // x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),
     y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
     r: Math.round(Math.random() * 10)
   }))

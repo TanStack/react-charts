@@ -29,14 +29,14 @@ export default Connect((state, props) => {
       return null
     }
 
-    // For react-motion to interpolate correctly, it needs to interpolate
+    const flipped = primaryAxis.isVertical
+
+    // For react-move to interpolate correctly, it needs to interpolate
     // the x and y values independently for each point. So we create an
     // object that maps to the available points in the data array
     const keyPrefix = 'path_'
     const xPrefix = keyPrefix + 'x_'
     const yPrefix = keyPrefix + 'y_'
-
-    const flipped = primaryAxis.isVertical
 
     const springMap = {}
     data.forEach((d, i) => {

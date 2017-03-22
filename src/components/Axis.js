@@ -326,7 +326,7 @@ class Axis extends PureComponent {
                   visible: 0,
                   measureable: 0
                 })}
-                ignore={['measureable']}
+                ignore={['measureable', 'visible']}
               >
                 {(inters) => {
                   return (
