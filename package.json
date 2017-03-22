@@ -1,12 +1,12 @@
 {
-  "name": "react-chart",
+  "name": "react-charts",
   "version": "0.0.1",
   "description": "Simple, immersive & interactive charts for React",
   "license": "MIT",
-  "homepage": "https://github.com/react-chart/react-chart#readme",
+  "homepage": "https://github.com/react-charts/react-charts#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/react-chart/react-chart.git"
+    "url": "git+https://github.com/react-charts/react-charts.git"
   },
   "keywords": [
     "react",
@@ -18,15 +18,15 @@
   "main": "lib/index.js",
   "files": [
     "lib/",
-    "react-chart.js",
-    "react-chart.css",
+    "react-charts.js",
+    "react-charts.css",
     "media/*.png"
   ],
   "scripts": {
     "build:node": "babel src --out-dir lib --source-maps inline",
     "watch": "onchange 'src/**' -i -- npm-run-all build:*",
     "test": "standard",
-    "umd": "rm -rf react-chart.js && browserify lib/index.js -s reactChart -x react -t babelify -g uglifyify -o react-chart.js",
+    "umd": "rm -rf react-charts.js && browserify lib/index.js -s reactCharts -x react -t babelify -g uglifyify -o react-charts.js",
     "prepublish": "npm-run-all build:* && npm run umd",
     "postpublish": "git push --tags",
     "storybook": "start-storybook -p 8000 -c .storybook",
@@ -79,7 +79,7 @@
       "dist",
       "lib",
       "example",
-      "react-chart.js",
+      "react-charts.js",
       "stories",
       "docs"
     ]
