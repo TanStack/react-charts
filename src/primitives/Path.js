@@ -31,7 +31,6 @@ export default React.createClass({
           stroke: isActive ? 'red' : resolvedStyle.stroke,
           opacity: visible * resolvedStyle.opacity
         }}
-        damping={10}
       >
         {(inter) => {
           return (

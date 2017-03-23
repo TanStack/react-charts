@@ -6,8 +6,8 @@ const defaultStyle = {
   strokeWidth: 0,
   fill: '#333',
   opacity: 1,
-  rx: 3,
-  ry: 3
+  rx: 0,
+  ry: 0
 }
 
 export default React.createClass({

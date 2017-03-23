@@ -43,7 +43,7 @@ class Line extends Component {
               <Scale
                 primary
                 id='x'
-                type='linear'
+                type='ordinal'
               />
               <Scale
                 id='y'
@@ -53,6 +53,7 @@ class Line extends Component {
               <Axis
                 scaleID='x'
                 position='bottom'
+                centerTicks
               />
               <Axis
                 scaleID='y'
@@ -84,7 +85,7 @@ function makeSeries () {
   const length = 30
   const max = 100
   // const max = Math.random() > 0.5 ? 100000 : 10
-  const multiplier = 10
+  const multiplier = 1
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({
     x: d * multiplier,

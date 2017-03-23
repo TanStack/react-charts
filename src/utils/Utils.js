@@ -1,7 +1,15 @@
-
 export default {
+  normalizeGetter,
   get,
-  mapValues
+  mapValues,
+  uniq
+}
+
+function normalizeGetter (getter) {
+  if (typeof getter === 'function') {
+    return getter
+  }
+  return (d, i) => get(d, getter)
 }
 
 function get (obj, path, def) {
@@ -24,6 +32,10 @@ function mapValues (obj, cb) {
     }
   }
   return newObj
+}
+
+function uniq (arr) {
+  return arr.filter((d, i) => arr.filter(dd => dd === d).length === 1)
 }
 
 //

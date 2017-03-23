@@ -18,14 +18,24 @@ class Interaction extends PureComponent {
       data,
       primaryAxis,
       secondaryAxis,
+      getSeries,
       getX,
       getY,
       onHover,
       onActivate
     } = this.props
 
-    const decoratedData = data.map((series, i) => {
-      return series.map((d, ii) => {
+    // Don't render until we have all dependencies
+    if (
+      !data ||
+      !primaryAxis ||
+      !secondaryAxis
+    ) {
+      return null
+    }
+
+    const decoratedData = data.map((s, i) => {
+      return getSeries(s).map((d, ii) => {
         return {
           ...d,
           seriesIndex: i,
@@ -85,6 +95,7 @@ export default Connect(state => ({
   data: state.data,
   primaryAxis: Selectors.primaryAxis(state),
   secondaryAxis: Selectors.secondaryAxis(state),
+  getSeries: state.getSeries,
   getX: state.getX,
   getY: state.getY
 }))(Interaction)

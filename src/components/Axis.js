@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate, Transition } from 'react-move'
+import { scaleBand } from 'd3-scale'
 //
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
@@ -29,6 +30,8 @@ class Axis extends PureComponent {
     tickSizeInner: 6,
     tickSizeOuter: 6,
     tickPadding: 3,
+    barPaddingInner: 0.1,
+    barPaddingOuter: 0.1,
     showGrid: true
   }
   // Lifecycle
@@ -75,7 +78,13 @@ class Axis extends PureComponent {
       width,
       height,
       invert,
-      primaryAxis
+      primaryAxis,
+      centerTicks,
+      data,
+      getSeries,
+      getX,
+      barPaddingInner,
+      barPaddingOuter
     } = props
 
     if (!scale) {
@@ -112,12 +121,34 @@ class Axis extends PureComponent {
 
     const axis = scale.copy()
 
+    // Pass down some information with the axis
     axis.range(range)
     axis.isPrimary = scale.isPrimary
-    axis.isVertical = isVertical
-    axis.isRTL = isRTL
-    axis.isInverted = isInverted
-    axis.position = position
+
+    Object.assign(axis, {
+      isVertical,
+      isRTL,
+      isInverted,
+      position,
+      centerTicks,
+      barPaddingInner,
+      barPaddingOuter,
+      barWidth: 1
+    })
+
+    if (axis.isPrimary) {
+      // If this is the primary axis, it could possibly be used to display bars.
+      // Calculate a band scale that is similar and pass down the bandwidth
+      // just in case.
+      const bandScale = scaleBand()
+        .domain((getSeries(data[0]) || []).map(getX))
+        .rangeRound(axis.range(), 0.1)
+        .paddingInner(barPaddingInner)
+        .paddingOuter(barPaddingOuter)
+      axis.barWidth = bandScale.bandwidth()
+      // axis.stepSize = bandScale.step()
+      // axis.barPaddingOuterSize = (axis.stepSize * barPaddingOuter) / 2
+    }
 
     this.props.dispatch(state => ({
       axes: {
@@ -148,7 +179,7 @@ class Axis extends PureComponent {
     const isHorizontal = position === positionTop || position === positionBottom
     const labelDims = Array(...this.el.querySelectorAll(textEl + '.-measureable')).map(el => el.getBoundingClientRect())
 
-    if (labelDims.length !== this.ticks.length) {
+    if (!labelDims.length || labelDims.length !== this.ticks.length) {
       window.setTimeout(() => {
         window.requestAnimationFrame(this.measure)
       }, 1)
@@ -208,7 +239,8 @@ class Axis extends PureComponent {
       tickFormat,
       tickSizeInner,
       tickSizeOuter,
-      tickPadding
+      tickPadding,
+      centerTicks
     } = this.props
 
     // Render Dependencies
@@ -230,20 +262,24 @@ class Axis extends PureComponent {
     const range = axis.range()
     const range0 = range[0] + 0.5
     const range1 = range[1] + 0.5
-    const axisCopy = (axis.bandwidth ? center : identity)(axis.copy())
+    const itemWidth = centerTicks ? axis.barWidth : 1
+    // const seriesPadding = centerTicks ? axis.barPaddingOuter * axis.stepSize : 0
+    const seriesPadding = 0
+    const tickPosition = seriesPadding + (itemWidth / 2)
 
-    this.prevAxis = this.prevAxis || axisCopy
+    this.prevAxis = axis
 
     return (
       <Animate
         data={{
-          width: width,
-          height: height,
-          max: max,
-          range0: range0,
-          range1: range1,
-          isRTL: isRTL,
-          tickSizeOuter: tickSizeOuter
+          width,
+          height,
+          max,
+          range0,
+          range1,
+          isRTL,
+          tickSizeOuter,
+          tickPosition
         }}
       >
         {({
@@ -253,7 +289,8 @@ class Axis extends PureComponent {
           range0,
           range1,
           isRTL,
-          tickSizeOuter
+          tickSizeOuter,
+          tickPosition
         }) => {
           let axisPath
           if (isVertical) {
@@ -312,7 +349,7 @@ class Axis extends PureComponent {
                 data={ticks}
                 getKey={(d, i) => d}
                 update={d => ({
-                  tick: axisCopy(d),
+                  tick: axis(d),
                   visible: 1,
                   measureable: 1
                 })}
@@ -322,7 +359,7 @@ class Axis extends PureComponent {
                   measureable: 1
                 })}
                 leave={d => ({
-                  tick: axisCopy(d),
+                  tick: axis(d),
                   visible: 0,
                   measureable: 0
                 })}
@@ -342,10 +379,10 @@ class Axis extends PureComponent {
                             transform={transform(inter.state.tick)}
                           >
                             <Line
-                              x1={isVertical ? '0.5' : '0.5'}
-                              x2={isVertical ? isRTL * tickSizeInner : '0.5'}
-                              y1={isVertical ? '0.5' : '0.5'}
-                              y2={isVertical ? '0.5' : isRTL * tickSizeInner}
+                              x1={isVertical ? '0.5' : tickPosition}
+                              x2={isVertical ? isRTL * tickSizeInner : tickPosition}
+                              y1={isVertical ? tickPosition : '0.5'}
+                              y2={isVertical ? tickPosition : isRTL * tickSizeInner}
                               visible={inter.state.visible}
                               style={{
                                 strokeWidth: 1,
@@ -366,8 +403,8 @@ class Axis extends PureComponent {
                               />
                             )}
                             <Text
-                              x={isVertical ? isRTL * spacing : '0.5'}
-                              y={isVertical ? '0.5' : isRTL * spacing}
+                              x={isVertical ? isRTL * spacing : tickPosition}
+                              y={isVertical ? tickPosition : isRTL * spacing}
                               dy={position === positionTop ? '0em' : position === positionBottom ? '0.71em' : '0.32em'}
                               className={inter.state.measureable && '-measureable'}
                               visible={inter.state.visible}
@@ -402,6 +439,7 @@ export default Connect((state, props) => {
     data: state.data,
     width: Selectors.gridWidth(state),
     height: Selectors.gridHeight(state),
+    getSeries: state.getSeries,
     getX: state.getX,
     getY: state.getY,
     primaryAxis: Selectors.primaryAxis(state),
@@ -427,12 +465,4 @@ function translateX (x) {
 
 function translateY (y) {
   return 'translate(0,' + y + ')'
-}
-
-function center (scale) {
-  var offset = scale.bandwidth() / 2
-  if (scale.round()) offset = Math.round(offset)
-  return function (d) {
-    return scale(d) + offset
-  }
 }

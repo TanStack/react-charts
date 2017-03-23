@@ -1,14 +1,17 @@
 import {
   scaleLinear,
   scaleLog,
-  scaleTime
+  scaleTime,
+  scaleBand
  } from 'd3-scale'
 //
+import Utils from '../utils/Utils'
 
 const scales = {
   linear: scaleLinear,
   log: scaleLog,
-  time: scaleTime
+  time: scaleTime,
+  ordinal: scaleBand
 }
 
 export default ({
@@ -16,6 +19,7 @@ export default ({
   data,
   id,
   type,
+  getSeries,
   getX,
   getY,
   invert
@@ -23,7 +27,8 @@ export default ({
   const getter = primary ? getX : getY
   const vals = []
 
-  data.forEach(series => {
+  data.forEach(s => {
+    let series = getSeries(s)
     series.forEach(d => {
       vals.push(getter(d))
     })
@@ -32,11 +37,20 @@ export default ({
   const min = Math.min(...vals)
   const max = Math.max(...vals)
 
-  const domain = invert ? [max, min] : [min, max]
+  let domain
+  if (type === 'ordinal') {
+    const dedupedVals = Utils.uniq(vals)
+    domain = invert ? [...dedupedVals].reverse() : dedupedVals
+  } else {
+    domain = invert ? [max, min] : [min, max]
+  }
 
   const scale = scales[type]()
     .domain(domain)
-    .nice()
+
+  if (type !== 'ordinal') {
+    scale.nice()
+  }
 
   scale.isPrimary = !!primary
   scale.isInverted = !!invert

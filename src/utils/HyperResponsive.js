@@ -3,7 +3,7 @@ import 'javascript-detect-element-resize'
 //
 import throttle from '../utils/throttle'
 
-export default function HyperResponsive (WrappedComponent, defaultProps) {
+export default function HyperResponsive (WrappedComponent) {
   return class HyperResponsive extends Component {
     constructor () {
       super()
@@ -53,7 +53,6 @@ export default function HyperResponsive (WrappedComponent, defaultProps) {
         >
           {ready && (
             <WrappedComponent
-              {...defaultProps}
               width={width}
               height={height}
               {...rest}

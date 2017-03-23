@@ -13,6 +13,7 @@ import Readme from '../README.md'
 import LineChart from '../stories/LineChart.js'
 import ColumnChart from '../stories/ColumnChart.js'
 import BarChart from '../stories/BarChart.js'
+import StackedBarChart from '../stories/StackedBarChart.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -31,4 +32,5 @@ configure(() => {
     .add('Line Chart', LineChart)
     .add('Column Chart', ColumnChart)
     .add('Bar Chart', BarChart)
+    .add('Stacked Bar Chart', StackedBarChart)
 }, module)

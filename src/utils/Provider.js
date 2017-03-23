@@ -8,14 +8,12 @@ export default function Provider (ComponentToWrap) {
     }
     constructor (props) {
       super()
-      this.state = {...props}
+      this.state = {}
       this.dispatch = this.dispatch.bind(this)
     }
     dispatch (fn, callback) {
-      return this.setState(fn, callback)
-    }
-    componentWillReceiveProps (nextProps) {
-      this.setState(nextProps)
+      // Force any updates to be performed with functional setState
+      return this.setState(state => fn(state), callback)
     }
     getChildContext () {
       return {

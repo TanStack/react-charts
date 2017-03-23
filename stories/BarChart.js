@@ -43,7 +43,7 @@ class Line extends Component {
               <Scale
                 primary
                 id='x'
-                type='linear'
+                type='ordinal'
               />
               <Scale
                 id='y'
@@ -53,6 +53,7 @@ class Line extends Component {
               <Axis
                 scaleID='x'
                 position='left'
+                centerTicks
               />
               <Axis
                 scaleID='y'

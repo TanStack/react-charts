@@ -5,6 +5,10 @@ import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 import Rectangle from '../primitives/Rectangle'
 
+import { stackKey } from '../components/Data'
+
+const getDataOrStackData = d => d[stackKey] ? d[stackKey] : d
+
 export default Connect((state, props) => {
   return {
     primaryAxis: Selectors.primaryAxis(state),
@@ -29,6 +33,7 @@ export default Connect((state, props) => {
       return null
     }
 
+    const barWidth = primaryAxis.barWidth
     const flipped = primaryAxis.isVertical
 
     // For react-move to interpolate correctly, it needs to interpolate
@@ -40,16 +45,21 @@ export default Connect((state, props) => {
 
     const springMap = {}
     data.forEach((d, i) => {
+      const resolvedDatum = getDataOrStackData(d)
       // Interpolate each x and y with the default spring
-      springMap[xPrefix + i] = flipped ? secondaryAxis(getY(d)) : primaryAxis(getX(d))
-      springMap[yPrefix + i] = flipped ? primaryAxis(getX(d)) : secondaryAxis(getY(d))
+      springMap[xPrefix + i] = flipped ? secondaryAxis(getY(resolvedDatum)) : primaryAxis(getX(resolvedDatum))
+      springMap[yPrefix + i] = flipped ? primaryAxis(getX(resolvedDatum)) : secondaryAxis(getY(resolvedDatum))
     })
     const secondaryAxisTrueRange = secondaryAxis.isInverted ? [...secondaryAxis.range()].reverse() : secondaryAxis.range()
+
+    // const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
+    const seriesPadding = 0
 
     return (
       <Animate
         data={{
-          ...springMap
+          ...springMap,
+          secondaryAxisTrueRange
         }}
         damping={10}
       >
@@ -69,30 +79,30 @@ export default Connect((state, props) => {
                 if (primaryAxis.isVertical) {
                   if (primaryAxis.position === 'left') {
                     // Left to right bars
-                    x = secondaryAxisTrueRange[0]
-                    y = d.y
-                    height = 5
-                    width = Math.max(secondaryAxisTrueRange[1] - secondaryAxisTrueRange[0] - d.x, 0)
+                    x = inter.secondaryAxisTrueRange[0]
+                    y = d.y + seriesPadding
+                    height = barWidth
+                    width = Math.max(inter.secondaryAxisTrueRange[1] - inter.secondaryAxisTrueRange[0] - d.x, 0)
                   } else {
                     // Right to left bars
                     x = d.x
-                    y = d.y
-                    height = 5
-                    width = Math.max(secondaryAxisTrueRange[1] - secondaryAxisTrueRange[0] - d.x, 0)
+                    y = d.y + seriesPadding
+                    height = barWidth
+                    width = Math.max(inter.secondaryAxisTrueRange[1] - inter.secondaryAxisTrueRange[0] - d.x, 0)
                   }
                 } else {
                   if (primaryAxis.position === 'bottom') {
                     // Bottom to top bars
-                    x = d.x
+                    x = d.x + seriesPadding
                     y = d.y
-                    height = Math.max(secondaryAxisTrueRange[0] - d.y, 0)
-                    width = 5
+                    height = Math.max(inter.secondaryAxisTrueRange[0] - d.y, 0)
+                    width = barWidth
                   } else {
                     // Top to bottom bars
-                    x = d.x
+                    x = d.x + seriesPadding
                     y = 0
                     height = Math.max(d.y, 0)
-                    width = 5
+                    width = barWidth
                   }
                 }
                 return (
