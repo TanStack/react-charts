@@ -13,7 +13,10 @@ export default function Provider (ComponentToWrap) {
     }
     dispatch (fn, callback) {
       // Force any updates to be performed with functional setState
-      return this.setState(state => fn(state), callback)
+      return this.setState(state => {
+        // console.info('Chart State Update', fn(state))
+        return fn(state)
+      }, callback)
     }
     getChildContext () {
       return {

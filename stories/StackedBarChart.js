@@ -40,32 +40,21 @@ class Line extends Component {
               data={data}
               getSeries={d => d.data}
               getX={d => d.x}
-              getY='y'
+              getY='nested.y'
               getR={['nested', 'r']}
             >
-              {/* Scales */}
-              <Scale
-                primary
-                id='x'
-                type='linear'
-              />
-              <Scale
-                id='y'
-                type='linear'
-              />
-
               {/* Axes */}
               <Axis
-                scaleID='x'
+                primary
+                type='linear'
                 position='bottom'
                 centerTicks
-                stack
                 stackPadding={0.1}
               />
               <Axis
-                scaleID='y'
+                type='linear'
                 position='left'
-                stack
+                stacked
               />
 
               {/* Simple config */}
@@ -120,8 +109,8 @@ function makeSeries (d, i) {
     label: 'Dataset ' + i + 1,
     data: _.map(_.range(length), d => ({
       x: d * multiplier,
-      y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
       nested: {
+        y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
         r: Math.round(Math.random() * 10)
       }
     }))

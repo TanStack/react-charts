@@ -55,19 +55,21 @@ export default Connect((state, props) => {
       return getSeries(s).map(d => (0))
     })
 
-    const stackData = data.map((s, i) => {
-      return getSeries(s).map((d, key) => {
+    const stackData = data.map((s, seriesIndex) => {
+      return getSeries(s).map((d, index) => {
         let datum = {
-          x: getX(d),
+          seriesIndex,
+          index,
+          x: primaryAxis(getX(d)),
           r: getR(d)
         }
         if (secondaryStacked) {
-          const start = (totals[i - 1] || totals[0])[key]
-          datum.y = start
-          datum.y2 = start + getY(d)
-          totals[i][key] = datum.y2
+          const start = (totals[seriesIndex - 1] || totals[0])[index]
+          datum.y = secondaryAxis(start)
+          datum.y2 = secondaryAxis(start + getY(d))
+          totals[seriesIndex][index] = datum.y2
         } else {
-          datum.y = getY(d)
+          datum.y = secondaryAxis(getY(d))
         }
         return datum
       })

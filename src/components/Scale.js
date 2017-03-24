@@ -1,9 +1,18 @@
 import { Component } from 'react'
+import {
+  scaleLinear,
+  scaleLog,
+  scaleTime,
+  scaleBand
+ } from 'd3-scale'
 //
 
-import ScaleUtil from '../utils/Scale'
-import Connect from '../utils/Connect'
-import Selectors from '../utils/Selectors'
+const scales = {
+  linear: scaleLinear,
+  log: scaleLog,
+  time: scaleTime,
+  ordinal: scaleBand
+}
 
 class Scale extends Component {
   constructor () {
@@ -34,14 +43,74 @@ class Scale extends Component {
   updateScale (props) {
     const {
       id,
-      data
+      primary,
+      type,
+      invert,
+      //
+      data,
+      getSeries,
+      getX,
+      getY
     } = props
 
     if (!data) {
       return
     }
 
-    const newScale = ScaleUtil(props)
+    const getter = primary ? getX : getY
+    let uniqueVals = []
+    let min = 0
+    let max = 0
+    let negativeTotal = 0
+    let positiveTotal = 0
+
+    let domain
+    let totalDomain
+
+    if (type === 'ordinal') {
+      data.forEach(s => {
+        let series = getSeries(s)
+        const seriesValues = series.map(getter)
+        seriesValues.forEach(d => {
+          if (uniqueVals.indexOf(d) === -1) {
+            uniqueVals.push(d)
+          }
+        })
+      })
+      domain = invert ? [...uniqueVals].reverse() : uniqueVals
+    } else {
+      // Determine the min/max and negative/positive totals
+      data.forEach(s => {
+        let series = getSeries(s)
+        const seriesValues = series.map(getter)
+        const seriesMin = Math.min(seriesValues)
+        const seriesMax = Math.max(seriesValues)
+        min = Math.min(min, seriesMin)
+        max = Math.max(max, seriesMax)
+        if (min < 0) {
+          negativeTotal += min
+        }
+        if (max > 0) {
+          positiveTotal += max
+        }
+      })
+      domain = invert ? [max, min] : [min, max]
+      totalDomain = invert ? [positiveTotal, negativeTotal] : [negativeTotal, positiveTotal]
+    }
+
+    const newScale = scales[type]()
+      .domain(domain)
+
+    if (type !== 'ordinal') {
+      newScale.nice()
+    }
+
+    Object.assign(newScale, {
+      isPrimary: !!primary,
+      isInverted: !!invert,
+      totalDomain
+    })
+
     // Provide the scale to the rest of the chart
     this.props.dispatch(state => ({
       scales: {

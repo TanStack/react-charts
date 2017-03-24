@@ -84,7 +84,8 @@ class Axis extends PureComponent {
       getSeries,
       getX,
       barPaddingInner,
-      barPaddingOuter
+      barPaddingOuter,
+      stacked
     } = props
 
     if (!scale) {
@@ -124,7 +125,6 @@ class Axis extends PureComponent {
     // Pass down some information with the axis
     axis.range(range)
     axis.isPrimary = scale.isPrimary
-
     Object.assign(axis, {
       isVertical,
       isRTL,
@@ -133,7 +133,8 @@ class Axis extends PureComponent {
       centerTicks,
       barPaddingInner,
       barPaddingOuter,
-      barWidth: 1
+      barWidth: 1,
+      isStacked: stacked
     })
 
     if (axis.isPrimary) {
@@ -148,6 +149,9 @@ class Axis extends PureComponent {
       axis.barWidth = bandScale.bandwidth()
       // axis.stepSize = bandScale.step()
       // axis.barPaddingOuterSize = (axis.stepSize * barPaddingOuter) / 2
+    } else {
+      // If this secondaryAxis is stacked, we should extend the axis and scale's domain
+      // to the accumulative min and max (we precalculated it in the scale, so no biggie)
     }
 
     this.props.dispatch(state => ({
