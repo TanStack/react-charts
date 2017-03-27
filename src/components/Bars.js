@@ -5,10 +5,6 @@ import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 import Rectangle from '../primitives/Rectangle'
 
-import { stackKey } from '../components/Data'
-
-const getDataOrStackData = d => d[stackKey] ? d[stackKey] : d
-
 export default Connect((state, props) => {
   return {
     primaryAxis: Selectors.primaryAxis(state),
@@ -31,11 +27,9 @@ export default Connect((state, props) => {
 
     const barWidth = primaryAxis.barWidth
     const flipped = primaryAxis.isVertical
+    const yStacked = secondaryAxis.stacked
 
-    const xKey = flipped ? 'y' : 'x'
-    const yKey = flipped ? 'x' : 'y'
-
-    const secondaryAxisTrueRange = secondaryAxis.isInverted ? [...secondaryAxis.range()].reverse() : secondaryAxis.range()
+    const secondaryAxisTrueRange = secondaryAxis.isInverted ? [...secondaryAxis.scale.range()].reverse() : secondaryAxis.scale.range()
 
     // const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
     const seriesPadding = 0
@@ -54,44 +48,45 @@ export default Connect((state, props) => {
               className='series bars'
             >
               {inter.data.map((d, i) => {
-                let x, y, height, width
+                let x1, y1, x2, y2
                 if (primaryAxis.isVertical) {
                   if (primaryAxis.position === 'left') {
                     // Left to right bars
-                    x = inter.secondaryAxisTrueRange[0]
-                    y = d[yKey] + seriesPadding
-                    height = barWidth
-                    width = Math.max(inter.secondaryAxisTrueRange[1] - inter.secondaryAxisTrueRange[0] - d[xKey], 0)
+                    x1 = inter.secondaryAxisTrueRange[0]
+                    x2 = Math.max(d.x, 0)
+                    y1 = d.y + seriesPadding
+                    y2 = y1 + barWidth
                   } else {
                     // Right to left bars
-                    x = d[xKey]
-                    y = d[yKey] + seriesPadding
-                    height = barWidth
-                    width = Math.max(inter.secondaryAxisTrueRange[1] - inter.secondaryAxisTrueRange[0] - d[xKey], 0)
+                    x1 = d.x
+                    x2 = Math.max(inter.secondaryAxisTrueRange[1] - inter.secondaryAxisTrueRange[0] - d.x, 0)
+                    y1 = d.y + seriesPadding
+                    y2 = y1 + barWidth
                   }
                 } else {
                   if (primaryAxis.position === 'bottom') {
                     // Bottom to top bars
-                    x = d[xKey] + seriesPadding
-                    y = d[yKey]
-                    height = Math.max(inter.secondaryAxisTrueRange[0] - d[yKey], 0)
-                    width = barWidth
+                    x1 = d.x + seriesPadding
+                    x2 = x1 + barWidth
+                    y1 = d.y
+                    y2 = d.yBase
+                    // y2 = Math.max(inter.secondaryAxisTrueRange[0] - d.y, 0)
                   } else {
                     // Top to bottom bars
-                    x = d[xKey] + seriesPadding
-                    y = 0
-                    height = Math.max(d[yKey], 0)
-                    width = barWidth
+                    x1 = d.x + seriesPadding
+                    x2 = x1 + barWidth
+                    y1 = 0
+                    y2 = Math.max(d.y, 0)
                   }
                 }
                 return (
                   <Rectangle
                     {...rest}
                     key={i}
-                    x={x}
-                    y={y}
-                    height={height}
-                    width={width}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
                   />
                 )
               })}

@@ -121,7 +121,7 @@ class Chart extends Component {
                 transform={`translate(${gridX}, ${gridY})`}
               >
                 {children}
-                <Interaction
+                {/* <Interaction
                   onHover={(hovered, e) => dispatch(state => ({
                     ...state,
                     hovered
@@ -138,12 +138,12 @@ class Chart extends Component {
                       active: newActive
                     }))
                   }}
-                />
+                /> */}
               </g>
             </svg>
           )}
         </Animate>
-        <Tooltip />
+        {/* <Tooltip /> */}
       </div>
     )
   }

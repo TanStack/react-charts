@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Scale, Axis, Data } from '../src'
+import { Chart, Axis, Data } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -46,10 +46,10 @@ class Line extends Component {
               {/* Axes */}
               <Axis
                 primary
-                type='linear'
+                type='ordinal'
                 position='bottom'
                 centerTicks
-                stackPadding={0.1}
+                // stackPadding={0.1}
               />
               <Axis
                 type='linear'

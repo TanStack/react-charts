@@ -5,7 +5,7 @@ export default {
   primaryAxis: state => {
     for (var key in state.axes) {
       if (state.axes.hasOwnProperty(key)) {
-        if (state.axes[key].isPrimary) {
+        if (state.axes[key].primary) {
           return state.axes[key]
         }
       }
@@ -15,7 +15,7 @@ export default {
   secondaryAxis: state => {
     for (var key in state.axes) {
       if (state.axes.hasOwnProperty(key)) {
-        if (!state.axes[key].isPrimary) {
+        if (!state.axes[key].primary) {
           return state.axes[key]
         }
       }

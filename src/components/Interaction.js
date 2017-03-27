@@ -50,9 +50,9 @@ class Interaction extends PureComponent {
       return null
     }
 
-    const extent = [[0, 0], [primaryAxis.range()[1], secondaryAxis.range()[0]]]
+    const extent = [[0, 0], [primaryAxis.scale.range()[1], secondaryAxis.range()[0]]]
     const vor = voronoi()
-      .x(d => primaryAxis(getX(d)))
+      .x(d => primaryAxis.scale(getX(d)))
       .y(d => secondaryAxis(getY(d)))
       .extent(extent)(flatData)
 
