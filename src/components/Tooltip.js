@@ -11,8 +11,6 @@ class Tooltip extends PureComponent {
       hovered,
       primaryAxis,
       secondaryAxis,
-      getX,
-      getY,
       offset: {
         left,
         top
@@ -25,8 +23,8 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    const x = gridX + primaryAxis(getX(hovered))
-    const y = gridY + secondaryAxis(getY(hovered))
+    const x = gridX + hovered.x
+    const y = gridY + hovered.y
 
     const alignX = '-50%'
     const alignY = '-100%'
@@ -76,7 +74,7 @@ class Tooltip extends PureComponent {
                     position: 'relative'
                   }}
                 >
-                  {hovered.x}, {hovered.y}
+                  {hovered.seriesLabel} - {hovered.primary}, {hovered.secondary}
                   <div
                     style={{
                       position: 'absolute',
@@ -101,12 +99,8 @@ class Tooltip extends PureComponent {
 }
 
 export default Connect(state => ({
-  data: state.data,
-  scales: state.scales,
   primaryAxis: Selectors.primaryAxis(state),
   secondaryAxis: Selectors.secondaryAxis(state),
-  getX: state.getX,
-  getY: state.getY,
   gridX: Selectors.gridX(state),
   gridY: Selectors.gridY(state),
   hovered: state.hovered,

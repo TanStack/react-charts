@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Scale, Axis, Stack } from '../src'
+import { Chart, Axis, Data } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -39,27 +39,16 @@ class Line extends Component {
             <Chart
               data={data}
             >
-              {/* Scales */}
-              <Scale
-                primary
-                id='x'
-                type='time'
-              />
-              <Scale
-                id='y'
-                type='log'
-              />
-              {/* Axes */}
               <Axis
-                scaleID='x'
+                primary
+                type='time'
                 position='bottom'
               />
               <Axis
-                scaleID='y'
+                type='linear'
                 position='left'
               />
-              {/* Stack */}
-              <Stack
+              <Data
                 type='line'
               />
             </Chart>
@@ -76,7 +65,7 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 1)), 1)), d => makeSeries())
+  return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), d => makeSeries())
 }
 function makeSeries () {
   const startDate = new Date()

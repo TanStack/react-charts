@@ -15,27 +15,24 @@ class Interaction extends PureComponent {
   }
   render () {
     const {
-      data,
+      stackData,
       primaryAxis,
       secondaryAxis,
-      getSeries,
-      getX,
-      getY,
       onHover,
       onActivate
     } = this.props
 
     // Don't render until we have all dependencies
     if (
-      !data ||
+      !stackData ||
       !primaryAxis ||
       !secondaryAxis
     ) {
       return null
     }
 
-    const decoratedData = data.map((s, i) => {
-      return getSeries(s).map((d, ii) => {
+    const decoratedStackData = stackData.map((s, i) => {
+      return s.map((d, ii) => {
         return {
           ...d,
           seriesIndex: i,
@@ -43,25 +40,25 @@ class Interaction extends PureComponent {
         }
       })
     })
-    const flatData = decoratedData.reduce((prev, now) => prev.concat(now), [])
+    const flatStackData = decoratedStackData.reduce((prev, now) => prev.concat(now), [])
 
     // Bail out if the scale isn't available
     if (!primaryAxis || !secondaryAxis) {
       return null
     }
 
-    const extent = [[0, 0], [primaryAxis.scale.range()[1], secondaryAxis.range()[0]]]
+    const extent = [[0, 0], [primaryAxis.scale.range()[1], secondaryAxis.scale.range()[0]]]
     const vor = voronoi()
-      .x(d => primaryAxis.scale(getX(d)))
-      .y(d => secondaryAxis(getY(d)))
-      .extent(extent)(flatData)
+      .x(d => d.x)
+      .y(d => d.y)
+      .extent(extent)(flatStackData)
 
     const polygons = vor.polygons()
     const lineFn = line()
 
     return (
       <g
-        className='tooltips'
+        className='Interaction'
         onMouseLeave={e => onHover(null, e)}
       >
         <g>
@@ -92,10 +89,7 @@ class Interaction extends PureComponent {
 }
 
 export default Connect(state => ({
-  data: state.data,
+  stackData: state.stackData,
   primaryAxis: Selectors.primaryAxis(state),
-  secondaryAxis: Selectors.secondaryAxis(state),
-  getSeries: state.getSeries,
-  getX: state.getX,
-  getY: state.getY
+  secondaryAxis: Selectors.secondaryAxis(state)
 }))(Interaction)

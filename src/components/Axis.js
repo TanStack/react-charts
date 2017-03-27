@@ -73,10 +73,7 @@ class Axis extends PureComponent {
       newProps.primary !== oldProps.primary ||
       newProps.type !== oldProps.type ||
       newProps.invert !== oldProps.invert ||
-      newProps.data !== oldProps.data ||
-      newProps.getSeries !== oldProps.getSeries ||
-      newProps.getX !== oldProps.getX ||
-      newProps.getY !== oldProps.getY ||
+      newProps.accessedData !== oldProps.accessedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
       position !== oldProps.position
@@ -101,17 +98,14 @@ class Axis extends PureComponent {
       barPaddingOuter,
       centerTicks,
       // Context
+      accessedData,
       width,
       height,
-      primaryAxis,
-      data,
-      getSeries,
-      getX,
-      getY
+      primaryAxis
     } = props
 
     // We need the data to proceed
-    if (!data) {
+    if (!accessedData) {
       return
     }
 
@@ -121,7 +115,7 @@ class Axis extends PureComponent {
     }
 
     // Detect some settings
-    const getter = primary ? getX : getY
+    const datumKey = primary ? 'primary' : 'secondary'
     const vertical = detectVertical(position)
     const RTL = primary && detectRTL(position) // Right to left OR top to bottom
 
@@ -137,9 +131,8 @@ class Axis extends PureComponent {
     let domain
 
     if (type === 'ordinal') {
-      data.forEach(s => {
-        let series = getSeries(s)
-        const seriesValues = series.map(getter)
+      accessedData.forEach(series => {
+        const seriesValues = series.map(d => d[datumKey])
         seriesValues.forEach(d => {
           if (uniqueVals.indexOf(d) === -1) {
             uniqueVals.push(d)
@@ -147,10 +140,22 @@ class Axis extends PureComponent {
         })
       })
       domain = invert ? [...uniqueVals].reverse() : uniqueVals
+    } else if (type === 'time') {
+      min = max = accessedData[0][0][datumKey]
+      accessedData.forEach(series => {
+        const seriesValues = series.map(d => +d[datumKey])
+        seriesValues.forEach((d, i) => {
+          datumValues[i] = [...(datumValues[i] || []), d]
+        })
+        const seriesMin = Math.min(...seriesValues)
+        const seriesMax = Math.max(...seriesValues)
+        min = Math.min(min, seriesMin)
+        max = Math.max(max, seriesMax)
+      })
+      domain = invert ? [max, min] : [min, max]
     } else {
-      data.forEach(s => {
-        let series = getSeries(s)
-        const seriesValues = series.map(getter)
+      accessedData.forEach(series => {
+        const seriesValues = series.map(d => d[datumKey])
         seriesValues.forEach((d, i) => {
           datumValues[i] = [...(datumValues[i] || []), d]
         })
@@ -206,13 +211,13 @@ class Axis extends PureComponent {
       // Calculate a band axis that is similar and pass down the bandwidth
       // just in case.
       const bandScale = scaleBand()
-        .domain((getSeries(data[0]) || []).map(getX))
+        .domain(accessedData.reduce((prev, current) => current.length > prev.length ? current : prev, []).map(d => d.primary))
         .rangeRound(scale.range(), 0.1)
         .paddingInner(barPaddingInner)
         .paddingOuter(barPaddingOuter)
       barWidth = bandScale.bandwidth()
-      // scale.stepSize = bandScale.step()
-      // scale.barPaddingOuterSize = (scale.stepSize * barPaddingOuter) / 2
+      // TODO: scale.stepSize = bandScale.step()
+      // TODO: scale.barPaddingOuterSize = (scale.stepSize * barPaddingOuter) / 2
     }
 
     // Set some extra values on the axis for posterity
@@ -518,12 +523,9 @@ export default Connect((state, props) => {
 
   return {
     id,
-    data: state.data,
+    accessedData: state.accessedData,
     width: Selectors.gridWidth(state),
     height: Selectors.gridHeight(state),
-    getSeries: state.getSeries,
-    getX: state.getX,
-    getY: state.getY,
     primaryAxis: Selectors.primaryAxis(state),
     axis: state.axes && state.axes[id],
     showGrid: state.showGrid,

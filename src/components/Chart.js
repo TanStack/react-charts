@@ -1,71 +1,113 @@
 import React, { Component } from 'react'
 import { Animate } from 'react-move'
 //
-import Interaction from '../components/Interaction'
-import Tooltip from '../components/Tooltip'
-
-import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
-
 import HyperResponsive from '../utils/HyperResponsive'
 import Provider from '../utils/Provider'
 import Connect from '../utils/Connect'
+import Utils from '../utils/Utils'
+
+import Interaction from '../components/Interaction'
+import Tooltip from '../components/Tooltip'
 
 class Chart extends Component {
   static defaultProps = {
-    getSeries: d => d,
+    getData: d => d,
+    getLabel: (d, i) => 'Series ' + (i + 1),
+    getSeriesID: (d, i) => i,
     getX: d => Array.isArray(d) ? d[0] : d.x,
     getY: d => Array.isArray(d) ? d[1] : d.y,
     getR: d => Array.isArray(d) ? d[0] : d.r
   }
   constructor () {
     super()
-    this.injestProps = this.injestProps.bind(this)
+    this.updateDimensions = this.updateDimensions.bind(this)
+    this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
   }
+  componentWillMount () {
+    this.updateDataModel(this.props)
+    this.updateDimensions(this.props)
+  }
   componentDidMount () {
-    this.injestProps(this.props)
     this.measure()
   }
   componentWillUpdate (nextProps) {
-    // Any time these props change, we need to make them available
-    // to the entire chart via context
+    // If the width and hight change, update them
+    if (
+      nextProps.width !== this.props.width ||
+      nextProps.height !== this.props.height
+    ) {
+      this.updateDimensions(nextProps)
+    }
+    // If anything related to the data model changes, update it
     if (
       nextProps.data !== this.props.data ||
       nextProps.width !== this.props.width ||
       nextProps.height !== this.props.height ||
-      nextProps.getSeries !== this.props.getSeries ||
+      nextProps.getData !== this.props.getData ||
+      nextProps.getSeriesID !== this.props.getSeriesID ||
+      nextProps.getLabel !== this.props.getLabel ||
       nextProps.getX !== this.props.getX ||
       nextProps.getY !== this.props.getY ||
       nextProps.getR !== this.props.getR
     ) {
-      this.injestProps(nextProps)
+      this.updateDataModel(nextProps)
     }
   }
   componentDidUpdate (prevProps) {
     window.requestAnimationFrame(() => this.measure(prevProps))
   }
-  injestProps (props) {
+  updateDimensions (nextProps) {
+    this.props.dispatch(state => ({
+      width: nextProps.width,
+      height: nextProps.height
+    }))
+  }
+  updateDataModel (props) {
     const {
-      data,
-      width,
-      height,
-      getSeries,
+      data
+    } = props
+    let {
+      getData,
+      getLabel,
+      getSeriesID,
       getX,
       getY,
       getR
     } = props
 
+    // Normalize getters
+    getData = Utils.normalizeGetter(getData)
+    getLabel = Utils.normalizeGetter(getLabel)
+    getSeriesID = Utils.normalizeGetter(getSeriesID)
+    getX = Utils.normalizeGetter(getX)
+    getY = Utils.normalizeGetter(getY)
+    getR = Utils.normalizeGetter(getR)
+
+    // First access the data, and provide it to the context
+    const accessedData = data.map((s, seriesIndex) => {
+      const series = getData(s, seriesIndex)
+      return series.map((d, index) => {
+        return {
+          seriesIndex,
+          index,
+          series,
+          seriesID: getSeriesID(s, seriesIndex),
+          seriesLabel: getLabel(s, seriesIndex),
+          row: s,
+          datum: d,
+          primary: getX(d, index),
+          secondary: getY(d, index),
+          r: getR(d, index)
+        }
+      })
+    })
+
     // This will make all of the props available to anything using
     // the chart context
     this.props.dispatch(state => ({
-      data,
-      width,
-      height,
-      getSeries: Utils.normalizeGetter(getSeries),
-      getX: Utils.normalizeGetter(getX),
-      getY: Utils.normalizeGetter(getY),
-      getR: Utils.normalizeGetter(getR)
+      accessedData
     }))
   }
   measure (prevProps) {
@@ -121,7 +163,7 @@ class Chart extends Component {
                 transform={`translate(${gridX}, ${gridY})`}
               >
                 {children}
-                {/* <Interaction
+                <Interaction
                   onHover={(hovered, e) => dispatch(state => ({
                     ...state,
                     hovered
@@ -138,12 +180,12 @@ class Chart extends Component {
                       active: newActive
                     }))
                   }}
-                /> */}
+                />
               </g>
             </svg>
           )}
         </Animate>
-        {/* <Tooltip /> */}
+        <Tooltip />
       </div>
     )
   }
@@ -155,8 +197,6 @@ const ReactChart = Connect((state) => {
     height: state.height,
     gridX: Selectors.gridX(state),
     gridY: Selectors.gridY(state),
-    getX: state.getX,
-    getY: state.getY,
     active: state.active,
     hovered: state.hovered,
     offset: Selectors.offset(state)

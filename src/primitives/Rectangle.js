@@ -13,8 +13,6 @@ const defaultStyle = {
 export default React.createClass({
   render () {
     const {
-      isActive,
-      isInactive,
       visible,
       style,
       x1,

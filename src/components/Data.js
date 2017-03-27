@@ -4,27 +4,26 @@ import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
 
 import { Transition } from 'react-move'
-import Curve from './Curve'
+import Line from './Line'
+import Area from './Area'
 import Bars from './Bars'
 
 const stackTypes = {
-  line: Curve,
+  line: Line,
+  area: Area,
   bar: Bars
 }
 
 export default Connect((state, props) => {
   return {
-    data: state.data,
+    accessedData: state.accessedData,
     stackData: state.stackData,
     hovered: state.hovered,
     primaryAxis: Selectors.primaryAxis(state),
-    secondaryAxis: Selectors.secondaryAxis(state),
-    getSeries: state.getSeries,
-    getX: state.getX,
-    getY: state.getY,
-    getR: state.getR
+    secondaryAxis: Selectors.secondaryAxis(state)
   }
 })(React.createClass({
+  displayName: 'Data',
   componentDidMount () {
     this.updateStackData(this.props)
   },
@@ -34,17 +33,13 @@ export default Connect((state, props) => {
     // If any of the following change,
     // we need to update the stack
     if (
+      newProps.accessedData !== oldProps.accessedData ||
       newProps.axes !== oldProps.axes ||
       newProps.type !== oldProps.type ||
       newProps.seriesKey !== oldProps.seriesKey ||
-      newProps.data !== oldProps.data ||
       newProps.primaryAxis !== oldProps.primaryAxis ||
       newProps.secondaryAxis !== oldProps.secondaryAxis ||
-      newProps.hovered !== oldProps.hovered ||
-      newProps.getSeries !== oldProps.getSeries ||
-      newProps.getX !== oldProps.getX ||
-      newProps.getY !== oldProps.getY ||
-      newProps.getR !== oldProps.getR
+      newProps.hovered !== oldProps.hovered
     ) {
       this.updateStackData(newProps)
     }
@@ -52,55 +47,48 @@ export default Connect((state, props) => {
   updateStackData (props) {
     const {
       //
-      data,
+      accessedData,
       primaryAxis,
-      secondaryAxis,
-      getSeries,
-      getX,
-      getY,
-      getR
+      secondaryAxis
     } = props
 
-    // Don't render until dependencies are met
-    if (!primaryAxis || !secondaryAxis) {
-      return null
+    // If the axes are not ready, just provide the accessedData
+    if (!accessedData || !primaryAxis || !secondaryAxis) {
+      return
     }
 
+    // If the axes are ready, let's decorate the accessedData for visual plotting
     const secondaryStacked = secondaryAxis.stacked
-
-    const totals = secondaryStacked && data.map(s => {
-      return getSeries(s).map(d => (0))
+    // "totals" are used if secondaryAxis stacking is enabled
+    const totals = secondaryStacked && accessedData.map(s => {
+      return s.map(d => (0))
     })
-
-    const accessedStackData = data.map((s, seriesIndex) => {
-      return getSeries(s).map((d, index) => {
-        let datum = {
-          seriesIndex,
-          index,
-          x: getX(d),
-          r: getR(d)
+    let stackData = accessedData.map((series, seriesIndex) => {
+      return series.map((d, index) => {
+        const datum = {
+          ...d,
+          x: d.primary,
+          y: d.secondary,
+          yBase: 0
         }
         if (secondaryStacked) {
-          const start = (totals[seriesIndex - 1] || totals[0])[index]
+          const start = (typeof totals[seriesIndex - 1] !== 'undefined' ? totals[seriesIndex - 1] : totals[0])[index]
           datum.yBase = start
-          datum.y = start + getY(d)
+          datum.y = start + datum.y
           totals[seriesIndex][index] = datum.y
-        } else {
-          datum.yBase = 0
-          datum.y = getY(d)
         }
         return datum
       })
     })
 
-    // scale the datapoints to their axis coordinates
-    const stackData = accessedStackData.map((s, seriesIndex) => {
-      return s.map((d, index) => {
+    // Now, scale the datapoints to their axis coordinates
+    stackData = stackData.map((series, seriesIndex) => {
+      return series.map((d, index) => {
         return {
           ...d,
           x: primaryAxis.scale(d.x),
-          yBase: secondaryAxis.scale(d.yBase),
-          y: secondaryAxis.scale(d.y)
+          y: secondaryAxis.scale(d.y),
+          yBase: secondaryAxis.scale(d.yBase)
         }
       })
     })
@@ -117,12 +105,16 @@ export default Connect((state, props) => {
       hovered
     } = this.props
 
+    if (!stackData) {
+      return null
+    }
+
     const StackCmp = stackTypes[type]
 
     return (
       <Transition
         data={stackData}
-        getKey={(d, i) => i}
+        getKey={(d, i) => d.seriesID}
         update={d => ({
           timer: 1,
           visible: 1
@@ -144,7 +136,7 @@ export default Connect((state, props) => {
             >
               {inters.map((inter, i) => {
                 const rgb = Math.floor(255 * ((i + 1) / inters.length))
-                const rgb2 = Math.floor(100 * ((i + 1) / inters.length))
+                const rgb2 = Math.floor(50 * ((i + 1) / inters.length))
                 // TODO: should we do this here? or should we send the
                 // indices down the chain and let the lower level items
                 // decide if they are truly active or not?
@@ -159,7 +151,7 @@ export default Connect((state, props) => {
                     visible={inter.state.visible}
                     style={{
                       opacity: 0.5,
-                      fill: `rgb(${rgb}, ${rgb2}, 0)`
+                      stroke: `rgb(${rgb}, ${rgb2}, 0)`
                     }}
                   />
                 )
