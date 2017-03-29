@@ -97,6 +97,7 @@ class Chart extends PureComponent {
     // This will make all of the props available to anything using
     // the chart context
     this.props.dispatch(state => ({
+      ...state,
       accessedData
     }))
   }

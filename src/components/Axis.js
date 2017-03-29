@@ -243,6 +243,7 @@ class Axis extends PureComponent {
     this.prevAxis = this.prevAxis || axis
 
     this.props.dispatch(state => ({
+      ...state,
       axes: {
         ...state.axes,
         [id]: axis

@@ -125,6 +125,7 @@ export default Connect((state, props) => {
     })
 
     this.props.dispatch(state => ({
+      ...state,
       stackData
     }))
   },
