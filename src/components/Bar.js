@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 import classnames from 'classnames'
 //
@@ -7,13 +7,7 @@ import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 import Rectangle from '../primitives/Rectangle'
 
-export default Connect((state, props) => {
-  return {
-    primaryAxis: Selectors.primaryAxis(state),
-    hovered: state.hovered
-  }
-})(React.createClass({
-  displayName: 'Bars',
+class Bars extends PureComponent {
   render () {
     const {
       series,
@@ -104,4 +98,11 @@ export default Connect((state, props) => {
       </Animate>
     )
   }
-}))
+}
+
+export default Connect((state, props) => {
+  return {
+    primaryAxis: Selectors.primaryAxis(state),
+    hovered: state.hovered
+  }
+})(Bars)

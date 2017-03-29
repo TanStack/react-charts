@@ -152,15 +152,15 @@ class Chart extends PureComponent {
                 transform={`translate(${gridX}, ${gridY})`}
               >
                 {children}
-                {/* <Interaction
+                <Interaction
                   onHover={this.onHover}
                   onActivate={this.onActivate}
-                /> */}
+                />
               </g>
             </svg>
           )}
         </Animate>
-        {/* <Tooltip /> */}
+        <Tooltip />
       </div>
     )
   }

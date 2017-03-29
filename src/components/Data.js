@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 //
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
@@ -28,30 +28,19 @@ const defaultColors = [
   '#cd82ad'
 ]
 
-export default Connect((state, props) => {
-  return {
-    accessedData: state.accessedData,
-    stackData: state.stackData,
-    primaryAxis: Selectors.primaryAxis(state),
-    secondaryAxis: Selectors.secondaryAxis(state),
-    hovered: state.hovered
+class Data extends PureComponent {
+  static defaultProps = {
+    type: 'line',
+    getProps: (d, i) => ({
+      style: {
+        color: defaultColors[d.index % defaultColors.length]
+      }
+    }),
+    getDataProps: () => ({})
   }
-})(React.createClass({
-  displayName: 'Data',
-  getDefaultProps () {
-    return {
-      type: 'line',
-      getProps: (d, i) => ({
-        style: {
-          color: defaultColors[d.index % defaultColors.length]
-        }
-      }),
-      getDataProps: () => ({})
-    }
-  },
   componentDidMount () {
     this.updateStackData(this.props)
-  },
+  }
   componentWillUpdate (newProps) {
     const oldProps = this.props
 
@@ -68,7 +57,7 @@ export default Connect((state, props) => {
     ) {
       this.updateStackData(newProps)
     }
-  },
+  }
   updateStackData (props) {
     const {
       //
@@ -128,7 +117,7 @@ export default Connect((state, props) => {
       ...state,
       stackData
     }))
-  },
+  }
   render () {
     const {
       type,
@@ -196,4 +185,14 @@ export default Connect((state, props) => {
       </Transition>
     )
   }
-}))
+}
+
+export default Connect((state, props) => {
+  return {
+    accessedData: state.accessedData,
+    stackData: state.stackData,
+    primaryAxis: Selectors.primaryAxis(state),
+    secondaryAxis: Selectors.secondaryAxis(state),
+    hovered: state.hovered
+  }
+})(Data)

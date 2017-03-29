@@ -1,5 +1,8 @@
 import React from 'react'
 import { configure, storiesOf } from '@kadira/storybook'
+import Perf from 'react-addons-perf'
+
+window.Perf = Perf
 
 import './reset.css'
 import './fonts.css'

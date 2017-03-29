@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
 
@@ -10,12 +10,10 @@ const defaultStyle = {
   ry: 0
 }
 
-export default React.createClass({
-  getDefaultProps () {
-    return {
-      opacity: 1
-    }
-  },
+export default class Circle extends PureComponent {
+  static defaultProps = {
+    opacity: 1
+  }
   render () {
     const {
       style,
@@ -62,4 +60,4 @@ export default React.createClass({
       </Animate>
     )
   }
-})
+}

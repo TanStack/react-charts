@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 import classnames from 'classnames'
 import {
@@ -22,12 +22,7 @@ const circleDefaultStyle = {
   r: 2
 }
 
-export default Connect((state, props) => {
-  return {
-    hovered: state.hovered
-  }
-})(React.createClass({
-  displayName: 'Area',
+class Area extends PureComponent {
   render () {
     const {
       series,
@@ -126,4 +121,10 @@ export default Connect((state, props) => {
       </Animate>
     )
   }
-}))
+}
+
+export default Connect((state, props) => {
+  return {
+    hovered: state.hovered
+  }
+})(Area)

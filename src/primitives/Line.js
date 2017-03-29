@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
 
@@ -9,7 +9,7 @@ const defaultStyle = {
   opacity: 1
 }
 
-export default React.createClass({
+export default class Line extends PureComponent {
   render () {
     const {
       style,
@@ -38,4 +38,4 @@ export default React.createClass({
       </Animate>
     )
   }
-})
+}
