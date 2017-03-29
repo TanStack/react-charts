@@ -300,7 +300,7 @@ class Axis extends PureComponent {
       newRotation = isNaN(newRotation) ? 0 : newRotation
 
       if (Math.floor(rotation) !== Math.floor(newRotation)) {
-        console.log(rotation, newRotation)
+        // console.log(rotation, newRotation)
         this.rotation = newRotation
         // this.setState(state => ({
         //   rotation: newRotation
@@ -312,7 +312,7 @@ class Axis extends PureComponent {
     const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
 
     if (visibleLabelStep !== newVisibleLabelStep) {
-      console.log(visibleLabelStep, newVisibleLabelStep)
+      // console.log(visibleLabelStep, newVisibleLabelStep)
       this.visibleLabelStep = newVisibleLabelStep
       // this.setState(state => ({
       //   visibleLabelStep: newVisibleLabelStep
@@ -607,9 +607,9 @@ function identity (x) {
 }
 
 function translateX (x) {
-  return 'translate(' + x + ',0)'
+  return 'translate(' + x + ', 0)'
 }
 
 function translateY (y) {
-  return 'translate(0,' + y + ')'
+  return 'translate(0, ' + y + ')'
 }

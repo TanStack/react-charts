@@ -1,24 +1,36 @@
-import React, { Component, PropTypes } from 'react'
+import React, { PureComponent, PropTypes } from 'react'
 
 export default function Connect (mapStateToProps) {
   return (ComponentToWrap) => {
-    return class ConnectedReactChartCmp extends Component {
+    return class ConnectedReactChartCmp extends PureComponent {
       // let’s define what’s needed from the `context`
       static displayName = `Connect(${ComponentToWrap.displayName || ComponentToWrap.name})`
       static contextTypes = {
-        reactChart: PropTypes.object.isRequired,
-        reactChartDispatch: PropTypes.func.isRequired
+        reactChart: PropTypes.object.isRequired
+      }
+      constructor () {
+        super()
+        this.handleChange = this.handleChange.bind(this)
+      }
+      componentDidMount () {
+        this.unsubscribe = this.context.reactChart.subscribe(this.handleChange.bind(this))
+      }
+      componentWillUnmount () {
+        this.unsubscribe()
+      }
+
+      handleChange () {
+        this.forceUpdate()
       }
       render () {
         const {
-          reactChart,
-          reactChartDispatch
+          reactChart
         } = this.context
         return (
           <ComponentToWrap
-            {...mapStateToProps(reactChart, this.props)}
-            dispatch={reactChartDispatch}
             {...this.props}
+            {...mapStateToProps(reactChart.getState(), this.props)}
+            dispatch={reactChart.dispatch}
           />
         )
       }

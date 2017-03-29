@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
 import Selectors from '../utils/Selectors'
@@ -10,7 +10,7 @@ import Utils from '../utils/Utils'
 import Interaction from '../components/Interaction'
 import Tooltip from '../components/Tooltip'
 
-class Chart extends Component {
+class Chart extends PureComponent {
   static defaultProps = {
     getData: d => d,
     getLabel: (d, i) => 'Series ' + (i + 1),
@@ -21,25 +21,15 @@ class Chart extends Component {
   }
   constructor () {
     super()
-    this.updateDimensions = this.updateDimensions.bind(this)
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
-  }
-  componentWillMount () {
-    this.updateDataModel(this.props)
-    this.updateDimensions(this.props)
+    this.onHover = this.onHover.bind(this)
   }
   componentDidMount () {
+    this.updateDataModel(this.props)
     this.measure()
   }
   componentWillUpdate (nextProps) {
-    // If the width and hight change, update them
-    if (
-      nextProps.width !== this.props.width ||
-      nextProps.height !== this.props.height
-    ) {
-      this.updateDimensions(nextProps)
-    }
     // If anything related to the data model changes, update it
     if (
       nextProps.data !== this.props.data ||
@@ -57,12 +47,6 @@ class Chart extends Component {
   }
   componentDidUpdate (prevProps) {
     window.requestAnimationFrame(() => this.measure(prevProps))
-  }
-  updateDimensions (nextProps) {
-    this.props.dispatch(state => ({
-      width: nextProps.width,
-      height: nextProps.height
-    }))
   }
   updateDataModel (props) {
     const {
@@ -137,8 +121,6 @@ class Chart extends Component {
       height,
       gridX,
       gridY,
-      active,
-      dispatch,
       children
     } = this.props
 
@@ -169,36 +151,45 @@ class Chart extends Component {
                 transform={`translate(${gridX}, ${gridY})`}
               >
                 {children}
-                <Interaction
-                  onHover={(hovered, e) => dispatch(state => ({
-                    ...state,
-                    hovered
-                  }))}
-                  onActivate={(newActive, e) => {
-                    if (active === newActive) {
-                      return dispatch(state => ({
-                        ...state,
-                        active: null
-                      }))
-                    }
-                    dispatch(state => ({
-                      ...state,
-                      active: newActive
-                    }))
-                  }}
-                />
+                {/* <Interaction
+                  onHover={this.onHover}
+                  onActivate={this.onActivate}
+                /> */}
               </g>
             </svg>
           )}
         </Animate>
-        <Tooltip />
+        {/* <Tooltip /> */}
       </div>
     )
+  }
+  onHover (hovered, e) {
+    return this.props.dispatch(state => ({
+      ...state,
+      hovered
+    }))
+  }
+  onActivate (newActive, e) {
+    const {
+      active,
+      dispatch
+    } = this.props
+    if (active === newActive) {
+      return dispatch(state => ({
+        ...state,
+        active: null
+      }))
+    }
+    dispatch(state => ({
+      ...state,
+      active: newActive
+    }))
   }
 }
 
 const ReactChart = Connect((state) => {
   return {
+    data: state.data,
     width: state.width,
     height: state.height,
     gridX: Selectors.gridX(state),

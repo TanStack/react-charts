@@ -55,7 +55,7 @@ class Tooltip extends PureComponent {
           >
             <div
               style={{
-                transform: `translate(${x}px, ${y}px)`
+                transform: `translate3d(${x}px, ${y}px, 0px)`
               }}
             >
               <div
@@ -80,7 +80,7 @@ class Tooltip extends PureComponent {
                       position: 'absolute',
                       top: '100%',
                       left: '50%',
-                      transform: 'translate(-50%, 0)',
+                      transform: 'translate(-50%, 0%)',
                       width: '0',
                       height: '0',
                       borderLeft: '5px solid transparent',

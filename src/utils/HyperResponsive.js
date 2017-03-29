@@ -1,10 +1,10 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import 'javascript-detect-element-resize'
 //
 import throttle from '../utils/throttle'
 
 export default function HyperResponsive (WrappedComponent) {
-  return class HyperResponsive extends Component {
+  return class HyperResponsive extends PureComponent {
     constructor () {
       super()
       this.state = {

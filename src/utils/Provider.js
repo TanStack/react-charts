@@ -1,27 +1,54 @@
-import React, { Component, PropTypes } from 'react'
+import React, { PureComponent, PropTypes } from 'react'
 
 export default function Provider (ComponentToWrap) {
-  return class Provider extends Component {
+  return class Provider extends PureComponent {
     static childContextTypes = {
-      reactChart: PropTypes.object.isRequired,
-      reactChartDispatch: PropTypes.func.isRequired
+      reactChart: PropTypes.object.isRequired
     }
     constructor (props) {
       super()
-      this.state = {}
+      this.store = {...props}
+      this.subscribers = []
+      this.subscribe = this.subscribe.bind(this)
+      this.notify = this.notify.bind(this)
       this.dispatch = this.dispatch.bind(this)
     }
-    dispatch (fn, callback) {
-      // Force any updates to be performed with functional setState
-      return this.setState(state => {
-        // console.info('Chart State Update', fn(state))
-        return fn(state)
-      }, callback)
+    componentWillReceiveProps (newProps) {
+      for (var prop in newProps) {
+        if (newProps.hasOwnProperty(prop)) {
+          if (this.store[prop] !== newProps[prop]) {
+            this.dispatch(store => ({
+              ...store,
+              ...newProps
+            }))
+          }
+        }
+      }
+    }
+    subscribe (cb) {
+      // Add the subscription
+      this.subscribers.push(cb)
+      // return an unsubscribe function
+      return () => {
+        this.subscribers = this.subscribers.filter(d => d !== cb)
+      }
+    }
+    dispatch (fn) {
+      // Functionally replace the store
+      this.store = fn(this.store)
+      // Then notify all subscribers
+      this.notify()
+    }
+    notify () {
+      this.subscribers.forEach(d => d())
     }
     getChildContext () {
       return {
-        reactChart: this.state,
-        reactChartDispatch: this.dispatch
+        reactChart: {
+          getState: () => this.store,
+          subscribe: this.subscribe,
+          dispatch: this.dispatch
+        }
       }
     }
     render () {
