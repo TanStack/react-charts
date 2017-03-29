@@ -1,10 +1,21 @@
 export default {
+  normalizeComponent,
   extractColor,
   normalizeGetter,
   normalizePathGetter,
   get,
   mapValues,
   uniq
+}
+
+function normalizeComponent (Comp, params = {}, fallback = Comp) {
+  return typeof Comp === 'function' ? (
+    Object.getPrototypeOf(Comp).isReactComponent ? (
+      <Comp
+        {...params}
+      />
+    ) : Comp(params)
+  ) : fallback
 }
 
 function extractColor (style = {}) {

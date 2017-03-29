@@ -210,6 +210,8 @@ class Axis extends PureComponent {
     scale.range(range)
 
     let barWidth = 1
+    let barStepSize = 0
+    let barPaddingOuterSize = 0
     // If this is the primary axis, it could possibly be used to display bars.
     if (primary) {
       // Calculate a band axis that is similar and pass down the bandwidth
@@ -220,8 +222,8 @@ class Axis extends PureComponent {
         .paddingInner(barPaddingInner)
         .paddingOuter(barPaddingOuter)
       barWidth = bandScale.bandwidth()
-      // TODO: scale.stepSize = bandScale.step()
-      // TODO: scale.barPaddingOuterSize = (scale.stepSize * barPaddingOuter) / 2
+      barStepSize = bandScale.step()
+      barPaddingOuterSize = (barStepSize * barPaddingOuter) / 2
     }
 
     // Set some extra values on the axis for posterity
@@ -236,7 +238,9 @@ class Axis extends PureComponent {
       barPaddingInner,
       barPaddingOuter,
       stacked,
-      barWidth
+      barWidth,
+      barStepSize,
+      barPaddingOuterSize
     }
 
     // Make sure we start with a prevAxis

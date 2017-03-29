@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
+import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
 //
@@ -16,7 +17,9 @@ class Tooltip extends PureComponent {
         top
       },
       gridX,
-      gridY
+      gridY,
+      //
+      component
     } = this.props
 
     if (!primaryAxis || !secondaryAxis || !hovered) {
@@ -67,14 +70,17 @@ class Tooltip extends PureComponent {
                 <div
                   style={{
                     padding: '5px',
-                    background: '#262626',
+                    background: 'rgba(38, 38, 38, 0.8)',
                     color: 'white',
-                    opacity: 0.8,
                     borderRadius: '3px',
                     position: 'relative'
                   }}
                 >
-                  {hovered.seriesLabel} - {hovered.primary}, {hovered.secondary}
+                  {Utils.normalizeComponent(component, {
+                    ...hovered,
+                    primaryAxis,
+                    secondaryAxis
+                  })}
                   <div
                     style={{
                       position: 'absolute',
@@ -85,7 +91,7 @@ class Tooltip extends PureComponent {
                       height: '0',
                       borderLeft: '5px solid transparent',
                       borderRight: '5px solid transparent',
-                      borderTop: '5px solid #262626'
+                      borderTop: '5px solid rgba(38, 38, 38, 0.8)'
                     }}
                   />
                 </div>

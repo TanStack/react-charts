@@ -23,8 +23,8 @@ class Bars extends PureComponent {
 
     const barWidth = primaryAxis.barWidth
 
-    // const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
-    const seriesPadding = 0
+    const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
+    // const seriesPadding = 0
 
     let { style, className, ...props } = getProps({
       ...series,

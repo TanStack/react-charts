@@ -13,13 +13,16 @@ class Interaction extends PureComponent {
     onHover: noop,
     onActivate: noop
   }
+  constructor () {
+    super()
+    this.onHover = this.onHover.bind(this)
+    this.onActivate = this.onActivate.bind(this)
+  }
   render () {
     const {
       stackData,
       primaryAxis,
-      secondaryAxis,
-      onHover,
-      onActivate
+      secondaryAxis
     } = this.props
 
     // Don't render until we have all dependencies
@@ -54,32 +57,51 @@ class Interaction extends PureComponent {
     return (
       <g
         className='Interaction'
-        onMouseLeave={e => onHover(null, e)}
+        onMouseLeave={e => this.onHover(null, e)}
       >
-        <g>
-          {polygons.map((points, i) => {
-            const path = lineFn(points)
-            return (
-              <Path
-                key={i}
-                d={path}
-                className='action-voronoi'
-                stroke='transparent'
-                onMouseEnter={e => onHover(points.data, e)}
-                onClick={e => onActivate(points.data, e)}
-                style={{
-                  stroke: 'transparent',
-                  fill: 'transparent',
-                  strokeWidth: 0,
-                  opacity: 0
-                }}
-              />
-            )
-          })}
-        </g>
-        )}
+        {polygons.map((points, i) => {
+          const path = lineFn(points)
+          return (
+            <Path
+              key={i}
+              d={path}
+              className='action-voronoi'
+              stroke='transparent'
+              onMouseEnter={e => this.onHover(points.data, e)}
+              onClick={e => this.onActivate(points.data, e)}
+              style={{
+                stroke: 'transparent',
+                fill: 'transparent',
+                strokeWidth: 0,
+                opacity: 0
+              }}
+            />
+          )
+        })}
       </g>
     )
+  }
+  onHover (hovered, e) {
+    return this.props.dispatch(state => ({
+      ...state,
+      hovered
+    }))
+  }
+  onActivate (newActive, e) {
+    const {
+      active,
+      dispatch
+    } = this.props
+    if (active === newActive) {
+      return dispatch(state => ({
+        ...state,
+        active: null
+      }))
+    }
+    dispatch(state => ({
+      ...state,
+      active: newActive
+    }))
   }
 }
 

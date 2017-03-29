@@ -18,6 +18,7 @@ import AreaChart from '../stories/AreaChart.js'
 import BarChart from '../stories/BarChart.js'
 import ColumnChart from '../stories/ColumnChart.js'
 import CustomStyles from '../stories/CustomStyles.js'
+import CustomTooltip from '../stories/CustomTooltip.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -38,4 +39,5 @@ configure(() => {
     .add('Bar Chart', BarChart)
     .add('Column Chart', ColumnChart)
     .add('Custom Styles', CustomStyles)
+    .add('Custom Tooltip', CustomTooltip)
 }, module)

@@ -8,7 +8,7 @@ import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 
 import Interaction from '../components/Interaction'
-import Tooltip from '../components/Tooltip'
+import TooltipWrap from '../components/Tooltip'
 
 class Chart extends PureComponent {
   static defaultProps = {
@@ -17,13 +17,17 @@ class Chart extends PureComponent {
     getSeriesID: (d, i) => i,
     getX: d => Array.isArray(d) ? d[0] : d.x,
     getY: d => Array.isArray(d) ? d[1] : d.y,
-    getR: d => Array.isArray(d) ? d[0] : d.r
+    getR: d => Array.isArray(d) ? d[0] : d.r,
+    Tooltip: ({
+      seriesLabel,
+      primary,
+      secondary
+    }) => <span>{seriesLabel} - {primary}, {secondary}</span>
   }
   constructor () {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
-    this.onHover = this.onHover.bind(this)
   }
   componentDidMount () {
     this.updateDataModel(this.props)
@@ -33,6 +37,7 @@ class Chart extends PureComponent {
     // If anything related to the data model changes, update it
     if (
       nextProps.data !== this.props.data ||
+      nextProps.Tooltip !== this.props.Tooltip ||
       nextProps.width !== this.props.width ||
       nextProps.height !== this.props.height ||
       nextProps.getData !== this.props.getData ||
@@ -122,6 +127,7 @@ class Chart extends PureComponent {
       height,
       gridX,
       gridY,
+      Tooltip,
       children
     } = this.props
 
@@ -152,39 +158,14 @@ class Chart extends PureComponent {
                 transform={`translate(${gridX}, ${gridY})`}
               >
                 {children}
-                <Interaction
-                  onHover={this.onHover}
-                  onActivate={this.onActivate}
-                />
+                <Interaction />
               </g>
             </svg>
           )}
         </Animate>
-        <Tooltip />
+        <TooltipWrap component={Tooltip} />
       </div>
     )
-  }
-  onHover (hovered, e) {
-    return this.props.dispatch(state => ({
-      ...state,
-      hovered
-    }))
-  }
-  onActivate (newActive, e) {
-    const {
-      active,
-      dispatch
-    } = this.props
-    if (active === newActive) {
-      return dispatch(state => ({
-        ...state,
-        active: null
-      }))
-    }
-    dispatch(state => ({
-      ...state,
-      active: newActive
-    }))
   }
 }
 
