@@ -15,6 +15,7 @@ import AreaChart from '../stories/AreaChart.js'
 import ColumnChart from '../stories/ColumnChart.js'
 import BarChart from '../stories/BarChart.js'
 import StackedColumnChart from '../stories/StackedColumnChart.js'
+import CustomStyles from '../stories/CustomStyles.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -35,4 +36,5 @@ configure(() => {
     .add('Column Chart', ColumnChart)
     .add('Bar Chart', BarChart)
     .add('Stacked Column Chart', StackedColumnChart)
+    .add('Custom Styles', CustomStyles)
 }, module)

@@ -78,30 +78,34 @@ class Chart extends Component {
     } = props
 
     // Normalize getters
-    getData = Utils.normalizeGetter(getData)
-    getLabel = Utils.normalizeGetter(getLabel)
-    getSeriesID = Utils.normalizeGetter(getSeriesID)
-    getX = Utils.normalizeGetter(getX)
-    getY = Utils.normalizeGetter(getY)
-    getR = Utils.normalizeGetter(getR)
+    getData = Utils.normalizePathGetter(getData)
+    getLabel = Utils.normalizePathGetter(getLabel)
+    getSeriesID = Utils.normalizePathGetter(getSeriesID)
+    getX = Utils.normalizePathGetter(getX)
+    getY = Utils.normalizePathGetter(getY)
+    getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
     const accessedData = data.map((s, seriesIndex) => {
-      const series = getData(s, seriesIndex)
-      return series.map((d, index) => {
-        return {
-          seriesIndex,
-          index,
-          series,
-          seriesID: getSeriesID(s, seriesIndex),
-          seriesLabel: getLabel(s, seriesIndex),
-          row: s,
-          datum: d,
-          primary: getX(d, index),
-          secondary: getY(d, index),
-          r: getR(d, index)
-        }
-      })
+      const seriesID = getSeriesID(s, seriesIndex)
+      const seriesLabel = getLabel(s, seriesIndex)
+      return {
+        row: s,
+        id: seriesID,
+        label: seriesLabel,
+        data: getData(s, seriesIndex).map((d, index) => {
+          return {
+            row: s,
+            seriesID,
+            seriesLabel,
+            index,
+            datum: d,
+            primary: getX(d, index),
+            secondary: getY(d, index),
+            r: getR(d, index)
+          }
+        })
+      }
     })
 
     // This will make all of the props available to anything using

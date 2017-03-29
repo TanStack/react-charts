@@ -1,11 +1,19 @@
 export default {
   normalizeGetter,
+  normalizePathGetter,
   get,
   mapValues,
   uniq
 }
 
 function normalizeGetter (getter) {
+  if (typeof getter === 'function') {
+    return getter
+  }
+  return () => getter
+}
+
+function normalizePathGetter (getter) {
   if (typeof getter === 'function') {
     return getter
   }

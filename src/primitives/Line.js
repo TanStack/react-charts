@@ -12,9 +12,6 @@ const defaultStyle = {
 export default React.createClass({
   render () {
     const {
-      isActive,
-      isInactive,
-      visible,
       style,
       ...rest
     } = this.props
@@ -27,8 +24,7 @@ export default React.createClass({
     return (
       <Animate
         data={{
-          ...resolvedStyle,
-          opacity: visible * resolvedStyle.opacity
+          ...resolvedStyle
         }}
       >
         {(inter) => {

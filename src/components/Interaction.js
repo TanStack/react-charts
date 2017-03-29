@@ -31,16 +31,7 @@ class Interaction extends PureComponent {
       return null
     }
 
-    const decoratedStackData = stackData.map((s, i) => {
-      return s.map((d, ii) => {
-        return {
-          ...d,
-          seriesIndex: i,
-          index: ii
-        }
-      })
-    })
-    const flatStackData = decoratedStackData.reduce((prev, now) => prev.concat(now), [])
+    const flatStackData = stackData.reduce((prev, now) => prev.concat(now.data), [])
 
     // Bail out if the scale isn't available
     if (!primaryAxis || !secondaryAxis) {
@@ -72,11 +63,11 @@ class Interaction extends PureComponent {
                 stroke='transparent'
                 onMouseEnter={e => onHover(points.data, e)}
                 onClick={e => onActivate(points.data, e)}
-                visible={0}
                 style={{
                   stroke: 'transparent',
                   fill: 'transparent',
-                  strokeWidth: 0
+                  strokeWidth: 0,
+                  opacity: 0
                 }}
               />
             )

@@ -7,27 +7,21 @@ import Rectangle from '../primitives/Rectangle'
 
 export default Connect((state, props) => {
   return {
-    primaryAxis: Selectors.primaryAxis(state),
-    secondaryAxis: Selectors.secondaryAxis(state)
+    primaryAxis: Selectors.primaryAxis(state)
   }
 })(React.createClass({
   displayName: 'Bars',
   render () {
     const {
-      data,
-      style,
+      series,
+      visibility,
+      //
       primaryAxis,
-      secondaryAxis,
       //
       ...rest
     } = this.props
 
-    if (!primaryAxis || !secondaryAxis) {
-      return null
-    }
-
     const barWidth = primaryAxis.barWidth
-    const secondaryAxisTrueRange = secondaryAxis.isInverted ? [...secondaryAxis.scale.range()].reverse() : secondaryAxis.scale.range()
 
     // const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
     const seriesPadding = 0
@@ -35,8 +29,7 @@ export default Connect((state, props) => {
     return (
       <Animate
         data={{
-          data,
-          secondaryAxisTrueRange
+          data: series.data
         }}
         damping={10}
       >
@@ -66,9 +59,7 @@ export default Connect((state, props) => {
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    style={{
-                      fill: style.stroke
-                    }}
+                    opacity={visibility}
                   />
                 )
               })}

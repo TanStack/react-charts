@@ -22,8 +22,9 @@ export default React.createClass({
   },
   render () {
     const {
-      data,
+      series,
       style,
+      visibility,
       //
       showPoints,
       //
@@ -37,7 +38,7 @@ export default React.createClass({
     return (
       <Animate
         data={{
-          data
+          data: series.data
         }}
         damping={10}
       >
@@ -46,16 +47,15 @@ export default React.createClass({
           return (
             <g>
               <Path
-                {...rest}
                 d={path}
                 style={{
                   ...defaultStyle,
                   ...style
                 }}
+                opacity={visibility}
               />
               {showPoints && inter.data.map((d, i) => (
                 <Circle
-                  {...rest}
                   key={i}
                   x={d.x}
                   y={d.y}
@@ -63,6 +63,7 @@ export default React.createClass({
                     ...defaultStyle,
                     ...style
                   }}
+                  opacity={visibility}
                 />
               ))}
             </g>

@@ -13,7 +13,6 @@ const defaultStyle = {
 export default React.createClass({
   render () {
     const {
-      visible,
       style,
       x1,
       y1,
@@ -38,8 +37,7 @@ export default React.createClass({
     return (
       <Animate
         data={{
-          ...resolvedStyle,
-          opacity: visible * resolvedStyle.opacity
+          ...resolvedStyle
         }}
       >
         {(inter) => {

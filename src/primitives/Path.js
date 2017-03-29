@@ -12,8 +12,6 @@ const defaultStyle = {
 export default React.createClass({
   render () {
     const {
-      isActive,
-      visible,
       style,
       ...rest
     } = this.props
@@ -26,9 +24,7 @@ export default React.createClass({
     return (
       <Animate
         data={{
-          ...resolvedStyle,
-          stroke: isActive ? 'red' : resolvedStyle.stroke,
-          opacity: visible * resolvedStyle.opacity
+          ...resolvedStyle
         }}
       >
         {(inter) => {

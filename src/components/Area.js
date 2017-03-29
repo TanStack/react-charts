@@ -2,71 +2,110 @@ import React from 'react'
 import { Animate } from 'react-move'
 import {
   area,
+  line,
   curveCardinal,
   curveMonotoneX
 } from 'd3-shape'
 //
+import Connect from '../utils/Connect'
+
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
-const defaultStyle = {
+const pathDefaultStyle = {
+  strokeWidth: 2,
+  fill: '#b8b8b8'
+}
+
+const circleDefaultStyle = {
   strokeWidth: 2
 }
 
-export default React.createClass({
+export default Connect((state, props) => {
+  return {
+    hovered: state.hovered
+  }
+})(React.createClass({
   displayName: 'Line',
   getDefaultProps () {
     return {
-      showPoints: true
+      showPoints: true,
+      getStyle: d => ({}),
+      getActiveDataStyle: d => ({}),
+      getInactiveDataStyle: d => ({})
     }
   },
   render () {
     const {
-      data,
-      style,
-      //
+      series,
+      visibility,
       showPoints,
+      getProps,
+      getDataProps,
       //
-      ...rest
+      hovered
     } = this.props
 
-    const lineFn = area()
+    const areaFn = area()
     .curve(curveMonotoneX)
     .y0(d => d[2])
+
+    const lineFn = line()
+    .curve(curveMonotoneX)
+
+    const isActive = hovered && hovered.seriesID === series.id
+    const isInactive = hovered && hovered.seriesID !== series.id
 
     return (
       <Animate
         data={{
-          data
+          data: series.data
         }}
         damping={13}
       >
         {inter => {
-          const path = lineFn(inter.data.map(d => ([d.x, d.y, d.yBase])))
+          const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.yBase])))
+          const linePath = lineFn(inter.data.map(d => ([d.x, d.y])))
           return (
             <g>
               <Path
-                {...rest}
-                d={path}
+                d={areaPath}
                 style={{
-                  ...defaultStyle,
-                  ...style,
-                  fill: style.stroke
+                  ...pathDefaultStyle,
+                  // ...style,
+                  stroke: 'transparent'
                 }}
+                opacity={visibility}
               />
-              {showPoints && inter.data.map((d, i) => (
-                <Circle
-                  {...rest}
-                  key={i}
-                  x={d.x}
-                  y={d.y}
-                  r={Math.max(d.r, 0)}
-                />
-              ))}
+              <Path
+                d={linePath}
+                style={{
+                  ...pathDefaultStyle,
+                  // ...style,
+                  fill: 'transparent'
+                }}
+                opacity={visibility}
+              />
+              {showPoints && inter.data.map((d, i) => {
+                const isDatumActive = hovered && hovered.seriesID === series.id && hovered.index === i
+                const isDatumInactive = hovered && (hovered.seriesID !== series.id || hovered.index !== i)
+
+                return (
+                  <Circle
+                    key={i}
+                    x={d.x}
+                    y={d.y}
+                    style={{
+                      ...circleDefaultStyle
+                    }}
+                    opacity={visibility}
+                  />
+                )
+              })}
             </g>
           )
         }}
       </Animate>
     )
   }
-})
+}))
