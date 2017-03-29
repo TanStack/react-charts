@@ -1,5 +1,6 @@
 import React from 'react'
 import { Animate } from 'react-move'
+import classnames from 'classnames'
 import {
   area,
   line,
@@ -8,17 +9,17 @@ import {
 } from 'd3-shape'
 //
 import Connect from '../utils/Connect'
+import Utils from '../utils/Utils'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
 const pathDefaultStyle = {
-  strokeWidth: 2,
-  fill: '#b8b8b8'
+  strokeWidth: 2
 }
 
 const circleDefaultStyle = {
-  strokeWidth: 2
+  r: 2
 }
 
 export default Connect((state, props) => {
@@ -26,20 +27,13 @@ export default Connect((state, props) => {
     hovered: state.hovered
   }
 })(React.createClass({
-  displayName: 'Line',
-  getDefaultProps () {
-    return {
-      showPoints: true,
-      getStyle: d => ({}),
-      getActiveDataStyle: d => ({}),
-      getInactiveDataStyle: d => ({})
-    }
-  },
+  displayName: 'Area',
   render () {
     const {
       series,
+      active,
+      inactive,
       visibility,
-      showPoints,
       getProps,
       getDataProps,
       //
@@ -53,15 +47,19 @@ export default Connect((state, props) => {
     const lineFn = line()
     .curve(curveMonotoneX)
 
-    const isActive = hovered && hovered.seriesID === series.id
-    const isInactive = hovered && hovered.seriesID !== series.id
+    let { style, className, ...props } = getProps({
+      ...series,
+      active,
+      inactive
+    })
+
+    style = Utils.extractColor(style)
 
     return (
       <Animate
         data={{
           data: series.data
         }}
-        damping={13}
       >
         {inter => {
           const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.yBase])))
@@ -69,34 +67,54 @@ export default Connect((state, props) => {
           return (
             <g>
               <Path
+                {...props}
                 d={areaPath}
+                className={classnames(className)}
                 style={{
                   ...pathDefaultStyle,
-                  // ...style,
+                  ...style,
                   stroke: 'transparent'
                 }}
                 opacity={visibility}
               />
               <Path
                 d={linePath}
+                {...props}
+                className={classnames(className)}
                 style={{
                   ...pathDefaultStyle,
-                  // ...style,
+                  ...style,
                   fill: 'transparent'
                 }}
                 opacity={visibility}
               />
-              {showPoints && inter.data.map((d, i) => {
-                const isDatumActive = hovered && hovered.seriesID === series.id && hovered.index === i
-                const isDatumInactive = hovered && (hovered.seriesID !== series.id || hovered.index !== i)
+              {inter.data.map((d, i) => {
+                const active = hovered && hovered.seriesID === series.id && hovered.index === i
+                const inactive = hovered && (hovered.seriesID !== series.id || hovered.index !== i)
+
+                let {
+                  style: dataStyle,
+                  className: dataClassName,
+                  ...dataProps
+                } = getDataProps({
+                  ...series,
+                  active,
+                  inactive
+                })
+
+                dataStyle = Utils.extractColor(dataStyle)
 
                 return (
                   <Circle
                     key={i}
                     x={d.x}
                     y={d.y}
+                    {...dataProps}
+                    className={classnames(dataClassName)}
                     style={{
-                      ...circleDefaultStyle
+                      ...circleDefaultStyle,
+                      ...style,
+                      ...dataStyle
                     }}
                     opacity={visibility}
                   />

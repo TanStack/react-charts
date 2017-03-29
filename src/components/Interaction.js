@@ -31,6 +31,10 @@ class Interaction extends PureComponent {
       return null
     }
 
+    // TODO: Need to support different types of voronoi's here.
+    // - Closest / Hit Point / Element Hover
+    // - Point / Y Axis / Stack
+
     const flatStackData = stackData.reduce((prev, now) => prev.concat(now.data), [])
 
     // Bail out if the scale isn't available

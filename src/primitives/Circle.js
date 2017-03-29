@@ -3,6 +3,7 @@ import { Animate } from 'react-move'
 //
 
 const defaultStyle = {
+  r: 2,
   strokeWidth: '1',
   stroke: '#000000',
   fill: '#000000',
@@ -12,7 +13,7 @@ const defaultStyle = {
 export default React.createClass({
   getDefaultProps () {
     return {
-      r: 2
+      opacity: 1
     }
   },
   render () {
@@ -21,6 +22,7 @@ export default React.createClass({
       y,
       r,
       style,
+      opacity,
       ...rest
     } = this.props
 
@@ -30,18 +32,19 @@ export default React.createClass({
     }
     return (
       <Animate
-        data={{
-          ...resolvedStyle
-        }}
+        data={resolvedStyle}
       >
         {(inter) => {
           return (
             <circle
-              {...inter}
               {...rest}
               cx={x}
               cy={y}
               r={r}
+              style={{
+                ...inter,
+                opacity: opacity * inter.opacity
+              }}
             />
           )
         }}

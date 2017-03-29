@@ -1,9 +1,21 @@
 export default {
+  extractColor,
   normalizeGetter,
   normalizePathGetter,
   get,
   mapValues,
   uniq
+}
+
+function extractColor (style = {}) {
+  if (style.color) {
+    return {
+      ...style,
+      fill: style.fill || style.color,
+      stroke: style.stroke || style.color
+    }
+  }
+  return style
 }
 
 function normalizeGetter (getter) {

@@ -91,11 +91,13 @@ class Chart extends Component {
       const seriesLabel = getLabel(s, seriesIndex)
       return {
         row: s,
+        index: seriesIndex,
         id: seriesID,
         label: seriesLabel,
         data: getData(s, seriesIndex).map((d, index) => {
           return {
             row: s,
+            seriesIndex,
             seriesID,
             seriesLabel,
             index,

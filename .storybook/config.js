@@ -12,9 +12,8 @@ import Readme from '../README.md'
 //
 import LineChart from '../stories/LineChart.js'
 import AreaChart from '../stories/AreaChart.js'
-import ColumnChart from '../stories/ColumnChart.js'
 import BarChart from '../stories/BarChart.js'
-import StackedColumnChart from '../stories/StackedColumnChart.js'
+import ColumnChart from '../stories/ColumnChart.js'
 import CustomStyles from '../stories/CustomStyles.js'
 //
 configure(() => {
@@ -33,8 +32,7 @@ configure(() => {
   storiesOf('2. Demos')
     .add('Line Chart', LineChart)
     .add('Area Chart', AreaChart)
-    .add('Column Chart', ColumnChart)
     .add('Bar Chart', BarChart)
-    .add('Stacked Column Chart', StackedColumnChart)
+    .add('Column Chart', ColumnChart)
     .add('Custom Styles', CustomStyles)
 }, module)

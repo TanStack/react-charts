@@ -38,6 +38,11 @@ class Line extends Component {
           >
             <Chart
               data={data}
+              getData={d => d.data}
+              getLabel={d => d.label}
+              getX={d => d.x}
+              getY='nested.y'
+              getR={['nested', 'r']}
             >
               <Axis
                 primary
@@ -48,6 +53,7 @@ class Line extends Component {
               <Axis
                 type='linear'
                 position='left'
+                stacked
               />
               <Data
                 type='bar'
@@ -66,19 +72,24 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 1)), 1)), d => makeSeries())
+  return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 2)), makeSeries)
 }
 
-function makeSeries () {
+function makeSeries (d, i) {
   // const length = Math.round(Math.random() * 30)
   const length = 30
   const max = 100
   // const max = Math.random() > 0.5 ? 100000 : 10
   const multiplier = 1
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
-  return _.map(_.range(length), d => ({
-    x: d * multiplier,
-    y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
-    r: Math.round(Math.random() * 10)
-  }))
+  return {
+    label: 'Series ' + (i + 1),
+    data: _.map(_.range(length), d => ({
+      x: d * multiplier,
+      nested: {
+        y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
+        r: Math.round(Math.random() * 10)
+      }
+    }))
+  }
 }

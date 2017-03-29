@@ -11,9 +11,15 @@ const defaultStyle = {
 }
 
 export default React.createClass({
+  getDefaultProps () {
+    return {
+      opacity: 1
+    }
+  },
   render () {
     const {
       style,
+      opacity,
       x1,
       y1,
       x2,
@@ -36,19 +42,20 @@ export default React.createClass({
 
     return (
       <Animate
-        data={{
-          ...resolvedStyle
-        }}
+        data={resolvedStyle}
       >
         {(inter) => {
           return (
             <rect
-              {...inter}
               {...rest}
               x={xStart}
               y={yStart}
               width={width}
               height={height}
+              style={{
+                ...inter,
+                opacity: opacity * inter.opacity
+              }}
             />
           )
         }}

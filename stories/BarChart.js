@@ -67,7 +67,7 @@ class Line extends Component {
 export default () => <Line />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 1)), 1)), d => makeSeries())
+  return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), d => makeSeries())
 }
 
 function makeSeries () {

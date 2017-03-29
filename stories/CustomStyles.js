@@ -54,13 +54,16 @@ class Line extends Component {
                 type='area'
                 getProps={(series, i) => ({
                   style: {
-                    fill: series.active ? 'green' : series.inactive ? 'grey' : series.color
+                    color: series.inactive ? 'grey' : series.row.color,
+                    opacity: series.inactive ? 0.2 : 1
                   }
                 })}
-                // getDataProps={(datum, i) => ({
-                //   r: 5,
-                //   color: '#d74949'
-                // })}
+                getDataProps={(datum, i) => ({
+                  style: {
+                    r: datum.active ? 5 : 0,
+                    color: datum.active ? 'black' : undefined
+                  }
+                })}
               />
             </Chart>
           </ResizableBox>
@@ -74,6 +77,19 @@ class Line extends Component {
 }
 
 export default () => <Line />
+
+const colors = [
+  '#0f7db4',
+  '#fc6868',
+  '#DECF3F',
+  '#60BD68',
+  '#FAA43A',
+  '#c63b89',
+  '#1aaabe',
+  '#734fe9',
+  '#1828bd',
+  '#cd82ad'
+]
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), makeSeries)
@@ -89,7 +105,7 @@ function makeSeries (i) {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return {
     label: 'Series ' + (i + 1),
-    color: `rgb(${255 / i}, 0, 0)`,
+    color: colors[i],
     data: _.map(_.range(length), d => ({
       // x: d * multiplier,
       x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),

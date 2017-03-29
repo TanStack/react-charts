@@ -46,12 +46,11 @@ class Axis extends PureComponent {
     barPaddingOuter: 0.1,
     showGrid: true
   }
-  state = {
-    rotation: 0
-  }
   // Lifecycle
   constructor () {
     super()
+    this.rotation = 0
+    this.visibleLabelStep = 1
     this.measure = this.measure.bind(this)
     this.updateScale = this.updateScale.bind(this)
   }
@@ -269,7 +268,7 @@ class Axis extends PureComponent {
     const {
       rotation,
       visibleLabelStep
-    } = this.state
+    } = this
 
     if (!this.el) {
       return
@@ -302,21 +301,23 @@ class Axis extends PureComponent {
 
       if (Math.floor(rotation) !== Math.floor(newRotation)) {
         console.log(rotation, newRotation)
-        this.setState(state => ({
-          rotation: newRotation
-        }))
-        return
+        this.rotation = newRotation
+        // this.setState(state => ({
+        //   rotation: newRotation
+        // }))
+        // return
       }
     }
 
-    const newLabelSkipRatio = Math.ceil(fontSize / smallestTickGap)
+    const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
 
-    if (visibleLabelStep !== newLabelSkipRatio) {
-      console.log(visibleLabelStep, newLabelSkipRatio)
-      this.setState(state => ({
-        visibleLabelStep: newLabelSkipRatio
-      }))
-      return
+    if (visibleLabelStep !== newVisibleLabelStep) {
+      console.log(visibleLabelStep, newVisibleLabelStep)
+      this.visibleLabelStep = newVisibleLabelStep
+      // this.setState(state => ({
+      //   visibleLabelStep: newVisibleLabelStep
+      // }))
+      // return
     }
 
     if (!labelDims.length || labelDims.length !== this.ticks.length) {
@@ -387,7 +388,7 @@ class Axis extends PureComponent {
     const {
       rotation,
       visibleLabelStep
-    } = this.state
+    } = this
 
     // Render Dependencies
     if (!axis) {
@@ -415,29 +416,29 @@ class Axis extends PureComponent {
     const seriesPadding = 0
     const tickPosition = seriesPadding + (itemWidth / 2)
 
-    // return (
-    //   <Animate
-    //     data={{
-    //       width,
-    //       height,
-    //       max,
-    //       range0,
-    //       range1,
-    //       RTL,
-    //       tickSizeOuter,
-    //       tickPosition
-    //     }}
-    //   >
-    //     {({
-    //       width,
-    //       height,
-    //       max,
-    //       range0,
-    //       range1,
-    //       RTL,
-    //       tickSizeOuter,
-    //       tickPosition
-    //     }) => {
+    return (
+      <Animate
+        data={{
+          width,
+          height,
+          max,
+          range0,
+          range1,
+          RTL,
+          tickSizeOuter,
+          tickPosition
+        }}
+      >
+        {({
+          width,
+          height,
+          max,
+          range0,
+          range1,
+          RTL,
+          tickSizeOuter,
+          tickPosition
+        }) => {
           let axisPath
           if (vertical) {
             if (position === positionLeft) {
@@ -495,8 +496,8 @@ class Axis extends PureComponent {
                 getKey={(d, i) => String(d.tick)}
                 update={d => ({
                   tick: scale(d.tick),
-                  // visibility: d.index % visibleLabelStep === 0 ? 1 : 0,
-                  visibility: 1,
+                  visibility: d.index % visibleLabelStep === 0 ? 1 : 0,
+                  // visibility: 1,
                   measureable: 1,
                   rotation
                 })}
@@ -570,9 +571,9 @@ class Axis extends PureComponent {
               </Transition>
             </g>
           )
-      //   }}
-      // </Animate>
-    // )
+        }}
+      </Animate>
+    )
   }
 }
 

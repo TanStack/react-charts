@@ -7,29 +7,46 @@ import Utils from '../utils/Utils'
 import { Transition } from 'react-move'
 import Line from './Line'
 import Area from './Area'
-import Bars from './Bars'
+import Bar from './Bar'
 
 const stackTypes = {
   line: Line,
   area: Area,
-  bar: Bars
+  bar: Bar
 }
+
+const defaultColors = [
+  '#0f7db4',
+  '#fc6868',
+  '#DECF3F',
+  '#60BD68',
+  '#FAA43A',
+  '#c63b89',
+  '#1aaabe',
+  '#734fe9',
+  '#1828bd',
+  '#cd82ad'
+]
 
 export default Connect((state, props) => {
   return {
     accessedData: state.accessedData,
     stackData: state.stackData,
     primaryAxis: Selectors.primaryAxis(state),
-    secondaryAxis: Selectors.secondaryAxis(state)
+    secondaryAxis: Selectors.secondaryAxis(state),
+    hovered: state.hovered
   }
 })(React.createClass({
   displayName: 'Data',
   getDefaultProps () {
     return {
       type: 'line',
-      getStyle: d => ({}),
-      getActiveStyle: d => ({}),
-      getInactiveStyle: d => ({})
+      getProps: (d, i) => ({
+        style: {
+          color: defaultColors[d.index % defaultColors.length]
+        }
+      }),
+      getDataProps: () => ({})
     }
   },
   componentDidMount () {
@@ -116,6 +133,7 @@ export default Connect((state, props) => {
       type,
       getProps,
       getDataProps,
+      hovered,
       //
       stackData
     } = this.props
@@ -150,12 +168,21 @@ export default Connect((state, props) => {
               className='Stack'
             >
               {inters.map((inter) => {
-                const resolvedType = typeGetter(inter.data, inter.data.id)
+                const active = hovered && hovered.seriesID === inter.data.id
+                const inactive = hovered && hovered.seriesID !== inter.data.id
+
+                const resolvedType = typeGetter({
+                  ...inter.data,
+                  active,
+                  inactive
+                }, inter.data.id)
                 const StackCmp = stackTypes[resolvedType]
                 return (
                   <StackCmp
                     key={inter.key}
                     series={inter.data}
+                    active={active}
+                    inactive={inactive}
                     getProps={getProps}
                     getDataProps={getDataProps}
                     visibility={inter.state.visibility}
