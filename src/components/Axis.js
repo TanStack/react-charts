@@ -1,37 +1,24 @@
 import React, { PureComponent } from 'react'
 import { Animate, Transition } from 'react-move'
-import {
-  scaleLinear,
-  scaleLog,
-  scaleTime,
-  scaleBand
- } from 'd3-scale'
 //
+import measure from './Axis.measure'
+import updateScale from './Axis.updateScale'
+
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 import Text from '../primitives/Text'
 
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
-//
-const scales = {
-  linear: scaleLinear,
-  log: scaleLog,
-  time: scaleTime,
-  ordinal: scaleBand
-}
 
-const positionTop = 'top'
-const positionRight = 'right'
-const positionBottom = 'bottom'
-const positionLeft = 'left'
+export const positionTop = 'top'
+export const positionRight = 'right'
+export const positionBottom = 'bottom'
+export const positionLeft = 'left'
 
 const fontSize = 10
 
 const detectVertical = position => [positionLeft, positionRight].indexOf(position) > -1
-const detectRTL = (position) => [positionTop, positionRight].indexOf(position) > -1
-const getPixel = d => d
-const radiansToDegrees = r => r * (180 / Math.PI)
 
 class Axis extends PureComponent {
   static defaultProps = {
@@ -44,15 +31,16 @@ class Axis extends PureComponent {
     maxLabelRotation: 50,
     barPaddingInner: 0.1,
     barPaddingOuter: 0.1,
-    showGrid: true
+    showGrid: true,
+    cursor: {}
   }
   // Lifecycle
   constructor () {
     super()
     this.rotation = 0
     this.visibleLabelStep = 1
-    this.measure = this.measure.bind(this)
-    this.updateScale = this.updateScale.bind(this)
+    this.measure = measure.bind(this)
+    this.updateScale = updateScale.bind(this)
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
@@ -80,6 +68,10 @@ class Axis extends PureComponent {
       newProps.accessedData !== oldProps.accessedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
+      // TODO: (
+        // newProps.cursor || oldProps.cursor
+        // newProps.cursor.option !== oldProps.cursor.option
+      // )
       position !== oldProps.position
     ) {
       this.updateScale(newProps)
@@ -87,292 +79,6 @@ class Axis extends PureComponent {
   }
   componentDidUpdate () {
     window.requestAnimationFrame(this.measure)
-  }
-  updateScale (props) {
-    const {
-      // Computed
-      id,
-      // Props
-      type,
-      position,
-      invert,
-      primary,
-      stacked,
-      barPaddingInner,
-      barPaddingOuter,
-      centerTicks,
-      // Context
-      accessedData,
-      width,
-      height,
-      primaryAxis
-    } = props
-
-    // We need the data to proceed
-    if (!accessedData) {
-      return
-    }
-
-    // If this axis is secondary, we need the primaryAxis to proceed
-    if (!primary && !primaryAxis) {
-      return
-    }
-
-    // Detect some settings
-    const datumKey = primary ? 'primary' : 'secondary'
-    const vertical = detectVertical(position)
-    const RTL = primary && detectRTL(position) // Right to left OR top to bottom
-
-    // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
-
-    // First we need to find unique values, min/max values and negative/positive totals
-    let uniqueVals = []
-    let min = 0
-    let max = 0
-    let datumValues = []
-    let negativeTotal = 0
-    let positiveTotal = 0
-    let domain
-
-    if (type === 'ordinal') {
-      accessedData.forEach(series => {
-        const seriesValues = series.data.map(d => d[datumKey])
-        seriesValues.forEach(d => {
-          if (uniqueVals.indexOf(d) === -1) {
-            uniqueVals.push(d)
-          }
-        })
-      })
-      domain = invert ? [...uniqueVals].reverse() : uniqueVals
-    } else if (type === 'time') {
-      min = max = accessedData[0].data[0][datumKey]
-      accessedData.forEach(series => {
-        const seriesValues = series.data.map(d => +d[datumKey])
-        seriesValues.forEach((d, i) => {
-          datumValues[i] = [...(datumValues[i] || []), d]
-        })
-        const seriesMin = Math.min(...seriesValues)
-        const seriesMax = Math.max(...seriesValues)
-        min = Math.min(min, seriesMin)
-        max = Math.max(max, seriesMax)
-      })
-      domain = invert ? [max, min] : [min, max]
-    } else {
-      accessedData.forEach(series => {
-        const seriesValues = series.data.map(d => d[datumKey])
-        seriesValues.forEach((d, i) => {
-          datumValues[i] = [...(datumValues[i] || []), d]
-        })
-        const seriesMin = Math.min(...seriesValues)
-        const seriesMax = Math.max(...seriesValues)
-        min = Math.min(min, seriesMin)
-        max = Math.max(max, seriesMax)
-      })
-      if (stacked) {
-        // If we're stacking, calculate and use the max and min values for the largest stack
-        [positiveTotal, negativeTotal] = datumValues.reduce((totals, vals) => {
-          const positive = vals.filter(d => d > 0).reduce((ds, d) => ds + d, 0)
-          const negative = vals.filter(d => d < 0).reduce((ds, d) => ds + d, 0)
-          return [
-            positive > totals[0] ? positive : totals[0],
-            negative > totals[1] ? negative : totals[1]
-          ]
-        }, [0, 0])
-        domain = invert ? [positiveTotal, negativeTotal] : [negativeTotal, positiveTotal]
-      } else {
-        // If we're not stacking, use the min and max values
-        domain = invert ? [max, min] : [min, max]
-      }
-    }
-
-    const scale = scales[type]()
-      .domain(domain)
-
-    // If we're not using an ordinal scale, round the ticks to "nice" values
-    if (type !== 'ordinal') {
-      scale.nice()
-    }
-
-    // Now we need to figure out the range
-    let range = vertical
-      ? invert ? [0, height] : [height, 0] // If the axis is inverted, swap the range, too
-      : invert ? [width, 0] : [0, width]
-
-    if (!primary) {
-      // Secondary axes are usually dependent on primary axes for orientation, so if the
-      // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
-      // to match the origin of the primary axis
-      if (primaryAxis.RTL) {
-        range = range.reverse()
-      }
-    }
-    // Set the range
-    scale.range(range)
-
-    let barWidth = 1
-    let barStepSize = 0
-    let barPaddingOuterSize = 0
-    // If this is the primary axis, it could possibly be used to display bars.
-    if (primary) {
-      // Calculate a band axis that is similar and pass down the bandwidth
-      // just in case.
-      const bandScale = scaleBand()
-        .domain(accessedData.reduce((prev, current) => current.data.length > prev.length ? current.data : prev, []).map(d => d.primary))
-        .rangeRound(scale.range(), 0.1)
-        .paddingInner(barPaddingInner)
-        .paddingOuter(barPaddingOuter)
-      barWidth = bandScale.bandwidth()
-      barStepSize = bandScale.step()
-      barPaddingOuterSize = (barStepSize * barPaddingOuter) / 2
-    }
-
-    // Set some extra values on the axis for posterity
-    const axis = {
-      scale,
-      primary,
-      invert,
-      vertical,
-      RTL,
-      position,
-      centerTicks,
-      barPaddingInner,
-      barPaddingOuter,
-      stacked,
-      barWidth,
-      barStepSize,
-      barPaddingOuterSize
-    }
-
-    // Make sure we start with a prevAxis
-    this.prevAxis = this.prevAxis || axis
-
-    this.props.dispatch(state => ({
-      ...state,
-      axes: {
-        ...state.axes,
-        [id]: axis
-      }
-    }))
-  }
-  measure () {
-    // Measure finds the amount of overflow this axis produces and
-    // updates the margins to ensure that the axis is visibility
-    // Unfortunately, this currently happens after a render, but potentially
-    // could happen pre-render if we could reliably predict the size of the
-    // labels before they render. Considering that ticks could be anything,
-    // even a react component, this could get very tough.
-    const {
-      tickSizeInner,
-      tickSizeOuter,
-      tickPadding,
-      maxLabelRotation,
-      position,
-      dispatch
-    } = this.props
-
-    const {
-      rotation,
-      visibleLabelStep
-    } = this
-
-    if (!this.el) {
-      return
-    }
-
-    const isHorizontal = position === positionTop || position === positionBottom
-    const labelDims = Array(...this.el.querySelectorAll('.tick.-measureable text')).map(el => el.getBoundingClientRect())
-
-    let smallestTickGap = 10000 // This is just a ridiculously large tick spacing that would never happen (hopefully)
-    // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
-    if (isHorizontal) {
-      const tickDims = Array(...this.el.querySelectorAll('.tick.-measureable')).map(el => el.getBoundingClientRect())
-      tickDims.reduce((prev, current) => {
-        if (prev) {
-          const gap = current.left - prev.left - (fontSize / 2)
-          smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
-        }
-        return current
-      })
-      const largestLabel = labelDims.reduce((prev, current) => {
-        current._overflow = current.width - smallestTickGap
-        if (current._overflow > 0 && current._overflow > prev._overflow) {
-          return current
-        }
-        return prev
-      }, {_overflow: 0})
-
-      let newRotation = Math.min(Math.max(Math.abs(radiansToDegrees(Math.acos(smallestTickGap / largestLabel.width))), 0), maxLabelRotation)
-      newRotation = isNaN(newRotation) ? 0 : newRotation
-
-      if (Math.floor(rotation) !== Math.floor(newRotation)) {
-        // console.log(rotation, newRotation)
-        this.rotation = newRotation
-        // this.setState(state => ({
-        //   rotation: newRotation
-        // }))
-        // return
-      }
-    }
-
-    const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
-
-    if (visibleLabelStep !== newVisibleLabelStep) {
-      // console.log(visibleLabelStep, newVisibleLabelStep)
-      this.visibleLabelStep = newVisibleLabelStep
-      // this.setState(state => ({
-      //   visibleLabelStep: newVisibleLabelStep
-      // }))
-      // return
-    }
-
-    if (!labelDims.length || labelDims.length !== this.ticks.length) {
-      window.setTimeout(() => {
-        window.requestAnimationFrame(this.measure)
-      }, 1)
-      return
-    }
-
-    let width = 0
-    let height = 0
-    let top = 0
-    let bottom = 0
-    let left = 0
-    let right = 0
-
-    // Determine axis rotation before we measure
-
-    if (isHorizontal) {
-      // Add width overflow from the first and last ticks
-      left = Math.ceil(getPixel(labelDims[0].width) / 2)
-      right = Math.ceil(getPixel(labelDims[labelDims.length - 1].width) / 2)
-      height =
-        Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
-        tickPadding + // Add tick padding
-        Math.max(...labelDims.map(d => Math.ceil(getPixel(d.height)))) // Add the height of the largest label
-    } else {
-      // Add height overflow from the first and last ticks
-      top = Math.ceil(getPixel(labelDims[0].height) / 2)
-      bottom = Math.ceil(getPixel(labelDims[labelDims.length - 1].height) / 2)
-      width =
-        Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
-        tickPadding + // Add tick padding
-        Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width)))) // Add the width of the largest label
-    }
-
-    dispatch(state => ({
-      ...state,
-      axisDimensions: {
-        ...state.axisDimensions,
-        [position]: {
-          width,
-          height,
-          top,
-          bottom,
-          left,
-          right
-        }
-      }
-    }))
   }
   render () {
     const {
