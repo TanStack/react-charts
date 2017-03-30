@@ -20,6 +20,7 @@ import ColumnChart from '../stories/ColumnChart.js'
 import CustomStyles from '../stories/CustomStyles.js'
 import CustomTooltip from '../stories/CustomTooltip.js'
 import Cursors from '../stories/Cursors.js'
+import CustomCursors from '../stories/CustomCursors.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -42,4 +43,5 @@ configure(() => {
     .add('Custom Styles', CustomStyles)
     .add('Custom Tooltip', CustomTooltip)
     .add('Cursors', Cursors)
+    .add('Custom Cursors', CustomCursors)
 }, module)
