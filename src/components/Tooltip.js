@@ -1,12 +1,20 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
-import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
 //
 
 class Tooltip extends PureComponent {
+  static defaultProps = {
+    children: ({
+      seriesLabel,
+      primary,
+      secondary
+    }) => (
+      <span>{seriesLabel} - {primary}, {secondary}</span>
+    )
+  }
   render () {
     const {
       hovered,
@@ -19,7 +27,7 @@ class Tooltip extends PureComponent {
       gridX,
       gridY,
       //
-      component
+      children
     } = this.props
 
     if (!primaryAxis || !secondaryAxis || !hovered) {
@@ -76,7 +84,7 @@ class Tooltip extends PureComponent {
                     position: 'relative'
                   }}
                 >
-                  {Utils.normalizeComponent(component, {
+                  {children({
                     ...hovered,
                     primaryAxis,
                     secondaryAxis
@@ -111,4 +119,6 @@ export default Connect(state => ({
   gridY: Selectors.gridY(state),
   hovered: state.hovered,
   offset: Selectors.offset(state)
-}))(Tooltip)
+}))(Tooltip, {
+  isHTML: true
+})

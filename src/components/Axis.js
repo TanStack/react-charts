@@ -31,8 +31,7 @@ class Axis extends PureComponent {
     maxLabelRotation: 50,
     barPaddingInner: 0.1,
     barPaddingOuter: 0.1,
-    showGrid: true,
-    cursor: {}
+    showGrid: true
   }
   // Lifecycle
   constructor () {
@@ -68,10 +67,6 @@ class Axis extends PureComponent {
       newProps.accessedData !== oldProps.accessedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
-      // TODO: (
-        // newProps.cursor || oldProps.cursor
-        // newProps.cursor.option !== oldProps.cursor.option
-      // )
       position !== oldProps.position
     ) {
       this.updateScale(newProps)

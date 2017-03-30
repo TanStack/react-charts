@@ -39,21 +39,6 @@ class Line extends Component {
             <Chart
               data={data}
               getData={d => d.data}
-              Tooltip={props => {
-                return (
-                  <div>
-                    <div>{props.seriesLabel} - {props.primary}, {props.secondary}</div>
-                    <img
-                      src='https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif'
-                      alt=''
-                      style={{
-                        width: '200px',
-                        height: 'auto'
-                      }}
-                    />
-                  </div>
-                )
-              }}
             >
               <Axis
                 primary
@@ -68,6 +53,23 @@ class Line extends Component {
               <Data
                 type='area'
               />
+              <Tooltip>
+                {props => {
+                  return (
+                    <div>
+                      <div>{props.seriesLabel} - {props.primary}, {props.secondary}</div>
+                      <img
+                        src='https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif'
+                        alt=''
+                        style={{
+                          width: '200px',
+                          height: 'auto'
+                        }}
+                      />
+                    </div>
+                  )
+                }}
+              </Tooltip>
             </Chart>
           </ResizableBox>
         ))}
@@ -80,19 +82,6 @@ class Line extends Component {
 }
 
 export default () => <Line />
-
-const colors = [
-  '#0f7db4',
-  '#fc6868',
-  '#DECF3F',
-  '#60BD68',
-  '#FAA43A',
-  '#c63b89',
-  '#1aaabe',
-  '#734fe9',
-  '#1828bd',
-  '#cd82ad'
-]
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), makeSeries)
@@ -108,7 +97,6 @@ function makeSeries (i) {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return {
     label: 'Series ' + (i + 1),
-    color: colors[i],
     data: _.map(_.range(length), d => ({
       // x: d * multiplier,
       x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),

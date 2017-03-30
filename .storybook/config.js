@@ -41,5 +41,5 @@ configure(() => {
     .add('Column Chart', ColumnChart)
     .add('Custom Styles', CustomStyles)
     .add('Custom Tooltip', CustomTooltip)
-    .add('Custom Tooltip', Cursors)
+    .add('Cursors', Cursors)
 }, module)

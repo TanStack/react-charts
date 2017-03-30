@@ -17,6 +17,20 @@ class Interaction extends PureComponent {
     super()
     this.onHover = this.onHover.bind(this)
     this.onActivate = this.onActivate.bind(this)
+    this.onCursor = this.onCursor.bind(this)
+  }
+  componentDidMount () {
+    this.props.dispatch(state => ({
+      ...state,
+      cursor: {
+        active: false,
+        x: 0,
+        y: 0
+      }
+    }))
+  }
+  componentDidUpdate () {
+    this.dims = this.el.getBoundingClientRect()
   }
   render () {
     const {
@@ -56,8 +70,14 @@ class Interaction extends PureComponent {
 
     return (
       <g
+        ref={el => { this.el = el }}
         className='Interaction'
-        onMouseLeave={e => this.onHover(null, e)}
+        onMouseEnter={e => this.onCursor(e)}
+        onMouseMove={e => this.onCursor(e)}
+        onMouseLeave={e => {
+          this.onCursor(e, true)
+          this.onHover(null, e)
+        }}
       >
         {polygons.map((points, i) => {
           const path = lineFn(points)
@@ -101,6 +121,16 @@ class Interaction extends PureComponent {
     dispatch(state => ({
       ...state,
       active: newActive
+    }))
+  }
+  onCursor (e, leaving) {
+    this.props.dispatch(state => ({
+      ...state,
+      cursor: {
+        active: !leaving,
+        x: e.clientX - this.dims.left,
+        y: e.clientY - this.dims.top
+      }
     }))
   }
 }

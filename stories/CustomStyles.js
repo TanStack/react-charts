@@ -66,6 +66,7 @@ class Line extends Component {
                   }
                 })}
               />
+              <Tooltip />
             </Chart>
           </ResizableBox>
         ))}

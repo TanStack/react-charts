@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Axis, Data } from '../src'
+import { Chart, Axis, Data, Tooltip } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -51,6 +51,7 @@ class Line extends Component {
               <Data
                 type='line'
               />
+              <Tooltip />
             </Chart>
           </ResizableBox>
         ))}

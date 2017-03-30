@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Axis, Data, Cursor } from '../src'
+import { Chart, Axis, Data, Tooltip, Cursor } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -39,21 +39,6 @@ class Line extends Component {
             <Chart
               data={data}
               getData={d => d.data}
-              Tooltip={props => {
-                return (
-                  <div>
-                    <div>{props.seriesLabel} - {props.primary}, {props.secondary}</div>
-                    <img
-                      src='https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif'
-                      alt=''
-                      style={{
-                        width: '200px',
-                        height: 'auto'
-                      }}
-                    />
-                  </div>
-                )
-              }}
             >
               <Axis
                 primary
@@ -65,12 +50,17 @@ class Line extends Component {
                 position='left'
                 stacked
                 cursor={{
-                  
+
                 }}
               />
               <Data
                 type='area'
               />
+              <Tooltip />
+              <Cursor
+                primary
+              />
+              <Cursor />
             </Chart>
           </ResizableBox>
         ))}
@@ -83,19 +73,6 @@ class Line extends Component {
 }
 
 export default () => <Line />
-
-const colors = [
-  '#0f7db4',
-  '#fc6868',
-  '#DECF3F',
-  '#60BD68',
-  '#FAA43A',
-  '#c63b89',
-  '#1aaabe',
-  '#734fe9',
-  '#1828bd',
-  '#cd82ad'
-]
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), makeSeries)
@@ -111,12 +88,17 @@ function makeSeries (i) {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return {
     label: 'Series ' + (i + 1),
-    color: colors[i],
-    data: _.map(_.range(length), d => ({
-      // x: d * multiplier,
-      x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),
-      y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
-      r: Math.round(Math.random() * 5)
-    }))
+    data: _.map(_.range(length), d => {
+      let date = new Date()
+      date.setMinutes(startDate.getMinutes() + (30 * d))
+      date.setSeconds(0)
+      date = date.setMilliseconds(0)
+      return {
+        // x: d * multiplier,
+        x: date,
+        y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
+        r: Math.round(Math.random() * 5)
+      }
+    })
   }
 }

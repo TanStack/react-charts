@@ -1,17 +1,17 @@
 import React, { PureComponent } from 'react'
-import { voronoi } from 'd3-voronoi'
-import { line } from 'd3-shape'
+import { Animate } from 'react-move'
 //
-import Path from '../primitives/Path'
+// import Line from '../primitives/Line'
+// import Text from '../primitives/Text'
+// import Rectangle from '../primitives/Rectangle'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
-const noop = () => null
-
-class Interaction extends PureComponent {
+class Cursor extends PureComponent {
   static defaultProps = {
-    onHover: noop,
-    onActivate: noop
+    children: ({
+      label
+    }) => <span>{label}</span>
   }
   constructor () {
     super()
@@ -20,65 +20,137 @@ class Interaction extends PureComponent {
   }
   render () {
     const {
-      stackData,
+      primary,
+      //
       primaryAxis,
-      secondaryAxis
+      secondaryAxis,
+      cursor,
+      offset: {
+        left,
+        top
+      },
+      gridX,
+      gridY,
+      children
     } = this.props
 
     // Don't render until we have all dependencies
     if (
-      !stackData ||
       !primaryAxis ||
       !secondaryAxis
     ) {
       return null
     }
 
-    // TODO: Need to support different types of voronoi's here.
-    // - Closest / Hit Point / Element Hover
-    // - Point / Y Axis / Stack
+    const x = gridX + cursor.x
+    const y = gridY + cursor.y
+    // const x = cursor.x
+    // const y = cursor.y
 
-    const flatStackData = stackData.reduce((prev, now) => prev.concat(now.data), [])
+    const axis = primary ? primaryAxis : secondaryAxis
+    const siblingAxis = primary ? secondaryAxis : primaryAxis
+    const range = axis.scale.range()
+    const siblingRange = siblingAxis.scale.range()
 
-    // Bail out if the scale isn't available
-    if (!primaryAxis || !secondaryAxis) {
-      return null
+    const formatLabel = axis.scale.tickFormat(axis.scale.ticks().length)
+
+    let
+      x1,
+      x2,
+      y1,
+      y2,
+      label,
+      alignPctX,
+      alignPctY
+
+    if (axis.vertical) {
+      x1 = gridX + siblingRange[0]
+      x2 = gridX + siblingRange[1]
+      y1 = y
+      y2 = y + 1
+      label = formatLabel(axis.scale.invert(cursor.y))
+      if (axis.position === 'left') {
+        alignPctX = -100
+        alignPctY = -50
+      } else {
+        alignPctX = 0
+        alignPctY = -50
+      }
+    } else {
+      x1 = x
+      x2 = x + 1
+      y1 = gridY + siblingRange[0]
+      y2 = gridY + siblingRange[1]
+      label = formatLabel(axis.scale.invert(cursor.x))
+      if (axis.position === 'top') {
+        alignPctX = -500
+        alignPctY = -100
+      } else {
+        alignPctX = -50
+        alignPctY = 0
+      }
     }
 
-    const extent = [[0, 0], [primaryAxis.scale.range()[1], secondaryAxis.scale.range()[0]]]
-    const vor = voronoi()
-      .x(d => d.x)
-      .y(d => d.y)
-      .extent(extent)(flatStackData)
+    const xStart = Math.min(x1, x2)
+    const yStart = Math.min(y1, y2)
+    const xEnd = Math.max(x1, x2)
+    const yEnd = Math.max(y1, y2)
 
-    const polygons = vor.polygons()
-    const lineFn = line()
+    const height = Math.max(yEnd - yStart, 0)
+    const width = Math.max(xEnd - xStart, 0)
 
     return (
-      <g
-        className='Cursor'
-        onMouseLeave={e => this.onHover(null, e)}
+      <Animate
+        data={{
+          visibility: cursor.active ? 1 : 0
+        }}
       >
-        {polygons.map((points, i) => {
-          const path = lineFn(points)
-          return (
-            <Path
-              key={i}
-              d={path}
-              className='action-voronoi'
-              stroke='transparent'
-              onMouseEnter={e => this.onHover(points.data, e)}
-              onClick={e => this.onActivate(points.data, e)}
+        {inter => (
+          <div
+            className='Cursor'
+            onMouseLeave={e => this.onHover(null, e)}
+            style={{
+              pointerEvents: 'none',
+              position: 'absolute',
+              left: `${left}px`,
+              top: `${top}px`,
+              opacity: inter.visibility
+            }}
+          >
+            <div
               style={{
-                stroke: 'transparent',
-                fill: 'transparent',
-                strokeWidth: 0,
-                opacity: 0
+                position: 'absolute',
+                transform: `translate3d(${xStart}px, ${yStart}px, 0px)`,
+                width: `${width}px`,
+                height: `${height}px`,
+                background: 'rgba(0,0,0,.3)'
               }}
             />
-          )
-        })}
-      </g>
+            <div
+              style={{
+                position: 'absolute',
+                transform: `translate3d(${x1}px, ${y1}px, 0px)`
+              }}
+            >
+              <div
+                style={{
+                  padding: '5px',
+                  fontSize: '10px',
+                  background: 'rgba(0,0,0,.6)',
+                  color: 'white',
+                  borderRadius: '3px',
+                  position: 'relative',
+                  transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`
+                }}
+              >
+                {children({
+                  label
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </Animate>
     )
   }
   onHover (hovered, e) {
@@ -106,7 +178,33 @@ class Interaction extends PureComponent {
 }
 
 export default Connect(state => ({
-  stackData: state.stackData,
   primaryAxis: Selectors.primaryAxis(state),
-  secondaryAxis: Selectors.secondaryAxis(state)
-}))(Interaction)
+  secondaryAxis: Selectors.secondaryAxis(state),
+  cursor: state.cursor,
+  offset: Selectors.offset(state),
+  gridX: Selectors.gridX(state),
+  gridY: Selectors.gridY(state)
+}))(Cursor, {
+  isHTML: true
+})
+
+/* <g
+
+  >
+
+  <Rectangle
+    x1={labelX1}
+    x2={labelX2}
+    y1={labelY1}
+    y2={labelY2}
+  />
+  <Text
+    x={x1}
+    y={y1}
+    fontSize={fontSize}
+    textAnchor={axis.position === 'left' ? 'end' : axis.position === 'right' ? 'start' : 'middle'}
+    dominantBaseline={axis.position === 'top' ? 'alphabetic' : axis.position === 'bottom' ? 'hanging' : 'central'}
+  >
+    {label}
+  </Text>
+</g> */

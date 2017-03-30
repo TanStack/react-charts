@@ -16,7 +16,7 @@ const stackTypes = {
 }
 
 const defaultColors = [
-  '#0f7db4',
+  '#4ab5eb',
   '#fc6868',
   '#DECF3F',
   '#60BD68',
@@ -36,7 +36,11 @@ class Data extends PureComponent {
         color: defaultColors[d.index % defaultColors.length]
       }
     }),
-    getDataProps: () => ({})
+    getDataProps: ({
+      active
+    }) => ({
+      r: active ? 4 : 2
+    })
   }
   componentDidMount () {
     this.updateStackData(this.props)
@@ -140,15 +144,12 @@ class Data extends PureComponent {
         data={[...stackData].reverse()} // The stack is reversed for proper z-index painting
         getKey={(d, i) => d.id}
         update={d => ({
-          timer: 1,
           visibility: 1
         })}
         enter={(d, i) => ({
-          timer: 0,
           visibility: 0
         })}
         leave={d => ({
-          timer: 0,
           visibility: 0
         })}
       >
@@ -157,7 +158,7 @@ class Data extends PureComponent {
             <g
               className='Stack'
             >
-              {inters.map((inter) => {
+              {inters.map((inter, i) => {
                 const active = hovered && hovered.seriesID === inter.data.id
                 const inactive = hovered && hovered.seriesID !== inter.data.id
 

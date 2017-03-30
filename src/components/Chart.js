@@ -8,7 +8,6 @@ import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 
 import Interaction from '../components/Interaction'
-import TooltipWrap from '../components/Tooltip'
 
 class Chart extends PureComponent {
   static defaultProps = {
@@ -17,12 +16,7 @@ class Chart extends PureComponent {
     getSeriesID: (d, i) => i,
     getX: d => Array.isArray(d) ? d[0] : d.x,
     getY: d => Array.isArray(d) ? d[1] : d.y,
-    getR: d => Array.isArray(d) ? d[0] : d.r,
-    Tooltip: ({
-      seriesLabel,
-      primary,
-      secondary
-    }) => <span>{seriesLabel} - {primary}, {secondary}</span>
+    getR: d => Array.isArray(d) ? d[0] : d.r
   }
   constructor () {
     super()
@@ -37,7 +31,6 @@ class Chart extends PureComponent {
     // If anything related to the data model changes, update it
     if (
       nextProps.data !== this.props.data ||
-      nextProps.Tooltip !== this.props.Tooltip ||
       nextProps.width !== this.props.width ||
       nextProps.height !== this.props.height ||
       nextProps.getData !== this.props.getData ||
@@ -127,9 +120,12 @@ class Chart extends PureComponent {
       height,
       gridX,
       gridY,
-      Tooltip,
       children
     } = this.props
+
+    const allChildren = React.Children.toArray(children)
+    const svgChildren = allChildren.filter(d => !d.type.isHTML)
+    const htmlChildren = allChildren.filter(d => d.type.isHTML)
 
     return (
       <div
@@ -157,13 +153,13 @@ class Chart extends PureComponent {
                 ref={el => { this.groupEl = el }}
                 transform={`translate(${gridX}, ${gridY})`}
               >
-                {children}
+                {svgChildren}
                 <Interaction />
               </g>
             </svg>
           )}
         </Animate>
-        <TooltipWrap component={Tooltip} />
+        {htmlChildren}
       </div>
     )
   }

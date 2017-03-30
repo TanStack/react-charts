@@ -1,8 +1,8 @@
 import React, { PureComponent, PropTypes } from 'react'
 
 export default function Connect (mapStateToProps) {
-  return (ComponentToWrap) => {
-    return class ConnectedReactChartCmp extends PureComponent {
+  return (ComponentToWrap, statics = {}) => {
+    class ConnectedReactChartCmp extends PureComponent {
       // let’s define what’s needed from the `context`
       static displayName = `Connect(${ComponentToWrap.displayName || ComponentToWrap.name})`
       static contextTypes = {
@@ -35,5 +35,11 @@ export default function Connect (mapStateToProps) {
         )
       }
     }
+    for (var prop in statics) {
+      if (statics.hasOwnProperty(prop)) {
+        ConnectedReactChartCmp[prop] = statics[prop]
+      }
+    }
+    return ConnectedReactChartCmp
   }
 }
