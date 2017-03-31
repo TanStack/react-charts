@@ -162,6 +162,7 @@ export default function updateScale (props) {
   // Set some extra values on the axis for posterity
   const axis = {
     scale,
+    uniqueVals,
     primary,
     invert,
     vertical,

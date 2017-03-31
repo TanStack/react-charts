@@ -7,7 +7,7 @@ export default function Provider (ComponentToWrap) {
     }
     constructor (props) {
       super()
-      this.store = {...props}
+      this.state = {...props}
       this.subscribers = []
       this.subscribe = this.subscribe.bind(this)
       this.notify = this.notify.bind(this)
@@ -16,9 +16,9 @@ export default function Provider (ComponentToWrap) {
     componentWillReceiveProps (newProps) {
       for (var prop in newProps) {
         if (newProps.hasOwnProperty(prop)) {
-          if (this.store[prop] !== newProps[prop]) {
-            this.dispatch(store => ({
-              ...store,
+          if (this.state[prop] !== newProps[prop]) {
+            this.dispatch(state => ({
+              ...state,
               ...newProps
             }))
           }
@@ -35,9 +35,8 @@ export default function Provider (ComponentToWrap) {
     }
     dispatch (fn) {
       // Functionally replace the store
-      this.store = fn(this.store)
+      this.setState(fn, this.notify)
       // Then notify all subscribers
-      this.notify()
     }
     notify () {
       this.subscribers.forEach(d => d())
@@ -45,7 +44,7 @@ export default function Provider (ComponentToWrap) {
     getChildContext () {
       return {
         reactChart: {
-          getState: () => this.store,
+          getState: () => this.state,
           subscribe: this.subscribe,
           dispatch: this.dispatch
         }

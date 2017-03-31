@@ -14,6 +14,8 @@ import Utils from '../utils/Utils'
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
+import { defaultProps } from './Data'
+
 const pathDefaultStyle = {
   strokeWidth: 2
 }
@@ -32,7 +34,8 @@ class Area extends PureComponent {
       getProps,
       getDataProps,
       //
-      hovered
+      hovered,
+      interaction
     } = this.props
 
     const areaFn = area()
@@ -59,6 +62,13 @@ class Area extends PureComponent {
         {inter => {
           const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.yBase])))
           const linePath = lineFn(inter.data.map(d => ([d.x, d.y])))
+
+          const seriesInteractionProps = interaction === 'series' ? {
+            onMouseEnter: this.hoverSeries.bind(this, series),
+            onMouseMove: this.hoverSeries.bind(this, series),
+            onMouseLeave: this.hoverSeries.bind(this, null)
+          } : {}
+
           return (
             <g>
               <Path
@@ -71,6 +81,7 @@ class Area extends PureComponent {
                   stroke: 'transparent'
                 }}
                 opacity={visibility}
+                {...seriesInteractionProps}
               />
               <Path
                 d={linePath}
@@ -82,10 +93,13 @@ class Area extends PureComponent {
                   fill: 'transparent'
                 }}
                 opacity={visibility}
+                {...seriesInteractionProps}
               />
               {inter.data.map((d, i) => {
-                const active = hovered && hovered.seriesID === series.id && hovered.index === i
-                const inactive = hovered && (hovered.seriesID !== series.id || hovered.index !== i)
+                const {
+                  active: datumActive,
+                  inactive: datumInactive
+                } = Utils.datumStatus(series, d, hovered)
 
                 let {
                   style: dataStyle,
@@ -93,11 +107,18 @@ class Area extends PureComponent {
                   ...dataProps
                 } = getDataProps({
                   ...series,
-                  active,
-                  inactive
+                  active: datumActive,
+                  inactive: datumInactive,
+                  defaults: defaultProps
                 })
 
                 dataStyle = Utils.extractColor(dataStyle)
+
+                const datumInteractionProps = interaction === 'element' ? {
+                  onMouseEnter: this.hoverDatum.bind(this, d),
+                  onMouseMove: this.hoverDatum.bind(this, d),
+                  onMouseLeave: this.hoverDatum.bind(this, null)
+                } : {}
 
                 return (
                   <Circle
@@ -112,6 +133,7 @@ class Area extends PureComponent {
                       ...dataStyle
                     }}
                     opacity={visibility}
+                    {...datumInteractionProps}
                   />
                 )
               })}
@@ -121,10 +143,42 @@ class Area extends PureComponent {
       </Animate>
     )
   }
+  hoverSeries (series) {
+    this.props.dispatch(state => {
+      const focus = Utils.getClosestPoint(state.cursor, series.data)
+      return {
+        ...state,
+        hovered: series ? {
+          active: true,
+          series,
+          datums: series.data,
+          focus
+        } : {
+          ...state.hovered,
+          active: false
+        }
+      }
+    })
+  }
+  hoverDatum (datum) {
+    this.props.dispatch(state => ({
+      ...state,
+      hovered: datum ? {
+        active: true,
+        series: datum.series,
+        datums: [datum],
+        focus: datum
+      } : {
+        ...state.hovered,
+        active: false
+      }
+    }))
+  }
 }
 
 export default Connect((state, props) => {
   return {
-    hovered: state.hovered
+    hovered: state.hovered,
+    interaction: state.interaction
   }
 })(Area)

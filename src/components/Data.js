@@ -159,8 +159,10 @@ class Data extends PureComponent {
               className='Stack'
             >
               {inters.map((inter, i) => {
-                const active = hovered && hovered.seriesID === inter.data.id
-                const inactive = hovered && hovered.seriesID !== inter.data.id
+                const {
+                  active,
+                  inactive
+                } = Utils.seriesStatus(inter.data, hovered)
 
                 const resolvedType = typeGetter({
                   ...inter.data,

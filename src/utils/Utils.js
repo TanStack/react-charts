@@ -1,4 +1,8 @@
 export default {
+  seriesStatus,
+  datumStatus,
+  getCenterPointOfSide,
+  getClosestPoint,
   normalizeComponent,
   extractColor,
   normalizeGetter,
@@ -6,6 +10,96 @@ export default {
   get,
   mapValues,
   uniq
+}
+
+function seriesStatus (series, hovered) {
+  if (!hovered || !hovered.active || !hovered.series) {
+    return {
+      active: false,
+      inactive: false
+    }
+  }
+  const active = hovered.series.id === series.id
+
+  return {
+    active,
+    inactive: !active
+  }
+}
+
+function datumStatus (series, datum, hovered) {
+  if (!hovered || !hovered.active || !hovered.datums || !hovered.datums.length) {
+    return {
+      active: false,
+      inactive: false
+    }
+  }
+  const active = hovered.datums.find(d => d.seriesID === series.id && d.index === datum.index)
+
+  return {
+    active,
+    inactive: !active
+  }
+}
+
+function getCenterPointOfSide (position, points) {
+  let xMin, xMax, yMin, yMax
+
+  xMin = points[0].x
+  xMax = points[0].x
+  yMin = points[0].y
+  yMax = points[0].y
+
+  points.forEach(point => {
+    xMin = Math.min(point.x, xMin)
+    xMax = Math.max(point.x, xMax)
+    yMin = Math.min(point.y, yMin)
+    yMax = Math.max(point.y, yMax)
+  })
+
+  if (position === 'center') {
+    return {
+      x: (xMin + xMax) / 2,
+      y: (yMin + yMax) / 2
+    }
+  }
+  if (position === 'left') {
+    return {
+      x: xMin,
+      y: (yMin + yMax) / 2
+    }
+  }
+  if (position === 'left') {
+    return {
+      x: xMax,
+      y: (yMin + yMax) / 2
+    }
+  }
+  if (position === 'top') {
+    return {
+      x: (xMin + xMax) / 2,
+      y: yMin
+    }
+  }
+  if (position === 'bottom') {
+    return {
+      x: (xMin + xMax) / 2,
+      y: yMax
+    }
+  }
+}
+
+function getClosestPoint (point, points) {
+  let closestDistance = Infinity
+  let closestPoint = points.x
+  points.forEach((p) => {
+    const distance = Math.sqrt(Math.pow(p.x - point.x, 2) + Math.pow(p.y - point.y, 2))
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestPoint = p
+    }
+  })
+  return closestPoint
 }
 
 function normalizeComponent (Comp, params = {}, fallback = Comp) {

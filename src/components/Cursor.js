@@ -36,20 +36,20 @@ class Cursor extends PureComponent {
 
     // Don't render until we have all dependencies
     if (
+      !cursor ||
       !primaryAxis ||
       !secondaryAxis
     ) {
       return null
     }
 
-    const x = gridX + cursor.x
-    const y = gridY + cursor.y
+    const x = cursor.x
+    const y = cursor.y
     // const x = cursor.x
     // const y = cursor.y
 
     const axis = primary ? primaryAxis : secondaryAxis
     const siblingAxis = primary ? secondaryAxis : primaryAxis
-    const range = axis.scale.range()
     const siblingRange = siblingAxis.scale.range()
 
     const formatLabel = axis.scale.tickFormat(axis.scale.ticks().length)

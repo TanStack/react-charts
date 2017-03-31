@@ -7,7 +7,9 @@ import Provider from '../utils/Provider'
 import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 
-import Interaction from '../components/Interaction'
+import Rectangle from '../primitives/Rectangle'
+
+import Voronoi from '../components/Voronoi'
 
 class Chart extends PureComponent {
   static defaultProps = {
@@ -16,19 +18,33 @@ class Chart extends PureComponent {
     getSeriesID: (d, i) => i,
     getX: d => Array.isArray(d) ? d[0] : d.x,
     getY: d => Array.isArray(d) ? d[1] : d.y,
-    getR: d => Array.isArray(d) ? d[0] : d.r
+    getR: d => Array.isArray(d) ? d[0] : d.r,
+    interaction: 'closest'
   }
   constructor () {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
+    this.onCursor = this.onCursor.bind(this)
+    this.onCursorLeave = this.onCursorLeave.bind(this)
   }
   componentDidMount () {
+    this.props.dispatch(state => ({
+      ...state,
+      interaction: this.props.interaction
+    }))
     this.updateDataModel(this.props)
     this.measure()
   }
   componentWillUpdate (nextProps) {
     // If anything related to the data model changes, update it
+    if (nextProps.interaction !== this.props.interaction) {
+      this.props.dispatch(state => ({
+        ...state,
+        interaction: nextProps.interaction
+      }))
+    }
+
     if (
       nextProps.data !== this.props.data ||
       nextProps.width !== this.props.width ||
@@ -45,6 +61,7 @@ class Chart extends PureComponent {
   }
   componentDidUpdate (prevProps) {
     window.requestAnimationFrame(() => this.measure(prevProps))
+    this.dims = this.el.getBoundingClientRect()
   }
   updateDataModel (props) {
     const {
@@ -71,7 +88,7 @@ class Chart extends PureComponent {
     const accessedData = data.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
-      return {
+      const series = {
         row: s,
         index: seriesIndex,
         id: seriesID,
@@ -90,6 +107,7 @@ class Chart extends PureComponent {
           }
         })
       }
+      return series
     })
 
     // This will make all of the props available to anything using
@@ -150,11 +168,24 @@ class Chart extends PureComponent {
               }}
             >
               <g
-                ref={el => { this.groupEl = el }}
+                ref={el => { this.el = el }}
                 transform={`translate(${gridX}, ${gridY})`}
+                onMouseEnter={this.onCursor}
+                onMouseMove={this.onCursor}
+                onMouseLeave={this.onCursorLeave}
               >
+                <Rectangle
+                  // This is to ensure the cursor always has something to hit
+                  x1={-gridX}
+                  x2={width - gridX}
+                  y1={-gridY}
+                  y2={height - gridY}
+                  style={{
+                    opacity: 0
+                  }}
+                />
                 {svgChildren}
-                <Interaction />
+                <Voronoi />
               </g>
             </svg>
           )}
@@ -162,6 +193,28 @@ class Chart extends PureComponent {
         {htmlChildren}
       </div>
     )
+  }
+  onCursor ({
+    clientX,
+    clientY
+  }) {
+    this.props.dispatch(state => ({
+      ...state,
+      cursor: {
+        active: true,
+        x: clientX - this.dims.left,
+        y: clientY - this.dims.top
+      }
+    }))
+  }
+  onCursorLeave () {
+    this.props.dispatch(state => ({
+      ...state,
+      cursor: {
+        ...state.cursor,
+        active: false
+      }
+    }))
   }
 }
 
@@ -174,6 +227,7 @@ const ReactChart = Connect((state) => {
     gridY: Selectors.gridY(state),
     active: state.active,
     hovered: state.hovered,
+    cursor: state.cursor,
     offset: Selectors.offset(state)
   }
 })(Chart)

@@ -1,19 +1,35 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
+import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import Connect from '../utils/Connect'
 //
 
+const fontSize = 12
+
 class Tooltip extends PureComponent {
   static defaultProps = {
-    children: ({
-      seriesLabel,
-      primary,
-      secondary
-    }) => (
-      <span>{seriesLabel} - {primary}, {secondary}</span>
-    )
+    position: 'average',
+    children: (props) => {
+      const {
+        series,
+        datums
+      } = props
+      return series ? (
+        <div>
+          <strong>{series.label}</strong><br />
+          {series.data[0].primary}, {series.data[0].secondary}
+        </div>
+      ) : datums && datums.length ? (
+        <div>
+          <strong>{datums[0].primary}</strong><br />
+          {datums.map((d, i) => (
+            <span key={i}>{d.seriesLabel}: {d.secondary}</span>
+          ))}
+        </div>
+      ) : null
+    }
   }
   render () {
     const {
@@ -26,7 +42,9 @@ class Tooltip extends PureComponent {
       },
       gridX,
       gridY,
+      cursor,
       //
+      position, // nearest, average
       children
     } = this.props
 
@@ -34,11 +52,27 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    const x = gridX + hovered.x
-    const y = gridY + hovered.y
+    const datums = hovered.datums && hovered.datums.length ? hovered.datums : hovered.series ? hovered.series.data : null
+
+    const focus = datums ? (
+        position === 'top' ? Utils.getCenterPointOfSide('top', datums)
+        : position === 'right' ? Utils.getCenterPointOfSide('right', datums)
+        : position === 'top' ? Utils.getCenterPointOfSide('top', datums)
+        : position === 'bottom' ? Utils.getCenterPointOfSide('bottom', datums)
+        : position === 'center' ? Utils.getCenterPointOfSide('center', datums)
+        : Utils.getClosestPoint(cursor, datums)
+    ) : {
+      x: 0,
+      y: 0
+    }
+
+    const x = gridX + focus.x
+    const y = gridY + focus.y
 
     const alignX = '-50%'
     const alignY = '-100%'
+
+    const visibility = hovered.active ? 1 : 0
 
     return (
       <Animate
@@ -46,14 +80,16 @@ class Tooltip extends PureComponent {
           x,
           y,
           alignX,
-          alignY
+          alignY,
+          visibility
         }}
       >
         {({
           x,
           y,
           alignX,
-          alignY
+          alignY,
+          visibility
         }) => (
           <div
             className='tooltip-wrap'
@@ -61,7 +97,8 @@ class Tooltip extends PureComponent {
               pointerEvents: 'none',
               position: 'absolute',
               left: `${left}px`,
-              top: `${top}px`
+              top: `${top}px`,
+              opacity: visibility
             }}
           >
             <div
@@ -77,6 +114,7 @@ class Tooltip extends PureComponent {
               >
                 <div
                   style={{
+                    fontSize: fontSize + 'px',
                     padding: '5px',
                     background: 'rgba(38, 38, 38, 0.8)',
                     color: 'white',
@@ -84,11 +122,7 @@ class Tooltip extends PureComponent {
                     position: 'relative'
                   }}
                 >
-                  {children({
-                    ...hovered,
-                    primaryAxis,
-                    secondaryAxis
-                  })}
+                  {children(hovered)}
                   <div
                     style={{
                       position: 'absolute',
@@ -118,6 +152,7 @@ export default Connect(state => ({
   gridX: Selectors.gridX(state),
   gridY: Selectors.gridY(state),
   hovered: state.hovered,
+  cursor: state.cursor,
   offset: Selectors.offset(state)
 }))(Tooltip, {
   isHTML: true
