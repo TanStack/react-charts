@@ -45,8 +45,6 @@ class Cursor extends PureComponent {
 
     const x = cursor.x
     const y = cursor.y
-    // const x = cursor.x
-    // const y = cursor.y
 
     const axis = primary ? primaryAxis : secondaryAxis
     const siblingAxis = primary ? secondaryAxis : primaryAxis

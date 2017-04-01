@@ -55,7 +55,7 @@ class Line extends Component {
                 type='area'
                 getProps={(series, i) => ({
                   style: {
-                    color: 'grey',
+                    color: 'rgba(0, 0, 0, .7)',
                     opacity: series.inactive ? 0.2 : 1
                   }
                 })}
@@ -66,10 +66,14 @@ class Line extends Component {
                   }
                 })}
               />
-              <Cursor primary />
+              <Cursor
+                primary
+                snap
+              />
               <Cursor />
               <Tooltip
-                position='top' // nearest, average
+                position='center' // center, top, bottom, left, right, cursor, closest, (datums, resolvedCursor) => ({x, y})
+                align='auto' // auto, top, left, right, bottom, center,
               />
             </Chart>
           </ResizableBox>

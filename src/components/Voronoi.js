@@ -50,7 +50,8 @@ class Interaction extends PureComponent {
         x: d.x,
         y: d.y,
         series: stackData[d.seriesIndex],
-        datums: null
+        datums: null,
+        single: false
       }))
       const vor = voronoi()
         .x(d => d.x)
@@ -63,7 +64,8 @@ class Interaction extends PureComponent {
         x: d.x,
         y: d.y,
         series: null,
-        datums: [d]
+        datums: [d],
+        single: true
       }))
       const vor = voronoi()
         .x(d => d.x)
@@ -81,7 +83,8 @@ class Interaction extends PureComponent {
           x: d.x,
           y: d.y,
           series: null, // PrimaryAxis can't be the series, so don't send it
-          datums: []
+          datums: [],
+          single: false
         }
         datumsByPrimary[key].datums.push(d)
       })

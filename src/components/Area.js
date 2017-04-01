@@ -144,30 +144,27 @@ class Area extends PureComponent {
     )
   }
   hoverSeries (series) {
-    this.props.dispatch(state => {
-      const focus = Utils.getClosestPoint(state.cursor, series.data)
-      return {
-        ...state,
-        hovered: series ? {
-          active: true,
-          series,
-          datums: series.data,
-          focus
-        } : {
-          ...state.hovered,
-          active: false
-        }
+    this.props.dispatch(state => ({
+      ...state,
+      hovered: series ? {
+        active: true,
+        series,
+        datums: null,
+        single: false
+      } : {
+        ...state.hovered,
+        active: false
       }
-    })
+    }))
   }
   hoverDatum (datum) {
     this.props.dispatch(state => ({
       ...state,
       hovered: datum ? {
         active: true,
-        series: datum.series,
+        series: null,
         datums: [datum],
-        focus: datum
+        single: true
       } : {
         ...state.hovered,
         active: false

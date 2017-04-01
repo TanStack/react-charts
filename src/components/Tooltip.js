@@ -19,13 +19,12 @@ class Tooltip extends PureComponent {
       return series ? (
         <div>
           <strong>{series.label}</strong><br />
-          {series.data[0].primary}, {series.data[0].secondary}
         </div>
       ) : datums && datums.length ? (
         <div>
           <strong>{datums[0].primary}</strong><br />
           {datums.map((d, i) => (
-            <span key={i}>{d.seriesLabel}: {d.secondary}</span>
+            <div key={i}>{d.seriesLabel}: {d.secondary}<br /></div>
           ))}
         </div>
       ) : null
@@ -54,16 +53,23 @@ class Tooltip extends PureComponent {
 
     const datums = hovered.datums && hovered.datums.length ? hovered.datums : hovered.series ? hovered.series.data : null
 
+    const resolvedCursor = {
+      x: cursor.x - gridX,
+      y: cursor.y - gridY
+    }
+
     const focus = datums ? (
-        position === 'top' ? Utils.getCenterPointOfSide('top', datums)
+      typeof position === 'function' ? position(datums, resolvedCursor)
+        : position === 'top' ? Utils.getCenterPointOfSide('top', datums)
         : position === 'right' ? Utils.getCenterPointOfSide('right', datums)
         : position === 'top' ? Utils.getCenterPointOfSide('top', datums)
         : position === 'bottom' ? Utils.getCenterPointOfSide('bottom', datums)
         : position === 'center' ? Utils.getCenterPointOfSide('center', datums)
-        : Utils.getClosestPoint(cursor, datums)
+        : position === 'cursor' ? resolvedCursor
+        : Utils.getClosestPoint(resolvedCursor, datums)
     ) : {
-      x: 0,
-      y: 0
+      x: gridX,
+      y: gridY
     }
 
     const x = gridX + focus.x
