@@ -16,6 +16,7 @@ export default function measure () {
   // labels before they render. Considering that ticks could be anything,
   // even a react component, this could get very tough.
   const {
+    axis,
     tickSizeInner,
     tickSizeOuter,
     tickPadding,
@@ -46,7 +47,7 @@ export default function measure () {
         smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
       }
       return current
-    })
+    }, false)
     const largestLabel = labelDims.reduce((prev, current) => {
       current._overflow = current.width - smallestTickGap
       if (current._overflow > 0 && current._overflow > prev._overflow) {
@@ -59,12 +60,7 @@ export default function measure () {
     newRotation = isNaN(newRotation) ? 0 : newRotation
 
     if (Math.floor(rotation) !== Math.floor(newRotation)) {
-      // console.log(rotation, newRotation)
-      this.rotation = newRotation
-      // this.setState(state => ({
-      //   rotation: newRotation
-      // }))
-      // return
+      this.rotation = axis.position === 'top' ? -newRotation : newRotation
     }
   }
 

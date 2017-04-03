@@ -10,11 +10,10 @@ import {
 //
 import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
+import { hoverSeries, hoverDatum } from '../utils/hoverMethods'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
-
-import { defaultProps } from './Data'
 
 const pathDefaultStyle = {
   strokeWidth: 2
@@ -64,9 +63,9 @@ class Area extends PureComponent {
           const linePath = lineFn(inter.data.map(d => ([d.x, d.y])))
 
           const seriesInteractionProps = interaction === 'series' ? {
-            onMouseEnter: this.hoverSeries.bind(this, series),
-            onMouseMove: this.hoverSeries.bind(this, series),
-            onMouseLeave: this.hoverSeries.bind(this, null)
+            onMouseEnter: hoverSeries.bind(this, series),
+            onMouseMove: hoverSeries.bind(this, series),
+            onMouseLeave: hoverSeries.bind(this, null)
           } : {}
 
           return (
@@ -108,16 +107,15 @@ class Area extends PureComponent {
                 } = getDataProps({
                   ...series,
                   active: datumActive,
-                  inactive: datumInactive,
-                  defaults: defaultProps
+                  inactive: datumInactive
                 })
 
                 dataStyle = Utils.extractColor(dataStyle)
 
                 const datumInteractionProps = interaction === 'element' ? {
-                  onMouseEnter: this.hoverDatum.bind(this, d),
-                  onMouseMove: this.hoverDatum.bind(this, d),
-                  onMouseLeave: this.hoverDatum.bind(this, null)
+                  onMouseEnter: hoverDatum.bind(this, d),
+                  onMouseMove: hoverDatum.bind(this, d),
+                  onMouseLeave: hoverDatum.bind(this, null)
                 } : {}
 
                 return (
@@ -142,34 +140,6 @@ class Area extends PureComponent {
         }}
       </Animate>
     )
-  }
-  hoverSeries (series) {
-    this.props.dispatch(state => ({
-      ...state,
-      hovered: series ? {
-        active: true,
-        series,
-        datums: null,
-        single: false
-      } : {
-        ...state.hovered,
-        active: false
-      }
-    }))
-  }
-  hoverDatum (datum) {
-    this.props.dispatch(state => ({
-      ...state,
-      hovered: datum ? {
-        active: true,
-        series: null,
-        datums: [datum],
-        single: true
-      } : {
-        ...state.hovered,
-        active: false
-      }
-    }))
   }
 }
 

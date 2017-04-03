@@ -14,7 +14,9 @@ class Tooltip extends PureComponent {
     children: (props) => {
       const {
         series,
-        datums
+        datums,
+        primaryAxis,
+        secondaryAxis
       } = props
       return series ? (
         <div>
@@ -22,9 +24,10 @@ class Tooltip extends PureComponent {
         </div>
       ) : datums && datums.length ? (
         <div>
-          <strong>{datums[0].primary}</strong><br />
+          <strong>{primaryAxis.scale.tickFormat()(datums[0].primary)}</strong><br />
+          <br />
           {datums.map((d, i) => (
-            <div key={i}>{d.seriesLabel}: {d.secondary}<br /></div>
+            <div key={i}>{d.seriesLabel}: {secondaryAxis.scale.tickFormat()(d.secondary)}<br /></div>
           ))}
         </div>
       ) : null
@@ -43,7 +46,8 @@ class Tooltip extends PureComponent {
       gridY,
       cursor,
       //
-      position, // nearest, average
+      position,
+      align,
       children
     } = this.props
 
@@ -53,20 +57,15 @@ class Tooltip extends PureComponent {
 
     const datums = hovered.datums && hovered.datums.length ? hovered.datums : hovered.series ? hovered.series.data : null
 
-    const resolvedCursor = {
-      x: cursor.x - gridX,
-      y: cursor.y - gridY
-    }
-
     const focus = datums ? (
-      typeof position === 'function' ? position(datums, resolvedCursor)
-        : position === 'top' ? Utils.getCenterPointOfSide('top', datums)
+      typeof position === 'function' ? position(datums, cursor)
+        : position === 'left' ? Utils.getCenterPointOfSide('left', datums)
         : position === 'right' ? Utils.getCenterPointOfSide('right', datums)
         : position === 'top' ? Utils.getCenterPointOfSide('top', datums)
         : position === 'bottom' ? Utils.getCenterPointOfSide('bottom', datums)
         : position === 'center' ? Utils.getCenterPointOfSide('center', datums)
-        : position === 'cursor' ? resolvedCursor
-        : Utils.getClosestPoint(resolvedCursor, datums)
+        : position === 'cursor' ? cursor
+        : Utils.getClosestPoint(cursor, datums)
     ) : {
       x: gridX,
       y: gridY
@@ -75,8 +74,26 @@ class Tooltip extends PureComponent {
     const x = gridX + focus.x
     const y = gridY + focus.y
 
-    const alignX = '-50%'
-    const alignY = '-100%'
+    let alignX
+    let alignY
+
+    if (align === 'top') {
+      alignX = '-50%'
+      alignY = '-100%'
+    } else if (align === 'bottom') {
+      alignX = '-50%'
+      alignY = '0%'
+    } else if (align === 'left') {
+      alignX = '-100%'
+      alignY = '-50%'
+    } else if (align === 'right') {
+      alignX = '0%'
+      alignY = '-50%'
+    } else {
+      // TODO: Automatic Mode
+      alignX = '-50%'
+      alignY = '-100%'
+    }
 
     const visibility = hovered.active ? 1 : 0
 
@@ -128,7 +145,11 @@ class Tooltip extends PureComponent {
                     position: 'relative'
                   }}
                 >
-                  {children(hovered)}
+                  {children({
+                    ...hovered,
+                    primaryAxis,
+                    secondaryAxis
+                  })}
                   <div
                     style={{
                       position: 'absolute',

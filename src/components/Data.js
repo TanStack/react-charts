@@ -8,11 +8,13 @@ import { Transition } from 'react-move'
 import Line from './Line'
 import Area from './Area'
 import Bar from './Bar'
+import Bubble from './Bubble'
 
 const stackTypes = {
   line: Line,
   area: Area,
-  bar: Bar
+  bar: Bar,
+  bubble: Bubble
 }
 
 const defaultColors = [

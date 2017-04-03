@@ -21,7 +21,9 @@ class Cursor extends PureComponent {
   render () {
     const {
       primary,
+      snap,
       //
+      stackData,
       primaryAxis,
       secondaryAxis,
       cursor,
@@ -36,6 +38,7 @@ class Cursor extends PureComponent {
 
     // Don't render until we have all dependencies
     if (
+      !stackData ||
       !cursor ||
       !primaryAxis ||
       !secondaryAxis
@@ -43,8 +46,9 @@ class Cursor extends PureComponent {
       return null
     }
 
-    const x = cursor.x
-    const y = cursor.y
+    let x = cursor.x
+    let y = cursor.y
+    let animated = false
 
     const axis = primary ? primaryAxis : secondaryAxis
     const siblingAxis = primary ? secondaryAxis : primaryAxis
@@ -61,12 +65,44 @@ class Cursor extends PureComponent {
       alignPctX,
       alignPctY
 
+    if (primary && snap) {
+      animated = true
+      let closestPoint
+      if (primaryAxis.vertical) {
+        let smallestDistance = 10000000
+        stackData.forEach(series => {
+          series.data.forEach(datum => {
+            const distance = Math.abs(y - datum.y)
+            if (distance < smallestDistance) {
+              smallestDistance = distance
+              closestPoint = datum
+            }
+          })
+        })
+        y = closestPoint.y
+        label = formatLabel(closestPoint.primary)
+      } else {
+        let smallestDistance = 10000000
+        stackData.forEach(series => {
+          series.data.forEach(datum => {
+            const distance = Math.abs(x - datum.x)
+            if (distance < smallestDistance) {
+              smallestDistance = distance
+              closestPoint = datum
+            }
+          })
+        })
+        x = closestPoint.x
+        label = formatLabel(closestPoint.primary)
+      }
+    }
+
     if (axis.vertical) {
-      x1 = gridX + siblingRange[0]
-      x2 = gridX + siblingRange[1]
+      x1 = siblingRange[0]
+      x2 = siblingRange[1]
       y1 = y
       y2 = y + 1
-      label = formatLabel(axis.scale.invert(cursor.y))
+      label = label || formatLabel(axis.scale.invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -77,9 +113,9 @@ class Cursor extends PureComponent {
     } else {
       x1 = x
       x2 = x + 1
-      y1 = gridY + siblingRange[0]
-      y2 = gridY + siblingRange[1]
-      label = formatLabel(axis.scale.invert(cursor.x))
+      y1 = siblingRange[0]
+      y2 = siblingRange[1]
+      label = label || formatLabel(axis.scale.invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -100,6 +136,12 @@ class Cursor extends PureComponent {
     return (
       <Animate
         data={{
+          xStart,
+          yStart,
+          width,
+          height,
+          x1,
+          y1,
           visibility: cursor.active ? 1 : 0
         }}
       >
@@ -110,24 +152,24 @@ class Cursor extends PureComponent {
             style={{
               pointerEvents: 'none',
               position: 'absolute',
-              left: `${left}px`,
-              top: `${top}px`,
+              left: `${left + gridX}px`,
+              top: `${top + gridY}px`,
               opacity: inter.visibility
             }}
           >
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${xStart}px, ${yStart}px, 0px)`,
-                width: `${width}px`,
-                height: `${height}px`,
+                transform: `translate3d(${animated ? inter.xStart : xStart}px, ${animated ? inter.yStart : yStart}px, 0px)`,
+                width: `${animated ? inter.width : width}px`,
+                height: `${animated ? inter.height : height}px`,
                 background: 'rgba(0,0,0,.3)'
               }}
             />
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${x1}px, ${y1}px, 0px)`
+                transform: `translate3d(${animated ? inter.x1 : x1}px, ${animated ? inter.y1 : y1}px, 0px)`
               }}
             >
               <div
@@ -176,6 +218,7 @@ class Cursor extends PureComponent {
 }
 
 export default Connect(state => ({
+  stackData: state.stackData,
   primaryAxis: Selectors.primaryAxis(state),
   secondaryAxis: Selectors.secondaryAxis(state),
   cursor: state.cursor,

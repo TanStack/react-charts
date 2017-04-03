@@ -11,7 +11,7 @@ const noop = () => null
 
 const modeClosestSeries = 'closestSeries'
 const modeClosestPoint = 'closestPoint'
-const modePrimary = 'primary'
+const modeAxis = 'axis'
 
 class Interaction extends PureComponent {
   static defaultProps = {
@@ -72,23 +72,23 @@ class Interaction extends PureComponent {
         .y(d => d.y)
         .extent(extent)(voronoiData)
       polygons = vor.polygons()
-    } else if (interaction === modePrimary) {
-      // Primary Voronoi
+    } else if (interaction === modeAxis) {
+      // Axis Voronoi
       // Group all data points based on primaryAxis
       const allDatums = stackData.reduce((prev, now) => prev.concat(now.data), [])
-      const datumsByPrimary = {}
+      const datumsByAxis = {}
       allDatums.forEach(d => {
         const key = String(d.primary)
-        datumsByPrimary[key] = datumsByPrimary[key] || {
+        datumsByAxis[key] = datumsByAxis[key] || {
           x: d.x,
           y: d.y,
-          series: null, // PrimaryAxis can't be the series, so don't send it
+          series: null, // AxisAxis can't be the series, so don't send it
           datums: [],
           single: false
         }
-        datumsByPrimary[key].datums.push(d)
+        datumsByAxis[key].datums.push(d)
       })
-      const voronoiData = Object.keys(datumsByPrimary).map(d => datumsByPrimary[d])
+      const voronoiData = Object.keys(datumsByAxis).map(d => datumsByAxis[d])
       const vor = voronoi()
         .x(d => primaryAxis.vertical ? 0 : d.x)
         .y(d => primaryAxis.vertical ? d.y : 0)

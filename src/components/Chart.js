@@ -198,12 +198,17 @@ class Chart extends PureComponent {
     clientX,
     clientY
   }) {
-    this.props.dispatch(state => ({
+    const {
+      gridX,
+      gridY,
+      dispatch
+    } = this.props
+    dispatch(state => ({
       ...state,
       cursor: {
         active: true,
-        x: clientX - this.dims.left,
-        y: clientY - this.dims.top
+        x: clientX - this.dims.left - gridX,
+        y: clientY - this.dims.top - gridY
       }
     }))
   }

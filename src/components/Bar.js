@@ -5,6 +5,8 @@ import classnames from 'classnames'
 import Utils from '../utils/Utils'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
+import { hoverDatum } from '../utils/hoverMethods'
+
 import Rectangle from '../primitives/Rectangle'
 
 class Bars extends PureComponent {
@@ -18,7 +20,8 @@ class Bars extends PureComponent {
       getDataProps,
       //
       primaryAxis,
-      hovered
+      hovered,
+      interaction
     } = this.props
 
     const barWidth = primaryAxis.barWidth
@@ -59,8 +62,10 @@ class Bars extends PureComponent {
                   y2 = d.yBase
                 }
 
-                const dataActive = hovered && active && hovered.index === i
-                const dataInactive = hovered && (inactive || hovered.index !== i)
+                const {
+                  active: datumActive,
+                  inactive: datumInactive
+                } = Utils.datumStatus(series, d, hovered)
 
                 let {
                   style: dataStyle,
@@ -68,11 +73,17 @@ class Bars extends PureComponent {
                   ...dataProps
                 } = getDataProps({
                   ...series,
-                  active: dataActive,
-                  inactive: dataInactive
+                  active: datumActive,
+                  inactive: datumInactive
                 })
 
                 dataStyle = Utils.extractColor(dataStyle)
+
+                const datumInteractionProps = interaction === 'element' ? {
+                  onMouseEnter: hoverDatum.bind(this, d),
+                  onMouseMove: hoverDatum.bind(this, d),
+                  onMouseLeave: hoverDatum.bind(this, null)
+                } : {}
 
                 return (
                   <Rectangle
@@ -89,6 +100,7 @@ class Bars extends PureComponent {
                     x2={x2}
                     y2={y2}
                     opacity={visibility}
+                    {...datumInteractionProps}
                   />
                 )
               })}
@@ -103,6 +115,7 @@ class Bars extends PureComponent {
 export default Connect((state, props) => {
   return {
     primaryAxis: Selectors.primaryAxis(state),
-    hovered: state.hovered
+    hovered: state.hovered,
+    interaction: state.interaction
   }
 })(Bars)
