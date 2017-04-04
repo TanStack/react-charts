@@ -59,7 +59,7 @@ class Area extends PureComponent {
         }}
       >
         {inter => {
-          const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.yBase])))
+          const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.base])))
           const linePath = lineFn(inter.data.map(d => ([d.x, d.y])))
 
           const seriesInteractionProps = interaction === 'series' ? {

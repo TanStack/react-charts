@@ -51,15 +51,15 @@ class Bars extends PureComponent {
               {inter.data.map((d, i) => {
                 let x1, y1, x2, y2
                 if (primaryAxis.vertical) {
-                  x1 = d.yBase
-                  x2 = d.y
-                  y1 = d.x + seriesPadding
+                  x1 = d.base
+                  x2 = d.x
+                  y1 = d.y + seriesPadding
                   y2 = y1 + barWidth
                 } else {
                   x1 = d.x + seriesPadding
                   x2 = x1 + barWidth
                   y1 = d.y
-                  y2 = d.yBase
+                  y2 = d.base
                 }
 
                 const {

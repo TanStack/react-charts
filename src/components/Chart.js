@@ -19,7 +19,7 @@ class Chart extends PureComponent {
     getX: d => Array.isArray(d) ? d[0] : d.x,
     getY: d => Array.isArray(d) ? d[1] : d.y,
     getR: d => Array.isArray(d) ? d[0] : d.r,
-    interaction: 'closest'
+    interaction: 'closestPoint'
   }
   constructor () {
     super()

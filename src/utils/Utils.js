@@ -57,19 +57,13 @@ function getCenterPointOfSide (position, points) {
     yMax = Math.max(point.y, yMax)
   })
 
-  if (position === 'center') {
-    return {
-      x: (xMin + xMax) / 2,
-      y: (yMin + yMax) / 2
-    }
-  }
   if (position === 'left') {
     return {
       x: xMin,
       y: (yMin + yMax) / 2
     }
   }
-  if (position === 'left') {
+  if (position === 'right') {
     return {
       x: xMax,
       y: (yMin + yMax) / 2
@@ -86,6 +80,11 @@ function getCenterPointOfSide (position, points) {
       x: (xMin + xMax) / 2,
       y: yMax
     }
+  }
+  // Center
+  return {
+    x: (xMin + xMax) / 2,
+    y: (yMin + yMax) / 2
   }
 }
 

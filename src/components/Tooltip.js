@@ -11,6 +11,7 @@ const fontSize = 12
 class Tooltip extends PureComponent {
   static defaultProps = {
     position: 'average',
+    align: 'top',
     children: (props) => {
       const {
         series,
@@ -24,10 +25,12 @@ class Tooltip extends PureComponent {
         </div>
       ) : datums && datums.length ? (
         <div>
-          <strong>{primaryAxis.scale.tickFormat()(datums[0].primary)}</strong><br />
+          <strong>{primaryAxis.format(datums[0].primary)}</strong><br />
           <br />
           {datums.map((d, i) => (
-            <div key={i}>{d.seriesLabel}: {secondaryAxis.scale.tickFormat()(d.secondary)}<br /></div>
+            <div key={i}>
+              <span style={{color: ''}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
+            </div>
           ))}
         </div>
       ) : null
@@ -57,6 +60,10 @@ class Tooltip extends PureComponent {
 
     const datums = hovered.datums && hovered.datums.length ? hovered.datums : hovered.series ? hovered.series.data : null
 
+    // TODO: tooltip origin: hovered or chart or custom. Allows the user to position the tooltip relative to different parts of the chart
+    // TODO: tooltip padding
+    // TODO: tooltip offset
+
     const focus = datums ? (
       typeof position === 'function' ? position(datums, cursor)
         : position === 'left' ? Utils.getCenterPointOfSide('left', datums)
@@ -77,22 +84,59 @@ class Tooltip extends PureComponent {
     let alignX
     let alignY
 
+    let triangleStyles = {}
+
     if (align === 'top') {
       alignX = '-50%'
       alignY = '-100%'
+      triangleStyles = {
+        top: '100%',
+        left: '50%',
+        transform: 'translate(-50%, 0%)',
+        borderLeft: '5px solid transparent',
+        borderRight: '5px solid transparent',
+        borderTop: '5px solid rgba(38, 38, 38, 0.8)'
+      }
     } else if (align === 'bottom') {
       alignX = '-50%'
       alignY = '0%'
+      triangleStyles = {
+        top: '0%',
+        left: '50%',
+        transform: 'translate(-50%, -100%)',
+        borderLeft: '5px solid transparent',
+        borderRight: '5px solid transparent',
+        borderBottom: '5px solid rgba(38, 38, 38, 0.8)'
+      }
     } else if (align === 'left') {
       alignX = '-100%'
       alignY = '-50%'
+      triangleStyles = {
+        top: '50%',
+        left: '100%',
+        transform: 'translate(0%, -50%)',
+        borderTop: '5px solid transparent',
+        borderBottom: '5px solid transparent',
+        borderLeft: '5px solid rgba(38, 38, 38, 0.8)'
+      }
     } else if (align === 'right') {
       alignX = '0%'
       alignY = '-50%'
-    } else {
+      triangleStyles = {
+        top: '50%',
+        left: '0%',
+        transform: 'translate(-100%, -50%)',
+        borderTop: '5px solid transparent',
+        borderBottom: '5px solid transparent',
+        borderRight: '5px solid rgba(38, 38, 38, 0.8)'
+      }
+    } else if (align === 'center') {
       // TODO: Automatic Mode
       alignX = '-50%'
-      alignY = '-100%'
+      alignY = '-50%'
+      triangleStyles = {
+        opacity: 0
+      }
     }
 
     const visibility = hovered.active ? 1 : 0
@@ -104,6 +148,7 @@ class Tooltip extends PureComponent {
           y,
           alignX,
           alignY,
+          triangleStyles,
           visibility
         }}
       >
@@ -112,6 +157,7 @@ class Tooltip extends PureComponent {
           y,
           alignX,
           alignY,
+          triangleStyles,
           visibility
         }) => (
           <div
@@ -131,7 +177,7 @@ class Tooltip extends PureComponent {
             >
               <div
                 style={{
-                  transform: `translate(${alignX}, ${alignY})`,
+                  transform: `translate3d(${alignX}, ${alignY}, 0)`,
                   padding: '7px'
                 }}
               >
@@ -153,14 +199,9 @@ class Tooltip extends PureComponent {
                   <div
                     style={{
                       position: 'absolute',
-                      top: '100%',
-                      left: '50%',
-                      transform: 'translate(-50%, 0%)',
                       width: '0',
                       height: '0',
-                      borderLeft: '5px solid transparent',
-                      borderRight: '5px solid transparent',
-                      borderTop: '5px solid rgba(38, 38, 38, 0.8)'
+                      ...triangleStyles
                     }}
                   />
                 </div>

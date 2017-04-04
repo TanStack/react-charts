@@ -57,7 +57,6 @@ class Line extends Component {
                 {props => {
                   return (
                     <div>
-                      <div>{props.seriesLabel} - {props.primary}, {props.secondary}</div>
                       <img
                         src='https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif'
                         alt=''

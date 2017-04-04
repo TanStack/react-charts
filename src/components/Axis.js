@@ -11,14 +11,12 @@ import Text from '../primitives/Text'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
+const fontSize = 10
+
 export const positionTop = 'top'
 export const positionRight = 'right'
 export const positionBottom = 'bottom'
 export const positionLeft = 'left'
-
-const fontSize = 10
-
-const detectVertical = position => [positionLeft, positionRight].indexOf(position) > -1
 
 class Axis extends PureComponent {
   static defaultProps = {
@@ -82,13 +80,8 @@ class Axis extends PureComponent {
       width,
       height,
       showGrid,
-      tickArguments,
-      tickValues,
-      tickFormat,
       tickSizeInner,
-      tickSizeOuter,
-      tickPadding,
-      centerTicks
+      tickSizeOuter
     } = this.props
 
     const {
@@ -101,26 +94,20 @@ class Axis extends PureComponent {
       return null
     }
 
-    const scale = axis.scale
-
-    const vertical = detectVertical(position)
-    const max =
-      position === positionBottom ? -height
-      : position === positionLeft ? width
-      : position === positionTop ? height
-      : -width
-    const RTL = (position === positionTop || position === positionLeft) ? -1 : 1
-    const transform = !vertical ? translateX : translateY
-    const ticks = this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues
-    const format = tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat
-    const spacing = Math.max(tickSizeInner, 0) + tickPadding
-    const range = scale.range()
-    const range0 = range[0] + 0.5
-    const range1 = range[1] + 0.5
-    const itemWidth = centerTicks ? axis.barWidth : 1
-    // const seriesPadding = centerTicks ? axis.barPaddingOuter * axis.stepSize : 0
-    const seriesPadding = 0
-    const tickPosition = seriesPadding + (itemWidth / 2)
+    const {
+      scale,
+      max,
+      transform,
+      vertical,
+      ticks,
+      format,
+      //
+      range0,
+      range1,
+      directionMultiplier,
+      tickPosition,
+      spacing
+    } = axis
 
     return (
       <Animate
@@ -130,9 +117,10 @@ class Axis extends PureComponent {
           max,
           range0,
           range1,
-          RTL,
+          directionMultiplier,
           tickSizeOuter,
-          tickPosition
+          tickPosition,
+          spacing
         }}
       >
         {({
@@ -141,9 +129,10 @@ class Axis extends PureComponent {
           max,
           range0,
           range1,
-          RTL,
+          directionMultiplier,
           tickSizeOuter,
-          tickPosition
+          tickPosition,
+          spacing
         }) => {
           let axisPath
           if (vertical) {
@@ -236,9 +225,9 @@ class Axis extends PureComponent {
                           >
                             <Line
                               x1={vertical ? '0.5' : tickPosition}
-                              x2={vertical ? RTL * tickSizeInner : tickPosition}
+                              x2={vertical ? directionMultiplier * tickSizeInner : tickPosition}
                               y1={vertical ? tickPosition : '0.5'}
-                              y2={vertical ? tickPosition : RTL * tickSizeInner}
+                              y2={vertical ? tickPosition : directionMultiplier * tickSizeInner}
                               style={{
                                 strokeWidth: 1
                               }}
@@ -260,7 +249,7 @@ class Axis extends PureComponent {
                               opacity={inter.state.visibility}
                               fontSize={fontSize}
                               transform={`
-                                translate(${vertical ? RTL * spacing : tickPosition}, ${vertical ? tickPosition : RTL * spacing})
+                                translate(${vertical ? directionMultiplier * spacing : tickPosition}, ${vertical ? tickPosition : directionMultiplier * spacing})
                                 rotate(${-rotation})
                               `}
                               dominantBaseline={rotation ? 'central' : position === positionBottom ? 'hanging' : position === positionTop ? 'alphabetic' : 'central'}
@@ -297,20 +286,9 @@ export default Connect((state, props) => {
     width: Selectors.gridWidth(state),
     height: Selectors.gridHeight(state),
     primaryAxis: Selectors.primaryAxis(state),
-    axis: state.axes && state.axes[id],
-    showGrid: state.showGrid,
-    tickArguments: state.tickArguments,
-    tickValues: state.tickValues,
-    tickFormat: state.tickFormat,
-    tickSizeInner: state.tickSizeInner,
-    tickSizeOuter: state.tickSizeOuter,
-    tickPadding: state.tickPadding
+    axis: state.axes && state.axes[id]
   }
 })(Axis)
-
-function identity (x) {
-  return x
-}
 
 function translateX (x) {
   return 'translate(' + x + ', 0)'

@@ -8,7 +8,8 @@ import {
 import {
   positionTop,
   positionLeft,
-  positionRight
+  positionRight,
+  positionBottom
  } from './Axis'
 
 const scales = {
@@ -34,6 +35,11 @@ export default function updateScale (props) {
     barPaddingInner,
     barPaddingOuter,
     centerTicks,
+    tickArguments,
+    tickValues,
+    tickFormat,
+    tickPadding,
+    tickSizeInner,
     // Context
     accessedData,
     width,
@@ -161,6 +167,7 @@ export default function updateScale (props) {
 
   // Set some extra values on the axis for posterity
   const axis = {
+    type,
     scale,
     uniqueVals,
     primary,
@@ -174,8 +181,25 @@ export default function updateScale (props) {
     stacked,
     barWidth,
     barStepSize,
-    barPaddingOuterSize
+    barPaddingOuterSize,
+    max:
+      position === positionBottom ? -height
+      : position === positionLeft ? width
+      : position === positionTop ? height
+      : -width,
+    directionMultiplier: (position === positionTop || position === positionLeft) ? -1 : 1,
+    transform: !vertical ? translateX : translateY,
+    ticks: this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues,
+    format: tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat,
+    spacing: Math.max(tickSizeInner, 0) + tickPadding,
+    range: scale.range(),
+    range0: range[0] + 0.5,
+    range1: range[1] + 0.5,
+    itemWidth: centerTicks ? barWidth : 1,
+    seriesPadding: centerTicks ? barPaddingOuter * barStepSize : 0
   }
+
+  axis.tickPosition = axis.seriesPadding + (axis.itemWidth / 2)
 
   // Make sure we start with a prevAxis
   this.prevAxis = this.prevAxis || axis
@@ -187,4 +211,16 @@ export default function updateScale (props) {
       [id]: axis
     }
   }))
+}
+
+function identity (x) {
+  return x
+}
+
+function translateX (x) {
+  return 'translate(' + x + ', 0)'
+}
+
+function translateY (y) {
+  return 'translate(0, ' + y + ')'
 }

@@ -83,21 +83,33 @@ class Data extends PureComponent {
     const totals = secondaryStacked && accessedData.map(s => {
       return s.data.map(d => (0))
     })
+
+    const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
+    const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
+    const xScale = primaryAxis.vertical ? secondaryAxis.scale : primaryAxis.scale
+    const yScale = primaryAxis.vertical ? primaryAxis.scale : secondaryAxis.scale
+
     let stackData = accessedData.map((series, seriesIndex) => {
       return {
         ...series,
         data: series.data.map((d, index) => {
           const datum = {
             ...d,
-            x: d.primary,
-            y: d.secondary,
-            yBase: 0
+            x: d[xKey],
+            y: d[yKey],
+            base: 0
           }
           if (secondaryStacked) {
             const start = (typeof totals[seriesIndex - 1] !== 'undefined' ? totals[seriesIndex - 1] : totals[0])[index]
-            datum.yBase = start
-            datum.y = start + datum.y
-            totals[seriesIndex][index] = datum.y
+            datum.base = start
+            // Stack the x or y values (according to axis positioning)
+            if (primaryAxis.vertical) {
+              datum.x = start + datum.x
+              totals[seriesIndex][index] = datum.x
+            } else {
+              datum.y = start + datum.y
+              totals[seriesIndex][index] = datum.y
+            }
           }
           return datum
         })
@@ -111,9 +123,9 @@ class Data extends PureComponent {
         data: series.data.map((d, index) => {
           return {
             ...d,
-            x: primaryAxis.scale(d.x),
-            y: secondaryAxis.scale(d.y),
-            yBase: secondaryAxis.scale(d.yBase)
+            x: xScale(d.x),
+            y: yScale(d.y),
+            base: primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
           }
         })
       }

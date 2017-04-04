@@ -1,9 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 //
-// import Line from '../primitives/Line'
-// import Text from '../primitives/Text'
-// import Rectangle from '../primitives/Rectangle'
 import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
@@ -54,8 +51,6 @@ class Cursor extends PureComponent {
     const siblingAxis = primary ? secondaryAxis : primaryAxis
     const siblingRange = siblingAxis.scale.range()
 
-    const formatLabel = axis.scale.tickFormat(axis.scale.ticks().length)
-
     let
       x1,
       x2,
@@ -65,22 +60,22 @@ class Cursor extends PureComponent {
       alignPctX,
       alignPctY
 
-    if (primary && snap) {
+    if (primary && (axis.type === 'ordinal' || snap)) {
       animated = true
-      let closestPoint
+      let closestDatum
       if (primaryAxis.vertical) {
         let smallestDistance = 10000000
         stackData.forEach(series => {
           series.data.forEach(datum => {
-            const distance = Math.abs(y - datum.y)
+            const distance = Math.abs(y - datum.x)
             if (distance < smallestDistance) {
               smallestDistance = distance
-              closestPoint = datum
+              closestDatum = datum
             }
           })
         })
-        y = closestPoint.y
-        label = formatLabel(closestPoint.primary)
+        y = closestDatum.x
+        label = axis.format(closestDatum.primary)
       } else {
         let smallestDistance = 10000000
         stackData.forEach(series => {
@@ -88,12 +83,12 @@ class Cursor extends PureComponent {
             const distance = Math.abs(x - datum.x)
             if (distance < smallestDistance) {
               smallestDistance = distance
-              closestPoint = datum
+              closestDatum = datum
             }
           })
         })
-        x = closestPoint.x
-        label = formatLabel(closestPoint.primary)
+        x = closestDatum.x
+        label = axis.format(closestDatum.primary)
       }
     }
 
@@ -102,7 +97,7 @@ class Cursor extends PureComponent {
       x2 = siblingRange[1]
       y1 = y
       y2 = y + 1
-      label = label || formatLabel(axis.scale.invert(cursor.y))
+      label = typeof label !== 'undefined' ? label : axis.format(axis.scale.invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -115,7 +110,7 @@ class Cursor extends PureComponent {
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label = label || formatLabel(axis.scale.invert(cursor.x))
+      label = typeof label !== 'undefined' ? label : axis.format(axis.scale.invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100

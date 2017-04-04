@@ -60,7 +60,7 @@ const options = {
     'bottom',
     'left',
     'right',
-    'auto'
+    'center'
   ],
   snapCursor: [
     true,
@@ -91,8 +91,8 @@ export default class ChartConfig extends Component {
     primaryAxisStack: false,
     secondaryAxisStack: true,
     interactionMode: 'axis',
-    tooltipPosition: 'top',
-    tooltipAlign: 'auto',
+    tooltipPosition: 'closest',
+    tooltipAlign: 'top',
     snapCursor: true
   }
   constructor (props) {
