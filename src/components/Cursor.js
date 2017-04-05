@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { Animate } from 'react-move'
 //
-import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
 class Cursor extends PureComponent {

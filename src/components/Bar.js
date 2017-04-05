@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { Animate } from 'react-move'
 import classnames from 'classnames'
 //
 import Utils from '../utils/Utils'
-import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 import { hoverDatum } from '../utils/hoverMethods'
 
@@ -39,8 +39,13 @@ class Bars extends PureComponent {
 
     return (
       <Animate
+        default={{
+          data: series.data,
+          visibility: 0
+        }}
         data={{
-          data: series.data
+          data: series.data,
+          visibility
         }}
       >
         {inter => {
@@ -99,7 +104,7 @@ class Bars extends PureComponent {
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    opacity={visibility}
+                    opacity={inter.visibility}
                     {...datumInteractionProps}
                   />
                 )

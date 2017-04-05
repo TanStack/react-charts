@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 //
 import ChartConfig from './components/ChartConfig'
-import { Chart, Axis, Data, Tooltip, Cursor } from '../src'
+import { Chart, Axis, Series, Tooltip, Cursor } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -49,7 +49,7 @@ class Line extends Component {
               position={secondaryAxisPosition}
               stacked
             />
-            <Data
+            <Series
               type={elementType}
               getProps={(series, i) => ({
                 style: {

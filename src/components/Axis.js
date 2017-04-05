@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { Animate, Transition } from 'react-move'
 //
 import measure from './Axis.measure'
@@ -8,7 +9,6 @@ import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 import Text from '../primitives/Text'
 
-import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
 const fontSize = 10

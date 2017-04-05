@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
+import { Connect } from 'codux'
 import classnames from 'classnames'
 import {
   area,
@@ -8,7 +9,6 @@ import {
   curveMonotoneX
 } from 'd3-shape'
 //
-import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 import { hoverSeries, hoverDatum } from '../utils/hoverMethods'
 
@@ -54,8 +54,13 @@ class Area extends PureComponent {
 
     return (
       <Animate
+        default={{
+          data: series.data,
+          visibility: 0
+        }}
         data={{
-          data: series.data
+          data: series.data,
+          visibility
         }}
       >
         {inter => {
@@ -79,7 +84,7 @@ class Area extends PureComponent {
                   ...style,
                   stroke: 'transparent'
                 }}
-                opacity={visibility}
+                opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
               <Path
@@ -91,7 +96,7 @@ class Area extends PureComponent {
                   ...style,
                   fill: 'transparent'
                 }}
-                opacity={visibility}
+                opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
               {inter.data.map((d, i) => {
@@ -130,7 +135,7 @@ class Area extends PureComponent {
                       ...style,
                       ...dataStyle
                     }}
-                    opacity={visibility}
+                    opacity={inter.visibility}
                     {...datumInteractionProps}
                   />
                 )

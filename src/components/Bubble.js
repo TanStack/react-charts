@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { Animate } from 'react-move'
 import classnames from 'classnames'
 
-import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 import { hoverDatum } from '../utils/hoverMethods'
 
@@ -26,8 +26,13 @@ class Line extends PureComponent {
 
     return (
       <Animate
+        default={{
+          data: series.data,
+          visibility: 0
+        }}
         data={{
-          data: series.data
+          data: series.data,
+          visibility
         }}
       >
         {inter => {
@@ -50,7 +55,7 @@ class Line extends PureComponent {
                 })
 
                 dataStyle = Utils.extractColor(dataStyle)
-                
+
                 const datumInteractionProps = interaction === 'element' ? {
                   onMouseEnter: hoverDatum.bind(this, d),
                   onMouseMove: hoverDatum.bind(this, d),
@@ -69,7 +74,7 @@ class Line extends PureComponent {
                       ...circleDefaultStyle,
                       ...dataStyle
                     }}
-                    opacity={visibility}
+                    opacity={inter.visibility}
                     {...datumInteractionProps}
                   />
                 )

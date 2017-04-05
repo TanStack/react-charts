@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Axis, Data, Tooltip } from '../src'
+import { Chart, Axis, Series, Tooltip } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
@@ -51,7 +51,7 @@ class Line extends Component {
                 position='left'
                 stacked
               />
-              <Data
+              <Series
                 type='area'
                 getProps={(series, i) => ({
                   style: {

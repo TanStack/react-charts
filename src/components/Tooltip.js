@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { Animate } from 'react-move'
 //
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
-import Connect from '../utils/Connect'
 //
 
 const fontSize = 12

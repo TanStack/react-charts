@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
+import { Connect } from 'codux'
 import { voronoi } from 'd3-voronoi'
 import { line } from 'd3-shape'
 //
 import Path from '../primitives/Path'
-
-import Connect from '../utils/Connect'
 import Selectors from '../utils/Selectors'
 
 const noop = () => null

@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
+import { Provider, Connect } from 'codux'
 //
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
-import Provider from '../utils/Provider'
-import Connect from '../utils/Connect'
 import Utils from '../utils/Utils'
 
 import Rectangle from '../primitives/Rectangle'
@@ -16,8 +15,8 @@ class Chart extends PureComponent {
     getData: d => d,
     getLabel: (d, i) => 'Series ' + (i + 1),
     getSeriesID: (d, i) => i,
-    getX: d => Array.isArray(d) ? d[0] : d.x,
-    getY: d => Array.isArray(d) ? d[1] : d.y,
+    getPrimary: d => Array.isArray(d) ? d[0] : d.x,
+    getSecondary: d => Array.isArray(d) ? d[1] : d.y,
     getR: d => Array.isArray(d) ? d[0] : d.r,
     interaction: 'closestPoint'
   }
@@ -52,8 +51,8 @@ class Chart extends PureComponent {
       nextProps.getData !== this.props.getData ||
       nextProps.getSeriesID !== this.props.getSeriesID ||
       nextProps.getLabel !== this.props.getLabel ||
-      nextProps.getX !== this.props.getX ||
-      nextProps.getY !== this.props.getY ||
+      nextProps.getPrimary !== this.props.getPrimary ||
+      nextProps.getSecondary !== this.props.getSecondary ||
       nextProps.getR !== this.props.getR
     ) {
       this.updateDataModel(nextProps)
@@ -71,8 +70,8 @@ class Chart extends PureComponent {
       getData,
       getLabel,
       getSeriesID,
-      getX,
-      getY,
+      getPrimary,
+      getSecondary,
       getR
     } = props
 
@@ -80,8 +79,8 @@ class Chart extends PureComponent {
     getData = Utils.normalizePathGetter(getData)
     getLabel = Utils.normalizePathGetter(getLabel)
     getSeriesID = Utils.normalizePathGetter(getSeriesID)
-    getX = Utils.normalizePathGetter(getX)
-    getY = Utils.normalizePathGetter(getY)
+    getPrimary = Utils.normalizePathGetter(getPrimary)
+    getSecondary = Utils.normalizePathGetter(getSecondary)
     getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
@@ -101,14 +100,36 @@ class Chart extends PureComponent {
             seriesLabel,
             index,
             datum: d,
-            primary: getX(d, index),
-            secondary: getY(d, index),
+            primary: getPrimary(d, index),
+            secondary: getSecondary(d, index),
             r: getR(d, index)
           }
         })
       }
       return series
     })
+
+    // function applyGroupMeta (series, config) {
+    //   const groupBy = normalizeGetter(config[0].groupBy)
+    //   const orderBy = normalizeGetter(config[0].orderBy)
+    //   const getMeta = normalizeGetter(config[0].getMeta)
+    //
+    //   const nextConfigs = config.slice(1)
+    //
+    //   const groupedSeries = _.groupBy(series, groupBy)
+    //   const orderedSeries = _.orderBy(groupedSeries, orderBy)
+    //   const meta = _.map(orderedSeries, getMeta)
+    //   let orderedSeriesWithMeta = _.map(orderedSeries, getMeta)
+    //
+    //   if (nextConfigs.length) {
+    //     orderedSeriesWithMeta = orderedSeries.map(s => organize(s, nextConfigs))
+    //   }
+    //
+    //   const flatSeries = []
+    //   return orderedSeriesWithMeta
+    // }
+    //
+
 
     // This will make all of the props available to anything using
     // the chart context
