@@ -1,84 +1,10 @@
 import React, { Component } from 'react'
-import _ from 'lodash'
-import { ResizableBox } from 'react-resizable'
+
+import ChartConfig from './components/ChartConfig'
 //
 import { Chart, Axis, Series, Tooltip } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
-
-class Line extends Component {
-  constructor () {
-    super()
-    this.state = {
-      data: makeData()
-    }
-  }
-  render () {
-    const {
-      data
-    } = this.state
-    return (
-      <div>
-        <button
-          onClick={() => this.setState({
-            data: makeData()
-          })}
-        >
-          Randomize Data
-        </button>
-
-        <br />
-        <br />
-
-        {_.range(1).map((d, i) => (
-          <ResizableBox
-            key={i}
-            width={500}
-            height={300}
-          >
-            <Chart
-              data={data}
-              getData={d => d.data}
-              // tooltip={{}}
-            >
-              <Axis
-                primary
-                type='time'
-                position='bottom'
-              />
-              <Axis
-                type='linear'
-                position='left'
-                stacked
-              />
-              <Series
-                type='area'
-                getProps={(series, i) => ({
-                  style: {
-                    color: series.inactive ? 'grey' : series.row.color,
-                    opacity: series.inactive ? 0.2 : 1
-                  }
-                })}
-                getDataProps={(datum, i) => ({
-                  style: {
-                    r: datum.active ? 5 : 0,
-                    color: datum.active ? 'black' : undefined
-                  }
-                })}
-              />
-              <Tooltip />
-            </Chart>
-          </ResizableBox>
-        ))}
-
-        <br />
-        <br />
-      </div>
-    )
-  }
-}
-
-export default () => <Line />
 
 const colors = [
   '#0f7db4',
@@ -93,26 +19,57 @@ const colors = [
   '#cd82ad'
 ]
 
-function makeData () {
-  return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), makeSeries)
-}
-
-function makeSeries (i) {
-  const startDate = new Date()
-  // const length = Math.round(Math.random() * 30)
-  const length = 30
-  const max = 100
-  // const max = Math.random() > 0.5 ? 100000 : 10
-  // const multiplier = 10
-  // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
-  return {
-    label: 'Series ' + (i + 1),
-    color: colors[i],
-    data: _.map(_.range(length), d => ({
-      // x: d * multiplier,
-      x: new Date().setMinutes(startDate.getMinutes() + (30 * d)),
-      y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
-      r: Math.round(Math.random() * 5)
-    }))
+class Story extends Component {
+  render () {
+    return (
+      <ChartConfig
+        interaction='axis'
+        show={[
+          'elementType',
+          'interaction'
+        ]}
+      >
+        {({
+          elementType,
+          interaction,
+          data
+        }) => (
+          <Chart
+            data={data}
+            getData={s => s.data}
+            interaction={interaction}
+          >
+            <Axis
+              primary
+              type='time'
+              position='bottom'
+            />
+            <Axis
+              type='linear'
+              position='left'
+              stacked
+            />
+            <Series
+              type={elementType}
+              getStyles={series => ({
+                color: series.otherHovered ? 'grey' : colors[series.index],
+                opacity: series.otherHovered ? 0.2 : 1,
+                line: {
+                  strokeDasharray: '5, 5'
+                }
+              })}
+              getDataStyles={d => ({
+                r: d.hovered ? 5 : d.selected ? 4 : d.otherHovered ? 2 : 3,
+                strokeDasharray: '0',
+                opacity: d.hovered ? 1 : d.selected ? 1 : d.otherHovered ? 0.5 : d.otherSelected ? 0.75 : 1
+              })}
+            />
+            <Tooltip />
+          </Chart>
+        )}
+      </ChartConfig>
+    )
   }
 }
+
+export default () => <Story />

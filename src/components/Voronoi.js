@@ -114,7 +114,7 @@ class Interaction extends PureComponent {
               className='action-voronoi'
               onMouseEnter={this.onHover.bind(this, points.data.series, points.data.datums)}
               onMouseMove={this.onHover.bind(this, points.data.series, points.data.datums)}
-              onClick={this.onActivate.bind(this, points.data.series, points.data.datums)}
+              onClick={this.onClick.bind(this, points.data.series, points.data.datums)}
               style={{
                 fill: 'transparent',
                 stroke: 'transparent',
@@ -152,21 +152,19 @@ class Interaction extends PureComponent {
       }
     })
   }
-  onActivate (series, datums) {
-    // const {
-    //   active,
-    //   dispatch
-    // } = this.props
-    // if (active === newActive) {
-    //   return dispatch(state => ({
-    //     ...state,
-    //     active: null
-    //   }))
-    // }
-    // dispatch(state => ({
-    //   ...state,
-    //   active: newActive
-    // }))
+  onClick (series, datums) {
+    if (series || datums) {
+      return this.props.dispatch(state => {
+        return {
+          ...state,
+          selected: {
+            active: true,
+            series,
+            datums
+          }
+        }
+      })
+    }
   }
 }
 

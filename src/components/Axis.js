@@ -62,7 +62,7 @@ class Axis extends PureComponent {
       newProps.primary !== oldProps.primary ||
       newProps.type !== oldProps.type ||
       newProps.invert !== oldProps.invert ||
-      newProps.accessedData !== oldProps.accessedData ||
+      newProps.materializedData !== oldProps.materializedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
       position !== oldProps.position
@@ -282,7 +282,7 @@ export default Connect((state, props) => {
 
   return {
     id,
-    accessedData: state.accessedData,
+    materializedData: state.materializedData,
     width: Selectors.gridWidth(state),
     height: Selectors.gridHeight(state),
     primaryAxis: Selectors.primaryAxis(state),

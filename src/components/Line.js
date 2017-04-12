@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
-import classnames from 'classnames'
+
 import {
   line,
-  curveCardinal,
+  // curveCardinal,
   curveMonotoneX
 } from 'd3-shape'
 
 import Utils from '../utils/Utils'
-import { hoverSeries, hoverDatum } from '../utils/hoverMethods'
+import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 //
 import Path from '../primitives/Path'
@@ -27,26 +27,17 @@ class Line extends PureComponent {
   render () {
     const {
       series,
-      active,
-      inactive,
       visibility,
-      getProps,
-      getDataProps,
+      style,
+      getDataStyles,
       //
-      hovered,
+      hovered: chartHovered,
+      selected: chartSelected,
       interaction
     } = this.props
 
     const lineFn = line()
     .curve(curveMonotoneX)
-
-    let { style, className, ...props } = getProps({
-      ...series,
-      active,
-      inactive
-    })
-
-    style = Utils.extractColor(style)
 
     return (
       <Animate
@@ -63,6 +54,7 @@ class Line extends PureComponent {
           const path = lineFn(inter.data.map(d => ([d.x, d.y])))
 
           const seriesInteractionProps = interaction === 'series' ? {
+            onClick: selectSeries.bind(this, series),
             onMouseEnter: hoverSeries.bind(this, series),
             onMouseMove: hoverSeries.bind(this, series),
             onMouseLeave: hoverSeries.bind(this, null)
@@ -71,36 +63,35 @@ class Line extends PureComponent {
           return (
             <g>
               <Path
-                {...props}
                 d={path}
-                className={classnames(className)}
                 style={{
                   ...pathDefaultStyle,
                   ...style,
-                  fill: 'transparent'
+                  fill: 'none'
                 }}
                 opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
               {inter.data.map((d, i) => {
                 const {
-                  active: datumActive,
-                  inactive: datumInactive
-                } = Utils.datumStatus(series, d, hovered)
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
+                } = Utils.datumStatus(series, d, chartHovered, chartSelected)
 
-                let {
-                  style: dataStyle,
-                  className: dataClassName,
-                  ...dataProps
-                } = getDataProps({
-                  ...series,
-                  active: datumActive,
-                  inactive: datumInactive
-                })
-
-                dataStyle = Utils.extractColor(dataStyle)
+                let dataStyle = Utils.extractColor(getDataStyles({
+                  ...d,
+                  series,
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered,
+                  type: 'circle'
+                }))
 
                 const datumInteractionProps = interaction === 'element' ? {
+                  onClick: selectDatum.bind(this, d),
                   onMouseEnter: hoverDatum.bind(this, d),
                   onMouseMove: hoverDatum.bind(this, d),
                   onMouseLeave: hoverDatum.bind(this, null)
@@ -111,14 +102,13 @@ class Line extends PureComponent {
                     key={i}
                     x={d.x}
                     y={d.y}
-                    {...dataProps}
-                    className={classnames(dataClassName)}
                     style={{
                       ...circleDefaultStyle,
                       ...style,
                       ...dataStyle
                     }}
                     opacity={inter.visibility}
+                    {...seriesInteractionProps}
                     {...datumInteractionProps}
                   />
                 )
@@ -134,6 +124,8 @@ class Line extends PureComponent {
 
 export default Connect((state, props) => {
   return {
-    hovered: state.hovered
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction
   }
 })(Line)

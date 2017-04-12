@@ -1,10 +1,9 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
-import classnames from 'classnames'
 
 import Utils from '../utils/Utils'
-import { hoverDatum } from '../utils/hoverMethods'
+import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 //
 import Circle from '../primitives/Circle'
@@ -18,9 +17,11 @@ class Line extends PureComponent {
     const {
       series,
       visibility,
-      getDataProps,
+      getDataStyles,
+      style,
       //
-      hovered,
+      hovered: chartHovered,
+      selected: chartSelected,
       interaction
     } = this.props
 
@@ -36,27 +37,34 @@ class Line extends PureComponent {
         }}
       >
         {inter => {
+          const seriesInteractionProps = interaction === 'series' ? {
+            onClick: selectSeries.bind(this, series),
+            onMouseEnter: hoverSeries.bind(this, series),
+            onMouseMove: hoverSeries.bind(this, series),
+            onMouseLeave: hoverSeries.bind(this, null)
+          } : {}
           return (
             <g>
               {inter.data.map((d, i) => {
                 const {
-                  active: datumActive,
-                  inactive: datumInactive
-                } = Utils.datumStatus(series, d, hovered)
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
+                } = Utils.datumStatus(series, d, chartHovered, chartSelected)
 
-                let {
-                  style: dataStyle,
-                  className: dataClassName,
-                  ...dataProps
-                } = getDataProps({
-                  ...series,
-                  active: datumActive,
-                  inactive: datumInactive
-                })
-
-                dataStyle = Utils.extractColor(dataStyle)
+                let dataStyle = Utils.extractColor(getDataStyles({
+                  ...d,
+                  series,
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered,
+                  type: 'circle'
+                }))
 
                 const datumInteractionProps = interaction === 'element' ? {
+                  onClick: selectDatum.bind(this, d),
                   onMouseEnter: hoverDatum.bind(this, d),
                   onMouseMove: hoverDatum.bind(this, d),
                   onMouseLeave: hoverDatum.bind(this, null)
@@ -68,13 +76,13 @@ class Line extends PureComponent {
                     x={d.x}
                     y={d.y}
                     r={d.r}
-                    {...dataProps}
-                    className={classnames(dataClassName)}
                     style={{
+                      ...style,
                       ...circleDefaultStyle,
                       ...dataStyle
                     }}
                     opacity={inter.visibility}
+                    {...seriesInteractionProps}
                     {...datumInteractionProps}
                   />
                 )
@@ -90,6 +98,8 @@ class Line extends PureComponent {
 
 export default Connect((state, props) => {
   return {
-    hovered: state.hovered
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction
   }
 })(Line)

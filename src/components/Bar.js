@@ -1,11 +1,10 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
-import classnames from 'classnames'
 //
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
-import { hoverDatum } from '../utils/hoverMethods'
+import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 import Rectangle from '../primitives/Rectangle'
 
@@ -13,14 +12,13 @@ class Bars extends PureComponent {
   render () {
     const {
       series,
-      active,
-      inactive,
       visibility,
-      getProps,
-      getDataProps,
+      getDataStyles,
+      style,
       //
       primaryAxis,
-      hovered,
+      hovered: chartHovered,
+      selected: chartSelected,
       interaction
     } = this.props
 
@@ -28,14 +26,6 @@ class Bars extends PureComponent {
 
     const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
     // const seriesPadding = 0
-
-    let { style, className, ...props } = getProps({
-      ...series,
-      active,
-      inactive
-    })
-
-    style = Utils.extractColor(style)
 
     return (
       <Animate
@@ -49,9 +39,15 @@ class Bars extends PureComponent {
         }}
       >
         {inter => {
+          const seriesInteractionProps = interaction === 'series' ? {
+            onClick: selectSeries.bind(this, series),
+            onMouseEnter: hoverSeries.bind(this, series),
+            onMouseMove: hoverSeries.bind(this, series),
+            onMouseLeave: hoverSeries.bind(this, null)
+          } : {}
           return (
             <g
-              className='series bars'
+              className='series bar'
             >
               {inter.data.map((d, i) => {
                 let x1, y1, x2, y2
@@ -68,23 +64,24 @@ class Bars extends PureComponent {
                 }
 
                 const {
-                  active: datumActive,
-                  inactive: datumInactive
-                } = Utils.datumStatus(series, d, hovered)
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
+                } = Utils.datumStatus(series, d, chartHovered, chartSelected)
 
-                let {
-                  style: dataStyle,
-                  className: dataClassName,
-                  ...dataProps
-                } = getDataProps({
-                  ...series,
-                  active: datumActive,
-                  inactive: datumInactive
-                })
-
-                dataStyle = Utils.extractColor(dataStyle)
+                let dataStyle = Utils.extractColor(getDataStyles({
+                  ...d,
+                  series,
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered,
+                  type: 'rectangle'
+                }))
 
                 const datumInteractionProps = interaction === 'element' ? {
+                  onClick: selectDatum.bind(this, d),
                   onMouseEnter: hoverDatum.bind(this, d),
                   onMouseMove: hoverDatum.bind(this, d),
                   onMouseLeave: hoverDatum.bind(this, null)
@@ -92,9 +89,6 @@ class Bars extends PureComponent {
 
                 return (
                   <Rectangle
-                    {...props}
-                    {...dataProps}
-                    className={classnames(className, dataClassName)}
                     style={{
                       ...style,
                       ...dataStyle
@@ -105,6 +99,7 @@ class Bars extends PureComponent {
                     x2={x2}
                     y2={y2}
                     opacity={inter.visibility}
+                    {...seriesInteractionProps}
                     {...datumInteractionProps}
                   />
                 )
@@ -121,6 +116,7 @@ export default Connect((state, props) => {
   return {
     primaryAxis: Selectors.primaryAxis(state),
     hovered: state.hovered,
+    selected: state.selected,
     interaction: state.interaction
   }
 })(Bars)

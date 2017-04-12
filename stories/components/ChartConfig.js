@@ -39,7 +39,7 @@ const options = {
     true,
     false
   ],
-  interactionMode: [
+  interaction: [
     'axis',
     'series',
     'closestSeries',
@@ -75,7 +75,7 @@ const optionKeys = [
   'secondaryAxisType',
   'secondaryAxisPosition',
   'secondaryAxisStack',
-  'interactionMode',
+  'interaction',
   'tooltipPosition',
   'tooltipAlign',
   'snapCursor'
@@ -83,6 +83,7 @@ const optionKeys = [
 
 export default class ChartConfig extends Component {
   static defaultProps = {
+    show: optionKeys,
     elementType: 'line',
     primaryAxisType: 'time',
     secondaryAxisType: 'linear',
@@ -90,7 +91,7 @@ export default class ChartConfig extends Component {
     secondaryAxisPosition: 'left',
     primaryAxisStack: false,
     secondaryAxisStack: true,
-    interactionMode: 'axis',
+    interaction: 'axis',
     tooltipPosition: 'closest',
     tooltipAlign: 'top',
     snapCursor: true
@@ -104,12 +105,13 @@ export default class ChartConfig extends Component {
   }
   render () {
     const {
-      children
+      children,
+      show
     } = this.props
     return (
       <div>
 
-        {optionKeys.map(option => (
+        {optionKeys.map(option => show.indexOf(option) > -1 ? (
           <div key={option}>
             <label>
               {option}: &nbsp;
@@ -126,7 +128,7 @@ export default class ChartConfig extends Component {
             </label>
             <br />
           </div>
-        ))}
+        ) : <div key={option} />)}
 
         <button
           onClick={() => this.setState({
@@ -168,7 +170,7 @@ function makeSeries (i) {
     label: 'Series ' + (i + 1),
     data: _.map(_.range(length), d => ({
       x: startDate.setMinutes(startDate.getMinutes() + 30),
-      y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
+      y: -max + Math.round(Math.random() * max * 2),
       r: Math.round(Math.random() * 10)
     }))
   }

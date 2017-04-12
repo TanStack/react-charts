@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import 'javascript-detect-element-resize'
 //
-import throttle from '../utils/throttle'
+import Utils from '../utils/Utils'
 
 export default function HyperResponsive (WrappedComponent) {
   return class HyperResponsive extends PureComponent {
@@ -15,14 +15,16 @@ export default function HyperResponsive (WrappedComponent) {
       this.resize = this.resize.bind(this)
     }
     componentWillMount () {
-      this.resize = throttle(this.resize, 16)
+      this.resize = Utils.throttle(this.resize, 16)
     }
     componentDidMount () {
-      window.addResizeListener(this.el, this.resize)
+      if (!this.resizeListener) {
+        this.resizeListener = window.addResizeListener(this.el, this.resize)
+      }
       this.resize()
     }
     componentWillUnmount () {
-      window.removeResizeListener(this.el, this.resize)
+      this.resizeListener && window.removeResizeListener(this.el, this.resize)
     }
     resize (e) {
       this.setState({

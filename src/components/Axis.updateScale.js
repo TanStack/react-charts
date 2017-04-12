@@ -41,14 +41,14 @@ export default function updateScale (props) {
     tickPadding,
     tickSizeInner,
     // Context
-    accessedData,
+    materializedData,
     width,
     height,
     primaryAxis
   } = props
 
   // We need the data to proceed
-  if (!accessedData) {
+  if (!materializedData) {
     return
   }
 
@@ -74,7 +74,7 @@ export default function updateScale (props) {
   let domain
 
   if (type === 'ordinal') {
-    accessedData.forEach(series => {
+    materializedData.forEach(series => {
       const seriesValues = series.data.map(d => d[datumKey])
       seriesValues.forEach(d => {
         if (uniqueVals.indexOf(d) === -1) {
@@ -84,8 +84,8 @@ export default function updateScale (props) {
     })
     domain = invert ? [...uniqueVals].reverse() : uniqueVals
   } else if (type === 'time') {
-    min = max = accessedData[0].data[0][datumKey]
-    accessedData.forEach(series => {
+    min = max = materializedData[0].data[0][datumKey]
+    materializedData.forEach(series => {
       const seriesValues = series.data.map(d => +d[datumKey])
       seriesValues.forEach((d, i) => {
         datumValues[i] = [...(datumValues[i] || []), d]
@@ -97,7 +97,7 @@ export default function updateScale (props) {
     })
     domain = invert ? [max, min] : [min, max]
   } else {
-    accessedData.forEach(series => {
+    materializedData.forEach(series => {
       const seriesValues = series.data.map(d => d[datumKey])
       seriesValues.forEach((d, i) => {
         datumValues[i] = [...(datumValues[i] || []), d]
@@ -110,11 +110,11 @@ export default function updateScale (props) {
     if (stacked) {
       // If we're stacking, calculate and use the max and min values for the largest stack
       [positiveTotal, negativeTotal] = datumValues.reduce((totals, vals) => {
-        const positive = vals.filter(d => d > 0).reduce((ds, d) => ds + d, 0)
+        const positive = vals.filter(d => d >= 0).reduce((ds, d) => ds + d, 0)
         const negative = vals.filter(d => d < 0).reduce((ds, d) => ds + d, 0)
         return [
           positive > totals[0] ? positive : totals[0],
-          negative > totals[1] ? negative : totals[1]
+          negative < totals[1] ? negative : totals[1]
         ]
       }, [0, 0])
       domain = invert ? [positiveTotal, negativeTotal] : [negativeTotal, positiveTotal]
@@ -156,7 +156,7 @@ export default function updateScale (props) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
     const bandScale = scaleBand()
-      .domain(accessedData.reduce((prev, current) => current.data.length > prev.length ? current.data : prev, []).map(d => d.primary))
+      .domain(materializedData.reduce((prev, current) => current.data.length > prev.length ? current.data : prev, []).map(d => d.primary))
       .rangeRound(scale.range(), 0.1)
       .paddingInner(barPaddingInner)
       .paddingOuter(barPaddingOuter)

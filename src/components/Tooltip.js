@@ -47,7 +47,8 @@ class Tooltip extends PureComponent {
       },
       gridX,
       gridY,
-      cursor,
+      cursor = {},
+      // quadTree,
       //
       position,
       align,
@@ -72,6 +73,7 @@ class Tooltip extends PureComponent {
         : position === 'bottom' ? Utils.getCenterPointOfSide('bottom', datums)
         : position === 'center' ? Utils.getCenterPointOfSide('center', datums)
         : position === 'cursor' ? cursor
+        // : quadTree.find(cursor.x, cursor.y)
         : Utils.getClosestPoint(cursor, datums)
     ) : {
       x: gridX,
@@ -221,7 +223,8 @@ export default Connect(state => ({
   gridY: Selectors.gridY(state),
   hovered: state.hovered,
   cursor: state.cursor,
-  offset: Selectors.offset(state)
+  offset: Selectors.offset(state),
+  quadTree: state.quadTree
 }))(Tooltip, {
   isHTML: true
 })

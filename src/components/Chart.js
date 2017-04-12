@@ -7,7 +7,6 @@ import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
 
 import Rectangle from '../primitives/Rectangle'
-
 import Voronoi from '../components/Voronoi'
 
 class Chart extends PureComponent {
@@ -18,13 +17,14 @@ class Chart extends PureComponent {
     getPrimary: d => Array.isArray(d) ? d[0] : d.x,
     getSecondary: d => Array.isArray(d) ? d[1] : d.y,
     getR: d => Array.isArray(d) ? d[0] : d.r,
+    decorate: d => ({}),
     interaction: 'closestPoint'
   }
   constructor () {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
-    this.onCursor = this.onCursor.bind(this)
+    this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
     this.onCursorLeave = this.onCursorLeave.bind(this)
   }
   componentDidMount () {
@@ -84,7 +84,7 @@ class Chart extends PureComponent {
     getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
-    const accessedData = data.map((s, seriesIndex) => {
+    let materializedData = data.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {
@@ -109,33 +109,10 @@ class Chart extends PureComponent {
       return series
     })
 
-    // function applyGroupMeta (series, config) {
-    //   const groupBy = normalizeGetter(config[0].groupBy)
-    //   const orderBy = normalizeGetter(config[0].orderBy)
-    //   const getMeta = normalizeGetter(config[0].getMeta)
-    //
-    //   const nextConfigs = config.slice(1)
-    //
-    //   const groupedSeries = _.groupBy(series, groupBy)
-    //   const orderedSeries = _.orderBy(groupedSeries, orderBy)
-    //   const meta = _.map(orderedSeries, getMeta)
-    //   let orderedSeriesWithMeta = _.map(orderedSeries, getMeta)
-    //
-    //   if (nextConfigs.length) {
-    //     orderedSeriesWithMeta = orderedSeries.map(s => organize(s, nextConfigs))
-    //   }
-    //
-    //   const flatSeries = []
-    //   return orderedSeriesWithMeta
-    // }
-    //
-
-
-    // This will make all of the props available to anything using
-    // the chart context
+    // Provide the materializedData to the chart instance
     this.props.dispatch(state => ({
       ...state,
-      accessedData
+      materializedData
     }))
   }
   measure (prevProps) {
@@ -191,8 +168,14 @@ class Chart extends PureComponent {
               <g
                 ref={el => { this.el = el }}
                 transform={`translate(${gridX}, ${gridY})`}
-                onMouseEnter={this.onCursor}
-                onMouseMove={this.onCursor}
+                onMouseEnter={e => {
+                  e.persist()
+                  this.onCursor(e)
+                }}
+                onMouseMove={e => {
+                  e.persist()
+                  this.onCursor(e)
+                }}
                 onMouseLeave={this.onCursorLeave}
               >
                 <Rectangle
@@ -239,6 +222,10 @@ class Chart extends PureComponent {
       cursor: {
         ...state.cursor,
         active: false
+      },
+      hovered: {
+        ...state.hovered,
+        active: false
       }
     }))
   }
@@ -254,7 +241,8 @@ const ReactChart = Connect((state) => {
     active: state.active,
     hovered: state.hovered,
     cursor: state.cursor,
-    offset: Selectors.offset(state)
+    offset: Selectors.offset(state),
+    selected: state.selected
   }
 })(Chart)
 

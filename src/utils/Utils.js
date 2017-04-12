@@ -1,4 +1,7 @@
+import RAF from 'raf'
+
 export default {
+  throttle,
   seriesStatus,
   datumStatus,
   getCenterPointOfSide,
@@ -9,37 +12,73 @@ export default {
   normalizePathGetter,
   get,
   mapValues,
-  uniq
+  uniq,
+  groupBy,
+  orderBy,
+  isArray
 }
 
-function seriesStatus (series, hovered) {
-  if (!hovered || !hovered.active || !hovered.series) {
-    return {
-      active: false,
-      inactive: false
-    }
-  }
-  const active = hovered.series.id === series.id
-
-  return {
-    active,
-    inactive: !active
+function throttle (func) {
+  let running
+  return (...args) => {
+    if (running) return
+    running = RAF(() => {
+      func(...args)
+      running = false
+    })
   }
 }
 
-function datumStatus (series, datum, hovered) {
-  if (!hovered || !hovered.active || !hovered.datums || !hovered.datums.length) {
-    return {
-      active: false,
-      inactive: false
-    }
+function seriesStatus (series, hovered, selected) {
+  const status = {
+    selected: false,
+    hovered: false,
+    otherSelected: false,
+    otherHovered: false
   }
-  const active = hovered.datums.find(d => d.seriesID === series.id && d.index === datum.index)
+  if (selected && selected.active && selected.series) {
+    status.selected = selected.series.id === series.id
+    status.otherSelected = !status.selected
+  }
+  if (hovered && hovered.active && hovered.series) {
+    status.hovered = hovered.series.id === series.id
+    status.otherHovered = !status.hovered
+  }
 
-  return {
-    active,
-    inactive: !active
+  return status
+}
+
+function datumStatus (series, datum, hovered, selected) {
+  const status = {
+    selected: false,
+    hovered: false,
+    otherSelected: false,
+    otherHovered: false
   }
+
+  let d
+  if (selected && selected.active && selected.datums) {
+    for (let i = 0; i < selected.datums.length; i++) {
+      d = selected.datums[i]
+      if (d.seriesID === series.id && d.index === datum.index) {
+        status.selected = true
+        break
+      }
+    }
+    status.otherSelected = !status.selected
+  }
+  if (hovered && hovered.active && hovered.datums) {
+    for (let i = 0; i < hovered.datums.length; i++) {
+      d = hovered.datums[i]
+      if (d.seriesID === series.id && d.index === datum.index) {
+        status.hovered = true
+        break
+      }
+    }
+    status.otherHovered = !status.hovered
+  }
+
+  return status
 }
 
 function getCenterPointOfSide (position, points) {
@@ -123,6 +162,9 @@ function extractColor (style = {}) {
 }
 
 function normalizeGetter (getter) {
+  if (!getter) {
+    return
+  }
   if (typeof getter === 'function') {
     return getter
   }
@@ -162,11 +204,43 @@ function uniq (arr) {
   return arr.filter((d, i) => arr.filter(dd => dd === d).length === 1)
 }
 
-//
-// // ########################################################################
-// // Non-exported Helpers
-// // ########################################################################
-//
+function groupBy (xs, key) {
+  return xs.reduce((rv, x, i) => {
+    const resKey = typeof key === 'function' ? key(x, i) : x[key]
+    rv[resKey] = isArray(rv[resKey]) ? rv[resKey] : []
+    rv[resKey].push(x)
+    return rv
+  }, {})
+}
+
+function orderBy (arr, funcs, dirs = []) {
+  funcs = isArray(funcs) ? funcs : [funcs]
+  return arr.sort((a, b) => {
+    for (let i = 0; i < funcs.length; i++) {
+      const comp = funcs[i]
+      const ca = comp(a)
+      const cb = comp(b)
+      const desc = dirs[i] === false || dirs[i] === 'desc'
+      if (ca > cb) {
+        return desc ? -1 : 1
+      }
+      if (ca < cb) {
+        return desc ? 1 : -1
+      }
+    }
+    return dirs[0]
+      ? a.__index - b.__index
+      : b.__index - b.__index
+  })
+}
+
+function isArray (a) {
+  return Array.isArray(a)
+}
+
+// ########################################################################
+// Non-exported Helpers
+// ########################################################################
 
 function makePathArray (obj) {
   return flattenDeep(obj)
@@ -185,8 +259,4 @@ function flattenDeep (arr, newArr = []) {
     }
   }
   return newArr
-}
-
-function isArray (a) {
-  return Array.isArray(a)
 }

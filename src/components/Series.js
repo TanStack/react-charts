@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
+import { quadtree as QuadTree } from 'd3-quadtree'
 //
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
@@ -33,15 +34,13 @@ const defaultColors = [
 class Series extends PureComponent {
   static defaultProps = {
     type: 'line',
-    getProps: (d, i) => ({
+    getStyles: (d, i) => ({
       style: {
         color: defaultColors[d.index % defaultColors.length]
       }
     }),
-    getDataProps: ({
-      active
-    }) => ({
-      r: active ? 4 : 2
+    getDataStyles: d => ({
+      r: d.active ? 4 : 2
     })
   }
   componentDidMount () {
@@ -53,13 +52,12 @@ class Series extends PureComponent {
     // If any of the following change,
     // we need to update the stack
     if (
-      newProps.accessedData !== oldProps.accessedData ||
+      newProps.materializedData !== oldProps.materializedData ||
       newProps.axes !== oldProps.axes ||
       newProps.type !== oldProps.type ||
       newProps.seriesKey !== oldProps.seriesKey ||
       newProps.primaryAxis !== oldProps.primaryAxis ||
-      newProps.secondaryAxis !== oldProps.secondaryAxis ||
-      newProps.hovered !== oldProps.hovered
+      newProps.secondaryAxis !== oldProps.secondaryAxis
     ) {
       this.updateStackData(newProps)
     }
@@ -67,29 +65,34 @@ class Series extends PureComponent {
   updateStackData (props) {
     const {
       //
-      accessedData,
+      materializedData,
       primaryAxis,
       secondaryAxis
     } = props
 
-    // If the axes are not ready, just provide the accessedData
-    if (!accessedData || !primaryAxis || !secondaryAxis) {
+    // If the axes are not ready, just provide the materializedData
+    if (!materializedData || !primaryAxis || !secondaryAxis) {
       return
     }
 
-    // If the axes are ready, let's decorate the accessedData for visual plotting
+    // If the axes are ready, let's decorate the materializedData for visual plotting
     const secondaryStacked = secondaryAxis.stacked
     // "totals" are used if secondaryAxis stacking is enabled
-    const totals = secondaryStacked && accessedData.map(s => {
-      return s.data.map(d => (0))
+    const totals = secondaryStacked && materializedData.map(s => {
+      return s.data.map(d => 0)
     })
+    .reduce((prev, current) => prev.length > current.length ? prev : current, [])
+    .map(d => ({
+      negative: 0,
+      positive: 0
+    }))
 
     const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
     const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
     const xScale = primaryAxis.vertical ? secondaryAxis.scale : primaryAxis.scale
     const yScale = primaryAxis.vertical ? primaryAxis.scale : secondaryAxis.scale
 
-    let stackData = accessedData.map((series, seriesIndex) => {
+    let stackData = materializedData.map((series, seriesIndex) => {
       return {
         ...series,
         data: series.data.map((d, index) => {
@@ -100,15 +103,26 @@ class Series extends PureComponent {
             base: 0
           }
           if (secondaryStacked) {
-            const start = (typeof totals[seriesIndex - 1] !== 'undefined' ? totals[seriesIndex - 1] : totals[0])[index]
-            datum.base = start
+            let start = totals[index]
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
-              datum.x = start + datum.x
-              totals[seriesIndex][index] = datum.x
+              // Should we use positive or negative base?
+              let key = datum.x >= 0 ? 'positive' : 'negative'
+              // Assign the base
+              datum.base = start[key]
+              // Add the value to the base
+              datum.x = datum.base + datum.x
+              // Update the totals
+              totals[index][key] = datum.x
             } else {
-              datum.y = start + datum.y
-              totals[seriesIndex][index] = datum.y
+              // Should we use positive or negative base?
+              let key = datum.y >= 0 ? 'positive' : 'negative'
+              // Assign the base
+              datum.base = start[key]
+              // Add the value to the base
+              datum.y = datum.base + datum.y
+              // Update the totals
+              totals[index][key] = datum.y
             }
           }
           return datum
@@ -131,18 +145,33 @@ class Series extends PureComponent {
       }
     })
 
+    const allPoints = []
+
+    stackData.forEach(s => {
+      s.data.forEach(d => {
+        allPoints.push(d)
+      })
+    })
+
+    const quadTree = QuadTree()
+      .x(d => d.x)
+      .y(d => d.y)
+      .addAll(allPoints)
+
     this.props.dispatch(state => ({
       ...state,
-      stackData
+      stackData,
+      quadTree
     }))
   }
   render () {
     const {
       type,
-      getProps,
-      getDataProps,
-      hovered,
+      getStyles,
+      getDataStyles,
       //
+      hovered: chartHovered,
+      selected: chartSelected,
       stackData
     } = this.props
 
@@ -175,25 +204,37 @@ class Series extends PureComponent {
             >
               {inters.map((inter, i) => {
                 const {
-                  active,
-                  inactive
-                } = Utils.seriesStatus(inter.data, hovered)
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
+                } = Utils.seriesStatus(inter.data, chartHovered, chartSelected)
 
                 const resolvedType = typeGetter({
                   ...inter.data,
-                  active,
-                  inactive
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
                 }, inter.data.id)
                 const StackCmp = stackTypes[resolvedType]
+
+                let style = Utils.extractColor(getStyles({
+                  ...inter.data,
+                  type: resolvedType,
+                  selected,
+                  hovered,
+                  otherSelected,
+                  otherHovered
+                }))
+
                 return (
                   <StackCmp
                     key={inter.key}
                     series={inter.data}
-                    active={active}
-                    inactive={inactive}
-                    getProps={getProps}
-                    getDataProps={getDataProps}
+                    getDataStyles={getDataStyles}
                     visibility={inter.state.visibility}
+                    style={style}
                   />
                 )
               })}
@@ -207,10 +248,11 @@ class Series extends PureComponent {
 
 export default Connect((state, props) => {
   return {
-    accessedData: state.accessedData,
+    materializedData: state.materializedData,
     stackData: state.stackData,
     primaryAxis: Selectors.primaryAxis(state),
     secondaryAxis: Selectors.secondaryAxis(state),
-    hovered: state.hovered
+    hovered: state.hovered,
+    selected: state.selected
   }
 })(Series)
