@@ -9,7 +9,6 @@ import {
   curveMonotoneX
 } from 'd3-shape'
 //
-import Utils from '../utils/Utils'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
@@ -28,13 +27,11 @@ class Area extends PureComponent {
     const {
       series,
       visibility,
-      getDataStyles,
-      style,
       //
-      hovered: chartHovered,
-      selected: chartSelected,
       interaction
     } = this.props
+
+    const style = series.style
 
     const areaFn = area()
     .curve(curveMonotoneX)
@@ -72,6 +69,7 @@ class Area extends PureComponent {
                 style={{
                   ...pathDefaultStyle,
                   ...style,
+                  ...style.area,
                   stroke: 'transparent'
                 }}
                 opacity={inter.visibility}
@@ -82,28 +80,14 @@ class Area extends PureComponent {
                 style={{
                   ...pathDefaultStyle,
                   ...style,
+                  ...style.line,
                   fill: 'none'
                 }}
                 opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
               {inter.data.map((d, i) => {
-                const {
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered
-                } = Utils.datumStatus(series, d, chartHovered, chartSelected)
-
-                let dataStyle = Utils.extractColor(getDataStyles({
-                  ...d,
-                  series,
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered,
-                  type: 'circle'
-                }))
+                let dataStyle = d.style
 
                 const datumInteractionProps = interaction === 'element' ? {
                   onClick: selectDatum.bind(this, d),
@@ -120,7 +104,9 @@ class Area extends PureComponent {
                     style={{
                       ...circleDefaultStyle,
                       ...style,
-                      ...dataStyle
+                      ...style.circle,
+                      ...dataStyle,
+                      ...dataStyle.circle
                     }}
                     opacity={inter.visibility}
                     // {...seriesInteractionProps}
@@ -142,4 +128,6 @@ export default Connect((state, props) => {
     selected: state.selected,
     interaction: state.interaction
   }
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
 })(Area)

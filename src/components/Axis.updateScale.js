@@ -193,13 +193,14 @@ export default function updateScale (props) {
     format: tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
     range: scale.range(),
-    range0: range[0] + 0.5,
-    range1: range[1] + 0.5,
-    itemWidth: centerTicks ? barWidth : 1,
-    seriesPadding: centerTicks ? barPaddingOuter * barStepSize : 0
+    range0: range[0],
+    range1: range[1],
+    itemWidth: barWidth,
+    // seriesPadding: centerTicks ? barWidth / 2 + (barPaddingOuter * barStepSize) : 0
+    seriesPadding: 0
   }
 
-  axis.tickPosition = axis.seriesPadding + (axis.itemWidth / 2)
+  axis.tickPosition = centerTicks ? axis.itemWidth / 2 : 0
 
   // Make sure we start with a prevAxis
   this.prevAxis = this.prevAxis || axis
@@ -210,7 +211,9 @@ export default function updateScale (props) {
       ...state.axes,
       [id]: axis
     }
-  }))
+  }), {
+    type: 'axisUpdateScale'
+  })
 }
 
 function identity (x) {

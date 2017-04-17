@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
 //
-import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
@@ -13,19 +12,16 @@ class Bars extends PureComponent {
     const {
       series,
       visibility,
-      getDataStyles,
-      style,
       //
       primaryAxis,
-      hovered: chartHovered,
-      selected: chartSelected,
       interaction
     } = this.props
 
-    const barWidth = primaryAxis.barWidth
+    const style = series.style
 
-    const seriesPadding = primaryAxis.centerTicks ? primaryAxis.barPaddingOuterSize : 0
-    // const seriesPadding = 0
+    const barWidth = primaryAxis.barWidth
+    const tickPosition = primaryAxis.tickPosition
+    const barOffset = -(barWidth / 2)
 
     return (
       <Animate
@@ -54,31 +50,16 @@ class Bars extends PureComponent {
                 if (primaryAxis.vertical) {
                   x1 = d.base
                   x2 = d.x
-                  y1 = d.y + seriesPadding
+                  y1 = d.y + tickPosition + barOffset
                   y2 = y1 + barWidth
                 } else {
-                  x1 = d.x + seriesPadding
+                  x1 = d.x + tickPosition + barOffset
                   x2 = x1 + barWidth
                   y1 = d.y
                   y2 = d.base
                 }
 
-                const {
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered
-                } = Utils.datumStatus(series, d, chartHovered, chartSelected)
-
-                let dataStyle = Utils.extractColor(getDataStyles({
-                  ...d,
-                  series,
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered,
-                  type: 'rectangle'
-                }))
+                let dataStyle = d.style
 
                 const datumInteractionProps = interaction === 'element' ? {
                   onClick: selectDatum.bind(this, d),
@@ -91,7 +72,9 @@ class Bars extends PureComponent {
                   <Rectangle
                     style={{
                       ...style,
-                      ...dataStyle
+                      ...style.rectangle,
+                      ...dataStyle,
+                      ...dataStyle.rectangle
                     }}
                     key={i}
                     x1={x1}
@@ -112,11 +95,18 @@ class Bars extends PureComponent {
   }
 }
 
-export default Connect((state, props) => {
-  return {
-    primaryAxis: Selectors.primaryAxis(state),
-    hovered: state.hovered,
-    selected: state.selected,
-    interaction: state.interaction
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis()
   }
+  return (state, props) => {
+    return {
+      primaryAxis: selectors.primaryAxis(state),
+      hovered: state.hovered,
+      selected: state.selected,
+      interaction: state.interaction
+    }
+  }
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
 })(Bars)

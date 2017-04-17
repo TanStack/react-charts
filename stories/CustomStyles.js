@@ -60,10 +60,26 @@ class Story extends Component {
               })}
               getDataStyles={d => ({
                 r: d.hovered ? 5 : d.selected ? 4 : d.otherHovered ? 2 : 3,
-                strokeDasharray: '0',
+                strokeWidth: 2,
+                strokeDasharray: '5, 5',
                 opacity: d.hovered ? 1 : d.selected ? 1 : d.otherHovered ? 0.5 : d.otherSelected ? 0.75 : 1
               })}
             />
+
+            {/* <Series>
+              {series => (
+                <Line
+                  series={series}
+                >
+                  {datum => (
+                    <Circle
+                      datum={datum}
+                    />
+                  )}
+                </Line>
+              )}
+            </Series> */}
+
             <Tooltip />
           </Chart>
         )}

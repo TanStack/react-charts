@@ -29,7 +29,7 @@ class Tooltip extends PureComponent {
           <br />
           {datums.map((d, i) => (
             <div key={i}>
-              <span style={{color: ''}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
+              <span style={{color: d.style.fill}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
             </div>
           ))}
         </div>
@@ -216,15 +216,26 @@ class Tooltip extends PureComponent {
   }
 }
 
-export default Connect(state => ({
-  primaryAxis: Selectors.primaryAxis(state),
-  secondaryAxis: Selectors.secondaryAxis(state),
-  gridX: Selectors.gridX(state),
-  gridY: Selectors.gridY(state),
-  hovered: state.hovered,
-  cursor: state.cursor,
-  offset: Selectors.offset(state),
-  quadTree: state.quadTree
-}))(Tooltip, {
-  isHTML: true
-})
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis(),
+    gridX: Selectors.gridX(),
+    gridY: Selectors.gridY(),
+    offset: Selectors.offset()
+  }
+  return state => ({
+    primaryAxis: selectors.primaryAxis(state),
+    secondaryAxis: selectors.secondaryAxis(state),
+    gridX: selectors.gridX(state),
+    gridY: selectors.gridY(state),
+    hovered: state.hovered,
+    cursor: state.cursor,
+    offset: selectors.offset(state),
+    quadTree: state.quadTree
+  })
+}, {
+  statics: {
+    isHTML: true
+  }
+})(Tooltip)

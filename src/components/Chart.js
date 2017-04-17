@@ -31,17 +31,21 @@ class Chart extends PureComponent {
     this.props.dispatch(state => ({
       ...state,
       interaction: this.props.interaction
-    }))
+    }), {
+      type: 'interaction'
+    })
     this.updateDataModel(this.props)
     this.measure()
   }
-  componentWillUpdate (nextProps) {
+  componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
     if (nextProps.interaction !== this.props.interaction) {
       this.props.dispatch(state => ({
         ...state,
         interaction: nextProps.interaction
-      }))
+      }), {
+        type: 'interaction'
+      })
     }
 
     if (
@@ -57,6 +61,19 @@ class Chart extends PureComponent {
     ) {
       this.updateDataModel(nextProps)
     }
+  }
+  shouldComponentUpdate (nextProps) {
+    if (
+      nextProps.style !== this.props.style ||
+      nextProps.width !== this.props.width ||
+      nextProps.height !== this.props.height ||
+      nextProps.gridX !== this.props.gridX ||
+      nextProps.gridY !== this.props.gridY ||
+      nextProps.children !== this.props.children
+    ) {
+      return true
+    }
+    return false
   }
   componentDidUpdate (prevProps) {
     window.requestAnimationFrame(() => this.measure(prevProps))
@@ -113,7 +130,9 @@ class Chart extends PureComponent {
     this.props.dispatch(state => ({
       ...state,
       materializedData
-    }))
+    }), {
+      type: 'materializedData'
+    })
   }
   measure (prevProps) {
     if (prevProps && (
@@ -126,7 +145,9 @@ class Chart extends PureComponent {
           left: this.el.offsetLeft,
           top: this.el.offsetTop
         }
-      }))
+      }), {
+        type: 'offset'
+      })
     }
   }
   render () {
@@ -214,7 +235,9 @@ class Chart extends PureComponent {
         x: clientX - this.dims.left - gridX,
         y: clientY - this.dims.top - gridY
       }
-    }))
+    }), {
+      type: 'cursor'
+    })
   }
   onCursorLeave () {
     this.props.dispatch(state => ({
@@ -227,23 +250,32 @@ class Chart extends PureComponent {
         ...state.hovered,
         active: false
       }
-    }))
+    }), {
+      type: 'cursor_hovered'
+    })
   }
 }
 
-const ReactChart = Connect((state) => {
-  return {
-    data: state.data,
-    width: state.width,
-    height: state.height,
-    gridX: Selectors.gridX(state),
-    gridY: Selectors.gridY(state),
-    active: state.active,
-    hovered: state.hovered,
-    cursor: state.cursor,
-    offset: Selectors.offset(state),
-    selected: state.selected
+const ReactChart = Connect(() => {
+  const selectors = {
+    gridX: Selectors.gridX(),
+    gridY: Selectors.gridY(),
+    offset: Selectors.offset()
   }
+  return (state) => {
+    return {
+      data: state.data,
+      width: state.width,
+      height: state.height,
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+      active: state.active,
+      offset: selectors.offset(state),
+      selected: state.selected
+    }
+  }
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
 })(Chart)
 
 export default HyperResponsive(Provider(ReactChart))

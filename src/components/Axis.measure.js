@@ -67,12 +67,7 @@ export default function measure () {
   const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
 
   if (visibleLabelStep !== newVisibleLabelStep) {
-    // console.log(visibleLabelStep, newVisibleLabelStep)
     this.visibleLabelStep = newVisibleLabelStep
-    // this.setState(state => ({
-    //   visibleLabelStep: newVisibleLabelStep
-    // }))
-    // return
   }
 
   if (!labelDims.length || labelDims.length !== this.ticks.length) {
@@ -122,5 +117,7 @@ export default function measure () {
         right
       }
     }
-  }))
+  }), {
+    type: 'axisDimensions'
+  })
 }

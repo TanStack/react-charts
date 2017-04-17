@@ -1535,9 +1535,9 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-codux@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/codux/-/codux-0.0.3.tgz#00b83665ddabb25984501459e0d2551d6d62106c"
+codux@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/codux/-/codux-0.0.8.tgz#1108ee6a471c5e285c72d75d0eeaf1ddd955b8b5"
 
 color-convert@^1.3.0:
   version "1.8.2"

@@ -10,7 +10,9 @@ export function hoverSeries (series) {
       ...state.hovered,
       active: false
     }
-  }))
+  }), {
+    type: 'hoverSeries'
+  })
 }
 
 export function hoverDatum (datum) {
@@ -25,7 +27,9 @@ export function hoverDatum (datum) {
       ...state.hovered,
       active: false
     }
-  }))
+  }), {
+    type: 'hoverDatum'
+  })
 }
 
 export function selectSeries (series) {
@@ -39,7 +43,9 @@ export function selectSeries (series) {
     } : {
       active: false
     }
-  }))
+  }), {
+    type: 'selectSeries'
+  })
 }
 
 export function selectDatum (datum) {
@@ -53,5 +59,7 @@ export function selectDatum (datum) {
     } : {
       active: false
     }
-  }))
+  }), {
+    type: 'selectDatum'
+  })
 }

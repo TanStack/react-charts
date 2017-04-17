@@ -7,7 +7,7 @@ export default {
   getCenterPointOfSide,
   getClosestPoint,
   normalizeComponent,
-  extractColor,
+  materializeStyles,
   normalizeGetter,
   normalizePathGetter,
   get,
@@ -150,14 +150,17 @@ function normalizeComponent (Comp, params = {}, fallback = Comp) {
   ) : fallback
 }
 
-function extractColor (style = {}) {
+function materializeStyles (style = {}, defaults = {}) {
   if (style.color) {
-    return {
+    style = {
       ...style,
-      fill: style.fill || style.color,
-      stroke: style.stroke || style.color
+      fill: style.fill || style.color || defaults.color,
+      stroke: style.stroke || style.color || defaults.color
     }
   }
+  ['area', 'line', 'rectangle', 'circle'].forEach(type => {
+    style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
+  })
   return style
 }
 
@@ -179,6 +182,13 @@ function normalizePathGetter (getter) {
 }
 
 function get (obj, path, def) {
+  if (typeof obj === 'function') {
+    try {
+      return obj()
+    } catch (e) {
+      return path
+    }
+  }
   if (!path) {
     return obj
   }

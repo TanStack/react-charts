@@ -34,19 +34,13 @@ const defaultColors = [
 class Series extends PureComponent {
   static defaultProps = {
     type: 'line',
-    getStyles: (d, i) => ({
-      style: {
-        color: defaultColors[d.index % defaultColors.length]
-      }
-    }),
-    getDataStyles: d => ({
-      r: d.active ? 4 : 2
-    })
+    getStyles: d => ({}),
+    getDataStyles: d => ({})
   }
   componentDidMount () {
     this.updateStackData(this.props)
   }
-  componentWillUpdate (newProps) {
+  componentWillReceiveProps (newProps) {
     const oldProps = this.props
 
     // If any of the following change,
@@ -61,6 +55,20 @@ class Series extends PureComponent {
     ) {
       this.updateStackData(newProps)
     }
+
+    if (
+      newProps.stackData !== oldProps.stackData ||
+      newProps.hovered !== oldProps.hovered ||
+      newProps.selected !== oldProps.selected
+    ) {
+      this.updateDecoratedData(newProps)
+    }
+  }
+  shouldComponentUpdate (nextProps) {
+    if (nextProps.decoratedData !== this.props.decoratedData) {
+      return true
+    }
+    return false
   }
   updateStackData (props) {
     const {
@@ -77,7 +85,7 @@ class Series extends PureComponent {
 
     // If the axes are ready, let's decorate the materializedData for visual plotting
     const secondaryStacked = secondaryAxis.stacked
-    // "totals" are used if secondaryAxis stacking is enabled
+    // "totals" are kept and used for bases if secondaryAxis stacking is enabled
     const totals = secondaryStacked && materializedData.map(s => {
       return s.data.map(d => 0)
     })
@@ -87,6 +95,7 @@ class Series extends PureComponent {
       positive: 0
     }))
 
+    // Make sure we're mapping x and y to the correct axes
     const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
     const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
     const xScale = primaryAxis.vertical ? secondaryAxis.scale : primaryAxis.scale
@@ -162,20 +171,80 @@ class Series extends PureComponent {
       ...state,
       stackData,
       quadTree
-    }))
+    }), {
+      type: 'stackData'
+    })
   }
-  render () {
+  updateDecoratedData (props) {
     const {
-      type,
       getStyles,
       getDataStyles,
       //
       hovered: chartHovered,
       selected: chartSelected,
       stackData
-    } = this.props
+    } = props
 
     if (!stackData) {
+      return
+    }
+
+    // Any time the hovered or selected elements change, we need
+    // to redecorate the stackData with the right styles.
+    // One of the benefits to doing this here, instead of in the
+    // series or datum components themselves is so other components
+    // can easily use the current styles of each element, eg. Tooltips
+    // displaying the exact colors that are being displayed
+
+    const decoratedData = stackData.map(series => {
+      // Get the series status
+      const seriesWithStatus = {
+        ...series,
+        ...Utils.seriesStatus(series, chartHovered, chartSelected)
+      }
+
+      // Get the series style
+      const style = Utils.materializeStyles(getStyles(seriesWithStatus), {
+        // Pass some sane defaults
+        color: defaultColors[series.index % (defaultColors.length - 1)]
+      })
+      seriesWithStatus.style = seriesWithStatus.style || style
+
+      // We also need to decorate each datum in the same fashion
+      seriesWithStatus.data = seriesWithStatus.data.map(datum => {
+        const datumWithStatus = {
+          ...datum,
+          ...Utils.datumStatus(series, datum, chartHovered, chartSelected)
+        }
+        const dataStyle = Utils.materializeStyles(getDataStyles(datumWithStatus), {
+          color: defaultColors[series.index % (defaultColors.length - 1)]
+        })
+        datumWithStatus.style = {
+          ...seriesWithStatus.style,
+          ...(datum.style || dataStyle)
+        }
+        return datumWithStatus
+      })
+
+      return seriesWithStatus
+    })
+
+    // Provide the new decorated data to the chart
+    this.props.dispatch(state => ({
+      ...state,
+      decoratedData
+    }), {
+      type: 'decoratedData'
+    })
+  }
+  render () {
+    const {
+      type,
+      //
+      decoratedData
+    } = this.props
+
+    if (!decoratedData) {
       return null
     }
 
@@ -184,7 +253,7 @@ class Series extends PureComponent {
 
     return (
       <Transition
-        data={[...stackData].reverse()} // The stack is reversed for proper z-index painting
+        data={[...decoratedData].reverse()} // The stack is reversed for proper z-index painting
         getKey={(d, i) => d.id}
         update={d => ({
           visibility: 1
@@ -203,38 +272,14 @@ class Series extends PureComponent {
               className='Series'
             >
               {inters.map((inter, i) => {
-                const {
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered
-                } = Utils.seriesStatus(inter.data, chartHovered, chartSelected)
-
-                const resolvedType = typeGetter({
-                  ...inter.data,
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered
-                }, inter.data.id)
+                const resolvedType = typeGetter(inter.data, inter.data.id)
                 const StackCmp = stackTypes[resolvedType]
-
-                let style = Utils.extractColor(getStyles({
-                  ...inter.data,
-                  type: resolvedType,
-                  selected,
-                  hovered,
-                  otherSelected,
-                  otherHovered
-                }))
 
                 return (
                   <StackCmp
                     key={inter.key}
                     series={inter.data}
-                    getDataStyles={getDataStyles}
                     visibility={inter.state.visibility}
-                    style={style}
                   />
                 )
               })}
@@ -246,13 +291,22 @@ class Series extends PureComponent {
   }
 }
 
-export default Connect((state, props) => {
-  return {
-    materializedData: state.materializedData,
-    stackData: state.stackData,
-    primaryAxis: Selectors.primaryAxis(state),
-    secondaryAxis: Selectors.secondaryAxis(state),
-    hovered: state.hovered,
-    selected: state.selected
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis()
   }
+  return (state, props) => {
+    return {
+      materializedData: state.materializedData,
+      stackData: state.stackData,
+      decoratedData: state.decoratedData,
+      primaryAxis: selectors.primaryAxis(state),
+      secondaryAxis: selectors.secondaryAxis(state),
+      hovered: state.hovered,
+      selected: state.selected
+    }
+  }
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
 })(Series)

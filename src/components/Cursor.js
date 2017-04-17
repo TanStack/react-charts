@@ -20,7 +20,7 @@ class Cursor extends PureComponent {
       primary,
       snap,
       //
-      stackData,
+      decoratedData,
       primaryAxis,
       secondaryAxis,
       cursor,
@@ -35,7 +35,7 @@ class Cursor extends PureComponent {
 
     // Don't render until we have all dependencies
     if (
-      !stackData ||
+      !decoratedData ||
       !cursor ||
       !primaryAxis ||
       !secondaryAxis
@@ -65,7 +65,7 @@ class Cursor extends PureComponent {
       let closestDatum
       if (primaryAxis.vertical) {
         let smallestDistance = 10000000
-        stackData.forEach(series => {
+        decoratedData.forEach(series => {
           series.data.forEach(datum => {
             const distance = Math.abs(y - datum.x)
             if (distance < smallestDistance) {
@@ -78,7 +78,7 @@ class Cursor extends PureComponent {
         label = axis.format(closestDatum.primary)
       } else {
         let smallestDistance = 10000000
-        stackData.forEach(series => {
+        decoratedData.forEach(series => {
           series.data.forEach(datum => {
             const distance = Math.abs(x - datum.x)
             if (distance < smallestDistance) {
@@ -192,7 +192,9 @@ class Cursor extends PureComponent {
     return this.props.dispatch(state => ({
       ...state,
       hovered
-    }))
+    }), {
+      type: 'hovered'
+    })
   }
   onActivate (newActive, e) {
     const {
@@ -203,26 +205,41 @@ class Cursor extends PureComponent {
       return dispatch(state => ({
         ...state,
         active: null
-      }))
+      }), {
+        type: 'active'
+      })
     }
     dispatch(state => ({
       ...state,
       active: newActive
-    }))
+    }), {
+      type: 'active'
+    })
   }
 }
 
-export default Connect(state => ({
-  stackData: state.stackData,
-  primaryAxis: Selectors.primaryAxis(state),
-  secondaryAxis: Selectors.secondaryAxis(state),
-  cursor: state.cursor,
-  offset: Selectors.offset(state),
-  gridX: Selectors.gridX(state),
-  gridY: Selectors.gridY(state)
-}))(Cursor, {
-  isHTML: true
-})
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis(),
+    offset: Selectors.offset(),
+    gridX: Selectors.gridX(),
+    gridY: Selectors.gridY()
+  }
+  return state => ({
+    decoratedData: state.decoratedData,
+    primaryAxis: selectors.primaryAxis(state),
+    secondaryAxis: selectors.secondaryAxis(state),
+    cursor: state.cursor,
+    offset: selectors.offset(state),
+    gridX: selectors.gridX(state),
+    gridY: selectors.gridY(state)
+  })
+}, {
+  statics: {
+    isHTML: true
+  }
+})(Cursor)
 
 /* <g
 

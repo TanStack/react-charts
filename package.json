@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
-    "codux": "^0.0.3",
+    "codux": "^0.0.8",
     "d3-quadtree": "^1.0.3",
     "d3-scale": "^1.0.4",
     "d3-shape": "^1.0.5",

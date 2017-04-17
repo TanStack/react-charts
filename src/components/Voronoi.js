@@ -21,14 +21,14 @@ class Interaction extends PureComponent {
     const {
       interaction,
       //
-      stackData,
+      decoratedData,
       primaryAxis,
       secondaryAxis
     } = this.props
 
     // Don't render until we have all dependencies
     if (
-      !stackData ||
+      !decoratedData ||
       !primaryAxis ||
       !secondaryAxis
     ) {
@@ -45,10 +45,10 @@ class Interaction extends PureComponent {
 
     if (interaction === modeClosestSeries) {
       // Closest Point Voronoi
-      const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
+      const voronoiData = decoratedData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
         x: d.x,
         y: d.y,
-        series: stackData[d.seriesIndex],
+        series: decoratedData[d.seriesIndex],
         datums: null,
         single: false
       }))
@@ -59,7 +59,7 @@ class Interaction extends PureComponent {
       polygons = vor.polygons()
     } else if (interaction === modeClosestPoint) {
       // Closest Point Voronoi
-      const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
+      const voronoiData = decoratedData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
         x: d.x,
         y: d.y,
         series: null,
@@ -74,7 +74,7 @@ class Interaction extends PureComponent {
     } else if (interaction === modeAxis) {
       // Axis Voronoi
       // Group all data points based on primaryAxis
-      const allDatums = stackData.reduce((prev, now) => prev.concat(now.data), [])
+      const allDatums = decoratedData.reduce((prev, now) => prev.concat(now.data), [])
       const datumsByAxis = {}
       allDatums.forEach(d => {
         const key = String(d.primary)
@@ -113,7 +113,7 @@ class Interaction extends PureComponent {
               d={path}
               className='action-voronoi'
               onMouseEnter={this.onHover.bind(this, points.data.series, points.data.datums)}
-              onMouseMove={this.onHover.bind(this, points.data.series, points.data.datums)}
+              // onMouseMove={this.onHover.bind(this, points.data.series, points.data.datums)}
               onClick={this.onClick.bind(this, points.data.series, points.data.datums)}
               style={{
                 fill: 'transparent',
@@ -139,6 +139,8 @@ class Interaction extends PureComponent {
             datums
           }
         }
+      }, {
+        type: 'hoveredVoronoi'
       })
     }
     // If we just left the area, deactive the hover
@@ -150,6 +152,8 @@ class Interaction extends PureComponent {
           active: false
         }
       }
+    }, {
+      type: 'hoveredVoronoi'
     })
   }
   onClick (series, datums) {
@@ -163,14 +167,24 @@ class Interaction extends PureComponent {
             datums
           }
         }
+      }, {
+        type: 'selectedVoronoi'
       })
     }
   }
 }
 
-export default Connect(state => ({
-  stackData: state.stackData,
-  primaryAxis: Selectors.primaryAxis(state),
-  secondaryAxis: Selectors.secondaryAxis(state),
-  interaction: state.interaction
-}))(Interaction)
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis()
+  }
+  return state => ({
+    decoratedData: state.decoratedData,
+    primaryAxis: selectors.primaryAxis(state),
+    secondaryAxis: selectors.secondaryAxis(state),
+    interaction: state.interaction
+  })
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
+})(Interaction)

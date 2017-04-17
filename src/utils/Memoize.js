@@ -1,47 +1,31 @@
-let id = 0
-const selectors = {}
-
-export default function Memo (getter) {
-  const mid = id++
-  selectors[mid] = {
-    params: []
+export default function Memo (...args) {
+  let getParams = (...subArgs) => subArgs
+  let fn = args[0]
+  if (args.length > 1) {
+    getParams = args[0]
+    fn = args[1]
   }
+  let params = []
+  let value
 
-  return (...params) => {
+  return (...p) => {
+    const newParams = getParams(...p)
     const recompute = () => {
-      selectors[mid].params = params
-      selectors[mid].value = getter(...params)
-      return selectors[mid].value
+      params = newParams
+      value = fn(...params)
+      return value
     }
 
-    if (params.length !== selectors[mid].params.length) {
+    if (newParams.length !== p.length) {
       return recompute()
     }
 
-    for (var i = 0; i < params.length; i++) {
-      if (params[i] !== selectors[mid].params[i]) {
+    for (var i = 0; i < newParams.length; i++) {
+      if (newParams[i] !== p[i]) {
         return recompute()
       }
     }
 
-    return selectors[mid].value
+    return value
   }
 }
-
-// Usage
-
-// const computeStuff = Memo((a, b, c) => {
-//   return {
-//     a: a,
-//     b: b + 2,
-//     c: {
-//       id: c
-//     }
-//   }
-// })
-//
-// const a = computeStuff(1, 2, 3)
-// const b = computeStuff(1, 2, 3)
-// console.log(a === b) // true
-// const c = computeStuff(3, 2, 1)
-// console.log(b === c) // false

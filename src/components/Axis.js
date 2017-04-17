@@ -44,16 +44,6 @@ class Axis extends PureComponent {
     if (oldProps.axis !== newProps.axis && oldProps.axis) {
       this.prevAxis = oldProps.axis
     }
-  }
-  componentDidMount () {
-    this.updateScale(this.props)
-    this.measure()
-  }
-  componentWillUpdate (newProps) {
-    const oldProps = this.props
-    const {
-      position
-    } = newProps
 
     // If any of the following change,
     // we need to update the axis
@@ -65,10 +55,21 @@ class Axis extends PureComponent {
       newProps.materializedData !== oldProps.materializedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
-      position !== oldProps.position
+      newProps.position !== oldProps.position ||
+      newProps.centerTicks !== oldProps.centerTicks
     ) {
       this.updateScale(newProps)
     }
+  }
+  componentDidMount () {
+    this.updateScale(this.props)
+    this.measure()
+  }
+  shouldComponentUpdate (newProps) {
+    if (newProps.axis !== this.props.axis) {
+      return true
+    }
+    return false
   }
   componentDidUpdate () {
     window.requestAnimationFrame(this.measure)
@@ -272,22 +273,31 @@ class Axis extends PureComponent {
   }
 }
 
-export default Connect((state, props) => {
-  const {
-    type,
-    position
-  } = props
-
-  const id = `${type}_${position}`
-
-  return {
-    id,
-    materializedData: state.materializedData,
-    width: Selectors.gridWidth(state),
-    height: Selectors.gridHeight(state),
-    primaryAxis: Selectors.primaryAxis(state),
-    axis: state.axes && state.axes[id]
+export default Connect(() => {
+  const selectors = {
+    gridWidth: Selectors.gridWidth(),
+    gridHeight: Selectors.gridHeight(),
+    primaryAxis: Selectors.primaryAxis()
   }
+  return (state, props) => {
+    const {
+      type,
+      position
+    } = props
+
+    const id = `${type}_${position}`
+
+    return {
+      id,
+      materializedData: state.materializedData,
+      width: selectors.gridWidth(state),
+      height: selectors.gridHeight(state),
+      primaryAxis: selectors.primaryAxis(state),
+      axis: state.axes && state.axes[id]
+    }
+  }
+}, {
+  filter: (oldState, newState, meta) => meta.type !== 'cursor'
 })(Axis)
 
 function translateX (x) {

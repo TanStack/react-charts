@@ -22,7 +22,6 @@ import CustomTooltip from '../stories/CustomTooltip.js'
 import Cursors from '../stories/Cursors.js'
 import CustomCursors from '../stories/CustomCursors.js'
 import InteractionModes from '../stories/InteractionModes.js'
-import SeriesGrouping from '../stories/SeriesGrouping.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -47,5 +46,4 @@ configure(() => {
     .add('Cursors', Cursors)
     .add('Custom Cursors', CustomCursors)
     .add('Interaction Modes', InteractionModes)
-    .add('Series Grouping', SeriesGrouping)
 }, module)
