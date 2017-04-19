@@ -42,7 +42,7 @@
     "d3-voronoi": "^1.1.1",
     "javascript-detect-element-resize": "^0.5.3",
     "raf": "^3.3.0",
-    "react-move": "^0.0.1"
+    "react-move": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^15.3.1"

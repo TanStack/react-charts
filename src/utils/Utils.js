@@ -151,14 +151,12 @@ function normalizeComponent (Comp, params = {}, fallback = Comp) {
 }
 
 function materializeStyles (style = {}, defaults = {}) {
-  if (style.color) {
-    style = {
-      ...style,
-      fill: style.fill || style.color || defaults.color,
-      stroke: style.stroke || style.color || defaults.color
-    }
+  style = {
+    ...style,
+    fill: style.fill || style.color || defaults.color,
+    stroke: style.stroke || style.color || defaults.color
   }
-  ['area', 'line', 'rectangle', 'circle'].forEach(type => {
+  ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
   })
   return style

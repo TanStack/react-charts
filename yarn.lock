@@ -4492,9 +4492,9 @@ react-modal@^1.2.0, react-modal@^1.2.1:
     exenv "1.2.0"
     lodash.assign "^4.2.0"
 
-react-move@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/react-move/-/react-move-0.0.1.tgz#a28d760c9ce5a6657a8edf79e490761a1226fbcd"
+react-move@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-move/-/react-move-1.1.0.tgz#c1b9b014d56152f1f2e9bb951f08c667efd13445"
   dependencies:
     d3-ease "^1.0.3"
     d3-interpolate "^1.1.3"

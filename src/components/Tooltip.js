@@ -47,7 +47,7 @@ class Tooltip extends PureComponent {
       },
       gridX,
       gridY,
-      cursor = {},
+      cursor,
       // quadTree,
       //
       position,
@@ -55,15 +55,14 @@ class Tooltip extends PureComponent {
       children
     } = this.props
 
-    if (!primaryAxis || !secondaryAxis || !hovered) {
+    if (!primaryAxis || !secondaryAxis || !hovered || !cursor) {
       return null
     }
 
     const datums = hovered.datums && hovered.datums.length ? hovered.datums : hovered.series ? hovered.series.data : null
 
     // TODO: tooltip origin: hovered or chart or custom. Allows the user to position the tooltip relative to different parts of the chart
-    // TODO: tooltip padding
-    // TODO: tooltip offset
+    // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
 
     const focus = datums ? (
       typeof position === 'function' ? position(datums, cursor)
@@ -153,6 +152,7 @@ class Tooltip extends PureComponent {
           triangleStyles,
           visibility
         }}
+        immutable={false}
       >
         {({
           x,

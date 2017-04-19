@@ -66,6 +66,7 @@ class Series extends PureComponent {
   }
   shouldComponentUpdate (nextProps) {
     if (nextProps.decoratedData !== this.props.decoratedData) {
+      this.decoratedData = nextProps.decoratedData.reverse() // For proper svg stacking
       return true
     }
     return false
@@ -239,10 +240,12 @@ class Series extends PureComponent {
   }
   render () {
     const {
-      type,
-      //
-      decoratedData
+      type
     } = this.props
+
+    const {
+      decoratedData
+    } = this
 
     if (!decoratedData) {
       return null
@@ -253,7 +256,7 @@ class Series extends PureComponent {
 
     return (
       <Transition
-        data={[...decoratedData].reverse()} // The stack is reversed for proper z-index painting
+        data={decoratedData} // The stack is reversed for proper z-index painting
         getKey={(d, i) => d.id}
         update={d => ({
           visibility: 1
@@ -265,6 +268,7 @@ class Series extends PureComponent {
           visibility: 0
         })}
         ignore={['visibility']}
+        duration={500}
       >
         {(inters) => {
           return (

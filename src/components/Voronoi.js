@@ -113,11 +113,9 @@ class Interaction extends PureComponent {
               d={path}
               className='action-voronoi'
               onMouseEnter={this.onHover.bind(this, points.data.series, points.data.datums)}
-              // onMouseMove={this.onHover.bind(this, points.data.series, points.data.datums)}
               onClick={this.onClick.bind(this, points.data.series, points.data.datums)}
               style={{
                 fill: 'transparent',
-                stroke: 'transparent',
                 strokeWidth: 0,
                 opacity: 0
               }}

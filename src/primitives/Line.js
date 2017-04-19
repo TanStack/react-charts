@@ -26,6 +26,7 @@ export default class Line extends PureComponent {
         data={{
           ...resolvedStyle
         }}
+        immutable={false}
       >
         {(inter) => {
           return (

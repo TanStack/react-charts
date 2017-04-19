@@ -35,7 +35,6 @@ class Axis extends PureComponent {
   constructor () {
     super()
     this.rotation = 0
-    this.visibleLabelStep = 1
     this.measure = measure.bind(this)
     this.updateScale = updateScale.bind(this)
   }
@@ -86,8 +85,7 @@ class Axis extends PureComponent {
     } = this.props
 
     const {
-      rotation,
-      visibleLabelStep
+      rotation
     } = this
 
     // Render Dependencies
@@ -100,9 +98,9 @@ class Axis extends PureComponent {
       max,
       transform,
       vertical,
-      ticks,
       format,
       //
+      ticks,
       range0,
       range1,
       directionMultiplier,
@@ -123,6 +121,7 @@ class Axis extends PureComponent {
           tickPosition,
           spacing
         }}
+        immutable={false}
       >
         {({
           width,
@@ -188,28 +187,28 @@ class Axis extends PureComponent {
                 }}
               />
               <Transition
-                data={ticks.map((d, i) => ({tick: d, index: i}))}
-                getKey={(d, i) => String(d.tick)}
+                data={ticks}
+                getKey={(d, i) => String(d)}
                 update={d => ({
-                  tick: scale(d.tick),
-                  visibility: d.index % visibleLabelStep === 0 ? 1 : 0,
-                  // visibility: 1,
+                  tick: scale(d),
+                  visibility: 1,
                   measureable: 1,
                   rotation
                 })}
                 enter={d => ({
-                  tick: this.prevAxis.scale(d.tick),
+                  tick: this.prevAxis.scale(d),
                   visibility: 0,
                   measureable: 1,
                   rotation: 0
                 })}
                 leave={d => ({
-                  tick: scale(d.tick),
+                  tick: scale(d),
                   visibility: 0,
                   measureable: 0,
                   rotation
                 })}
                 ignore={['measureable']}
+                duration={500}
               >
                 {(inters) => {
                   return (
@@ -256,7 +255,7 @@ class Axis extends PureComponent {
                               dominantBaseline={rotation ? 'central' : position === positionBottom ? 'hanging' : position === positionTop ? 'alphabetic' : 'central'}
                               textAnchor={rotation ? 'end' : position === positionRight ? 'start' : position === positionLeft ? 'end' : 'middle'}
                             >
-                              {format(inter.data.tick)}
+                              {format(inter.data)}
                             </Text>
                           </g>
                         )
@@ -297,7 +296,9 @@ export default Connect(() => {
     }
   }
 }, {
-  filter: (oldState, newState, meta) => meta.type !== 'cursor'
+  filter: (oldState, newState, meta) => {
+    return meta.type !== 'cursor'
+  }
 })(Axis)
 
 function translateX (x) {

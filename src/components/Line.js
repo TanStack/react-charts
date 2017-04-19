@@ -36,6 +36,8 @@ class Line extends PureComponent {
     const lineFn = line()
     .curve(curveMonotoneX)
 
+    console.log('line', visibility)
+
     return (
       <Animate
         default={{
@@ -46,6 +48,7 @@ class Line extends PureComponent {
           data: series.data,
           visibility
         }}
+        immutable={false}
       >
         {inter => {
           const path = lineFn(inter.data.map(d => ([d.x, d.y])))

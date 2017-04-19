@@ -50,6 +50,7 @@ class Area extends PureComponent {
           data: series.data,
           visibility
         }}
+        immutable={false}
       >
         {inter => {
           const areaPath = areaFn(inter.data.map(d => ([d.x, d.y, d.base])))
