@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Axis, Series, Tooltip, Cursor } from '../src'
+import source from '!raw-loader!./CustomCursors'
+import CodeHighlight from './components/codeHighlight'
 //
-// import CodeHighlight from './components/codeHighlight.js'
+import { Chart, Axis, Series, Tooltip, Cursor } from '../src'
 
 class Line extends Component {
   constructor () {
@@ -80,6 +81,7 @@ class Line extends Component {
 
         <br />
         <br />
+        <CodeHighlight>{() => source}</CodeHighlight>
       </div>
     )
   }

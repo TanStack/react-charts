@@ -135,6 +135,7 @@ class Series extends PureComponent {
     })
 
     // Now, scale the datapoints to their axis coordinates
+    // (mutation is okay here, since we have already made a materialized copy)
     stackData.forEach((series) => {
       series.data.forEach((d, index) => {
         d.x = xScale(d.x)
@@ -143,6 +144,8 @@ class Series extends PureComponent {
       })
     })
 
+    // Not we need to precalculate all of the possible status styles by
+    // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
     stackData.forEach(series => {
       const defaults = {
         // Pass some sane defaults
