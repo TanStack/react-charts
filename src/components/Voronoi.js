@@ -21,14 +21,14 @@ class Interaction extends PureComponent {
     const {
       interaction,
       //
-      decoratedData,
+      stackData,
       primaryAxis,
       secondaryAxis
     } = this.props
 
     // Don't render until we have all dependencies
     if (
-      !decoratedData ||
+      !stackData ||
       !primaryAxis ||
       !secondaryAxis
     ) {
@@ -45,10 +45,10 @@ class Interaction extends PureComponent {
 
     if (interaction === modeClosestSeries) {
       // Closest Point Voronoi
-      const voronoiData = decoratedData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
+      const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
         x: d.x,
         y: d.y,
-        series: decoratedData[d.seriesIndex],
+        series: stackData[d.seriesIndex],
         datums: null,
         single: false
       }))
@@ -59,7 +59,7 @@ class Interaction extends PureComponent {
       polygons = vor.polygons()
     } else if (interaction === modeClosestPoint) {
       // Closest Point Voronoi
-      const voronoiData = decoratedData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
+      const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
         x: d.x,
         y: d.y,
         series: null,
@@ -74,7 +74,7 @@ class Interaction extends PureComponent {
     } else if (interaction === modeAxis) {
       // Axis Voronoi
       // Group all data points based on primaryAxis
-      const allDatums = decoratedData.reduce((prev, now) => prev.concat(now.data), [])
+      const allDatums = stackData.reduce((prev, now) => prev.concat(now.data), [])
       const datumsByAxis = {}
       allDatums.forEach(d => {
         const key = String(d.primary)
@@ -178,7 +178,7 @@ export default Connect(() => {
     secondaryAxis: Selectors.secondaryAxis()
   }
   return state => ({
-    decoratedData: state.decoratedData,
+    stackData: state.stackData,
     primaryAxis: selectors.primaryAxis(state),
     secondaryAxis: selectors.secondaryAxis(state),
     interaction: state.interaction

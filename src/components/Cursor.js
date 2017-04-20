@@ -20,7 +20,7 @@ class Cursor extends PureComponent {
       primary,
       snap,
       //
-      decoratedData,
+      stackData,
       primaryAxis,
       secondaryAxis,
       cursor,
@@ -35,7 +35,7 @@ class Cursor extends PureComponent {
 
     // Don't render until we have all dependencies
     if (
-      !decoratedData ||
+      !stackData ||
       !cursor ||
       !primaryAxis ||
       !secondaryAxis
@@ -65,7 +65,7 @@ class Cursor extends PureComponent {
       let closestDatum
       if (primaryAxis.vertical) {
         let smallestDistance = 10000000
-        decoratedData.forEach(series => {
+        stackData.forEach(series => {
           series.data.forEach(datum => {
             const distance = Math.abs(y - datum.x)
             if (distance < smallestDistance) {
@@ -78,7 +78,7 @@ class Cursor extends PureComponent {
         label = axis.format(closestDatum.primary)
       } else {
         let smallestDistance = 10000000
-        decoratedData.forEach(series => {
+        stackData.forEach(series => {
           series.data.forEach(datum => {
             const distance = Math.abs(x - datum.x)
             if (distance < smallestDistance) {
@@ -228,7 +228,7 @@ export default Connect(() => {
     gridY: Selectors.gridY()
   }
   return state => ({
-    decoratedData: state.decoratedData,
+    stackData: state.stackData,
     primaryAxis: selectors.primaryAxis(state),
     secondaryAxis: selectors.secondaryAxis(state),
     cursor: state.cursor,

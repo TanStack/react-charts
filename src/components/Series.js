@@ -55,24 +55,18 @@ class Series extends PureComponent {
     ) {
       this.updateStackData(newProps)
     }
-
-    if (
-      newProps.stackData !== oldProps.stackData ||
-      newProps.hovered !== oldProps.hovered ||
-      newProps.selected !== oldProps.selected
-    ) {
-      this.updateDecoratedData(newProps)
-    }
   }
   shouldComponentUpdate (nextProps) {
-    if (nextProps.decoratedData !== this.props.decoratedData) {
-      this.decoratedData = nextProps.decoratedData.reverse() // For proper svg stacking
+    if (nextProps.stackData !== this.props.stackData) {
+      this.stackData = nextProps.stackData.reverse() // For proper svg stacking
       return true
     }
     return false
   }
   updateStackData (props) {
     const {
+      getStyles,
+      getDataStyles,
       //
       materializedData,
       primaryAxis,
@@ -141,18 +135,62 @@ class Series extends PureComponent {
     })
 
     // Now, scale the datapoints to their axis coordinates
-    stackData = stackData.map((series) => {
-      return {
-        ...series,
-        data: series.data.map((d, index) => {
-          return {
-            ...d,
-            x: xScale(d.x),
-            y: yScale(d.y),
-            base: primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
-          }
-        })
+    stackData.forEach((series) => {
+      series.data.forEach((d, index) => {
+        d.x = xScale(d.x)
+        d.y = yScale(d.y)
+        d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
+      })
+    })
+
+    stackData.forEach(series => {
+      const defaults = {
+        // Pass some sane defaults
+        color: defaultColors[series.index % (defaultColors.length - 1)]
       }
+
+      const getSeriesWithStatus = (hoverStatus, selectedStatus) => ({
+        ...series,
+        hovered: hoverStatus,
+        selected: selectedStatus
+      })
+
+      const statusStyles = {
+        'default': getStyles(getSeriesWithStatus(false, false)),
+        'notHoveredSelected': getStyles(getSeriesWithStatus(false, true)),
+        'hoveredNotSelected': getStyles(getSeriesWithStatus(true, false)),
+        'hoveredSelected': getStyles(getSeriesWithStatus(true, true))
+      }
+
+      Object.keys(statusStyles).forEach(key => {
+        statusStyles[key] = Utils.materializeStyles(statusStyles[key], defaults)
+      })
+
+      series.style = statusStyles.default
+      series.statusStyles = statusStyles
+
+      // We also need to decorate each datum in the same fashion
+      series.data.forEach(datum => {
+        const getDatumWithStatus = (hoverStatus, selectedStatus) => ({
+          ...datum,
+          hovered: hoverStatus,
+          selected: selectedStatus
+        })
+
+        const datumStatusStyles = {
+          'default': getDataStyles(getDatumWithStatus(false, false)),
+          'notHoveredSelected': getDataStyles(getDatumWithStatus(false, true)),
+          'hoveredNotSelected': getDataStyles(getDatumWithStatus(true, false)),
+          'hoveredSelected': getDataStyles(getDatumWithStatus(true, true))
+        }
+
+        Object.keys(datumStatusStyles).forEach(key => {
+          datumStatusStyles[key] = Utils.materializeStyles(datumStatusStyles[key], defaults)
+        })
+
+        datum.style = datumStatusStyles.default
+        datum.datumStatusStyles = datumStatusStyles
+      })
     })
 
     const allPoints = []
@@ -176,78 +214,16 @@ class Series extends PureComponent {
       type: 'stackData'
     })
   }
-  updateDecoratedData (props) {
-    const {
-      getStyles,
-      getDataStyles,
-      //
-      hovered: chartHovered,
-      selected: chartSelected,
-      stackData
-    } = props
-
-    if (!stackData) {
-      return
-    }
-
-    // Any time the hovered or selected elements change, we need
-    // to redecorate the stackData with the right styles.
-    // One of the benefits to doing this here, instead of in the
-    // series or datum components themselves is so other components
-    // can easily use the current styles of each element, eg. Tooltips
-    // displaying the exact colors that are being displayed
-
-    const decoratedData = stackData.map(series => {
-      // Get the series status
-      const seriesWithStatus = {
-        ...series,
-        ...Utils.seriesStatus(series, chartHovered, chartSelected)
-      }
-
-      // Get the series style
-      const style = Utils.materializeStyles(getStyles(seriesWithStatus), {
-        // Pass some sane defaults
-        color: defaultColors[series.index % (defaultColors.length - 1)]
-      })
-      seriesWithStatus.style = seriesWithStatus.style || style
-
-      // We also need to decorate each datum in the same fashion
-      seriesWithStatus.data = seriesWithStatus.data.map(datum => {
-        const datumWithStatus = {
-          ...datum,
-          ...Utils.datumStatus(series, datum, chartHovered, chartSelected)
-        }
-        const dataStyle = Utils.materializeStyles(getDataStyles(datumWithStatus), {
-          color: defaultColors[series.index % (defaultColors.length - 1)]
-        })
-        datumWithStatus.style = {
-          ...seriesWithStatus.style,
-          ...(datum.style || dataStyle)
-        }
-        return datumWithStatus
-      })
-
-      return seriesWithStatus
-    })
-
-    // Provide the new decorated data to the chart
-    this.props.dispatch(state => ({
-      ...state,
-      decoratedData
-    }), {
-      type: 'decoratedData'
-    })
-  }
   render () {
     const {
       type
     } = this.props
 
     const {
-      decoratedData
+      stackData
     } = this
 
-    if (!decoratedData) {
+    if (!stackData) {
       return null
     }
 
@@ -256,7 +232,7 @@ class Series extends PureComponent {
 
     return (
       <Transition
-        data={decoratedData} // The stack is reversed for proper z-index painting
+        data={stackData} // The stack is reversed for proper z-index painting
         getKey={(d, i) => d.id}
         update={d => ({
           visibility: 1
@@ -304,7 +280,7 @@ export default Connect(() => {
     return {
       materializedData: state.materializedData,
       stackData: state.stackData,
-      decoratedData: state.decoratedData,
+      stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
       hovered: state.hovered,
