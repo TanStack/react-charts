@@ -6,19 +6,6 @@ import { Chart, Axis, Series, Tooltip } from '../src'
 //
 // import CodeHighlight from './components/codeHighlight.js'
 
-const colors = [
-  '#0f7db4',
-  '#fc6868',
-  '#DECF3F',
-  '#60BD68',
-  '#FAA43A',
-  '#c63b89',
-  '#1aaabe',
-  '#734fe9',
-  '#1828bd',
-  '#cd82ad'
-]
-
 class Story extends Component {
   render () {
     return (

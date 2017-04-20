@@ -41,7 +41,7 @@ export default class Circle extends PureComponent {
     return (
       <Animate
         data={resolvedStyle}
-        immutable={false}
+        
       >
         {(inter) => {
           return (

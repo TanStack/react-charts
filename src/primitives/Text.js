@@ -28,7 +28,7 @@ export default class Text extends PureComponent {
     return (
       <Animate
         data={resolvedStyle}
-        immutable={false}
+        
       >
         {(inter) => {
           return (

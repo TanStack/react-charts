@@ -121,7 +121,7 @@ class Axis extends PureComponent {
           tickPosition,
           spacing
         }}
-        immutable={false}
+        
       >
         {({
           width,

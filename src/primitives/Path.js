@@ -28,7 +28,7 @@ export default class Path extends PureComponent {
     return (
       <Animate
         data={resolvedStyle}
-        immutable={false}
+        
       >
         {(inter) => {
           return (

@@ -139,7 +139,7 @@ class Cursor extends PureComponent {
           y1,
           visibility: cursor.active ? 1 : 0
         }}
-        immutable={false}
+        
       >
         {inter => (
           <div

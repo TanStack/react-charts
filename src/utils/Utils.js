@@ -1,4 +1,7 @@
+import { Animate } from 'react-move'
 import RAF from 'raf'
+
+Animate.defaults.immutable = false
 
 export default {
   throttle,

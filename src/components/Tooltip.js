@@ -152,7 +152,7 @@ class Tooltip extends PureComponent {
           triangleStyles,
           visibility
         }}
-        immutable={false}
+        
       >
         {({
           x,

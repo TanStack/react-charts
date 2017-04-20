@@ -36,7 +36,7 @@ class Line extends PureComponent {
           data: series.data,
           visibility
         }}
-        immutable={false}
+        
       >
         {inter => {
           const seriesInteractionProps = interaction === 'series' ? {

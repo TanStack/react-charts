@@ -173,7 +173,7 @@ class Chart extends PureComponent {
             gridX,
             gridY
           }}
-          immutable={false}
+          
         >
           {({
             gridX,
