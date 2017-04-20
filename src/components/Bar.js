@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
 //
+import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
@@ -14,10 +15,13 @@ class Bars extends PureComponent {
       visibility,
       //
       primaryAxis,
+      selected,
+      hovered,
       interaction
     } = this.props
 
-    const style = series.style
+    const status = Utils.seriesStatus(series, hovered, selected)
+    const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const barWidth = primaryAxis.barWidth
     const tickPosition = primaryAxis.tickPosition
@@ -46,26 +50,27 @@ class Bars extends PureComponent {
             <g
               className='series bar'
             >
-              {inter.data.map((d, i) => {
+              {inter.data.map((datum, i) => {
                 let x1, y1, x2, y2
                 if (primaryAxis.vertical) {
-                  x1 = d.base
-                  x2 = d.x
-                  y1 = d.y + tickPosition + barOffset
+                  x1 = datum.base
+                  x2 = datum.x
+                  y1 = datum.y + tickPosition + barOffset
                   y2 = y1 + barWidth
                 } else {
-                  x1 = d.x + tickPosition + barOffset
+                  x1 = datum.x + tickPosition + barOffset
                   x2 = x1 + barWidth
-                  y1 = d.y
-                  y2 = d.base
+                  y1 = datum.y
+                  y2 = datum.base
                 }
 
-                let dataStyle = d.style
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
                 const datumInteractionProps = interaction === 'element' ? {
-                  onClick: selectDatum.bind(this, d),
-                  onMouseEnter: hoverDatum.bind(this, d),
-                  onMouseMove: hoverDatum.bind(this, d),
+                  onClick: selectDatum.bind(this, datum),
+                  onMouseEnter: hoverDatum.bind(this, datum),
+                  onMouseMove: hoverDatum.bind(this, datum),
                   onMouseLeave: hoverDatum.bind(this, null)
                 } : {}
 

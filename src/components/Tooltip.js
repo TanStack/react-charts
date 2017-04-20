@@ -29,7 +29,7 @@ class Tooltip extends PureComponent {
           <br />
           {datums.map((d, i) => (
             <div key={i}>
-              <span style={{color: d.style.fill}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
+              <span style={{color: d.statusStyles.hovered.fill}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
             </div>
           ))}
         </div>

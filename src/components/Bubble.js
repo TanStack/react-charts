@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 import { Connect } from 'codux'
 import { Animate } from 'react-move'
 
+import Utils from '../utils/Utils'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 //
@@ -17,10 +18,13 @@ class Line extends PureComponent {
       series,
       visibility,
       //
+      selected,
+      hovered,
       interaction
     } = this.props
 
-    const style = series.style
+    const status = Utils.seriesStatus(series, hovered, selected)
+    const style = Utils.getStatusStyle(status, series.statusStyles)
 
     return (
       <Animate
@@ -43,22 +47,23 @@ class Line extends PureComponent {
           } : {}
           return (
             <g>
-              {inter.data.map((d, i) => {
-                let dataStyle = d.style
+              {inter.data.map((datum, i) => {
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
                 const datumInteractionProps = interaction === 'element' ? {
-                  onClick: selectDatum.bind(this, d),
-                  onMouseEnter: hoverDatum.bind(this, d),
-                  onMouseMove: hoverDatum.bind(this, d),
+                  onClick: selectDatum.bind(this, datum),
+                  onMouseEnter: hoverDatum.bind(this, datum),
+                  onMouseMove: hoverDatum.bind(this, datum),
                   onMouseLeave: hoverDatum.bind(this, null)
                 } : {}
 
                 return (
                   <Circle
                     key={i}
-                    x={d.x}
-                    y={d.y}
-                    r={d.r}
+                    x={datum.x}
+                    y={datum.y}
+                    r={datum.r}
                     style={{
                       ...circleDefaultStyle,
                       ...style,

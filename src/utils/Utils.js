@@ -4,6 +4,8 @@ export default {
   throttle,
   seriesStatus,
   datumStatus,
+  getStatusStyles,
+  getStatusStyle,
   getCenterPointOfSide,
   getClosestPoint,
   normalizeComponent,
@@ -79,6 +81,65 @@ function datumStatus (series, datum, hovered, selected) {
   }
 
   return status
+}
+
+function getStatusStyles (item, decorator, defaults) {
+  const styles = {
+    default: decorator(item),
+    selected: decorator({
+      ...item,
+      selected: true
+    }),
+    selectedHovered: decorator({
+      ...item,
+      selected: true,
+      hovered: true
+    }),
+    selectedOtherHovered: decorator({
+      ...item,
+      selected: true,
+      otherHovered: true
+    }),
+    otherSelected: decorator({
+      ...item,
+      otherSelected: true
+    }),
+    otherSelectedHovered: decorator({
+      ...item,
+      otherSelected: true,
+      hovered: true
+    }),
+    otherSelectedOtherHovered: decorator({
+      ...item,
+      otherHovered: true,
+      otherSelected: true
+    }),
+    hovered: decorator({
+      ...item,
+      hovered: true
+    }),
+    otherHovered: decorator({
+      ...item,
+      otherHovered: true
+    })
+  }
+  Object.keys(styles).forEach(key => {
+    styles[key] = materializeStyles(styles[key], defaults)
+  })
+  return styles
+}
+
+function getStatusStyle (status, styles) {
+  if (status.selected) {
+    if (status.hovered) {
+      return styles.selectedHovered
+    }
+    return styles.selected
+  }
+  if (status.hovered) {
+    return styles.hovered
+  }
+  return styles.default
 }
 
 function getCenterPointOfSide (position, points) {

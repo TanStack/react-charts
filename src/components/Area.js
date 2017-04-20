@@ -9,6 +9,7 @@ import {
   curveMonotoneX
 } from 'd3-shape'
 //
+import Utils from '../utils/Utils'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
@@ -28,10 +29,13 @@ class Area extends PureComponent {
       series,
       visibility,
       //
+      selected,
+      hovered,
       interaction
     } = this.props
 
-    const style = series.style
+    const status = Utils.seriesStatus(series, hovered, selected)
+    const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const areaFn = area()
     .curve(curveMonotoneX)
@@ -87,21 +91,22 @@ class Area extends PureComponent {
                 opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
-              {inter.data.map((d, i) => {
-                let dataStyle = d.style
+              {inter.data.map((datum, i) => {
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
                 const datumInteractionProps = interaction === 'element' ? {
-                  onClick: selectDatum.bind(this, d),
-                  onMouseEnter: hoverDatum.bind(this, d),
-                  onMouseMove: hoverDatum.bind(this, d),
+                  onClick: selectDatum.bind(this, datum),
+                  onMouseEnter: hoverDatum.bind(this, datum),
+                  onMouseMove: hoverDatum.bind(this, datum),
                   onMouseLeave: hoverDatum.bind(this, null)
                 } : {}
 
                 return (
                   <Circle
                     key={i}
-                    x={d.x}
-                    y={d.y}
+                    x={datum.x}
+                    y={datum.y}
                     style={{
                       ...circleDefaultStyle,
                       ...style,

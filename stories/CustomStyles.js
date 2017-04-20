@@ -52,7 +52,7 @@ class Story extends Component {
             <Series
               type={elementType}
               getStyles={series => ({
-                color: series.otherHovered ? 'grey' : colors[series.index],
+                color: series.otherHovered && 'grey',
                 opacity: series.otherHovered ? 0.2 : 1,
                 line: {
                   strokeDasharray: '5, 5'

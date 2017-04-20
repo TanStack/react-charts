@@ -149,47 +149,11 @@ class Series extends PureComponent {
         color: defaultColors[series.index % (defaultColors.length - 1)]
       }
 
-      const getSeriesWithStatus = (hoverStatus, selectedStatus) => ({
-        ...series,
-        hovered: hoverStatus,
-        selected: selectedStatus
-      })
-
-      const statusStyles = {
-        'default': getStyles(getSeriesWithStatus(false, false)),
-        'notHoveredSelected': getStyles(getSeriesWithStatus(false, true)),
-        'hoveredNotSelected': getStyles(getSeriesWithStatus(true, false)),
-        'hoveredSelected': getStyles(getSeriesWithStatus(true, true))
-      }
-
-      Object.keys(statusStyles).forEach(key => {
-        statusStyles[key] = Utils.materializeStyles(statusStyles[key], defaults)
-      })
-
-      series.style = statusStyles.default
-      series.statusStyles = statusStyles
+      series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
       // We also need to decorate each datum in the same fashion
       series.data.forEach(datum => {
-        const getDatumWithStatus = (hoverStatus, selectedStatus) => ({
-          ...datum,
-          hovered: hoverStatus,
-          selected: selectedStatus
-        })
-
-        const datumStatusStyles = {
-          'default': getDataStyles(getDatumWithStatus(false, false)),
-          'notHoveredSelected': getDataStyles(getDatumWithStatus(false, true)),
-          'hoveredNotSelected': getDataStyles(getDatumWithStatus(true, false)),
-          'hoveredSelected': getDataStyles(getDatumWithStatus(true, true))
-        }
-
-        Object.keys(datumStatusStyles).forEach(key => {
-          datumStatusStyles[key] = Utils.materializeStyles(datumStatusStyles[key], defaults)
-        })
-
-        datum.style = datumStatusStyles.default
-        datum.datumStatusStyles = datumStatusStyles
+        datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, defaults)
       })
     })
 
@@ -279,7 +243,6 @@ export default Connect(() => {
   return (state, props) => {
     return {
       materializedData: state.materializedData,
-      stackData: state.stackData,
       stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
