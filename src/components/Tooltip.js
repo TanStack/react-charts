@@ -48,7 +48,6 @@ class Tooltip extends PureComponent {
       gridX,
       gridY,
       cursor,
-      // quadTree,
       //
       position,
       align,
@@ -152,7 +151,7 @@ class Tooltip extends PureComponent {
           triangleStyles,
           visibility
         }}
-        
+        duration={400}
       >
         {({
           x,

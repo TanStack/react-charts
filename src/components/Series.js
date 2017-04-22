@@ -6,17 +6,6 @@ import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 
 import { Transition } from 'react-move'
-import Line from './Line'
-import Area from './Area'
-import Bar from './Bar'
-import Bubble from './Bubble'
-
-const stackTypes = {
-  line: Line,
-  area: Area,
-  bar: Bar,
-  bubble: Bubble
-}
 
 const defaultColors = [
   '#4ab5eb',
@@ -195,7 +184,7 @@ class Series extends PureComponent {
     }
 
     // Allow dynamic types
-    const typeGetter = Utils.normalizeGetter(type)
+    let typeGetter = typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
 
     return (
       <Transition
@@ -219,9 +208,7 @@ class Series extends PureComponent {
               className='Series'
             >
               {inters.map((inter, i) => {
-                const resolvedType = typeGetter(inter.data, inter.data.id)
-                const StackCmp = stackTypes[resolvedType]
-
+                const StackCmp = typeGetter(inter.data, inter.data.id)
                 return (
                   <StackCmp
                     key={inter.key}

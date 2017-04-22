@@ -5,7 +5,7 @@ import { ResizableBox } from 'react-resizable'
 import source from '!raw-loader!./Cursors'
 import CodeHighlight from './components/codeHighlight'
 //
-import { Chart, Axis, Series, Tooltip, Cursor } from '../src'
+import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../src'
 
 class Line extends Component {
   constructor () {
@@ -55,7 +55,7 @@ class Line extends Component {
                 }}
               />
               <Series
-                type='area'
+                type={Area}
               />
               <Tooltip />
               <Cursor

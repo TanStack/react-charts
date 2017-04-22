@@ -5,9 +5,9 @@ import { ResizableBox } from 'react-resizable'
 import source from '!raw-loader!./LineChart'
 import CodeHighlight from './components/codeHighlight'
 //
-import { Chart, Axis, Series, Tooltip } from '../src'
+import { Chart, Axis, Series, Tooltip, Line } from '../src'
 
-class Line extends Component {
+class Story extends Component {
   constructor () {
     super()
     this.state = {
@@ -50,7 +50,7 @@ class Line extends Component {
                 position='left'
               />
               <Series
-                type='line'
+                type={Line}
               />
               <Tooltip />
             </Chart>
@@ -65,7 +65,7 @@ class Line extends Component {
   }
 }
 
-export default () => <Line />
+export default () => <Story />
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), d => makeSeries())

@@ -84,7 +84,8 @@ export default function updateScale (props) {
     })
     domain = invert ? [...uniqueVals].reverse() : uniqueVals
   } else if (type === 'time') {
-    min = max = materializedData[0].data[0][datumKey]
+    const firstRow = materializedData[0].data[0] || {}
+    min = max = firstRow[datumKey]
     materializedData.forEach(series => {
       const seriesValues = series.data.map(d => +d[datumKey])
       seriesValues.forEach((d, i) => {

@@ -5,7 +5,7 @@ import { ResizableBox } from 'react-resizable'
 import source from '!raw-loader!./AreaChart'
 import CodeHighlight from './components/codeHighlight'
 //
-import { Chart, Axis, Series, Tooltip } from '../src'
+import { Chart, Axis, Series, Tooltip, Area } from '../src'
 
 class Line extends Component {
   constructor () {
@@ -51,7 +51,7 @@ class Line extends Component {
                 stacked
               />
               <Series
-                type='area'
+                type={Area}
               />
               <Tooltip />
             </Chart>

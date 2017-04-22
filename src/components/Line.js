@@ -50,7 +50,8 @@ class Line extends PureComponent {
           data: series.data,
           visibility
         }}
-
+        duration={500}
+        easing='easeBackOut'
       >
         {inter => {
           const path = lineFn(inter.data.map(d => ([d.x, d.y])))

@@ -3,14 +3,17 @@ import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 //
+import { Line, Area, Bar, Bubble } from '../../src'
+
+const types = {
+  line: Line,
+  area: Area,
+  bar: Bar,
+  bubble: Bubble
+}
 
 const options = {
-  elementType: [
-    'line',
-    'area',
-    'bar',
-    'bubble'
-  ],
+  elementType: Object.keys(types),
   primaryAxisType: [
     'linear',
     'time',
@@ -147,7 +150,10 @@ export default class ChartConfig extends Component {
             width={500}
             height={300}
           >
-            {children(this.state)}
+            {children({
+              ...this.state,
+              elementType: types[this.state.elementType]
+            })}
           </ResizableBox>
         ))}
       </div>
