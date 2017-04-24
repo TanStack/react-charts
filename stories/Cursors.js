@@ -31,38 +31,46 @@ class Line extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(3).map((d, i) => (
           <ResizableBox
             key={i}
             width={500}
             height={300}
           >
-            <Chart
-              data={data}
-              getData={d => d.data}
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                margin: i % 2 ? '50px' : '0'
+              }}
             >
-              <Axis
-                primary
-                type='time'
-                position='bottom'
-              />
-              <Axis
-                type='linear'
-                position='left'
-                stacked
-                cursor={{
+              <Chart
+                data={data}
+                getData={d => d.data}
+              >
+                <Axis
+                  primary
+                  type='time'
+                  position='bottom'
+                />
+                <Axis
+                  type='linear'
+                  position='left'
+                  stacked
+                  cursor={{
 
-                }}
-              />
-              <Series
-                type={Area}
-              />
-              <Tooltip />
-              <Cursor
-                primary
-              />
-              <Cursor />
-            </Chart>
+                  }}
+                />
+                <Series
+                  type={Area}
+                />
+                <Tooltip />
+                <Cursor
+                  primary
+                />
+                <Cursor />
+              </Chart>
+            </div>
           </ResizableBox>
         ))}
 

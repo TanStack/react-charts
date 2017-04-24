@@ -4,12 +4,12 @@ import Perf from 'react-addons-perf'
 
 window.Perf = Perf
 
-import './reset.css'
-import './fonts.css'
-import './layout.css'
 import '../stories/utils/prism.css'
 import 'react-resizable/css/styles.css'
 import 'github-markdown-css/github-markdown.css'
+import './reset.css'
+import './fonts.css'
+import './layout.css'
 //
 import Readme from '../README.md'
 //
@@ -22,6 +22,8 @@ import CustomTooltip from '../stories/CustomTooltip.js'
 import Cursors from '../stories/Cursors.js'
 import CustomCursors from '../stories/CustomCursors.js'
 import InteractionModes from '../stories/InteractionModes.js'
+import DynamicParent from '../stories/DynamicParent.js'
+import Sparklines from '../stories/Sparklines.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -46,4 +48,6 @@ configure(() => {
     .add('Cursors', Cursors)
     .add('Custom Cursors', CustomCursors)
     .add('Interaction Modes', InteractionModes)
+    .add('Dynamic Parent', DynamicParent)
+    .add('Sparklines', Sparklines)
 }, module)

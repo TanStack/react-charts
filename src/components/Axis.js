@@ -29,7 +29,8 @@ class Axis extends PureComponent {
     maxLabelRotation: 50,
     barPaddingInner: 0.1,
     barPaddingOuter: 0.1,
-    showGrid: true
+    showGrid: true,
+    display: true
   }
   // Lifecycle
   constructor () {
@@ -81,7 +82,8 @@ class Axis extends PureComponent {
       height,
       showGrid,
       tickSizeInner,
-      tickSizeOuter
+      tickSizeOuter,
+      display
     } = this.props
 
     const {
@@ -89,7 +91,7 @@ class Axis extends PureComponent {
     } = this
 
     // Render Dependencies
-    if (!axis) {
+    if (!axis || !display) {
       return null
     }
 
@@ -121,7 +123,6 @@ class Axis extends PureComponent {
           tickPosition,
           spacing
         }}
-        
       >
         {({
           width,

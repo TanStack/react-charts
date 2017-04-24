@@ -20,6 +20,12 @@ const defaultColors = [
   '#cd82ad'
 ]
 
+const getType = (type, data, id) => {
+  // Allow dynamic types
+  const typeGetter = typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
+  return typeGetter(data, id)
+}
+
 class Series extends PureComponent {
   static defaultProps = {
     type: 'line',
@@ -69,21 +75,25 @@ class Series extends PureComponent {
 
     // If the axes are ready, let's decorate the materializedData for visual plotting
     const secondaryStacked = secondaryAxis.stacked
-    // "totals" are kept and used for bases if secondaryAxis stacking is enabled
-    const totals = secondaryStacked && materializedData.map(s => {
-      return s.data.map(d => 0)
-    })
-    .reduce((prev, current) => prev.length > current.length ? prev : current, [])
-    .map(d => ({
-      negative: 0,
-      positive: 0
-    }))
 
     // Make sure we're mapping x and y to the correct axes
     const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
     const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
     const xScale = primaryAxis.vertical ? secondaryAxis.scale : primaryAxis.scale
     const yScale = primaryAxis.vertical ? primaryAxis.scale : secondaryAxis.scale
+
+    // "totals" are kept and used for bases if secondaryAxis stacking is enabled
+    const totals = {}
+    if (secondaryStacked) {
+      materializedData.forEach(series => {
+        series.data.forEach(datum => {
+          totals[datum.primary] = {
+            negative: 0,
+            positive: 0
+          }
+        })
+      })
+    }
 
     let stackData = materializedData.map((series, seriesIndex) => {
       return {
@@ -96,7 +106,7 @@ class Series extends PureComponent {
             base: 0
           }
           if (secondaryStacked) {
-            let start = totals[index]
+            let start = totals[d.primary]
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
               // Should we use positive or negative base?
@@ -106,7 +116,7 @@ class Series extends PureComponent {
               // Add the value to the base
               datum.x = datum.base + datum.x
               // Update the totals
-              totals[index][key] = datum.x
+              totals[d.primary][key] = datum.x
             } else {
               // Should we use positive or negative base?
               let key = datum.y >= 0 ? 'positive' : 'negative'
@@ -115,7 +125,7 @@ class Series extends PureComponent {
               // Add the value to the base
               datum.y = datum.base + datum.y
               // Update the totals
-              totals[index][key] = datum.y
+              totals[d.primary][key] = datum.y
             }
           }
           return datum
@@ -145,7 +155,10 @@ class Series extends PureComponent {
 
       // We also need to decorate each datum in the same fashion
       series.data.forEach(datum => {
-        datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, defaults)
+        datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
+          ...defaults,
+          ...series.statusStyles.default
+        })
       })
     })
 
@@ -183,9 +196,6 @@ class Series extends PureComponent {
       return null
     }
 
-    // Allow dynamic types
-    let typeGetter = typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
-
     return (
       <Transition
         data={stackData} // The stack is reversed for proper z-index painting
@@ -208,7 +218,7 @@ class Series extends PureComponent {
               className='Series'
             >
               {inters.map((inter, i) => {
-                const StackCmp = typeGetter(inter.data, inter.data.id)
+                const StackCmp = getType(type, inter.data, inter.data.id)
                 return (
                   <StackCmp
                     key={inter.key}

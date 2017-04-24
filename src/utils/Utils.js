@@ -193,7 +193,7 @@ function getCenterPointOfSide (position, points) {
 
 function getClosestPoint (point, points) {
   let closestDistance = Infinity
-  let closestPoint = points.x
+  let closestPoint = points[0] || {}
   points.forEach((p) => {
     const distance = Math.sqrt(Math.pow(p.x - point.x, 2) + Math.pow(p.y - point.y, 2))
     if (distance < closestDistance) {
@@ -217,8 +217,8 @@ function normalizeComponent (Comp, params = {}, fallback = Comp) {
 function materializeStyles (style = {}, defaults = {}) {
   style = {
     ...style,
-    fill: style.fill || style.color || defaults.color,
-    stroke: style.stroke || style.color || defaults.color
+    fill: style.fill || style.color || defaults.fill || defaults.color,
+    stroke: style.stroke || style.color || defaults.stroke || defaults.color
   }
   ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}

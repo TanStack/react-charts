@@ -26,6 +26,7 @@ class Chart extends PureComponent {
     this.measure = this.measure.bind(this)
     this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
     this.onCursorLeave = this.onCursorLeave.bind(this)
+    this.getScroll = this.getScroll.bind(this)
   }
   componentDidMount () {
     this.props.dispatch(state => ({
@@ -35,7 +36,7 @@ class Chart extends PureComponent {
       type: 'interaction'
     })
     this.updateDataModel(this.props)
-    this.measure()
+    this.componentDidUpdate(this.props)
   }
   componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
@@ -150,6 +151,20 @@ class Chart extends PureComponent {
       })
     }
   }
+  getScroll () {
+    let scrollLeft = 0
+    let scrollTop = 0
+    let node = this.el
+    while (node) {
+      node = node.parentElement
+      scrollLeft += node ? node.scrollLeft : 0
+      scrollTop += node ? node.scrollTop : 0
+    }
+    return {
+      left: scrollLeft,
+      top: scrollTop
+    }
+  }
   render () {
     const {
       style,
@@ -167,13 +182,16 @@ class Chart extends PureComponent {
     return (
       <div
         className='Chart'
+        style={{
+          height: '0',
+          width: '0'
+        }}
       >
         <Animate
           data={{
             gridX,
             gridY
           }}
-          
         >
           {({
             gridX,
@@ -220,10 +238,12 @@ class Chart extends PureComponent {
       </div>
     )
   }
-  onCursor ({
-    clientX,
-    clientY
-  }) {
+  onCursor (e) {
+    const {
+      clientX,
+      clientY
+    } = e
+    const scroll = this.getScroll()
     const {
       gridX,
       gridY,
@@ -233,8 +253,8 @@ class Chart extends PureComponent {
       ...state,
       cursor: {
         active: true,
-        x: clientX - this.dims.left - gridX,
-        y: clientY - this.dims.top - gridY
+        x: clientX - (this.dims.left - scroll.left) - gridX,
+        y: clientY - (this.dims.top - scroll.top) - gridY
       }
     }), {
       type: 'cursor'

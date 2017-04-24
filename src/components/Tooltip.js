@@ -25,13 +25,29 @@ class Tooltip extends PureComponent {
         </div>
       ) : datums && datums.length ? (
         <div>
-          <strong>{primaryAxis.format(datums[0].primary)}</strong><br />
-          <br />
-          {datums.map((d, i) => (
-            <div key={i}>
-              <span style={{color: d.statusStyles.hovered.fill}}>&#9679;</span> {d.seriesLabel}: {secondaryAxis.format(d.secondary)}<br />
-            </div>
-          ))}
+          <div
+            style={{
+              marginBottom: '3px'
+            }}
+          >
+            <strong>{primaryAxis.format(datums[0].primary)}</strong>
+          </div>
+          <table>
+            <tbody>
+              {(secondaryAxis.stacked ? [...datums].reverse() : datums).map((d, i) => (
+                <tr key={i}>
+                  <td>
+                    <span style={{color: d.statusStyles.hovered.fill}}>&#9679;</span> {d.seriesLabel}: &nbsp;
+                  </td>
+                  <td style={{
+                    textAlign: 'right'
+                  }}>
+                    {secondaryAxis.format(d.secondary)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : null
     }

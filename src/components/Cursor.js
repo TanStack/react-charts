@@ -51,6 +51,8 @@ class Cursor extends PureComponent {
     const siblingAxis = primary ? secondaryAxis : primaryAxis
     const siblingRange = siblingAxis.scale.range()
 
+    const invert = axis.scale.invert || (() => 0)
+
     let
       x1,
       x2,
@@ -62,7 +64,7 @@ class Cursor extends PureComponent {
 
     if (primary && (axis.type === 'ordinal' || snap)) {
       animated = true
-      let closestDatum
+      let closestDatum = {}
       if (primaryAxis.vertical) {
         let smallestDistance = 10000000
         stackData.forEach(series => {
@@ -97,7 +99,7 @@ class Cursor extends PureComponent {
       x2 = siblingRange[1]
       y1 = y
       y2 = y + 1
-      label = typeof label !== 'undefined' ? label : axis.format(axis.scale.invert(cursor.y))
+      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -110,7 +112,7 @@ class Cursor extends PureComponent {
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label = typeof label !== 'undefined' ? label : axis.format(axis.scale.invert(cursor.x))
+      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -139,7 +141,7 @@ class Cursor extends PureComponent {
           y1,
           visibility: cursor.active ? 1 : 0
         }}
-        
+
       >
         {inter => (
           <div
@@ -176,7 +178,8 @@ class Cursor extends PureComponent {
                   color: 'white',
                   borderRadius: '3px',
                   position: 'relative',
-                  transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`
+                  transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
+                  whiteSpace: !axis.vertical && 'nowrap'
                 }}
               >
                 {children({
