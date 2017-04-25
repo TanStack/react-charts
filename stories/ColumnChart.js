@@ -7,7 +7,7 @@ import CodeHighlight from './components/codeHighlight'
 //
 import { Chart, Axis, Series, Tooltip, Bar } from '../src'
 
-class Line extends Component {
+class Story extends Component {
   constructor () {
     super()
     this.state = {
@@ -43,15 +43,11 @@ class Line extends Component {
               getLabel={d => d.label}
               getPrimary={d => d.x}
               getSecondary='nested.y'
-              getMeta={{
-                r: 'nested.r'
-              }}
             >
               <Axis
                 primary
                 type='ordinal'
                 position='bottom'
-                centerTicks
               />
               <Axis
                 type='linear'
@@ -74,7 +70,7 @@ class Line extends Component {
   }
 }
 
-export default () => <Line />
+export default () => <Story />
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 2)), makeSeries)
@@ -92,7 +88,7 @@ function makeSeries (d, i) {
     data: _.map(_.range(length), d => ({
       x: d * multiplier,
       nested: {
-        y: Math.round(Math.random() * (max) + Math.round(Math.random() * 50)),
+        y: Math.round(-max + (Math.random() * max * 2)),
         r: Math.round(Math.random() * 10)
       }
     }))

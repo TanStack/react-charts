@@ -7,7 +7,7 @@ import ChartConfig from './components/ChartConfig'
 //
 import { Chart, Axis, Series, Tooltip } from '../src'
 
-class Line extends Component {
+class Story extends Component {
   render () {
     return (
       <div>
@@ -55,4 +55,4 @@ class Line extends Component {
   }
 }
 
-export default () => <Line />
+export default () => <Story />

@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { voronoi } from 'd3-voronoi'
 import { line } from 'd3-shape'
 //
@@ -46,8 +46,8 @@ class Interaction extends PureComponent {
     if (interaction === modeClosestSeries) {
       // Closest Point Voronoi
       const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
-        x: d.x,
-        y: d.y,
+        x: d.focus.x,
+        y: d.focus.y,
         series: stackData[d.seriesIndex],
         datums: null,
         single: false
@@ -60,8 +60,8 @@ class Interaction extends PureComponent {
     } else if (interaction === modeClosestPoint) {
       // Closest Point Voronoi
       const voronoiData = stackData.reduce((prev, now) => prev.concat(now.data), []).map(d => ({
-        x: d.x,
-        y: d.y,
+        x: d.focus.x,
+        y: d.focus.y,
         series: null,
         datums: [d],
         single: true
@@ -79,8 +79,8 @@ class Interaction extends PureComponent {
       allDatums.forEach(d => {
         const key = String(d.primary)
         datumsByAxis[key] = datumsByAxis[key] || {
-          x: d.x,
-          y: d.y,
+          x: d.focus.x,
+          y: d.focus.y,
           series: null, // AxisAxis can't be the series, so don't send it
           datums: [],
           single: false

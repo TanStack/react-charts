@@ -4,6 +4,7 @@ import RAF from 'raf'
 Animate.defaults.immutable = false
 
 export default {
+  requestAnimationFrame: RAF,
   throttle,
   seriesStatus,
   datumStatus,
@@ -148,16 +149,16 @@ function getStatusStyle (status, styles) {
 function getCenterPointOfSide (position, points) {
   let xMin, xMax, yMin, yMax
 
-  xMin = points[0].x
-  xMax = points[0].x
-  yMin = points[0].y
-  yMax = points[0].y
+  xMin = points[0].focus.x
+  xMax = points[0].focus.x
+  yMin = points[0].focus.y
+  yMax = points[0].focus.y
 
   points.forEach(point => {
-    xMin = Math.min(point.x, xMin)
-    xMax = Math.max(point.x, xMax)
-    yMin = Math.min(point.y, yMin)
-    yMax = Math.max(point.y, yMax)
+    xMin = Math.min(point.focus.x, xMin)
+    xMax = Math.max(point.focus.x, xMax)
+    yMin = Math.min(point.focus.y, yMin)
+    yMax = Math.max(point.focus.y, yMax)
   })
 
   if (position === 'left') {
@@ -191,11 +192,11 @@ function getCenterPointOfSide (position, points) {
   }
 }
 
-function getClosestPoint (point, points) {
+function getClosestPoint (position, points) {
   let closestDistance = Infinity
   let closestPoint = points[0] || {}
   points.forEach((p) => {
-    const distance = Math.sqrt(Math.pow(p.x - point.x, 2) + Math.pow(p.y - point.y, 2))
+    const distance = Math.sqrt(Math.pow(p.focus.x - position.x, 2) + Math.pow(p.focus.y - position.y, 2))
     if (distance < closestDistance) {
       closestDistance = distance
       closestPoint = p

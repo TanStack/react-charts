@@ -7,7 +7,7 @@ import CodeHighlight from './components/codeHighlight'
 //
 import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../src'
 
-class Line extends Component {
+class Story extends Component {
   constructor () {
     super()
     this.state = {
@@ -82,7 +82,7 @@ class Line extends Component {
   }
 }
 
-export default () => <Line />
+export default () => <Story />
 
 function makeData () {
   return _.map(_.range(Math.max(Math.round((Math.random() * 4)), 1)), makeSeries)

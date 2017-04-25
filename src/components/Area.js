@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 
 import {
   area,

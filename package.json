@@ -26,7 +26,8 @@
     "build:node": "babel src --out-dir lib --source-maps inline",
     "watch": "onchange 'src/**' -i -- npm-run-all build:*",
     "test": "standard",
-    "umd": "rm -rf react-charts.js && browserify lib/index.js -s reactCharts -x react -t babelify -g uglifyify -o react-charts.js",
+    "umd": "rimraf react-move.js && webpack --config umd.webpack.js",
+    "umd:perf": "rimraf react-move.js && webpack --config umd-perf.webpack.js",
     "prepublish": "npm-run-all build:* && npm run umd",
     "postpublish": "git push --tags",
     "storybook": "start-storybook -p 8000 -c .storybook",
@@ -35,14 +36,14 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
-    "codux": "^0.0.9",
     "d3-quadtree": "^1.0.3",
     "d3-scale": "^1.0.4",
     "d3-shape": "^1.0.5",
     "d3-voronoi": "^1.1.1",
     "javascript-detect-element-resize": "^0.5.3",
     "raf": "^3.3.0",
-    "react-move": "^1.1.3"
+    "react-move": "^1.1.7",
+    "react-state": "^2.0.0"
   },
   "peerDependencies": {
     "react": "^15.3.1"
@@ -69,9 +70,12 @@
     "react-addons-perf": "^15.4.2",
     "react-dom": "^15.4.1",
     "react-resizable": "^1.6.0",
+    "rimraf": "^2.6.1",
     "standard": "^8.0.0",
     "stylus": "^0.54.5",
-    "uglifyify": "^3.0.3"
+    "uglifyify": "^3.0.3",
+    "webpack": "^2.4.1",
+    "webpack-bundle-analyzer": "^2.4.0"
   },
   "browserify-shim": {
     "react": "global:React"
@@ -90,7 +94,7 @@
   },
   "babel": {
     "presets": [
-      "es2015",
+      ["es2015"],
       "stage-2",
       "react"
     ],

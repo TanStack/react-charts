@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { Animate, Transition } from 'react-move'
+import RAF from 'raf'
 //
 import measure from './Axis.measure'
 import updateScale from './Axis.updateScale'
@@ -27,9 +28,9 @@ class Axis extends PureComponent {
     tickSizeOuter: 6,
     tickPadding: 3,
     maxLabelRotation: 50,
-    barPaddingInner: 0.1,
-    barPaddingOuter: 0.1,
-    showGrid: true,
+    innerPadding: 0.1,
+    outerPadding: 0.1,
+    showGrid: 1,
     display: true
   }
   // Lifecycle
@@ -55,8 +56,7 @@ class Axis extends PureComponent {
       newProps.materializedData !== oldProps.materializedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
-      newProps.position !== oldProps.position ||
-      newProps.centerTicks !== oldProps.centerTicks
+      newProps.position !== oldProps.position
     ) {
       this.updateScale(newProps)
     }
@@ -72,10 +72,15 @@ class Axis extends PureComponent {
     return false
   }
   componentDidUpdate () {
-    window.requestAnimationFrame(this.measure)
+    RAF(() => {
+      if (!this.measure()) {
+        window.setTimeout(() => this.componentDidUpdate(), 1)
+      }
+    })
   }
   render () {
     const {
+      type,
       axis,
       position,
       width,
@@ -103,10 +108,13 @@ class Axis extends PureComponent {
       format,
       //
       ticks,
-      range0,
-      range1,
+      range: [
+        range0,
+        range1
+      ],
       directionMultiplier,
-      tickPosition,
+      tickOffset,
+      gridOffset,
       spacing
     } = axis
 
@@ -120,7 +128,8 @@ class Axis extends PureComponent {
           range1,
           directionMultiplier,
           tickSizeOuter,
-          tickPosition,
+          tickOffset,
+          gridOffset,
           spacing
         }}
       >
@@ -132,7 +141,8 @@ class Axis extends PureComponent {
           range1,
           directionMultiplier,
           tickSizeOuter,
-          tickPosition,
+          tickOffset,
+          gridOffset,
           spacing
         }) => {
           let axisPath
@@ -212,12 +222,19 @@ class Axis extends PureComponent {
                 duration={500}
               >
                 {(inters) => {
+                  let showGridLine = showGrid
+
+                  // If ordinal and showGrid isn't explicit, hide it
+                  if (type === 'ordinal' && showGrid === 1) {
+                    showGridLine = false
+                  }
+
                   return (
                     <g
                       className='ticks'
                       ref={el => { this.el = el }}
                     >
-                      {inters.map((inter) => {
+                      {inters.map((inter, index) => {
                         return (
                           <g
                             key={inter.key}
@@ -225,32 +242,32 @@ class Axis extends PureComponent {
                             transform={transform(inter.state.tick)}
                           >
                             <Line
-                              x1={vertical ? '0.5' : tickPosition}
-                              x2={vertical ? directionMultiplier * tickSizeInner : tickPosition}
-                              y1={vertical ? tickPosition : '0.5'}
-                              y2={vertical ? tickPosition : directionMultiplier * tickSizeInner}
+                              x1={vertical ? 0 : tickOffset}
+                              x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
+                              y1={vertical ? tickOffset : 0}
+                              y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
                               style={{
                                 strokeWidth: 1
                               }}
                               opacity={inter.state.visibility * 0.2}
                             />
-                            {showGrid && (
+                            {showGridLine && (
                               <Line
-                                x1={vertical ? '0.5' : '0.5'}
-                                x2={vertical ? max : '0.5'}
-                                y1={vertical ? '0.5' : '0.5'}
-                                y2={vertical ? '0.5' : max}
+                                x1={vertical ? 0 : gridOffset}
+                                x2={vertical ? max : gridOffset}
+                                y1={vertical ? gridOffset : 0}
+                                y2={vertical ? gridOffset : max}
                                 style={{
                                   strokeWidth: 1
                                 }}
-                                opacity={inter.state.visibility * 0.2}
+                                opacity={inter.state.visibility * (index !== 0 && index !== inters.length - 1 && inter.data === 0 ? 0.5 : 0.2)}
                               />
                             )}
                             <Text
                               opacity={inter.state.visibility}
                               fontSize={fontSize}
                               transform={`
-                                translate(${vertical ? directionMultiplier * spacing : tickPosition}, ${vertical ? tickPosition : directionMultiplier * spacing})
+                                translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${vertical ? tickOffset : directionMultiplier * spacing})
                                 rotate(${-rotation})
                               `}
                               dominantBaseline={rotation ? 'central' : position === positionBottom ? 'hanging' : position === positionTop ? 'alphabetic' : 'central'}

@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { Animate } from 'react-move'
 //
 import Selectors from '../utils/Selectors'
@@ -51,7 +51,7 @@ class Cursor extends PureComponent {
     const siblingAxis = primary ? secondaryAxis : primaryAxis
     const siblingRange = siblingAxis.scale.range()
 
-    const invert = axis.scale.invert || (() => 0)
+    const invert = axis.scale.invert || (d => d)
 
     let
       x1,
@@ -64,33 +64,33 @@ class Cursor extends PureComponent {
 
     if (primary && (axis.type === 'ordinal' || snap)) {
       animated = true
-      let closestDatum = {}
+      let closestDatum = { focus: {} }
       if (primaryAxis.vertical) {
         let smallestDistance = 10000000
         stackData.forEach(series => {
           series.data.forEach(datum => {
-            const distance = Math.abs(y - datum.x)
+            const distance = Math.abs(y - datum.focus.x)
             if (distance < smallestDistance) {
               smallestDistance = distance
               closestDatum = datum
             }
           })
         })
-        y = closestDatum.x
-        label = axis.format(closestDatum.primary)
+        y = closestDatum.focus.x
+        label = typeof closestDatum.primary !== 'undefined' ? axis.format(closestDatum.primary) : undefined
       } else {
         let smallestDistance = 10000000
         stackData.forEach(series => {
           series.data.forEach(datum => {
-            const distance = Math.abs(x - datum.x)
+            const distance = Math.abs(x - datum.focus.x)
             if (distance < smallestDistance) {
               smallestDistance = distance
               closestDatum = datum
             }
           })
         })
-        x = closestDatum.x
-        label = axis.format(closestDatum.primary)
+        x = closestDatum.focus.x
+        label = typeof closestDatum.primary !== 'undefined' ? axis.format(closestDatum.primary) : undefined
       }
     }
 
@@ -141,7 +141,7 @@ class Cursor extends PureComponent {
           y1,
           visibility: cursor.active ? 1 : 0
         }}
-
+        duration={400}
       >
         {inter => (
           <div

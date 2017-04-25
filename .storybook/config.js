@@ -24,6 +24,7 @@ import CustomCursors from '../stories/CustomCursors.js'
 import InteractionModes from '../stories/InteractionModes.js'
 import DynamicParent from '../stories/DynamicParent.js'
 import Sparklines from '../stories/Sparklines.js'
+import MixedTypes from '../stories/MixedTypes.js'
 //
 configure(() => {
   storiesOf('1. Docs')
@@ -50,4 +51,5 @@ configure(() => {
     .add('Interaction Modes', InteractionModes)
     .add('Dynamic Parent', DynamicParent)
     .add('Sparklines', Sparklines)
+    .add('Mixed Element Types', MixedTypes)
 }, module)

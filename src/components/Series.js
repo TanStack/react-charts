@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { quadtree as QuadTree } from 'd3-quadtree'
 //
 import Selectors from '../utils/Selectors'
@@ -20,10 +20,10 @@ const defaultColors = [
   '#cd82ad'
 ]
 
-const getType = (type, data, id) => {
+const getType = (type, data, i) => {
   // Allow dynamic types
   const typeGetter = typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
-  return typeGetter(data, id)
+  return typeGetter(data, i)
 }
 
 class Series extends PureComponent {
@@ -60,6 +60,7 @@ class Series extends PureComponent {
   }
   updateStackData (props) {
     const {
+      type,
       getStyles,
       getDataStyles,
       //
@@ -79,8 +80,10 @@ class Series extends PureComponent {
     // Make sure we're mapping x and y to the correct axes
     const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
     const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
-    const xScale = primaryAxis.vertical ? secondaryAxis.scale : primaryAxis.scale
-    const yScale = primaryAxis.vertical ? primaryAxis.scale : secondaryAxis.scale
+    const xAxis = primaryAxis.vertical ? secondaryAxis : primaryAxis
+    const yAxis = primaryAxis.vertical ? primaryAxis : secondaryAxis
+    const xScale = xAxis.scale
+    const yScale = yAxis.scale
 
     // "totals" are kept and used for bases if secondaryAxis stacking is enabled
     const totals = {}
@@ -96,8 +99,10 @@ class Series extends PureComponent {
     }
 
     let stackData = materializedData.map((series, seriesIndex) => {
+      const seriesType = getType(type, series, seriesIndex) || {}
       return {
         ...series,
+        type: seriesType.SeriesType,
         data: series.data.map((d, index) => {
           const datum = {
             ...d,
@@ -140,6 +145,31 @@ class Series extends PureComponent {
         d.x = xScale(d.x)
         d.y = yScale(d.y)
         d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
+        // Adjust non-bar elements for ordinal scales
+        if (series.type !== 'Bar') {
+          if (xAxis.type === 'ordinal') {
+            d.x += xAxis.tickOffset
+          }
+          if (yAxis.type === 'ordinal') {
+            d.y += yAxis.tickOffset
+          }
+        }
+
+        // Set the default focus point
+        d.focus = {
+          x: d.x,
+          y: d.y
+        }
+
+        // Adjust the focus point for specific elements
+        if (series.type === 'Bar') {
+          if (!xAxis.vertical) {
+            d.focus.x = d.x + xAxis.tickOffset
+          }
+          if (!yAxis.vertical) {
+            d.focus.y = d.y + yAxis.tickOffset
+          }
+        }
       })
     })
 

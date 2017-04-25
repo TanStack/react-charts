@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { Animate } from 'react-move'
 
 import {
@@ -51,7 +51,6 @@ class Line extends PureComponent {
           visibility
         }}
         duration={500}
-        easing='easeBackOut'
       >
         {inter => {
           const path = lineFn(inter.data.map(d => ([d.x, d.y])))
@@ -121,5 +120,8 @@ export default Connect((state, props) => {
     interaction: state.interaction
   }
 }, {
-  filter: (oldState, newState, meta) => meta.type !== 'cursor'
+  filter: (oldState, newState, meta) => meta.type !== 'cursor',
+  statics: {
+    SeriesType: 'Line'
+  }
 })(Line)

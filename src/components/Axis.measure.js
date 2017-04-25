@@ -1,7 +1,7 @@
 import {
   positionTop,
   positionBottom
- } from './Axis'
+} from './Axis'
 
 const fontSize = 10
 
@@ -71,10 +71,7 @@ export default function measure () {
   }
 
   if (!labelDims.length || labelDims.length !== this.ticks.length) {
-    window.setTimeout(() => {
-      window.requestAnimationFrame(this.measure)
-    }, 1)
-    return
+    return false
   }
 
   let width = 0
@@ -120,4 +117,6 @@ export default function measure () {
   }), {
     type: 'axisDimensions'
   })
+
+  return true
 }

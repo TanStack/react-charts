@@ -32,9 +32,8 @@ export default function updateScale (props) {
     invert,
     primary,
     stacked,
-    barPaddingInner,
-    barPaddingOuter,
-    centerTicks,
+    innerPadding,
+    outerPadding,
     tickArguments,
     tickValues,
     tickFormat,
@@ -58,7 +57,8 @@ export default function updateScale (props) {
   }
 
   // Detect some settings
-  const datumKey = primary ? 'primary' : 'secondary'
+  const valueKey = primary ? 'primary' : 'secondary'
+  const groupKey = !primary && 'primary'
   const vertical = detectVertical(position)
   const RTL = primary && detectRTL(position) // Right to left OR top to bottom
 
@@ -68,14 +68,14 @@ export default function updateScale (props) {
   let uniqueVals = []
   let min = 0
   let max = 0
-  let datumValues = []
+  let datumValues = {}
   let negativeTotal = 0
   let positiveTotal = 0
   let domain
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {
-      const seriesValues = series.data.map(d => d[datumKey])
+      const seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach(d => {
         if (uniqueVals.indexOf(d) === -1) {
           uniqueVals.push(d)
@@ -85,11 +85,12 @@ export default function updateScale (props) {
     domain = invert ? [...uniqueVals].reverse() : uniqueVals
   } else if (type === 'time') {
     const firstRow = materializedData[0].data[0] || {}
-    min = max = firstRow[datumKey]
+    min = max = firstRow[valueKey]
     materializedData.forEach(series => {
-      const seriesValues = series.data.map(d => +d[datumKey])
+      const seriesValues = series.data.map(d => +d[valueKey])
       seriesValues.forEach((d, i) => {
-        datumValues[i] = [...(datumValues[i] || []), d]
+        const key = groupKey ? series.data[i][groupKey] : i
+        datumValues[key] = [...(datumValues[key] || []), d]
       })
       const seriesMin = Math.min(...seriesValues)
       const seriesMax = Math.max(...seriesValues)
@@ -99,9 +100,10 @@ export default function updateScale (props) {
     domain = invert ? [max, min] : [min, max]
   } else {
     materializedData.forEach(series => {
-      const seriesValues = series.data.map(d => d[datumKey])
+      const seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach((d, i) => {
-        datumValues[i] = [...(datumValues[i] || []), d]
+        const key = groupKey ? series.data[i][groupKey] : i
+        datumValues[key] = [...(datumValues[key] || []), d]
       })
       const seriesMin = Math.min(...seriesValues)
       const seriesMax = Math.max(...seriesValues)
@@ -110,7 +112,7 @@ export default function updateScale (props) {
     })
     if (stacked) {
       // If we're stacking, calculate and use the max and min values for the largest stack
-      [positiveTotal, negativeTotal] = datumValues.reduce((totals, vals) => {
+      [positiveTotal, negativeTotal] = Object.keys(datumValues).map(d => datumValues[d]).reduce((totals, vals) => {
         const positive = vals.filter(d => d >= 0).reduce((ds, d) => ds + d, 0)
         const negative = vals.filter(d => d < 0).reduce((ds, d) => ds + d, 0)
         return [
@@ -123,14 +125,6 @@ export default function updateScale (props) {
       // If we're not stacking, use the min and max values
       domain = invert ? [max, min] : [min, max]
     }
-  }
-
-  const scale = scales[type]()
-    .domain(domain)
-
-  // If we're not using an ordinal scale, round the ticks to "nice" values
-  if (type !== 'ordinal') {
-    scale.nice()
   }
 
   // Now we need to figure out the range
@@ -146,27 +140,63 @@ export default function updateScale (props) {
       range = range.reverse()
     }
   }
-  // Set the range
-  scale.range(range)
 
-  let barWidth = 1
-  let barStepSize = 0
-  let barPaddingOuterSize = 0
-  // If this is the primary axis, it could possibly be used to display bars.
-  if (primary) {
+  // The the scale a home
+  let scale
+
+  // If this is an ordinal or other primary axis, it needs to be able to display bars.
+  let bandScale
+  let barSize = 1
+  let stepSize = 0
+
+  // outerPadding can also apply to linear scales by changing the domain (useful for displaying bars on non-ordinal scales)
+  // if (type !== 'ordinal') {
+  //   const [d1, d2] = domain
+  //   const paddedD1 = d1 + ((d1 - d2) * outerPadding)
+  //   const paddedD2 = d2 + ((d2 - d1) * outerPadding)
+  //   domain = [paddedD1, paddedD2]
+  // }
+
+  if (type === 'ordinal' || primary) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
-    const bandScale = scaleBand()
+    bandScale = scaleBand()
       .domain(materializedData.reduce((prev, current) => current.data.length > prev.length ? current.data : prev, []).map(d => d.primary))
-      .rangeRound(scale.range(), 0.1)
-      .paddingInner(barPaddingInner)
-      .paddingOuter(barPaddingOuter)
-    barWidth = bandScale.bandwidth()
-    barStepSize = bandScale.step()
-    barPaddingOuterSize = (barStepSize * barPaddingOuter) / 2
+      .rangeRound(range, 0.1)
+      .padding(0)
+
+    if (type === 'ordinal') {
+      bandScale
+        .paddingOuter(outerPadding)
+        .paddingInner(innerPadding)
+      barSize = bandScale.bandwidth()
+    } else {
+      barSize = bandScale.bandwidth()
+    }
+
+    stepSize = bandScale.step()
   }
 
-  // Set some extra values on the axis for posterity
+  if (type === 'ordinal') {
+    // If it's ordinal, just assign the bandScale we made
+    scale = bandScale
+  } else {
+    // Otherwise, create a new scale of the appropriate type
+    scale = scales[type]()
+  }
+
+  // Set the domain
+  scale.domain(domain)
+
+  // Now set the range
+  scale.range(range)
+
+  // If we're not using an ordinal scale, round the ticks to "nice" values
+  if (type !== 'ordinal') {
+    scale.nice()
+  }
+
+  // Pass down the axis config (including the scale itself) for posterity
   const axis = {
     type,
     scale,
@@ -176,13 +206,11 @@ export default function updateScale (props) {
     vertical,
     RTL,
     position,
-    centerTicks,
-    barPaddingInner,
-    barPaddingOuter,
     stacked,
-    barWidth,
-    barStepSize,
-    barPaddingOuterSize,
+    barSize,
+    stepSize,
+    domain,
+    range,
     max:
       position === positionBottom ? -height
       : position === positionLeft ? width
@@ -192,16 +220,17 @@ export default function updateScale (props) {
     transform: !vertical ? translateX : translateY,
     ticks: this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues,
     format: tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat,
-    spacing: Math.max(tickSizeInner, 0) + tickPadding,
-    range: scale.range(),
-    range0: range[0],
-    range1: range[1],
-    itemWidth: barWidth,
-    // seriesPadding: centerTicks ? barWidth / 2 + (barPaddingOuter * barStepSize) : 0
-    seriesPadding: 0
+    spacing: Math.max(tickSizeInner, 0) + tickPadding
   }
 
-  axis.tickPosition = centerTicks ? axis.itemWidth / 2 : 0
+  if (type === 'ordinal') {
+    axis.gridOffset = -(axis.stepSize * innerPadding) / 2
+    axis.tickOffset = axis.barSize / 2
+    axis.barOffset = 0
+  } else {
+    axis.tickOffset = 0
+    axis.barOffset = -axis.barSize / 2
+  }
 
   // Make sure we start with a prevAxis
   this.prevAxis = this.prevAxis || axis

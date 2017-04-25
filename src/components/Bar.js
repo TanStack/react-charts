@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { Animate } from 'react-move'
 //
 import Utils from '../utils/Utils'
@@ -23,9 +23,9 @@ class Bars extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const barWidth = primaryAxis.barWidth
-    const tickPosition = primaryAxis.tickPosition
-    const barOffset = -(barWidth / 2)
+    const barSize = primaryAxis.barSize
+    const tickOffset = primaryAxis.tickOffset
+    const barOffset = primaryAxis.barOffset
 
     return (
       <Animate
@@ -37,7 +37,7 @@ class Bars extends PureComponent {
           data: series.data,
           visibility
         }}
-        
+
       >
         {inter => {
           const seriesInteractionProps = interaction === 'series' ? {
@@ -55,11 +55,11 @@ class Bars extends PureComponent {
                 if (primaryAxis.vertical) {
                   x1 = datum.base
                   x2 = datum.x
-                  y1 = datum.y + tickPosition + barOffset
-                  y2 = y1 + barWidth
+                  y1 = datum.y + barOffset
+                  y2 = y1 + barSize
                 } else {
-                  x1 = datum.x + tickPosition + barOffset
-                  x2 = x1 + barWidth
+                  x1 = datum.x + barOffset
+                  x2 = x1 + barSize
                   y1 = datum.y
                   y2 = datum.base
                 }
@@ -114,5 +114,8 @@ export default Connect(() => {
     }
   }
 }, {
-  filter: (oldState, newState, meta) => meta.type !== 'cursor'
+  filter: (oldState, newState, meta) => meta.type !== 'cursor',
+  statics: {
+    SeriesType: 'Bar'
+  }
 })(Bars)

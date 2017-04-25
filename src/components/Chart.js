@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
-import { Provider, Connect } from 'codux'
+import { Provider, Connect } from 'react-state'
 //
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
@@ -26,7 +26,6 @@ class Chart extends PureComponent {
     this.measure = this.measure.bind(this)
     this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
     this.onCursorLeave = this.onCursorLeave.bind(this)
-    this.getScroll = this.getScroll.bind(this)
   }
   componentDidMount () {
     this.props.dispatch(state => ({
@@ -77,8 +76,7 @@ class Chart extends PureComponent {
     return false
   }
   componentDidUpdate (prevProps) {
-    window.requestAnimationFrame(() => this.measure(prevProps))
-    this.dims = this.el.getBoundingClientRect()
+    Utils.requestAnimationFrame(() => this.measure(prevProps))
   }
   updateDataModel (props) {
     const {
@@ -149,20 +147,6 @@ class Chart extends PureComponent {
       }), {
         type: 'offset'
       })
-    }
-  }
-  getScroll () {
-    let scrollLeft = 0
-    let scrollTop = 0
-    let node = this.el
-    while (node) {
-      node = node.parentElement
-      scrollLeft += node ? node.scrollLeft : 0
-      scrollTop += node ? node.scrollTop : 0
-    }
-    return {
-      left: scrollLeft,
-      top: scrollTop
     }
   }
   render () {
@@ -243,18 +227,19 @@ class Chart extends PureComponent {
       clientX,
       clientY
     } = e
-    const scroll = this.getScroll()
+    this.dims = this.el.getBoundingClientRect()
     const {
       gridX,
       gridY,
       dispatch
     } = this.props
+
     dispatch(state => ({
       ...state,
       cursor: {
         active: true,
-        x: clientX - (this.dims.left - scroll.left) - gridX,
-        y: clientY - (this.dims.top - scroll.top) - gridY
+        x: clientX - this.dims.left - gridX,
+        y: clientY - this.dims.top - gridY
       }
     }), {
       type: 'cursor'

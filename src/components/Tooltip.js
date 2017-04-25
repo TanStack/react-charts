@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { Connect } from 'codux'
+import { Connect } from 'react-state'
 import { Animate } from 'react-move'
 //
 import Utils from '../utils/Utils'
@@ -42,7 +42,7 @@ class Tooltip extends PureComponent {
                   <td style={{
                     textAlign: 'right'
                   }}>
-                    {secondaryAxis.format(d.secondary)}
+                    {Math.floor(d.secondary) < d.secondary ? Math.round(d.secondary * 100) / 100 : d.secondary}
                   </td>
                 </tr>
               ))}
@@ -88,7 +88,7 @@ class Tooltip extends PureComponent {
         : position === 'center' ? Utils.getCenterPointOfSide('center', datums)
         : position === 'cursor' ? cursor
         // : quadTree.find(cursor.x, cursor.y)
-        : Utils.getClosestPoint(cursor, datums)
+        : Utils.getClosestPoint(cursor, datums).focus
     ) : {
       x: gridX,
       y: gridY
