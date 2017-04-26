@@ -149,14 +149,6 @@ export default function updateScale (props) {
   let barSize = 1
   let stepSize = 0
 
-  // outerPadding can also apply to linear scales by changing the domain (useful for displaying bars on non-ordinal scales)
-  // if (type !== 'ordinal') {
-  //   const [d1, d2] = domain
-  //   const paddedD1 = d1 + ((d1 - d2) * outerPadding)
-  //   const paddedD2 = d2 + ((d2 - d1) * outerPadding)
-  //   domain = [paddedD1, paddedD2]
-  // }
-
   if (type === 'ordinal' || primary) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.

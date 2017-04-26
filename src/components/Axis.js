@@ -28,7 +28,7 @@ class Axis extends PureComponent {
     tickSizeOuter: 6,
     tickPadding: 3,
     maxLabelRotation: 50,
-    innerPadding: 0.1,
+    innerPadding: 0.2,
     outerPadding: 0.1,
     showGrid: 1,
     display: true

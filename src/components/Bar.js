@@ -24,7 +24,6 @@ class Bars extends PureComponent {
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const barSize = primaryAxis.barSize
-    const tickOffset = primaryAxis.tickOffset
     const barOffset = primaryAxis.barOffset
 
     return (

@@ -29,8 +29,8 @@ export default {
   }),
 
   offset: () => Memoize(state => [
-    _.get(() => state.offset.left, 0),
-    _.get(() => state.offset.top, 0)
+    state && state.offset && state.offset.left || 0,
+    state && state.offset && state.offset.top || 0
   ], (
     left,
     top
@@ -42,10 +42,10 @@ export default {
   }),
 
   gridX: () => Memoize(state => [
-    _.get(() => state.padding.left, 0),
-    _.get(() => state.axisDimensions.left.width, 0),
-    _.get(() => state.axisDimensions.top.left, 0),
-    _.get(() => state.axisDimensions.bottom.left, 0)
+    state && state.padding && state.padding.left || 0,
+    state && state.axisDimensions && state.axisDimensions.left && state.axisDimensions.left.width || 0,
+    state && state.axisDimensions && state.axisDimensions.top && state.axisDimensions.top.left || 0,
+    state && state.axisDimensions && state.axisDimensions.bottom && state.axisDimensions.bottom.left || 0
   ], (
     paddingLeft,
     axesLeftWidth,
@@ -56,10 +56,10 @@ export default {
   }),
 
   gridY: () => Memoize(state => [
-    _.get(() => state.padding.top, 0),
-    _.get(() => state.axisDimensions.top.height, 0),
-    _.get(() => state.axisDimensions.left.top, 0),
-    _.get(() => state.axisDimensions.right.top, 0)
+    state && state.padding && state.padding.top || 0,
+    state && state.axisDimensions && state.axisDimensions.top && state.axisDimensions.top.height || 0,
+    state && state.axisDimensions && state.axisDimensions.left && state.axisDimensions.left.top || 0,
+    state && state.axisDimensions && state.axisDimensions.right && state.axisDimensions.right.top || 0
   ], (
     paddingTop,
     axesTopHeight,
@@ -70,15 +70,15 @@ export default {
   }),
 
   gridWidth: () => Memoize(state => [
-    _.get(() => state.width, 0),
-    _.get(() => state.padding.left, 0),
-    _.get(() => state.padding.right, 0),
-    _.get(() => state.axisDimensions.left.width, 0),
-    _.get(() => state.axisDimensions.right.width, 0),
-    _.get(() => state.axisDimensions.top.left, 0),
-    _.get(() => state.axisDimensions.top.right, 0),
-    _.get(() => state.axisDimensions.bottom.left, 0),
-    _.get(() => state.axisDimensions.bottom.right, 0)
+    state && state.width && state.width || 0,
+    state && state.padding && state.padding.left || 0,
+    state && state.padding && state.padding.right || 0,
+    state && state.axisDimensions && state.axisDimensions.left && state.axisDimensions.left.width || 0,
+    state && state.axisDimensions && state.axisDimensions.right && state.axisDimensions.right.width || 0,
+    state && state.axisDimensions && state.axisDimensions.top && state.axisDimensions.top.left || 0,
+    state && state.axisDimensions && state.axisDimensions.top && state.axisDimensions.top.right || 0,
+    state && state.axisDimensions && state.axisDimensions.bottom && state.axisDimensions.bottom.left || 0,
+    state && state.axisDimensions && state.axisDimensions.bottom && state.axisDimensions.bottom.right || 0
   ], (
     width,
     paddingLeft,
@@ -98,15 +98,15 @@ export default {
   }),
 
   gridHeight: () => Memoize(state => [
-    _.get(() => state.height, 0),
-    _.get(() => state.padding.top, 0),
-    _.get(() => state.padding.bottom, 0),
-    _.get(() => state.axisDimensions.top.height, 0),
-    _.get(() => state.axisDimensions.bottom.height, 0),
-    _.get(() => state.axisDimensions.left.top, 0),
-    _.get(() => state.axisDimensions.left.bottom, 0),
-    _.get(() => state.axisDimensions.right.top, 0),
-    _.get(() => state.axisDimensions.right.bottom, 0)
+    state && state.height || 0,
+    state && state.padding && state.padding.top || 0,
+    state && state.padding && state.padding.bottom || 0,
+    state && state.axisDimensions && state.axisDimensions.top && state.axisDimensions.top.height || 0,
+    state && state.axisDimensions && state.axisDimensions.bottom && state.axisDimensions.bottom.height || 0,
+    state && state.axisDimensions && state.axisDimensions.left && state.axisDimensions.left.top || 0,
+    state && state.axisDimensions && state.axisDimensions.left && state.axisDimensions.left.bottom || 0,
+    state && state.axisDimensions && state.axisDimensions.right && state.axisDimensions.right.top || 0,
+    state && state.axisDimensions && state.axisDimensions.right && state.axisDimensions.right.bottom || 0
   ], (
     height,
     paddingTop,
