@@ -1,6 +1,6 @@
 {
   "name": "react-charts",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple, immersive & interactive charts for React",
   "license": "MIT",
   "homepage": "https://github.com/react-charts/react-charts#readme",
@@ -94,7 +94,9 @@
   },
   "babel": {
     "presets": [
-      ["es2015"],
+      [
+        "es2015"
+      ],
       "stage-2",
       "react"
     ],
