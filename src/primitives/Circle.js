@@ -14,31 +14,22 @@ export default class Circle extends PureComponent {
   static defaultProps = {
     opacity: 1
   }
-  render () {
-    const {
-      x,
-      y,
-      r,
-      style,
-      opacity,
-      ...rest
-    } = this.props
+  render() {
+    const { x, y, r, style, opacity, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
       ...style
     }
     return (
-      <Animate
-        data={resolvedStyle}
-      >
-        {(inter) => {
+      <Animate data={resolvedStyle}>
+        {inter => {
           return (
             <circle
               {...rest}
-              cx={x}
-              cy={y}
-              r={r}
+              cx={x || 0}
+              cy={y || 0}
+              r={r || 0}
               style={{
                 ...inter,
                 opacity: opacity * inter.opacity

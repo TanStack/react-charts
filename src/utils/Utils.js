@@ -1,3 +1,4 @@
+import React from 'react'
 import { Animate } from 'react-move'
 import RAF from 'raf'
 
@@ -21,7 +22,7 @@ export default {
   uniq,
   groupBy,
   orderBy,
-  isArray
+  isArray,
 }
 
 function throttle (func) {
@@ -40,7 +41,7 @@ function seriesStatus (series, hovered, selected) {
     selected: false,
     hovered: false,
     otherSelected: false,
-    otherHovered: false
+    otherHovered: false,
   }
   if (selected && selected.active && selected.series) {
     status.selected = selected.series.id === series.id
@@ -59,7 +60,7 @@ function datumStatus (series, datum, hovered, selected) {
     selected: false,
     hovered: false,
     otherSelected: false,
-    otherHovered: false
+    otherHovered: false,
   }
 
   let d
@@ -92,40 +93,40 @@ function getStatusStyles (item, decorator, defaults) {
     default: decorator(item),
     selected: decorator({
       ...item,
-      selected: true
+      selected: true,
     }),
     selectedHovered: decorator({
       ...item,
       selected: true,
-      hovered: true
+      hovered: true,
     }),
     selectedOtherHovered: decorator({
       ...item,
       selected: true,
-      otherHovered: true
+      otherHovered: true,
     }),
     otherSelected: decorator({
       ...item,
-      otherSelected: true
+      otherSelected: true,
     }),
     otherSelectedHovered: decorator({
       ...item,
       otherSelected: true,
-      hovered: true
+      hovered: true,
     }),
     otherSelectedOtherHovered: decorator({
       ...item,
       otherHovered: true,
-      otherSelected: true
+      otherSelected: true,
     }),
     hovered: decorator({
       ...item,
-      hovered: true
+      hovered: true,
     }),
     otherHovered: decorator({
       ...item,
-      otherHovered: true
-    })
+      otherHovered: true,
+    }),
   }
   Object.keys(styles).forEach(key => {
     styles[key] = materializeStyles(styles[key], defaults)
@@ -164,39 +165,41 @@ function getCenterPointOfSide (position, points) {
   if (position === 'left') {
     return {
       x: xMin,
-      y: (yMin + yMax) / 2
+      y: (yMin + yMax) / 2,
     }
   }
   if (position === 'right') {
     return {
       x: xMax,
-      y: (yMin + yMax) / 2
+      y: (yMin + yMax) / 2,
     }
   }
   if (position === 'top') {
     return {
       x: (xMin + xMax) / 2,
-      y: yMin
+      y: yMin,
     }
   }
   if (position === 'bottom') {
     return {
       x: (xMin + xMax) / 2,
-      y: yMax
+      y: yMax,
     }
   }
   // Center
   return {
     x: (xMin + xMax) / 2,
-    y: (yMin + yMax) / 2
+    y: (yMin + yMax) / 2,
   }
 }
 
 function getClosestPoint (position, points) {
   let closestDistance = Infinity
   let closestPoint = points[0] || {}
-  points.forEach((p) => {
-    const distance = Math.sqrt(Math.pow(p.focus.x - position.x, 2) + Math.pow(p.focus.y - position.y, 2))
+  points.forEach(p => {
+    const distance = Math.sqrt(
+      Math.pow(p.focus.x - position.x, 2) + Math.pow(p.focus.y - position.y, 2)
+    )
     if (distance < closestDistance) {
       closestDistance = distance
       closestPoint = p
@@ -206,20 +209,18 @@ function getClosestPoint (position, points) {
 }
 
 function normalizeComponent (Comp, params = {}, fallback = Comp) {
-  return typeof Comp === 'function' ? (
-    Object.getPrototypeOf(Comp).isReactComponent ? (
-      <Comp
-        {...params}
-      />
-    ) : Comp(params)
-  ) : fallback
+  return typeof Comp === 'function'
+    ? Object.getPrototypeOf(Comp).isReactComponent
+        ? <Comp {...params} />
+        : Comp(params)
+    : fallback
 }
 
 function materializeStyles (style = {}, defaults = {}) {
   style = {
     ...style,
     fill: style.fill || style.color || defaults.fill || defaults.color,
-    stroke: style.stroke || style.color || defaults.stroke || defaults.color
+    stroke: style.stroke || style.color || defaults.stroke || defaults.color,
   }
   ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
@@ -301,9 +302,7 @@ function orderBy (arr, funcs, dirs = []) {
         return desc ? 1 : -1
       }
     }
-    return dirs[0]
-      ? a.__index - b.__index
-      : b.__index - b.__index
+    return dirs[0] ? a.__index - b.__index : b.__index - b.__index
   })
 }
 
@@ -317,10 +316,10 @@ function isArray (a) {
 
 function makePathArray (obj) {
   return flattenDeep(obj)
-      .join('.')
-      .replace('[', '.')
-      .replace(']', '')
-      .split('.')
+    .join('.')
+    .replace('[', '.')
+    .replace(']', '')
+    .split('.')
 }
 
 function flattenDeep (arr, newArr = []) {

@@ -1,5 +1,6 @@
 node_modules
 lib
 dist
+docs/build
 react-chart.js
 *.log

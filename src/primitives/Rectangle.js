@@ -10,20 +10,12 @@ const defaultStyle = {
   ry: 0
 }
 
-export default class Circle extends PureComponent {
+export default class Rectangle extends PureComponent {
   static defaultProps = {
     opacity: 1
   }
-  render () {
-    const {
-      style,
-      opacity,
-      x1,
-      y1,
-      x2,
-      y2,
-      ...rest
-    } = this.props
+  render() {
+    const { style, opacity, x1, y1, x2, y2, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
@@ -39,11 +31,8 @@ export default class Circle extends PureComponent {
     const width = Math.max(xEnd - xStart, 0)
 
     return (
-      <Animate
-        data={resolvedStyle}
-        
-      >
-        {(inter) => {
+      <Animate data={resolvedStyle}>
+        {inter => {
           return (
             <rect
               {...rest}
