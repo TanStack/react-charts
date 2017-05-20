@@ -31,7 +31,8 @@
     "prepublish": "npm-run-all build:* && npm run umd",
     "postpublish": "git push --tags",
     "docs": "yarn watch & cd docs && yarn && yarn start",
-    "docs:build": "cd docs && yarn && yarn run build"
+    "docs:build": "cd docs && yarn && yarn run build",
+    "preview": "yarn docs:build && serve -s docs/build"
   },
   "dependencies": {
     "classnames": "^2.2.5",

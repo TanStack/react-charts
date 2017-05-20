@@ -22,7 +22,10 @@ const defaultColors = [
 
 const getType = (type, data, i) => {
   // Allow dynamic types
-  const typeGetter = typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
+  const typeGetter = typeof type === 'function' &&
+    type.prototype.isReactComponent
+    ? () => type
+    : type
   return typeGetter(data, i)
 }
 
@@ -32,10 +35,10 @@ class Series extends PureComponent {
     getStyles: d => ({}),
     getDataStyles: d => ({})
   }
-  componentDidMount () {
+  componentDidMount() {
     this.updateStackData(this.props)
   }
-  componentWillReceiveProps (newProps) {
+  componentWillReceiveProps(newProps) {
     const oldProps = this.props
 
     // If any of the following change,
@@ -51,14 +54,14 @@ class Series extends PureComponent {
       this.updateStackData(newProps)
     }
   }
-  shouldComponentUpdate (nextProps) {
+  shouldComponentUpdate(nextProps) {
     if (nextProps.stackData !== this.props.stackData) {
       this.stackData = nextProps.stackData.reverse() // For proper svg stacking
       return true
     }
     return false
   }
-  updateStackData (props) {
+  updateStackData(props) {
     const {
       type,
       getStyles,
@@ -140,7 +143,7 @@ class Series extends PureComponent {
 
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
-    stackData.forEach((series) => {
+    stackData.forEach(series => {
       series.data.forEach((d, index) => {
         d.x = xScale(d.x)
         d.y = yScale(d.y)
@@ -200,27 +203,23 @@ class Series extends PureComponent {
       })
     })
 
-    const quadTree = QuadTree()
-      .x(d => d.x)
-      .y(d => d.y)
-      .addAll(allPoints)
+    const quadTree = QuadTree().x(d => d.x).y(d => d.y).addAll(allPoints)
 
-    this.props.dispatch(state => ({
-      ...state,
-      stackData,
-      quadTree
-    }), {
-      type: 'stackData'
-    })
+    this.props.dispatch(
+      state => ({
+        ...state,
+        stackData,
+        quadTree
+      }),
+      {
+        type: 'stackData'
+      }
+    )
   }
-  render () {
-    const {
-      type
-    } = this.props
+  render() {
+    const { type, getStyles, getDataStyles, ...rest } = this.props
 
-    const {
-      stackData
-    } = this
+    const { stackData } = this
 
     if (!stackData) {
       return null
@@ -242,15 +241,14 @@ class Series extends PureComponent {
         ignore={['visibility']}
         duration={500}
       >
-        {(inters) => {
+        {inters => {
           return (
-            <g
-              className='Series'
-            >
+            <g className="Series">
               {inters.map((inter, i) => {
                 const StackCmp = getType(type, inter.data, inter.data.id)
                 return (
                   <StackCmp
+                    {...rest}
                     key={inter.key}
                     series={inter.data}
                     visibility={inter.state.visibility}
@@ -265,21 +263,24 @@ class Series extends PureComponent {
   }
 }
 
-export default Connect(() => {
-  const selectors = {
-    primaryAxis: Selectors.primaryAxis(),
-    secondaryAxis: Selectors.secondaryAxis()
-  }
-  return (state, props) => {
-    return {
-      materializedData: state.materializedData,
-      stackData: state.stackData,
-      primaryAxis: selectors.primaryAxis(state),
-      secondaryAxis: selectors.secondaryAxis(state),
-      hovered: state.hovered,
-      selected: state.selected
+export default Connect(
+  () => {
+    const selectors = {
+      primaryAxis: Selectors.primaryAxis(),
+      secondaryAxis: Selectors.secondaryAxis()
     }
+    return (state, props) => {
+      return {
+        materializedData: state.materializedData,
+        stackData: state.stackData,
+        primaryAxis: selectors.primaryAxis(state),
+        secondaryAxis: selectors.secondaryAxis(state),
+        hovered: state.hovered,
+        selected: state.selected
+      }
+    }
+  },
+  {
+    filter: (oldState, newState, meta) => meta.type !== 'cursor'
   }
-}, {
-  filter: (oldState, newState, meta) => meta.type !== 'cursor'
-})(Series)
+)(Series)

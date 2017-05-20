@@ -14,38 +14,44 @@ class Chart extends PureComponent {
     getData: d => d,
     getLabel: (d, i) => 'Series ' + (i + 1),
     getSeriesID: (d, i) => i,
-    getPrimary: d => Array.isArray(d) ? d[0] : d.x,
-    getSecondary: d => Array.isArray(d) ? d[1] : d.y,
-    getR: d => Array.isArray(d) ? d[0] : d.r,
+    getPrimary: d => (Array.isArray(d) ? d[0] : d.x),
+    getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
+    getR: d => (Array.isArray(d) ? d[0] : d.r),
     decorate: d => ({}),
     interaction: 'closestPoint'
   }
-  constructor () {
+  constructor() {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
     this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
     this.onCursorLeave = this.onCursorLeave.bind(this)
   }
-  componentDidMount () {
-    this.props.dispatch(state => ({
-      ...state,
-      interaction: this.props.interaction
-    }), {
-      type: 'interaction'
-    })
+  componentDidMount() {
+    this.props.dispatch(
+      state => ({
+        ...state,
+        interaction: this.props.interaction
+      }),
+      {
+        type: 'interaction'
+      }
+    )
     this.updateDataModel(this.props)
     this.componentDidUpdate(this.props)
   }
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps(nextProps) {
     // If anything related to the data model changes, update it
     if (nextProps.interaction !== this.props.interaction) {
-      this.props.dispatch(state => ({
-        ...state,
-        interaction: nextProps.interaction
-      }), {
-        type: 'interaction'
-      })
+      this.props.dispatch(
+        state => ({
+          ...state,
+          interaction: nextProps.interaction
+        }),
+        {
+          type: 'interaction'
+        }
+      )
     }
 
     if (
@@ -62,7 +68,7 @@ class Chart extends PureComponent {
       this.updateDataModel(nextProps)
     }
   }
-  shouldComponentUpdate (nextProps) {
+  shouldComponentUpdate(nextProps) {
     if (
       nextProps.style !== this.props.style ||
       nextProps.width !== this.props.width ||
@@ -75,13 +81,11 @@ class Chart extends PureComponent {
     }
     return false
   }
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     Utils.requestAnimationFrame(() => this.measure(prevProps))
   }
-  updateDataModel (props) {
-    const {
-      data
-    } = props
+  updateDataModel(props) {
+    const { data } = props
     let {
       getData,
       getLabel,
@@ -126,38 +130,38 @@ class Chart extends PureComponent {
     })
 
     // Provide the materializedData to the chart instance
-    this.props.dispatch(state => ({
-      ...state,
-      materializedData
-    }), {
-      type: 'materializedData'
-    })
-  }
-  measure (prevProps) {
-    if (prevProps && (
-      this.props.offset.left !== prevProps.offset.left ||
-      this.props.offset.top !== prevProps.offset.top
-    )) {
-      this.props.dispatch(state => ({
+    this.props.dispatch(
+      state => ({
         ...state,
-        offset: {
-          left: this.el.offsetLeft,
-          top: this.el.offsetTop
+        materializedData
+      }),
+      {
+        type: 'materializedData'
+      }
+    )
+  }
+  measure(prevProps) {
+    if (
+      prevProps &&
+      (this.props.offset.left !== prevProps.offset.left ||
+        this.props.offset.top !== prevProps.offset.top)
+    ) {
+      this.props.dispatch(
+        state => ({
+          ...state,
+          offset: {
+            left: this.el.offsetLeft,
+            top: this.el.offsetTop
+          }
+        }),
+        {
+          type: 'offset'
         }
-      }), {
-        type: 'offset'
-      })
+      )
     }
   }
-  render () {
-    const {
-      style,
-      width,
-      height,
-      gridX,
-      gridY,
-      children
-    } = this.props
+  render() {
+    const { style, width, height, gridX, gridY, children } = this.props
 
     const allChildren = React.Children.toArray(children)
     const svgChildren = allChildren.filter(d => !d.type.isHTML)
@@ -165,7 +169,7 @@ class Chart extends PureComponent {
 
     return (
       <div
-        className='Chart'
+        className="Chart"
         style={{
           height: '0',
           width: '0'
@@ -177,12 +181,11 @@ class Chart extends PureComponent {
             gridY
           }}
         >
-          {({
-            gridX,
-            gridY
-          }) => (
+          {({ gridX, gridY }) => (
             <svg
-              ref={el => { this.el = el }}
+              ref={el => {
+                this.el = el
+              }}
               style={{
                 width: width,
                 height: height,
@@ -190,8 +193,10 @@ class Chart extends PureComponent {
               }}
             >
               <g
-                ref={el => { this.el = el }}
-                transform={`translate(${gridX}, ${gridY})`}
+                ref={el => {
+                  this.el = el
+                }}
+                transform={`translate(${gridX || 0}, ${gridY || 0})`}
                 onMouseEnter={e => {
                   e.persist()
                   this.onCursor(e)
@@ -222,66 +227,68 @@ class Chart extends PureComponent {
       </div>
     )
   }
-  onCursor (e) {
-    const {
-      clientX,
-      clientY
-    } = e
+  onCursor(e) {
+    const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
-    const {
-      gridX,
-      gridY,
-      dispatch
-    } = this.props
+    const { gridX, gridY, dispatch } = this.props
 
-    dispatch(state => ({
-      ...state,
-      cursor: {
-        active: true,
-        x: clientX - this.dims.left - gridX,
-        y: clientY - this.dims.top - gridY
+    dispatch(
+      state => ({
+        ...state,
+        cursor: {
+          active: true,
+          x: clientX - this.dims.left - gridX,
+          y: clientY - this.dims.top - gridY
+        }
+      }),
+      {
+        type: 'cursor'
       }
-    }), {
-      type: 'cursor'
-    })
+    )
   }
-  onCursorLeave () {
-    this.props.dispatch(state => ({
-      ...state,
-      cursor: {
-        ...state.cursor,
-        active: false
-      },
-      hovered: {
-        ...state.hovered,
-        active: false
+  onCursorLeave() {
+    this.props.dispatch(
+      state => ({
+        ...state,
+        cursor: {
+          ...state.cursor,
+          active: false
+        },
+        hovered: {
+          ...state.hovered,
+          active: false
+        }
+      }),
+      {
+        type: 'cursor_hovered'
       }
-    }), {
-      type: 'cursor_hovered'
-    })
+    )
   }
 }
 
-const ReactChart = Connect(() => {
-  const selectors = {
-    gridX: Selectors.gridX(),
-    gridY: Selectors.gridY(),
-    offset: Selectors.offset()
-  }
-  return (state) => {
-    return {
-      data: state.data,
-      width: state.width,
-      height: state.height,
-      gridX: selectors.gridX(state),
-      gridY: selectors.gridY(state),
-      active: state.active,
-      offset: selectors.offset(state),
-      selected: state.selected
+const ReactChart = Connect(
+  () => {
+    const selectors = {
+      gridX: Selectors.gridX(),
+      gridY: Selectors.gridY(),
+      offset: Selectors.offset()
     }
+    return state => {
+      return {
+        data: state.data,
+        width: state.width,
+        height: state.height,
+        gridX: selectors.gridX(state),
+        gridY: selectors.gridY(state),
+        active: state.active,
+        offset: selectors.offset(state),
+        selected: state.selected
+      }
+    }
+  },
+  {
+    filter: (oldState, newState, meta) => meta.type !== 'cursor'
   }
-}, {
-  filter: (oldState, newState, meta) => meta.type !== 'cursor'
-})(Chart)
+)(Chart)
 
 export default HyperResponsive(Provider(ReactChart))
