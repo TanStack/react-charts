@@ -1,26 +1,23 @@
-import {
-  scaleLinear,
-  scaleLog,
-  scaleTime,
-  scaleBand
-} from 'd3-scale'
+import { scaleLinear, scaleLog, scaleTime, scaleBand } from 'd3-scale'
 //
 import {
   positionTop,
   positionLeft,
   positionRight,
-  positionBottom
- } from './Axis'
+  positionBottom,
+} from './AxisLinear'
 
 const scales = {
   linear: scaleLinear,
   log: scaleLog,
   time: scaleTime,
-  ordinal: scaleBand
+  ordinal: scaleBand,
 }
 
-const detectVertical = position => [positionLeft, positionRight].indexOf(position) > -1
-const detectRTL = (position) => [positionTop, positionRight].indexOf(position) > -1
+const detectVertical = position =>
+  [positionLeft, positionRight].indexOf(position) > -1
+const detectRTL = position =>
+  [positionTop, positionRight].indexOf(position) > -1
 
 export default function updateScale (props) {
   const {
@@ -43,7 +40,7 @@ export default function updateScale (props) {
     materializedData,
     width,
     height,
-    primaryAxis
+    primaryAxis,
   } = props
 
   // We need the data to proceed
@@ -72,6 +69,7 @@ export default function updateScale (props) {
   let negativeTotal = 0
   let positiveTotal = 0
   let domain
+  let total
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {
@@ -112,15 +110,26 @@ export default function updateScale (props) {
     })
     if (stacked) {
       // If we're stacking, calculate and use the max and min values for the largest stack
-      [positiveTotal, negativeTotal] = Object.keys(datumValues).map(d => datumValues[d]).reduce((totals, vals) => {
-        const positive = vals.filter(d => d >= 0).reduce((ds, d) => ds + d, 0)
-        const negative = vals.filter(d => d < 0).reduce((ds, d) => ds + d, 0)
-        return [
-          positive > totals[0] ? positive : totals[0],
-          negative < totals[1] ? negative : totals[1]
-        ]
-      }, [0, 0])
-      domain = invert ? [positiveTotal, negativeTotal] : [negativeTotal, positiveTotal]
+      ;[positiveTotal, negativeTotal] = Object.keys(datumValues)
+        .map(d => datumValues[d])
+        .reduce(
+          (totals, vals) => {
+            const positive = vals
+              .filter(d => d >= 0)
+              .reduce((ds, d) => ds + d, 0)
+            const negative = vals
+              .filter(d => d < 0)
+              .reduce((ds, d) => ds + d, 0)
+            return [
+              positive > totals[0] ? positive : totals[0],
+              negative < totals[1] ? negative : totals[1],
+            ]
+          },
+          [0, 0]
+        )
+      domain = invert
+        ? [positiveTotal, negativeTotal]
+        : [negativeTotal, positiveTotal]
     } else {
       // If we're not stacking, use the min and max values
       domain = invert ? [max, min] : [min, max]
@@ -132,6 +141,10 @@ export default function updateScale (props) {
     ? invert ? [0, height] : [height, 0] // If the axis is inverted, swap the range, too
     : invert ? [width, 0] : [0, width]
 
+  // var arc = d3.svg.arc()
+  //   .outerRadius(radius - 10)
+  //   .innerRadius(radius - 70);
+
   if (!primary) {
     // Secondary axes are usually dependent on primary axes for orientation, so if the
     // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
@@ -141,7 +154,7 @@ export default function updateScale (props) {
     }
   }
 
-  // The the scale a home
+  // Give the scale a home
   let scale
 
   // If this is an ordinal or other primary axis, it needs to be able to display bars.
@@ -153,14 +166,20 @@ export default function updateScale (props) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
     bandScale = scaleBand()
-      .domain(materializedData.reduce((prev, current) => current.data.length > prev.length ? current.data : prev, []).map(d => d.primary))
+      .domain(
+        materializedData
+          .reduce(
+            (prev, current) =>
+              current.data.length > prev.length ? current.data : prev,
+            []
+          )
+          .map(d => d.primary)
+      )
       .rangeRound(range, 0.1)
       .padding(0)
 
     if (type === 'ordinal') {
-      bandScale
-        .paddingOuter(outerPadding)
-        .paddingInner(innerPadding)
+      bandScale.paddingOuter(outerPadding).paddingInner(innerPadding)
       barSize = bandScale.bandwidth()
     } else {
       barSize = bandScale.bandwidth()
@@ -203,16 +222,24 @@ export default function updateScale (props) {
     stepSize,
     domain,
     range,
-    max:
-      position === positionBottom ? -height
-      : position === positionLeft ? width
-      : position === positionTop ? height
-      : -width,
-    directionMultiplier: (position === positionTop || position === positionLeft) ? -1 : 1,
+    max: position === positionBottom
+      ? -height
+      : position === positionLeft
+          ? width
+          : position === positionTop ? height : -width,
+    directionMultiplier: position === positionTop || position === positionLeft
+      ? -1
+      : 1,
     transform: !vertical ? translateX : translateY,
-    ticks: this.ticks = tickValues == null ? (scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()) : tickValues,
-    format: tickFormat == null ? (scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity) : tickFormat,
-    spacing: Math.max(tickSizeInner, 0) + tickPadding
+    ticks: (this.ticks = tickValues == null
+      ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()
+      : tickValues),
+    format: tickFormat == null
+      ? scale.tickFormat
+          ? scale.tickFormat.apply(scale, tickArguments)
+          : identity
+      : tickFormat,
+    spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }
 
   if (type === 'ordinal') {
@@ -227,15 +254,18 @@ export default function updateScale (props) {
   // Make sure we start with a prevAxis
   this.prevAxis = this.prevAxis || axis
 
-  this.props.dispatch(state => ({
-    ...state,
-    axes: {
-      ...state.axes,
-      [id]: axis
+  this.props.dispatch(
+    state => ({
+      ...state,
+      axes: {
+        ...state.axes,
+        [id]: axis,
+      },
+    }),
+    {
+      type: 'axisUpdateScale',
     }
-  }), {
-    type: 'axisUpdateScale'
-  })
+  )
 }
 
 function identity (x) {

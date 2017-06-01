@@ -18,6 +18,7 @@ import InteractionModes from './stories/InteractionModes.js'
 import DynamicParent from './stories/DynamicParent.js'
 import Sparklines from './stories/Sparklines.js'
 import MixedTypes from './stories/MixedTypes.js'
+import DoughnutChart from './stories/DoughnutChart.js'
 
 export default class App extends React.Component {
   render() {
@@ -26,9 +27,9 @@ export default class App extends React.Component {
         style={{
           display: 'block',
           width: '100%',
-          height: '100%'
+          height: '100%',
         }}
-        pathPrefix="story/"
+        pathPrefix='story/'
         // StoryWrapper={props => (
         //   <defaultProps.StoryWrapper
         //     css={{
@@ -72,7 +73,8 @@ export default class App extends React.Component {
           { name: 'Interaction Modes', component: InteractionModes },
           { name: 'Dynamic Parent', component: DynamicParent },
           { name: 'Sparklines', component: Sparklines },
-          { name: 'Mixed Element Types', component: MixedTypes }
+          { name: 'Mixed Element Types', component: MixedTypes },
+          { name: 'Doughnut Chart', component: DoughnutChart },
         ]}
       />
     )

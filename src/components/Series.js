@@ -17,7 +17,7 @@ const defaultColors = [
   '#1aaabe',
   '#734fe9',
   '#1828bd',
-  '#cd82ad'
+  '#cd82ad',
 ]
 
 const getType = (type, data, i) => {
@@ -33,12 +33,12 @@ class Series extends PureComponent {
   static defaultProps = {
     type: 'line',
     getStyles: d => ({}),
-    getDataStyles: d => ({})
+    getDataStyles: d => ({}),
   }
-  componentDidMount() {
+  componentDidMount () {
     this.updateStackData(this.props)
   }
-  componentWillReceiveProps(newProps) {
+  componentWillReceiveProps (newProps) {
     const oldProps = this.props
 
     // If any of the following change,
@@ -54,14 +54,14 @@ class Series extends PureComponent {
       this.updateStackData(newProps)
     }
   }
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate (nextProps) {
     if (nextProps.stackData !== this.props.stackData) {
       this.stackData = nextProps.stackData.reverse() // For proper svg stacking
       return true
     }
     return false
   }
-  updateStackData(props) {
+  updateStackData (props) {
     const {
       type,
       getStyles,
@@ -69,12 +69,24 @@ class Series extends PureComponent {
       //
       materializedData,
       primaryAxis,
-      secondaryAxis
+      secondaryAxis,
     } = props
 
-    // If the axes are not ready, just provide the materializedData
-    if (!materializedData || !primaryAxis || !secondaryAxis) {
+    // We need materializedData to proceed
+    if (!materializedData) {
       return
+    }
+
+    // If the axes are not ready, just provide the materializedData
+    if (!primaryAxis) {
+      return
+    }
+
+    // Some charts require the secondaryAxis
+    if (primaryAxis.type !== 'pie') {
+      if (!secondaryAxis) {
+        return
+      }
     }
 
     // If the axes are ready, let's decorate the materializedData for visual plotting
@@ -95,7 +107,7 @@ class Series extends PureComponent {
         series.data.forEach(datum => {
           totals[datum.primary] = {
             negative: 0,
-            positive: 0
+            positive: 0,
           }
         })
       })
@@ -111,7 +123,7 @@ class Series extends PureComponent {
             ...d,
             x: d[xKey],
             y: d[yKey],
-            base: 0
+            base: 0,
           }
           if (secondaryStacked) {
             let start = totals[d.primary]
@@ -137,7 +149,7 @@ class Series extends PureComponent {
             }
           }
           return datum
-        })
+        }),
       }
     })
 
@@ -161,7 +173,7 @@ class Series extends PureComponent {
         // Set the default focus point
         d.focus = {
           x: d.x,
-          y: d.y
+          y: d.y,
         }
 
         // Adjust the focus point for specific elements
@@ -181,7 +193,7 @@ class Series extends PureComponent {
     stackData.forEach(series => {
       const defaults = {
         // Pass some sane defaults
-        color: defaultColors[series.index % (defaultColors.length - 1)]
+        color: defaultColors[series.index % (defaultColors.length - 1)],
       }
 
       series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
@@ -190,7 +202,7 @@ class Series extends PureComponent {
       series.data.forEach(datum => {
         datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
           ...defaults,
-          ...series.statusStyles.default
+          ...series.statusStyles.default,
         })
       })
     })
@@ -209,14 +221,14 @@ class Series extends PureComponent {
       state => ({
         ...state,
         stackData,
-        quadTree
+        quadTree,
       }),
       {
-        type: 'stackData'
+        type: 'stackData',
       }
     )
   }
-  render() {
+  render () {
     const { type, getStyles, getDataStyles, ...rest } = this.props
 
     const { stackData } = this
@@ -230,20 +242,20 @@ class Series extends PureComponent {
         data={stackData} // The stack is reversed for proper z-index painting
         getKey={(d, i) => d.id}
         update={d => ({
-          visibility: 1
+          visibility: 1,
         })}
         enter={(d, i) => ({
-          visibility: 0
+          visibility: 0,
         })}
         leave={d => ({
-          visibility: 0
+          visibility: 0,
         })}
         ignore={['visibility']}
         duration={500}
       >
         {inters => {
           return (
-            <g className="Series">
+            <g className='Series'>
               {inters.map((inter, i) => {
                 const StackCmp = getType(type, inter.data, inter.data.id)
                 return (
@@ -267,7 +279,7 @@ export default Connect(
   () => {
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
-      secondaryAxis: Selectors.secondaryAxis()
+      secondaryAxis: Selectors.secondaryAxis(),
     }
     return (state, props) => {
       return {
@@ -276,11 +288,11 @@ export default Connect(
         primaryAxis: selectors.primaryAxis(state),
         secondaryAxis: selectors.secondaryAxis(state),
         hovered: state.hovered,
-        selected: state.selected
+        selected: state.selected,
       }
     }
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor'
+    filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(Series)

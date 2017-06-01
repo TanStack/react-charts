@@ -1,7 +1,4 @@
-import {
-  positionTop,
-  positionBottom
-} from './Axis'
+import { positionTop, positionBottom } from './AxisLinear'
 
 const fontSize = 10
 
@@ -22,41 +19,53 @@ export default function measure () {
     tickPadding,
     maxLabelRotation,
     position,
-    dispatch
+    dispatch,
   } = this.props
 
-  const {
-    rotation,
-    visibleLabelStep
-  } = this
+  const { rotation, visibleLabelStep } = this
 
   if (!this.el) {
     return
   }
 
   const isHorizontal = position === positionTop || position === positionBottom
-  const labelDims = Array(...this.el.querySelectorAll('.tick.-measureable text')).map(el => el.getBoundingClientRect())
+  const labelDims = Array(
+    ...this.el.querySelectorAll('.tick.-measureable text')
+  ).map(el => el.getBoundingClientRect())
 
   let smallestTickGap = 10000 // This is just a ridiculously large tick spacing that would never happen (hopefully)
   // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
   if (isHorizontal) {
-    const tickDims = Array(...this.el.querySelectorAll('.tick.-measureable')).map(el => el.getBoundingClientRect())
+    const tickDims = Array(
+      ...this.el.querySelectorAll('.tick.-measureable')
+    ).map(el => el.getBoundingClientRect())
     tickDims.reduce((prev, current) => {
       if (prev) {
-        const gap = current.left - prev.left - (fontSize / 2)
+        const gap = current.left - prev.left - fontSize / 2
         smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
       }
       return current
     }, false)
-    const largestLabel = labelDims.reduce((prev, current) => {
-      current._overflow = current.width - smallestTickGap
-      if (current._overflow > 0 && current._overflow > prev._overflow) {
-        return current
-      }
-      return prev
-    }, {_overflow: 0})
+    const largestLabel = labelDims.reduce(
+      (prev, current) => {
+        current._overflow = current.width - smallestTickGap
+        if (current._overflow > 0 && current._overflow > prev._overflow) {
+          return current
+        }
+        return prev
+      },
+      { _overflow: 0 }
+    )
 
-    let newRotation = Math.min(Math.max(Math.abs(radiansToDegrees(Math.acos(smallestTickGap / largestLabel.width))), 0), maxLabelRotation)
+    let newRotation = Math.min(
+      Math.max(
+        Math.abs(
+          radiansToDegrees(Math.acos(smallestTickGap / largestLabel.width))
+        ),
+        0
+      ),
+      maxLabelRotation
+    )
     newRotation = isNaN(newRotation) ? 0 : newRotation
 
     if (Math.floor(rotation) !== Math.floor(newRotation)) {
@@ -101,22 +110,25 @@ export default function measure () {
       Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width)))) // Add the width of the largest label
   }
 
-  dispatch(state => ({
-    ...state,
-    axisDimensions: {
-      ...state.axisDimensions,
-      [position]: {
-        width,
-        height,
-        top,
-        bottom,
-        left,
-        right
-      }
+  dispatch(
+    state => ({
+      ...state,
+      axisDimensions: {
+        ...state.axisDimensions,
+        [position]: {
+          width,
+          height,
+          top,
+          bottom,
+          left,
+          right,
+        },
+      },
+    }),
+    {
+      type: 'axisDimensions',
     }
-  }), {
-    type: 'axisDimensions'
-  })
+  )
 
   return true
 }
