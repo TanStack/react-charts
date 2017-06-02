@@ -5,7 +5,7 @@ import { Animate } from 'react-move'
 import {
   line,
   // curveCardinal,
-  curveMonotoneX
+  curveMonotoneX,
 } from 'd3-shape'
 
 import Utils from '../utils/Utils'
@@ -13,7 +13,7 @@ import {
   selectSeries,
   selectDatum,
   hoverSeries,
-  hoverDatum
+  hoverDatum,
 } from '../utils/interactionMethods'
 
 //
@@ -21,25 +21,25 @@ import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
 const pathDefaultStyle = {
-  strokeWidth: 2
+  strokeWidth: 2,
 }
 
 const circleDefaultStyle = {
-  r: 2
+  r: 2,
 }
 
 class Line extends PureComponent {
   static defaultProps = {
-    showPoints: true
+    showPoints: true,
   }
-  constructor() {
+  constructor () {
     super()
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
-  render() {
+  render () {
     const {
       series,
       visibility,
@@ -47,7 +47,7 @@ class Line extends PureComponent {
       //
       selected,
       hovered,
-      interaction
+      interaction,
     } = this.props
 
     const status = Utils.seriesStatus(series, hovered, selected)
@@ -59,18 +59,18 @@ class Line extends PureComponent {
       x: d.x,
       y: d.y,
       r: d.r,
-      base: d.base
+      base: d.base,
     }))
 
     return (
       <Animate
         default={{
           data,
-          visibility: 0
+          visibility: 0,
         }}
         data={{
           data,
-          visibility
+          visibility,
         }}
         duration={500}
         ignore={['originalData']}
@@ -79,17 +79,17 @@ class Line extends PureComponent {
           const path = lineFn(
             inter.data.map(d => [
               isNaN(d.x) ? null : d.x,
-              isNaN(d.y) ? null : d.y
+              isNaN(d.y) ? null : d.y,
             ])
           )
 
           const seriesInteractionProps = interaction === 'series'
             ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null)
-              }
+              onClick: () => this.selectSeries(series),
+              onMouseEnter: () => this.hoverSeries(series),
+              onMouseMove: () => this.hoverSeries(series),
+              onMouseLeave: () => this.hoverSeries(null),
+            }
             : {}
 
           return (
@@ -100,7 +100,7 @@ class Line extends PureComponent {
                   ...pathDefaultStyle,
                   ...style,
                   ...style.line,
-                  fill: 'none'
+                  fill: 'none',
                 }}
                 opacity={inter.visibility}
                 {...seriesInteractionProps}
@@ -120,11 +120,11 @@ class Line extends PureComponent {
 
                   const datumInteractionProps = interaction === 'element'
                     ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null)
-                      }
+                      onClick: () => this.selectDatum(datum),
+                      onMouseEnter: () => this.hoverDatum(datum),
+                      onMouseMove: () => this.hoverDatum(datum),
+                      onMouseLeave: () => this.hoverDatum(null),
+                    }
                     : {}
 
                   return (
@@ -137,7 +137,7 @@ class Line extends PureComponent {
                         ...style,
                         ...style.circle,
                         ...dataStyle,
-                        ...dataStyle.circle
+                        ...dataStyle.circle,
                       }}
                       opacity={inter.visibility}
                       {...seriesInteractionProps}
@@ -158,13 +158,13 @@ export default Connect(
     return {
       hovered: state.hovered,
       selected: state.selected,
-      interaction: state.interaction
+      interaction: state.interaction,
     }
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
     statics: {
-      SeriesType: 'Line'
-    }
+      SeriesType: 'Line',
+    },
   }
 )(Line)

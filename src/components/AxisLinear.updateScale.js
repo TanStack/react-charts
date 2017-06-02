@@ -69,7 +69,6 @@ export default function updateScale (props) {
   let negativeTotal = 0
   let positiveTotal = 0
   let domain
-  let total
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {

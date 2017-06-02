@@ -233,6 +233,8 @@ class Series extends PureComponent {
       return null
     }
 
+    console.log(stackData[0].data[0].secondary)
+
     return (
       <Transition
         data={stackData} // The stack is reversed for proper z-index painting
@@ -253,13 +255,14 @@ class Series extends PureComponent {
           return (
             <g className='Series'>
               {inters.map((inter, i) => {
+                !i && console.log(inter.data.data[0].secondary)
                 const StackCmp = getType(type, inter.data, inter.data.id)
                 return (
                   <StackCmp
                     {...rest}
                     key={inter.key}
                     series={inter.data}
-                    stackData={stackData}
+                    // stackData={stackData}
                     visibility={inter.state.visibility}
                   />
                 )
