@@ -59,7 +59,7 @@ function makeData() {
 function makeSeries() {
   const startDate = new Date()
   // const length = Math.round(Math.random() * 30)
-  const length = 30
+  const length = 8
   const max = 100
   // const max = Math.random() > 0.5 ? 100000 : 10
   // const multiplier = 10

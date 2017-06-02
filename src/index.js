@@ -9,6 +9,7 @@ import Line from './components/Line'
 import Area from './components/Area'
 import Bar from './components/Bar'
 import Bubble from './components/Bubble'
+import Pie from './components/Pie'
 // Utils
 import DecorateGroups from './utils/DecorateGroups'
 
@@ -24,6 +25,7 @@ module.exports = {
   Area,
   Bar,
   Bubble,
+  Pie,
   // Utils
-  DecorateGroups
+  DecorateGroups,
 }

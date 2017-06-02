@@ -29,6 +29,7 @@ class AxisPie extends PureComponent {
     tickSizeOuter: 6,
     tickPadding: 3,
     cutoutPercentage: 0.5,
+    outerPadding: 10,
   }
   // Lifecycle
   constructor () {
@@ -38,15 +39,10 @@ class AxisPie extends PureComponent {
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
-    if (oldProps.axis !== newProps.axis && oldProps.axis) {
-      this.prevAxis = oldProps.axis
-    }
 
     // If any of the following change,
     // we need to update the axis
     if (
-      newProps.axes !== oldProps.axes ||
-      newProps.invert !== oldProps.invert ||
       newProps.materializedData !== oldProps.materializedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width
@@ -80,28 +76,43 @@ class AxisPie extends PureComponent {
       width,
       height,
       dispatch,
+      outerPadding,
     } = props
     // We need the data to proceed
     if (!materializedData) {
       return
     }
 
-    const radius = Math.min(width, height)
+    const radius = Math.min(width, height) / 2 - outerPadding
 
-    const arc = Arc().outerRadius(radius).innerRadius(radius * cutoutPercentage)
+    // This arc is going to be used for label placement
+    // const arc = Arc().outerRadius(radius).innerRadius(radius * cutoutPercentage)
 
-    const axis = {
+    const scale = d => d
+
+    const primaryAxis = {
       id,
+      scale,
       cutoutPercentage,
       type,
-      arc,
+      primary: true,
+      width,
+      height,
+      radius,
+    }
+
+    const secondaryAxis = {
+      id,
+      scale,
+      type,
     }
 
     dispatch(
       state => ({
         ...state,
         axes: {
-          [id]: axis,
+          pie_primary: primaryAxis,
+          pie_secondary: secondaryAxis,
         },
       }),
       {
@@ -122,16 +133,10 @@ export default Connect(
       gridHeight: Selectors.gridHeight(),
     }
     return (state, props) => {
-      const { type, position } = props
-
-      const id = `${type}_${position}`
-
       return {
-        id,
         materializedData: state.materializedData,
         width: selectors.gridWidth(state),
         height: selectors.gridHeight(state),
-        axis: state.axes && state.axes[id],
       }
     }
   },

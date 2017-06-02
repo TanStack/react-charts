@@ -18,38 +18,38 @@ class Chart extends PureComponent {
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
     getR: d => (Array.isArray(d) ? d[0] : d.r),
     decorate: d => ({}),
-    interaction: 'closestPoint'
+    interaction: 'closestPoint',
   }
-  constructor() {
+  constructor () {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
     this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
     this.onCursorLeave = this.onCursorLeave.bind(this)
   }
-  componentDidMount() {
+  componentDidMount () {
     this.props.dispatch(
       state => ({
         ...state,
-        interaction: this.props.interaction
+        interaction: this.props.interaction,
       }),
       {
-        type: 'interaction'
+        type: 'interaction',
       }
     )
     this.updateDataModel(this.props)
     this.componentDidUpdate(this.props)
   }
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
     if (nextProps.interaction !== this.props.interaction) {
       this.props.dispatch(
         state => ({
           ...state,
-          interaction: nextProps.interaction
+          interaction: nextProps.interaction,
         }),
         {
-          type: 'interaction'
+          type: 'interaction',
         }
       )
     }
@@ -68,7 +68,7 @@ class Chart extends PureComponent {
       this.updateDataModel(nextProps)
     }
   }
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate (nextProps) {
     if (
       nextProps.style !== this.props.style ||
       nextProps.width !== this.props.width ||
@@ -81,10 +81,10 @@ class Chart extends PureComponent {
     }
     return false
   }
-  componentDidUpdate(prevProps) {
+  componentDidUpdate (prevProps) {
     Utils.requestAnimationFrame(() => this.measure(prevProps))
   }
-  updateDataModel(props) {
+  updateDataModel (props) {
     const { data } = props
     let {
       getData,
@@ -92,7 +92,7 @@ class Chart extends PureComponent {
       getSeriesID,
       getPrimary,
       getSecondary,
-      getR
+      getR,
     } = props
 
     // Normalize getters
@@ -122,9 +122,9 @@ class Chart extends PureComponent {
             datum: d,
             primary: getPrimary(d, index),
             secondary: getSecondary(d, index),
-            r: getR(d, index)
+            r: getR(d, index),
           }
-        })
+        }),
       }
       return series
     })
@@ -133,14 +133,14 @@ class Chart extends PureComponent {
     this.props.dispatch(
       state => ({
         ...state,
-        materializedData
+        materializedData,
       }),
       {
-        type: 'materializedData'
+        type: 'materializedData',
       }
     )
   }
-  measure(prevProps) {
+  measure (prevProps) {
     if (
       prevProps &&
       (this.props.offset.left !== prevProps.offset.left ||
@@ -151,16 +151,16 @@ class Chart extends PureComponent {
           ...state,
           offset: {
             left: this.el.offsetLeft,
-            top: this.el.offsetTop
-          }
+            top: this.el.offsetTop,
+          },
         }),
         {
-          type: 'offset'
+          type: 'offset',
         }
       )
     }
   }
-  render() {
+  render () {
     const { style, width, height, gridX, gridY, children } = this.props
 
     const allChildren = React.Children.toArray(children)
@@ -169,16 +169,16 @@ class Chart extends PureComponent {
 
     return (
       <div
-        className="Chart"
+        className='Chart'
         style={{
           height: '0',
-          width: '0'
+          width: '0',
         }}
       >
         <Animate
           data={{
             gridX,
-            gridY
+            gridY,
           }}
         >
           {({ gridX, gridY }) => (
@@ -189,7 +189,7 @@ class Chart extends PureComponent {
               style={{
                 width: width,
                 height: height,
-                ...style
+                ...style,
               }}
             >
               <g
@@ -214,7 +214,7 @@ class Chart extends PureComponent {
                   y1={-gridY}
                   y2={height - gridY}
                   style={{
-                    opacity: 0
+                    opacity: 0,
                   }}
                 />
                 {svgChildren}
@@ -227,7 +227,7 @@ class Chart extends PureComponent {
       </div>
     )
   }
-  onCursor(e) {
+  onCursor (e) {
     const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
     const { gridX, gridY, dispatch } = this.props
@@ -238,29 +238,29 @@ class Chart extends PureComponent {
         cursor: {
           active: true,
           x: clientX - this.dims.left - gridX,
-          y: clientY - this.dims.top - gridY
-        }
+          y: clientY - this.dims.top - gridY,
+        },
       }),
       {
-        type: 'cursor'
+        type: 'cursor',
       }
     )
   }
-  onCursorLeave() {
+  onCursorLeave () {
     this.props.dispatch(
       state => ({
         ...state,
         cursor: {
           ...state.cursor,
-          active: false
+          active: false,
         },
         hovered: {
           ...state.hovered,
-          active: false
-        }
+          active: false,
+        },
       }),
       {
-        type: 'cursor_hovered'
+        type: 'cursor_hovered',
       }
     )
   }
@@ -271,7 +271,7 @@ const ReactChart = Connect(
     const selectors = {
       gridX: Selectors.gridX(),
       gridY: Selectors.gridY(),
-      offset: Selectors.offset()
+      offset: Selectors.offset(),
     }
     return state => {
       return {
@@ -282,12 +282,12 @@ const ReactChart = Connect(
         gridY: selectors.gridY(state),
         active: state.active,
         offset: selectors.offset(state),
-        selected: state.selected
+        selected: state.selected,
       }
     }
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor'
+    filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(Chart)
 
