@@ -62,11 +62,7 @@ class Pie extends PureComponent {
       y: d.y,
     }))
 
-    console.log(preData.map(d => d.y))
-
     const pie = makePie().sort(null).value(d => d.y)
-
-    // console.log(preData.map(d => d.y))
     const data = pie(preData)
 
     return (

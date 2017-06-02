@@ -49,7 +49,6 @@ class Axis extends PureComponent {
     // If any of the following change,
     // we need to update the axis
     if (
-      newProps.axes !== oldProps.axes ||
       newProps.primary !== oldProps.primary ||
       newProps.type !== oldProps.type ||
       newProps.invert !== oldProps.invert ||
@@ -59,6 +58,7 @@ class Axis extends PureComponent {
       newProps.position !== oldProps.position
     ) {
       this.updateScale(newProps)
+      console.log('updatedScale')
     }
   }
   componentDidMount () {
@@ -113,214 +113,214 @@ class Axis extends PureComponent {
       spacing,
     } = axis
 
-    return (
-      <Animate
-        data={{
-          width,
-          height,
-          max,
-          range0,
-          range1,
-          directionMultiplier,
-          tickSizeOuter,
-          tickOffset,
-          gridOffset,
-          spacing,
-        }}
-      >
-        {({
-          width,
-          height,
-          max,
-          range0,
-          range1,
-          directionMultiplier,
-          tickSizeOuter,
-          tickOffset,
-          gridOffset,
-          spacing,
-        }) => {
-          let axisPath
-          if (vertical) {
-            if (position === positionLeft) {
-              axisPath = `
+    console.log(ticks)
+
+    // return (
+    //   <Animate
+    //     data={{
+    //       width,
+    //       height,
+    //       max,
+    //       range0,
+    //       range1,
+    //       directionMultiplier,
+    //       tickSizeOuter,
+    //       tickOffset,
+    //       gridOffset,
+    //       spacing,
+    //     }}
+    //   >
+    //     {({
+    //       width,
+    //       height,
+    //       max,
+    //       range0,
+    //       range1,
+    //       directionMultiplier,
+    //       tickSizeOuter,
+    //       tickOffset,
+    //       gridOffset,
+    //       spacing,
+    //     }) => {
+    let axisPath
+    if (vertical) {
+      if (position === positionLeft) {
+        axisPath = `
                 M ${-tickSizeOuter}, ${range0}
                 H 0
                 V ${range1}
                 H ${-tickSizeOuter}
               `
-            } else {
-              axisPath = `
+      } else {
+        axisPath = `
                 M ${tickSizeOuter}, ${range0}
                 H 0
                 V ${range1}
                 H ${tickSizeOuter}
               `
-            }
-          } else {
-            if (position === positionBottom) {
-              axisPath = `
+      }
+    } else {
+      if (position === positionBottom) {
+        axisPath = `
                 M 0, ${tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${tickSizeOuter}
               `
-            } else {
-              axisPath = `
+      } else {
+        axisPath = `
                 M 0, ${-tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${-tickSizeOuter}
               `
+      }
+    }
+
+    return (
+      <g
+        className='Axis'
+        fill='black'
+        fontSize='10'
+        fontFamily='sans-serif'
+        transform={
+          position === positionRight
+            ? translateX(width)
+            : position === positionBottom ? translateY(height) : undefined
+        }
+      >
+        <Path
+          className='domain'
+          d={axisPath}
+          style={{
+            stroke: '#acacac',
+            strokeWidth: '1',
+            fill: 'transparent',
+          }}
+        />
+        <Transition
+          data={ticks}
+          getKey={(d, i) => String(d)}
+          update={d => ({
+            tick: scale(d),
+            visibility: 1,
+            measureable: 1,
+            rotation,
+          })}
+          enter={d => ({
+            tick: this.prevAxis.scale(d),
+            visibility: 0,
+            measureable: 1,
+            rotation: 0,
+          })}
+          leave={d => ({
+            tick: scale(d),
+            visibility: 0,
+            measureable: 0,
+            rotation,
+          })}
+          ignore={['measureable']}
+          duration={500}
+        >
+          {inters => {
+            let showGridLine = showGrid
+
+            // If ordinal and showGrid isn't explicit, hide it
+            if (type === 'ordinal' && showGrid === 1) {
+              showGridLine = false
             }
-          }
 
-          return (
-            <g
-              className='Axis'
-              fill='black'
-              fontSize='10'
-              fontFamily='sans-serif'
-              transform={
-                position === positionRight
-                  ? translateX(width)
-                  : position === positionBottom ? translateY(height) : undefined
-              }
-            >
-              <Path
-                className='domain'
-                d={axisPath}
-                style={{
-                  stroke: '#acacac',
-                  strokeWidth: '1',
-                  fill: 'transparent',
+            return (
+              <g
+                className='ticks'
+                ref={el => {
+                  this.el = el
                 }}
-              />
-              <Transition
-                data={ticks}
-                getKey={(d, i) => String(d)}
-                update={d => ({
-                  tick: scale(d),
-                  visibility: 1,
-                  measureable: 1,
-                  rotation,
-                })}
-                enter={d => ({
-                  tick: this.prevAxis.scale(d),
-                  visibility: 0,
-                  measureable: 1,
-                  rotation: 0,
-                })}
-                leave={d => ({
-                  tick: scale(d),
-                  visibility: 0,
-                  measureable: 0,
-                  rotation,
-                })}
-                ignore={['measureable']}
-                duration={500}
               >
-                {inters => {
-                  let showGridLine = showGrid
-
-                  // If ordinal and showGrid isn't explicit, hide it
-                  if (type === 'ordinal' && showGrid === 1) {
-                    showGridLine = false
-                  }
-
+                {inters.map((inter, index) => {
                   return (
                     <g
-                      className='ticks'
-                      ref={el => {
-                        this.el = el
-                      }}
+                      key={inter.key}
+                      className={
+                        'tick' +
+                          (inter.state.measureable ? ' -measureable' : '')
+                      }
+                      transform={transform(inter.state.tick)}
                     >
-                      {inters.map((inter, index) => {
-                        return (
-                          <g
-                            key={inter.key}
-                            className={
-                              'tick' +
-                                (inter.state.measureable ? ' -measureable' : '')
-                            }
-                            transform={transform(inter.state.tick)}
-                          >
-                            <Line
-                              x1={vertical ? 0 : tickOffset}
-                              x2={
-                                vertical
-                                  ? directionMultiplier * tickSizeInner
-                                  : tickOffset
-                              }
-                              y1={vertical ? tickOffset : 0}
-                              y2={
-                                vertical
-                                  ? tickOffset
-                                  : directionMultiplier * tickSizeInner
-                              }
-                              style={{
-                                strokeWidth: 1,
-                              }}
-                              opacity={inter.state.visibility * 0.2}
-                            />
-                            {showGridLine &&
-                              <Line
-                                x1={vertical ? 0 : gridOffset}
-                                x2={vertical ? max : gridOffset}
-                                y1={vertical ? gridOffset : 0}
-                                y2={vertical ? gridOffset : max}
-                                style={{
-                                  strokeWidth: 1,
-                                }}
-                                opacity={
-                                  inter.state.visibility *
-                                    (index !== 0 &&
-                                      index !== inters.length - 1 &&
-                                      inter.data === 0
-                                      ? 0.5
-                                      : 0.2)
-                                }
-                              />}
-                            <Text
-                              opacity={inter.state.visibility}
-                              fontSize={fontSize}
-                              transform={`
+                      <Line
+                        x1={vertical ? 0 : tickOffset}
+                        x2={
+                          vertical
+                            ? directionMultiplier * tickSizeInner
+                            : tickOffset
+                        }
+                        y1={vertical ? tickOffset : 0}
+                        y2={
+                          vertical
+                            ? tickOffset
+                            : directionMultiplier * tickSizeInner
+                        }
+                        style={{
+                          strokeWidth: 1,
+                        }}
+                        opacity={inter.state.visibility * 0.2}
+                      />
+                      {showGridLine &&
+                        <Line
+                          x1={vertical ? 0 : gridOffset}
+                          x2={vertical ? max : gridOffset}
+                          y1={vertical ? gridOffset : 0}
+                          y2={vertical ? gridOffset : max}
+                          style={{
+                            strokeWidth: 1,
+                          }}
+                          opacity={
+                            inter.state.visibility *
+                              (index !== 0 &&
+                                index !== inters.length - 1 &&
+                                inter.data === 0
+                                ? 0.5
+                                : 0.2)
+                          }
+                        />}
+                      <Text
+                        opacity={inter.state.visibility}
+                        fontSize={fontSize}
+                        transform={`
                                 translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${vertical ? tickOffset : directionMultiplier * spacing})
                                 rotate(${-rotation})
                               `}
-                              dominantBaseline={
-                                rotation
-                                  ? 'central'
-                                  : position === positionBottom
-                                      ? 'hanging'
-                                      : position === positionTop
-                                          ? 'alphabetic'
-                                          : 'central'
-                              }
-                              textAnchor={
-                                rotation
-                                  ? 'end'
-                                  : position === positionRight
-                                      ? 'start'
-                                      : position === positionLeft
-                                          ? 'end'
-                                          : 'middle'
-                              }
-                            >
-                              {format(inter.data)}
-                            </Text>
-                          </g>
-                        )
-                      })}
+                        dominantBaseline={
+                          rotation
+                            ? 'central'
+                            : position === positionBottom
+                                ? 'hanging'
+                                : position === positionTop
+                                    ? 'alphabetic'
+                                    : 'central'
+                        }
+                        textAnchor={
+                          rotation
+                            ? 'end'
+                            : position === positionRight
+                                ? 'start'
+                                : position === positionLeft ? 'end' : 'middle'
+                        }
+                      >
+                        {format(inter.data)}
+                      </Text>
                     </g>
                   )
-                }}
-              </Transition>
-            </g>
-          )
-        }}
-      </Animate>
+                })}
+              </g>
+            )
+          }}
+        </Transition>
+      </g>
     )
+    //     }}
+    //   </Animate>
+    // )
   }
 }
 
