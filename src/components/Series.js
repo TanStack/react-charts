@@ -31,7 +31,6 @@ const getType = (type, data, i) => {
 
 class Series extends PureComponent {
   static defaultProps = {
-    type: 'line',
     getStyles: d => ({}),
     getDataStyles: d => ({}),
   }
@@ -78,15 +77,8 @@ class Series extends PureComponent {
     }
 
     // If the axes are not ready, just provide the materializedData
-    if (!primaryAxis) {
+    if (!primaryAxis || !secondaryAxis) {
       return
-    }
-
-    // Some charts require the secondaryAxis
-    if (primaryAxis.type !== 'pie') {
-      if (!secondaryAxis) {
-        return
-      }
     }
 
     // If the axes are ready, let's decorate the materializedData for visual plotting
@@ -114,10 +106,10 @@ class Series extends PureComponent {
     }
 
     let stackData = materializedData.map((series, seriesIndex) => {
-      const seriesType = getType(type, series, seriesIndex) || {}
+      const SeriesComponent = getType(type, series, seriesIndex) || {}
       return {
         ...series,
-        type: seriesType.SeriesType,
+        type: SeriesComponent.SeriesType,
         data: series.data.map((d, index) => {
           const datum = {
             ...d,
@@ -191,15 +183,21 @@ class Series extends PureComponent {
     // Not we need to precalculate all of the possible status styles by
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
     stackData.forEach(series => {
-      const defaults = {
-        // Pass some sane defaults
-        color: defaultColors[series.index % (defaultColors.length - 1)],
-      }
+      const defaults = series.type !== 'Pie'
+        ? {
+            // Pass some sane defaults
+          color: defaultColors[series.index % (defaultColors.length - 1)],
+        }
+        : {}
 
       series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
       // We also need to decorate each datum in the same fashion
       series.data.forEach(datum => {
+        if (series.type === 'Pie') {
+          defaults.color =
+            defaultColors[datum.index % (defaultColors.length - 1)]
+        }
         datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
           ...defaults,
           ...series.statusStyles.default,
@@ -230,7 +228,6 @@ class Series extends PureComponent {
   }
   render () {
     const { type, getStyles, getDataStyles, ...rest } = this.props
-
     const { stackData } = this
 
     if (!stackData) {
@@ -263,6 +260,7 @@ class Series extends PureComponent {
                     {...rest}
                     key={inter.key}
                     series={inter.data}
+                    stackData={stackData}
                     visibility={inter.state.visibility}
                   />
                 )

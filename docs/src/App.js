@@ -27,39 +27,39 @@ export default class App extends React.Component {
         style={{
           display: 'block',
           width: '100%',
-          height: '100%',
+          height: '100%'
         }}
-        pathPrefix='story/'
-        // StoryWrapper={props => (
-        //   <defaultProps.StoryWrapper
-        //     css={{
-        //       padding: 0
-        //     }}
-        //   >
-        //     <a
-        //       href="//github.com/tannerlinsley/react-charts"
-        //       style={{
-        //         display: 'block',
-        //         textAlign: 'center',
-        //         borderBottom: 'solid 3px #cccccc'
-        //       }}
-        //     >
-        //       <img
-        //         src="//npmcdn.com/react-charts/media/Banner.png"
-        //         alt="React Charts Logo"
-        //         style={{
-        //           width: '100px'
-        //         }}
-        //       />
-        //     </a>
-        //     <div
-        //       {...props}
-        //       style={{
-        //         padding: '10px'
-        //       }}
-        //     />
-        //   </defaultProps.StoryWrapper>
-        // )}
+        pathPrefix="story/"
+        StoryWrapper={props => (
+          <defaultProps.StoryWrapper
+            css={{
+              padding: 0
+            }}
+          >
+            <a
+              href="//github.com/tannerlinsley/react-charts"
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                borderBottom: 'solid 3px #cccccc'
+              }}
+            >
+              <img
+                src="//npmcdn.com/react-charts/media/banner.png"
+                alt="React Charts Logo"
+                style={{
+                  width: '100px'
+                }}
+              />
+            </a>
+            <div
+              {...props}
+              style={{
+                padding: '10px'
+              }}
+            />
+          </defaultProps.StoryWrapper>
+        )}
         stories={[
           { name: 'Readme & Documentation', component: Readme },
           { name: 'Line Chart', component: LineChart },
@@ -74,7 +74,7 @@ export default class App extends React.Component {
           { name: 'Dynamic Parent', component: DynamicParent },
           { name: 'Sparklines', component: Sparklines },
           { name: 'Mixed Element Types', component: MixedTypes },
-          { name: 'Doughnut Chart', component: DoughnutChart },
+          { name: 'Doughnut Chart', component: DoughnutChart }
         ]}
       />
     )

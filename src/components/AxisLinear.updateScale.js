@@ -69,7 +69,6 @@ export default function updateScale (props) {
   let negativeTotal = 0
   let positiveTotal = 0
   let domain
-  let total
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {
@@ -140,10 +139,6 @@ export default function updateScale (props) {
   let range = vertical
     ? invert ? [0, height] : [height, 0] // If the axis is inverted, swap the range, too
     : invert ? [width, 0] : [0, width]
-
-  // var arc = d3.svg.arc()
-  //   .outerRadius(radius - 10)
-  //   .innerRadius(radius - 70);
 
   if (!primary) {
     // Secondary axes are usually dependent on primary axes for orientation, so if the

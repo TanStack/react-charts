@@ -6,35 +6,26 @@ const defaultStyle = {
   strokeWidth: 1,
   stroke: 'black',
   fill: 'transparent',
-  opacity: 1
+  opacity: 1,
 }
 
 export default class Line extends PureComponent {
   render () {
-    const {
-      style,
-      ...rest
-    } = this.props
+    const { style, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style
+      ...style,
     }
 
     return (
       <Animate
         data={{
-          ...resolvedStyle
+          ...resolvedStyle,
         }}
-        
       >
-        {(inter) => {
-          return (
-            <line
-              {...inter}
-              {...rest}
-            />
-          )
+        {inter => {
+          return <line {...inter} {...rest} />
         }}
       </Animate>
     )

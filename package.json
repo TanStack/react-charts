@@ -42,8 +42,8 @@
     "d3-voronoi": "^1.1.2",
     "javascript-detect-element-resize": "^0.5.3",
     "raf": "^3.3.2",
-    "react-move": "^1.1.8",
-    "react-state": "^2.0.0"
+    "react-move": "^1.5.1",
+    "react-state": "^2.0.1"
   },
   "peerDependencies": {
     "react": "^15.3.1"
@@ -58,7 +58,7 @@
     "babelify": "^7.3.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-import": "^2.3.0",
     "eslint-plugin-node": "^4.2.2",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-react": "^7.0.1",
@@ -67,7 +67,7 @@
     "onchange": "^3.2.1",
     "react": "^15.5.4",
     "rimraf": "^2.6.1",
-    "webpack": "^2.5.1"
+    "webpack": "^2.6.1"
   },
   "browserify-shim": {
     "react": "global:React"

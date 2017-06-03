@@ -49,7 +49,6 @@ class Axis extends PureComponent {
     // If any of the following change,
     // we need to update the axis
     if (
-      newProps.axes !== oldProps.axes ||
       newProps.primary !== oldProps.primary ||
       newProps.type !== oldProps.type ||
       newProps.invert !== oldProps.invert ||

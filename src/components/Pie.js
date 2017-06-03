@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
 import { Animate } from 'react-move'
-import { pie as makePie } from 'd3-shape'
+import { pie as makePie, arc as makeArc } from 'd3-shape'
 
+import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 import {
   selectSeries,
@@ -13,13 +14,10 @@ import {
 
 //
 import Path from '../primitives/Path'
-import Circle from '../primitives/Circle'
 
-const pathDefaultStyle = {
-  strokeWidth: 2,
-}
+const Arc = makeArc()
 
-const circleDefaultStyle = {
+const arcDefaultStyle = {
   r: 2,
 }
 
@@ -38,49 +36,53 @@ class Pie extends PureComponent {
     const {
       series,
       visibility,
-      showPoints,
+      stackData, // we need this to figure out which level we're on
       //
       selected,
       hovered,
       interaction,
+      primaryAxis,
     } = this.props
 
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const data = series.data.map(d => ({
+    const { radius, cutoutPercentage } = primaryAxis
+
+    const outerRadius = radius
+    const innerRadius = radius * cutoutPercentage
+    const totalRadius = outerRadius - innerRadius
+
+    const seriesRadius = totalRadius / stackData.length
+    const seriesInnerRadius = innerRadius + seriesRadius * series.index
+    const seriesOuterRadius = seriesInnerRadius + seriesRadius
+
+    const preData = series.data.map(d => ({
       x: d.x,
       y: d.y,
-      r: d.r,
-      base: d.base,
     }))
 
     const pie = makePie().sort(null).value(d => d.y)
-
-    console.log(pie(data))
-    return null
+    const data = pie(preData)
 
     return (
       <Animate
         default={{
           data,
+          seriesInnerRadius: outerRadius,
+          seriesOuterRadius: outerRadius,
           visibility: 0,
         }}
         data={{
           data,
+          seriesInnerRadius,
+          seriesOuterRadius,
           visibility,
         }}
         duration={500}
-        ignore={['originalData']}
+        // ignore={['originalData']}
       >
         {inter => {
-          const path = pie(
-            inter.data.map(d => [
-              isNaN(d.x) ? null : d.x,
-              isNaN(d.y) ? null : d.y,
-            ])
-          )
-
           const seriesInteractionProps = interaction === 'series'
             ? {
               onClick: () => this.selectSeries(series),
@@ -91,58 +93,53 @@ class Pie extends PureComponent {
             : {}
 
           return (
-            <g>
-              <Path
-                d={path}
-                style={{
-                  ...pathDefaultStyle,
-                  ...style,
-                  ...style.line,
-                  fill: 'none',
-                }}
-                opacity={inter.visibility}
-                {...seriesInteractionProps}
-              />
-              {showPoints &&
-                series.data.map((datum, i) => {
-                  const status = Utils.datumStatus(
-                    series,
-                    datum,
-                    hovered,
-                    selected
-                  )
-                  const dataStyle = Utils.getStatusStyle(
-                    status,
-                    datum.statusStyles
-                  )
+            <g
+              transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}
+            >
+              {series.data.map((datum, i) => {
+                const status = Utils.datumStatus(
+                  series,
+                  datum,
+                  hovered,
+                  selected
+                )
+                const dataStyle = Utils.getStatusStyle(
+                  status,
+                  datum.statusStyles
+                )
 
-                  const datumInteractionProps = interaction === 'element'
-                    ? {
-                      onClick: () => this.selectDatum(datum),
-                      onMouseEnter: () => this.hoverDatum(datum),
-                      onMouseMove: () => this.hoverDatum(datum),
-                      onMouseLeave: () => this.hoverDatum(null),
-                    }
-                    : {}
+                const datumInteractionProps = interaction === 'element'
+                  ? {
+                    onClick: () => this.selectDatum(datum),
+                    onMouseEnter: () => this.hoverDatum(datum),
+                    onMouseMove: () => this.hoverDatum(datum),
+                    onMouseLeave: () => this.hoverDatum(null),
+                  }
+                  : {}
 
-                  return (
-                    <Circle
-                      key={i}
-                      x={inter.data[i].x}
-                      y={inter.data[i].y}
-                      style={{
-                        ...circleDefaultStyle,
-                        ...style,
-                        ...style.circle,
-                        ...dataStyle,
-                        ...dataStyle.circle,
-                      }}
-                      opacity={inter.visibility}
-                      {...seriesInteractionProps}
-                      {...datumInteractionProps}
-                    />
-                  )
-                })}
+                const path = Arc({
+                  ...inter.data[i],
+                  innerRadius: inter.seriesInnerRadius,
+                  outerRadius: inter.seriesOuterRadius,
+                })
+
+                return (
+                  <Path
+                    key={i}
+                    d={path}
+                    style={{
+                      ...arcDefaultStyle,
+                      ...style,
+                      ...style.arc,
+                      ...dataStyle,
+                      ...dataStyle.arc,
+                    }}
+                    opacity={inter.visibility}
+                    {...seriesInteractionProps}
+                    {...datumInteractionProps}
+                  />
+                )
+              })}
             </g>
           )
         }}
@@ -152,11 +149,17 @@ class Pie extends PureComponent {
 }
 
 export default Connect(
-  (state, props) => {
-    return {
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
+  () => {
+    const selectors = {
+      primaryAxis: Selectors.primaryAxis(),
+    }
+    return (state, props) => {
+      return {
+        primaryAxis: selectors.primaryAxis(state),
+        hovered: state.hovered,
+        selected: state.selected,
+        interaction: state.interaction,
+      }
     }
   },
   {

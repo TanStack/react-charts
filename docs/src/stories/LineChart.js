@@ -12,7 +12,7 @@ class Story extends Component {
   constructor() {
     super()
     this.state = {
-      data: makeData(),
+      data: makeData()
     }
   }
   render() {
@@ -22,7 +22,7 @@ class Story extends Component {
         <button
           onClick={() =>
             this.setState({
-              data: makeData(),
+              data: makeData()
             })}
         >
           Randomize Data
@@ -34,8 +34,8 @@ class Story extends Component {
         {_.range(1).map((d, i) => (
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
-              <Axis primary type='time' position='bottom' />
-              <Axis type='linear' position='left' />
+              <Axis primary type="time" position="bottom" />
+              <Axis type="linear" position="left" />
               <Series type={Line} showPoints={false} />
               <Tooltip />
             </Chart>
@@ -69,6 +69,6 @@ function makeSeries() {
     // x: d * multiplier,
     x: new Date().setMinutes(startDate.getMinutes() + 30 * d),
     y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
-    r: Math.round(Math.random() * 5),
+    r: Math.round(Math.random() * 5)
   }))
 }
