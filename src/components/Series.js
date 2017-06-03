@@ -227,7 +227,8 @@ class Series extends PureComponent {
     )
   }
   render () {
-    const { type, getStyles, getDataStyles, stackData, ...rest } = this.props
+    const { type, getStyles, getDataStyles, ...rest } = this.props
+    const { stackData } = this
 
     if (!stackData) {
       return null

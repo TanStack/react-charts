@@ -34,10 +34,10 @@ class Story extends Component {
         {_.range(1).map((d, i) => (
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
-              <Axis display={false} primary type="time" position="bottom" />
-              <Axis display={true} type="linear" position="left" />
-              {/* <Series type={Line} showPoints={false} /> */}
-              {/* <Tooltip /> */}
+              <Axis primary type="time" position="bottom" />
+              <Axis type="linear" position="left" />
+              <Series type={Line} showPoints={false} />
+              <Tooltip />
             </Chart>
           </ResizableBox>
         ))}

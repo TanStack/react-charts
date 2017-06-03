@@ -2879,8 +2879,8 @@ rc@~1.1.6:
     strip-json-comments "~1.0.4"
 
 react-move@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/react-move/-/react-move-1.5.1.tgz#3a511cb67cea71a876c88218fbee7db13bad0ea8"
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/react-move/-/react-move-1.5.3.tgz#b1f5003806f9c5621d810dd2636aa37c738a040a"
   dependencies:
     d3-ease "^1.0.3"
     d3-interpolate "^1.1.5"
