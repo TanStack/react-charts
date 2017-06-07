@@ -1,16 +1,6 @@
 import { PureComponent } from 'react'
 import { Connect } from 'react-state'
-// import { Animate, Transition } from 'react-move'
-// import RAF from 'raf'
-import { arc as Arc } from 'd3-shape'
 //
-// import measure from './AxisPie.measure'
-// import updateScale from './AxisPie.updateScale'
-
-// import Path from '../primitives/Path'
-// import Line from '../primitives/Line'
-// import Text from '../primitives/Text'
-
 import Selectors from '../utils/Selectors'
 
 // const fontSize = 10
@@ -30,6 +20,9 @@ class AxisPie extends PureComponent {
     tickPadding: 3,
     cutoutPercentage: 0.5,
     outerPadding: 10,
+    cornerRadius: 5,
+    relativePadAngle: 0,
+    padAngle: 0.02,
   }
   // Lifecycle
   constructor () {
@@ -77,6 +70,9 @@ class AxisPie extends PureComponent {
       height,
       dispatch,
       outerPadding,
+      cornerRadius,
+      relativePadAngle,
+      padAngle,
     } = props
     // We need the data to proceed
     if (!materializedData) {
@@ -99,6 +95,10 @@ class AxisPie extends PureComponent {
       width,
       height,
       radius,
+      cornerRadius,
+      relativePadAngle,
+      padAngle,
+      seriesPadding,
     }
 
     const secondaryAxis = {

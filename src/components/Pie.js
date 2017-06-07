@@ -47,7 +47,7 @@ class Pie extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const { radius, cutoutPercentage } = primaryAxis
+    const { radius, cutoutPercentage, cornerRadius, padAngle } = primaryAxis
 
     const outerRadius = radius
     const innerRadius = radius * cutoutPercentage
@@ -62,22 +62,24 @@ class Pie extends PureComponent {
       y: d.y,
     }))
 
-    const pie = makePie().sort(null).value(d => d.y)
+    const pie = makePie().sort(null).padAngle(padAngle).value(d => d.y)
     const data = pie(preData)
 
     return (
       <Animate
         default={{
           data,
+          visibility: 0,
           seriesInnerRadius: outerRadius,
           seriesOuterRadius: outerRadius,
-          visibility: 0,
+          cornerRadius,
         }}
         data={{
           data,
+          visibility,
           seriesInnerRadius,
           seriesOuterRadius,
-          visibility,
+          cornerRadius,
         }}
         duration={500}
         // ignore={['originalData']}
@@ -121,6 +123,8 @@ class Pie extends PureComponent {
                   ...inter.data[i],
                   innerRadius: inter.seriesInnerRadius,
                   outerRadius: inter.seriesOuterRadius,
+                  cornerRadius: inter.cornerRadius,
+                  padRadius: 50,
                 })
 
                 return (

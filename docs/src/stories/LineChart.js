@@ -31,7 +31,7 @@ class Story extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
@@ -40,7 +40,7 @@ class Story extends Component {
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
 
         <br />
         <br />
@@ -67,7 +67,7 @@ function makeSeries() {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return _.map(_.range(length), d => ({
     // x: d * multiplier,
-    x: new Date().setMinutes(startDate.getMinutes() + 30 * d),
+    x: new Date().setDate(startDate.getDay() + 1 * d),
     y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
     r: Math.round(Math.random() * 5)
   }))

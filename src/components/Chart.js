@@ -181,8 +181,8 @@ class Chart extends PureComponent {
             gridY,
           }}
         >
-          {({ gridX, gridY }) => (
-            <svg
+          {({ gridX, gridY }) =>
+            (<svg
               ref={el => {
                 this.el = el
               }}
@@ -220,8 +220,7 @@ class Chart extends PureComponent {
                 {svgChildren}
                 <Voronoi />
               </g>
-            </svg>
-          )}
+            </svg>)}
         </Animate>
         {htmlChildren}
       </div>

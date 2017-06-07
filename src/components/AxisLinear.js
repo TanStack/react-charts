@@ -3,6 +3,8 @@ import { Connect } from 'react-state'
 import { Animate, Transition } from 'react-move'
 import RAF from 'raf'
 //
+import Utils from '../utils/Utils'
+
 import measure from './AxisLinear.measure'
 import updateScale from './AxisLinear.updateScale'
 
@@ -36,8 +38,11 @@ class Axis extends PureComponent {
   // Lifecycle
   constructor () {
     super()
-    this.rotation = 0
-    this.measure = measure.bind(this)
+    this.state = {
+      rotation: 0,
+    }
+    this.measureRotation = Utils.throttle(measure.bind(this))
+    this.measure = Utils.throttle(measure.bind(this))
     this.updateScale = updateScale.bind(this)
   }
   componentWillReceiveProps (newProps) {
@@ -62,20 +67,15 @@ class Axis extends PureComponent {
   }
   componentDidMount () {
     this.updateScale(this.props)
-    this.measure()
   }
-  shouldComponentUpdate (newProps) {
-    if (newProps.axis !== this.props.axis) {
+  shouldComponentUpdate (newProps, nextState) {
+    if (
+      newProps.axis !== this.props.axis ||
+      this.state.rotation !== nextState.rotation
+    ) {
       return true
     }
     return false
-  }
-  componentDidUpdate () {
-    RAF(() => {
-      if (!this.measure()) {
-        window.setTimeout(() => this.componentDidUpdate(), 1)
-      }
-    })
   }
   render () {
     const {
@@ -90,7 +90,7 @@ class Axis extends PureComponent {
       display,
     } = this.props
 
-    const { rotation } = this
+    const { rotation } = this.state
 
     // Render Dependencies
     if (!axis || !display) {
@@ -125,7 +125,9 @@ class Axis extends PureComponent {
           tickOffset,
           gridOffset,
           spacing,
+          rotation,
         }}
+        onRest={() => this.measureRotation(true)}
       >
         {({
           width,
@@ -196,7 +198,7 @@ class Axis extends PureComponent {
                 }}
               />
               <Transition
-                data={ticks}
+                data={[...ticks]}
                 getKey={(d, i) => String(d)}
                 update={d => ({
                   tick: scale(d),
@@ -208,7 +210,7 @@ class Axis extends PureComponent {
                   tick: this.prevAxis.scale(d),
                   visibility: 0,
                   measureable: 1,
-                  rotation: 0,
+                  rotation,
                 })}
                 leave={d => ({
                   tick: scale(d),
@@ -218,6 +220,7 @@ class Axis extends PureComponent {
                 })}
                 ignore={['measureable']}
                 duration={500}
+                onRest={() => this.measure()}
               >
                 {inters => {
                   let showGridLine = showGrid
@@ -240,7 +243,7 @@ class Axis extends PureComponent {
                             key={inter.key}
                             className={
                               'tick' +
-                                (inter.state.measureable ? ' -measureable' : '')
+                              (inter.state.measureable ? ' -measureable' : '')
                             }
                             transform={transform(inter.state.tick)}
                           >
@@ -273,37 +276,41 @@ class Axis extends PureComponent {
                                 }}
                                 opacity={
                                   inter.state.visibility *
-                                    (index !== 0 &&
-                                      index !== inters.length - 1 &&
-                                      inter.data === 0
-                                      ? 0.5
-                                      : 0.2)
+                                  (index !== 0 &&
+                                    index !== inters.length - 1 &&
+                                    inter.data === 0
+                                    ? 0.5
+                                    : 0.2)
                                 }
                               />}
                             <Text
                               opacity={inter.state.visibility}
                               fontSize={fontSize}
                               transform={`
-                                translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${vertical ? tickOffset : directionMultiplier * spacing})
-                                rotate(${-rotation})
+                                translate(${vertical
+                                  ? directionMultiplier * spacing
+                                  : tickOffset}, ${vertical
+                                ? tickOffset
+                                : directionMultiplier * spacing})
+                                rotate(${-inter.state.rotation})
                               `}
                               dominantBaseline={
-                                rotation
+                                inter.state.rotation
                                   ? 'central'
                                   : position === positionBottom
-                                      ? 'hanging'
-                                      : position === positionTop
-                                          ? 'alphabetic'
-                                          : 'central'
+                                    ? 'hanging'
+                                    : position === positionTop
+                                      ? 'alphabetic'
+                                      : 'central'
                               }
                               textAnchor={
-                                rotation
+                                inter.state.rotation
                                   ? 'end'
                                   : position === positionRight
-                                      ? 'start'
-                                      : position === positionLeft
-                                          ? 'end'
-                                          : 'middle'
+                                    ? 'start'
+                                    : position === positionLeft
+                                      ? 'end'
+                                      : 'middle'
                               }
                             >
                               {format(inter.data)}

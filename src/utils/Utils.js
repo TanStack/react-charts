@@ -211,16 +211,16 @@ function getClosestPoint (position, points) {
 function normalizeComponent (Comp, params = {}, fallback = Comp) {
   return typeof Comp === 'function'
     ? Object.getPrototypeOf(Comp).isReactComponent
-        ? <Comp {...params} />
-        : Comp(params)
+      ? <Comp {...params} />
+      : Comp(params)
     : fallback
 }
 
 function materializeStyles (style = {}, defaults = {}) {
   style = {
     ...style,
-    fill: style.fill || style.color || defaults.fill || defaults.color,
     stroke: style.stroke || style.color || defaults.stroke || defaults.color,
+    fill: style.fill || style.color || defaults.fill || defaults.color,
   }
   ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}

@@ -5,7 +5,7 @@ const fontSize = 10
 const getPixel = d => d
 const radiansToDegrees = r => r * (180 / Math.PI)
 
-export default function measure () {
+export default function measure (isRotation) {
   // Measure finds the amount of overflow this axis produces and
   // updates the margins to ensure that the axis is visibility
   // Unfortunately, this currently happens after a render, but potentially
@@ -22,7 +22,9 @@ export default function measure () {
     dispatch,
   } = this.props
 
-  const { rotation, visibleLabelStep } = this
+  const { rotation } = this.state
+
+  const { visibleLabelStep } = this
 
   if (!this.el) {
     return
@@ -31,7 +33,14 @@ export default function measure () {
   const isHorizontal = position === positionTop || position === positionBottom
   const labelDims = Array(
     ...this.el.querySelectorAll('.tick.-measureable text')
-  ).map(el => el.getBoundingClientRect())
+  ).map(el => {
+    const bbox = el.getBoundingClientRect()
+    const obj = {}
+    for (let key in bbox) {
+      obj[key] = bbox[key]
+    }
+    return obj
+  })
 
   let smallestTickGap = 10000 // This is just a ridiculously large tick spacing that would never happen (hopefully)
   // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
@@ -41,7 +50,7 @@ export default function measure () {
     ).map(el => el.getBoundingClientRect())
     tickDims.reduce((prev, current) => {
       if (prev) {
-        const gap = current.left - prev.left - fontSize / 2
+        const gap = current.left - prev.left
         smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
       }
       return current
@@ -54,22 +63,30 @@ export default function measure () {
         }
         return prev
       },
-      { _overflow: 0 }
+      { ...labelDims[0], _overflow: 0 }
     )
 
-    let newRotation = Math.min(
-      Math.max(
-        Math.abs(
-          radiansToDegrees(Math.acos(smallestTickGap / largestLabel.width))
+    // Determine axis rotation before we measure
+    if (isRotation) {
+      let newRotation = Math.min(
+        Math.max(
+          Math.abs(
+            radiansToDegrees(
+              Math.acos((smallestTickGap + fontSize / 2) / largestLabel.width)
+            )
+          ),
+          0
         ),
-        0
-      ),
-      maxLabelRotation
-    )
-    newRotation = isNaN(newRotation) ? 0 : newRotation
+        maxLabelRotation
+      )
 
-    if (Math.floor(rotation) !== Math.floor(newRotation)) {
-      this.rotation = axis.position === 'top' ? -newRotation : newRotation
+      newRotation = isNaN(newRotation) ? 0 : Math.round(newRotation)
+      if (Math.abs(rotation - newRotation) > 20) {
+        this.setState({
+          rotation: axis.position === 'top' ? -newRotation : newRotation,
+        })
+      }
+      return
     }
   }
 
@@ -89,8 +106,6 @@ export default function measure () {
   let bottom = 0
   let left = 0
   let right = 0
-
-  // Determine axis rotation before we measure
 
   if (isHorizontal) {
     // Add width overflow from the first and last ticks
