@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 import { Connect } from 'react-state'
 
-import { area, line, curveCardinal, curveMonotoneX } from 'd3-shape'
+import { area, line, curveMonotoneX } from 'd3-shape'
 //
 import Utils from '../utils/Utils'
 import {
@@ -24,6 +24,9 @@ const circleDefaultStyle = {
 }
 
 class Area extends PureComponent {
+  static defaultProps = {
+    showPoints: false,
+  }
   constructor () {
     super()
     this.selectSeries = selectSeries.bind(this)
@@ -35,6 +38,7 @@ class Area extends PureComponent {
     const {
       series,
       visibility,
+      showPoints,
       //
       selected,
       hovered,
@@ -114,45 +118,46 @@ class Area extends PureComponent {
                 opacity={inter.visibility}
                 {...seriesInteractionProps}
               />
-              {series.data.map((datum, i) => {
-                const status = Utils.datumStatus(
-                  series,
-                  datum,
-                  hovered,
-                  selected
-                )
-                const dataStyle = Utils.getStatusStyle(
-                  status,
-                  datum.statusStyles
-                )
+              {showPoints &&
+                series.data.map((datum, i) => {
+                  const status = Utils.datumStatus(
+                    series,
+                    datum,
+                    hovered,
+                    selected
+                  )
+                  const dataStyle = Utils.getStatusStyle(
+                    status,
+                    datum.statusStyles
+                  )
 
-                const datumInteractionProps = interaction === 'element'
-                  ? {
-                    onClick: () => this.selectDatum(datum),
-                    onMouseEnter: () => this.hoverDatum(datum),
-                    onMouseMove: () => this.hoverDatum(datum),
-                    onMouseLeave: () => this.hoverDatum(null),
-                  }
-                  : {}
+                  const datumInteractionProps = interaction === 'element'
+                    ? {
+                      onClick: () => this.selectDatum(datum),
+                      onMouseEnter: () => this.hoverDatum(datum),
+                      onMouseMove: () => this.hoverDatum(datum),
+                      onMouseLeave: () => this.hoverDatum(null),
+                    }
+                    : {}
 
-                return (
-                  <Circle
-                    key={i}
-                    x={inter.data[i].x}
-                    y={inter.data[i].y}
-                    style={{
-                      ...circleDefaultStyle,
-                      ...style,
-                      ...style.circle,
-                      ...dataStyle,
-                      ...dataStyle.circle,
-                    }}
-                    opacity={inter.visibility}
-                    {...seriesInteractionProps}
-                    {...datumInteractionProps}
-                  />
-                )
-              })}
+                  return (
+                    <Circle
+                      key={i}
+                      x={inter.data[i].x}
+                      y={inter.data[i].y}
+                      style={{
+                        ...circleDefaultStyle,
+                        ...style,
+                        ...style.circle,
+                        ...dataStyle,
+                        ...dataStyle.circle,
+                      }}
+                      opacity={inter.visibility}
+                      {...seriesInteractionProps}
+                      {...datumInteractionProps}
+                    />
+                  )
+                })}
             </g>
           )
         }}
