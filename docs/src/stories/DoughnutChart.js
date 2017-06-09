@@ -31,15 +31,15 @@ class Story extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
-              <Axis type="pie" />
+              <Axis type='pie' />
               <Series type={Pie} showPoints={false} />
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
 
         <br />
         <br />
@@ -52,7 +52,7 @@ class Story extends Component {
 export default () => <Story />
 
 function makeData() {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 4), 1)), d =>
+  return _.map(_.range(Math.max(Math.round(Math.random() * 20), 1)), d =>
     makeSeries()
   )
 }

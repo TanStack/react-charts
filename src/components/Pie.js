@@ -15,7 +15,7 @@ import {
 //
 import Path from '../primitives/Path'
 
-const Arc = makeArc()
+const Arc = makeArc
 
 const arcDefaultStyle = {
   r: 2,
@@ -47,22 +47,30 @@ class Pie extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const { radius, cutoutPercentage, cornerRadius, padAngle } = primaryAxis
+    const {
+      radius,
+      cutoutPercentage,
+      cornerRadius,
+      arcPadding,
+      seriesPadding,
+    } = primaryAxis
 
     const outerRadius = radius
     const innerRadius = radius * cutoutPercentage
     const totalRadius = outerRadius - innerRadius
-
     const seriesRadius = totalRadius / stackData.length
     const seriesInnerRadius = innerRadius + seriesRadius * series.index
     const seriesOuterRadius = seriesInnerRadius + seriesRadius
+
+    const arcPaddingRadius = outerRadius / stackData.length * arcPadding * 50
+    const seriesPaddingRadius = seriesRadius * seriesPadding
 
     const preData = series.data.map(d => ({
       x: d.x,
       y: d.y,
     }))
 
-    const pie = makePie().sort(null).padAngle(padAngle).value(d => d.y)
+    const pie = makePie().sort(null).padAngle(0.01).value(d => d.y)
     const data = pie(preData)
 
     return (
@@ -70,19 +78,22 @@ class Pie extends PureComponent {
         default={{
           data,
           visibility: 0,
+          seriesPaddingRadius: 0,
           seriesInnerRadius: outerRadius,
           seriesOuterRadius: outerRadius,
           cornerRadius,
+          arcPaddingRadius,
         }}
         data={{
           data,
           visibility,
+          seriesPaddingRadius,
           seriesInnerRadius,
           seriesOuterRadius,
           cornerRadius,
+          arcPaddingRadius,
         }}
         duration={500}
-        // ignore={['originalData']}
       >
         {inter => {
           const seriesInteractionProps = interaction === 'series'
@@ -96,7 +107,8 @@ class Pie extends PureComponent {
 
           return (
             <g
-              transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}
+              transform={`translate(${primaryAxis.width /
+                2}, ${primaryAxis.height / 2})`}
             >
               {series.data.map((datum, i) => {
                 const status = Utils.datumStatus(
@@ -119,18 +131,19 @@ class Pie extends PureComponent {
                   }
                   : {}
 
-                const path = Arc({
-                  ...inter.data[i],
-                  innerRadius: inter.seriesInnerRadius,
-                  outerRadius: inter.seriesOuterRadius,
-                  cornerRadius: inter.cornerRadius,
-                  padRadius: 50,
-                })
+                const arc = Arc()
+                  .startAngle(inter.data[i].startAngle)
+                  .endAngle(inter.data[i].endAngle)
+                  .padAngle(inter.data[i].padAngle)
+                  .padRadius(inter.arcPaddingRadius)
+                  .innerRadius(inter.seriesInnerRadius + seriesPaddingRadius)
+                  .outerRadius(inter.seriesOuterRadius)
+                  .cornerRadius(inter.cornerRadius)
 
                 return (
                   <Path
                     key={i}
-                    d={path}
+                    d={arc()}
                     style={{
                       ...arcDefaultStyle,
                       ...style,

@@ -20,9 +20,9 @@ class AxisPie extends PureComponent {
     tickPadding: 3,
     cutoutPercentage: 0.5,
     outerPadding: 10,
-    cornerRadius: 5,
-    relativePadAngle: 0,
-    padAngle: 0.02,
+    cornerRadius: 1,
+    arcPadding: 0.1,
+    seriesPadding: 0.1,
   }
   // Lifecycle
   constructor () {
@@ -71,8 +71,8 @@ class AxisPie extends PureComponent {
       dispatch,
       outerPadding,
       cornerRadius,
-      relativePadAngle,
-      padAngle,
+      arcPadding,
+      seriesPadding,
     } = props
     // We need the data to proceed
     if (!materializedData) {
@@ -96,8 +96,7 @@ class AxisPie extends PureComponent {
       height,
       radius,
       cornerRadius,
-      relativePadAngle,
-      padAngle,
+      arcPadding,
       seriesPadding,
     }
 

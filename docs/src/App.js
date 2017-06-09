@@ -4,6 +4,7 @@ import ReactStory, { defaultProps } from 'react-story'
 
 import 'react-resizable/css/styles.css'
 import './stories/utils/prism.css'
+import bannerImg from '../../media/banner.png'
 
 import Readme from './stories/Readme.js'
 import LineChart from './stories/LineChart.js'
@@ -29,15 +30,15 @@ export default class App extends React.Component {
           width: '100%',
           height: '100%'
         }}
-        pathPrefix="story/"
-        StoryWrapper={props => (
+        pathPrefix='story/'
+        StoryWrapper={props =>
           <defaultProps.StoryWrapper
             css={{
               padding: 0
             }}
           >
             <a
-              href="//github.com/tannerlinsley/react-charts"
+              href='//github.com/tannerlinsley/react-charts'
               style={{
                 display: 'block',
                 textAlign: 'center',
@@ -45,8 +46,8 @@ export default class App extends React.Component {
               }}
             >
               <img
-                src="//npmcdn.com/react-charts/media/banner.png"
-                alt="React Charts Logo"
+                src={bannerImg}
+                alt='React Charts Logo'
                 style={{
                   width: '100px'
                 }}
@@ -58,8 +59,7 @@ export default class App extends React.Component {
                 padding: '10px'
               }}
             />
-          </defaultProps.StoryWrapper>
-        )}
+          </defaultProps.StoryWrapper>}
         stories={[
           { name: 'Readme & Documentation', component: Readme },
           { name: 'Line Chart', component: LineChart },
