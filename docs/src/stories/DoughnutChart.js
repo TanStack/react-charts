@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import source from '!raw!./LineChart'
+import source from '!raw!./DoughnutChart'
 import CodeHighlight from './components/codeHighlight'
 //
 import { Chart, Axis, Series, Tooltip, Pie } from '../../../lib'
@@ -52,7 +52,7 @@ class Story extends Component {
 export default () => <Story />
 
 function makeData() {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 20), 1)), d =>
+  return _.map(_.range(Math.max(Math.round(Math.random() * 8), 1)), d =>
     makeSeries()
   )
 }

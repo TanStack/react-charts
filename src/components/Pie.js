@@ -62,8 +62,8 @@ class Pie extends PureComponent {
     const seriesInnerRadius = innerRadius + seriesRadius * series.index
     const seriesOuterRadius = seriesInnerRadius + seriesRadius
 
-    const arcPaddingRadius = outerRadius / stackData.length * arcPadding * 50
-    const seriesPaddingRadius = seriesRadius * seriesPadding
+    const arcPaddingRadius = outerRadius * arcPadding * 20
+    const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
 
     const preData = series.data.map(d => ({
       x: d.x,

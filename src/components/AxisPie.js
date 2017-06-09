@@ -21,8 +21,8 @@ class AxisPie extends PureComponent {
     cutoutPercentage: 0.5,
     outerPadding: 10,
     cornerRadius: 1,
-    arcPadding: 0.1,
-    seriesPadding: 0.1,
+    arcPadding: 0.2,
+    seriesPadding: 0.2,
   }
   // Lifecycle
   constructor () {
