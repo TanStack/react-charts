@@ -79,7 +79,7 @@ export default function updateScale (props) {
         }
       })
     })
-    domain = invert ? [...uniqueVals].reverse() : uniqueVals
+    domain = uniqueVals
   } else if (type === 'time') {
     const firstRow = materializedData[0].data[0] || {}
     min = max = firstRow[valueKey]
@@ -94,7 +94,7 @@ export default function updateScale (props) {
       min = Math.min(min, seriesMin)
       max = Math.max(max, seriesMax)
     })
-    domain = invert ? [max, min] : [min, max]
+    domain = [min, max]
   } else {
     materializedData.forEach(series => {
       const seriesValues = series.data.map(d => d[valueKey])
@@ -104,6 +104,7 @@ export default function updateScale (props) {
       })
       const seriesMin = Math.min(...seriesValues)
       const seriesMax = Math.max(...seriesValues)
+      console.log(seriesMin, seriesMax, min, max)
       min = Math.min(min, seriesMin)
       max = Math.max(max, seriesMax)
     })
@@ -126,26 +127,24 @@ export default function updateScale (props) {
           },
           [0, 0]
         )
-      domain = invert
-        ? [positiveTotal, negativeTotal]
-        : [negativeTotal, positiveTotal]
+      domain = [negativeTotal, positiveTotal]
     } else {
       // If we're not stacking, use the min and max values
-      domain = invert ? [max, min] : [min, max]
+      domain = [min, max]
     }
   }
 
   // Now we need to figure out the range
   let range = vertical
-    ? invert ? [0, height] : [height, 0] // If the axis is inverted, swap the range, too
-    : invert ? [width, 0] : [0, width]
+    ? [height, 0] // If the axis is inverted, swap the range, too
+    : [0, width]
 
   if (!primary) {
     // Secondary axes are usually dependent on primary axes for orientation, so if the
     // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
     // to match the origin of the primary axis
     if (primaryAxis.RTL) {
-      range = range.reverse()
+      range = [...range].reverse()
     }
   }
 
@@ -192,7 +191,7 @@ export default function updateScale (props) {
   }
 
   // Set the domain
-  scale.domain(domain)
+  scale.domain(invert ? [...domain].reverse() : domain)
 
   // Now set the range
   scale.range(range)
@@ -220,8 +219,8 @@ export default function updateScale (props) {
     max: position === positionBottom
       ? -height
       : position === positionLeft
-          ? width
-          : position === positionTop ? height : -width,
+        ? width
+        : position === positionTop ? height : -width,
     directionMultiplier: position === positionTop || position === positionLeft
       ? -1
       : 1,
@@ -231,8 +230,8 @@ export default function updateScale (props) {
       : tickValues),
     format: tickFormat == null
       ? scale.tickFormat
-          ? scale.tickFormat.apply(scale, tickArguments)
-          : identity
+        ? scale.tickFormat.apply(scale, tickArguments)
+        : identity
       : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }

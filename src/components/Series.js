@@ -55,7 +55,7 @@ class Series extends PureComponent {
   }
   shouldComponentUpdate (nextProps) {
     if (nextProps.stackData !== this.props.stackData) {
-      this.stackData = nextProps.stackData.reverse() // For proper svg stacking
+      this.stackData = [...nextProps.stackData].reverse() // For proper svg stacking
       return true
     }
     return false

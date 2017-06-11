@@ -6,9 +6,7 @@ import Selectors from '../utils/Selectors'
 
 class Cursor extends PureComponent {
   static defaultProps = {
-    children: ({
-      label
-    }) => <span>{label}</span>
+    children: ({ label }) => <span>{label}</span>,
   }
   constructor () {
     super()
@@ -24,22 +22,14 @@ class Cursor extends PureComponent {
       primaryAxis,
       secondaryAxis,
       cursor,
-      offset: {
-        left,
-        top
-      },
+      offset: { left, top },
       gridX,
       gridY,
-      children
+      children,
     } = this.props
 
     // Don't render until we have all dependencies
-    if (
-      !stackData ||
-      !cursor ||
-      !primaryAxis ||
-      !secondaryAxis
-    ) {
+    if (!stackData || !cursor || !primaryAxis || !secondaryAxis) {
       return null
     }
 
@@ -53,14 +43,7 @@ class Cursor extends PureComponent {
 
     const invert = axis.scale.invert || (d => d)
 
-    let
-      x1,
-      x2,
-      y1,
-      y2,
-      label,
-      alignPctX,
-      alignPctY
+    let x1, x2, y1, y2, label, alignPctX, alignPctY
 
     if (primary && (axis.type === 'ordinal' || snap)) {
       animated = true
@@ -77,7 +60,9 @@ class Cursor extends PureComponent {
           })
         })
         y = closestDatum.focus.x
-        label = typeof closestDatum.primary !== 'undefined' ? axis.format(closestDatum.primary) : undefined
+        label = typeof closestDatum.primary !== 'undefined'
+          ? axis.format(closestDatum.primary)
+          : undefined
       } else {
         let smallestDistance = 10000000
         stackData.forEach(series => {
@@ -90,16 +75,20 @@ class Cursor extends PureComponent {
           })
         })
         x = closestDatum.focus.x
-        label = typeof closestDatum.primary !== 'undefined' ? axis.format(closestDatum.primary) : undefined
+        label = typeof closestDatum.primary !== 'undefined'
+          ? axis.format(closestDatum.primary)
+          : undefined
       }
     }
 
     if (axis.vertical) {
       x1 = siblingRange[0]
       x2 = siblingRange[1]
-      y1 = y
+      y1 = y - 1
       y2 = y + 1
-      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
+      label = typeof label !== 'undefined'
+        ? label
+        : axis.format(invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -108,11 +97,13 @@ class Cursor extends PureComponent {
         alignPctY = -50
       }
     } else {
-      x1 = x
+      x1 = x - 1
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
+      label = typeof label !== 'undefined'
+        ? label
+        : axis.format(invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -139,12 +130,12 @@ class Cursor extends PureComponent {
           height,
           x1,
           y1,
-          visibility: cursor.active ? 1 : 0
+          visibility: cursor.active ? 1 : 0,
         }}
         duration={400}
       >
-        {inter => (
-          <div
+        {inter =>
+          (<div
             className='Cursor'
             onMouseLeave={e => this.onHover(null, e)}
             style={{
@@ -152,22 +143,27 @@ class Cursor extends PureComponent {
               position: 'absolute',
               left: `${left + gridX}px`,
               top: `${top + gridY}px`,
-              opacity: inter.visibility
+              opacity: inter.visibility,
             }}
           >
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated ? inter.xStart : xStart}px, ${animated ? inter.yStart : yStart}px, 0px)`,
+                transform: `translate3d(${animated
+                  ? inter.xStart
+                  : xStart}px, ${animated ? inter.yStart : yStart}px, 0px)`,
                 width: `${animated ? inter.width : width}px`,
                 height: `${animated ? inter.height : height}px`,
-                background: 'rgba(0,0,0,.3)'
+                background: 'rgba(0,0,0,.3)',
+                WebkitBackfaceVisibility: 'hidden',
               }}
             />
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated ? inter.x1 : x1}px, ${animated ? inter.y1 : y1}px, 0px)`
+                transform: `translate3d(${animated
+                  ? inter.x1
+                  : x1}px, ${animated ? inter.y1 : y1}px, 0px)`,
               }}
             >
               <div
@@ -179,71 +175,79 @@ class Cursor extends PureComponent {
                   borderRadius: '3px',
                   position: 'relative',
                   transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
-                  whiteSpace: !axis.vertical && 'nowrap'
+                  whiteSpace: !axis.vertical && 'nowrap',
                 }}
               >
                 {children({
-                  label
+                  label,
                 })}
               </div>
             </div>
-          </div>
-        )}
+          </div>)}
       </Animate>
     )
   }
   onHover (hovered, e) {
-    return this.props.dispatch(state => ({
-      ...state,
-      hovered
-    }), {
-      type: 'hovered'
-    })
+    return this.props.dispatch(
+      state => ({
+        ...state,
+        hovered,
+      }),
+      {
+        type: 'hovered',
+      }
+    )
   }
   onActivate (newActive, e) {
-    const {
-      active,
-      dispatch
-    } = this.props
+    const { active, dispatch } = this.props
     if (active === newActive) {
-      return dispatch(state => ({
-        ...state,
-        active: null
-      }), {
-        type: 'active'
-      })
+      return dispatch(
+        state => ({
+          ...state,
+          active: null,
+        }),
+        {
+          type: 'active',
+        }
+      )
     }
-    dispatch(state => ({
-      ...state,
-      active: newActive
-    }), {
-      type: 'active'
-    })
+    dispatch(
+      state => ({
+        ...state,
+        active: newActive,
+      }),
+      {
+        type: 'active',
+      }
+    )
   }
 }
 
-export default Connect(() => {
-  const selectors = {
-    primaryAxis: Selectors.primaryAxis(),
-    secondaryAxis: Selectors.secondaryAxis(),
-    offset: Selectors.offset(),
-    gridX: Selectors.gridX(),
-    gridY: Selectors.gridY()
+export default Connect(
+  () => {
+    const selectors = {
+      primaryAxis: Selectors.primaryAxis(),
+      secondaryAxis: Selectors.secondaryAxis(),
+      offset: Selectors.offset(),
+      gridX: Selectors.gridX(),
+      gridY: Selectors.gridY(),
+    }
+    return state => ({
+      stackData: state.stackData,
+      primaryAxis: selectors.primaryAxis(state),
+      secondaryAxis: selectors.secondaryAxis(state),
+      cursor: state.cursor,
+      offset: selectors.offset(state),
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+    })
+  },
+  {
+    statics: {
+      isHTML: true,
+    },
   }
-  return state => ({
-    stackData: state.stackData,
-    primaryAxis: selectors.primaryAxis(state),
-    secondaryAxis: selectors.secondaryAxis(state),
-    cursor: state.cursor,
-    offset: selectors.offset(state),
-    gridX: selectors.gridX(state),
-    gridY: selectors.gridY(state)
-  })
-}, {
-  statics: {
-    isHTML: true
-  }
-})(Cursor)
+)(Cursor)
 
 /* <g
 
