@@ -104,7 +104,6 @@ export default function updateScale (props) {
       })
       const seriesMin = Math.min(...seriesValues)
       const seriesMax = Math.max(...seriesValues)
-      console.log(seriesMin, seriesMax, min, max)
       min = Math.min(min, seriesMin)
       max = Math.max(max, seriesMax)
     })
