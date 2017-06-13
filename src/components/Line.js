@@ -53,7 +53,9 @@ class Line extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const lineFn = line().curve(curveMonotoneX)
+    const lineFn = line()
+      .curve(curveMonotoneX)
+      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
 
     const data = series.data.map(d => ({
       x: d.x,

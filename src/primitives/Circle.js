@@ -7,19 +7,28 @@ const defaultStyle = {
   strokeWidth: '1',
   stroke: '#000000',
   fill: '#000000',
-  opacity: 1
+  opacity: 1,
 }
 
 export default class Circle extends PureComponent {
   static defaultProps = {
-    opacity: 1
+    opacity: 1,
   }
-  render() {
+  render () {
     const { x, y, r, style, opacity, ...rest } = this.props
+
+    if (
+      typeof x !== 'number' ||
+      typeof y !== 'number' ||
+      isNaN(x) ||
+      isNaN(y)
+    ) {
+      return null
+    }
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style
+      ...style,
     }
     return (
       <Animate data={resolvedStyle}>
@@ -32,7 +41,7 @@ export default class Circle extends PureComponent {
               r={r || 0}
               style={{
                 ...inter,
-                opacity: opacity * inter.opacity
+                opacity: opacity * inter.opacity,
               }}
             />
           )
