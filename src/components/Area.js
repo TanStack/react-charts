@@ -48,9 +48,14 @@ class Area extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const areaFn = area().curve(curveMonotoneX).y0(d => d[2])
+    const areaFn = area()
+      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .curve(curveMonotoneX)
+      .y0(d => d[2])
 
-    const lineFn = line().curve(curveMonotoneX)
+    const lineFn = line()
+      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .curve(curveMonotoneX)
 
     const data = series.data.map(d => ({
       x: d.x,

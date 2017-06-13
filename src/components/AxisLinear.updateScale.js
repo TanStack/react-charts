@@ -97,7 +97,9 @@ export default function updateScale (props) {
     domain = [min, max]
   } else {
     materializedData.forEach(series => {
-      const seriesValues = series.data.map(d => d[valueKey])
+      const seriesValues = series.data
+        .map(d => d[valueKey])
+        .filter(d => typeof d === 'number')
       seriesValues.forEach((d, i) => {
         const key = groupKey ? series.data[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
