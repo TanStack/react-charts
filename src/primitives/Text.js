@@ -25,10 +25,11 @@ export default class Text extends PureComponent {
       ...defaultStyle,
       ...style
     }
+
     return (
       <Animate
         data={resolvedStyle}
-        
+
       >
         {(inter) => {
           return (

@@ -49,7 +49,7 @@ class Story extends Component {
                     stroke: 'green'
                   },
                   tick: {
-                    color: 'green',
+                    fill: 'green',
                     fontSize: 14,
                     fontFamily: 'sans-serif'
                   }

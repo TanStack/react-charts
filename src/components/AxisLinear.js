@@ -196,14 +196,9 @@ class Axis extends PureComponent {
             }
           }
 
-          console.log(axisStyles);
-
           return (
             <g
               className='Axis'
-              fill={axisStyles.tick.color}
-              fontSize={axisStyles.tick.fontSize}
-              fontFamily={axisStyles.tick.fontFamily}
               transform={
                 position === positionRight
                   ? translateX(width)
@@ -303,7 +298,7 @@ class Axis extends PureComponent {
                               />}
                             <Text
                               opacity={inter.state.visibility}
-                              fontSize={fontSize}
+                              style={axisStyles.tick}
                               transform={`
                                 translate(${vertical
                                   ? directionMultiplier * spacing
