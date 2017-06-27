@@ -21,6 +21,19 @@ export const positionRight = 'right'
 export const positionBottom = 'bottom'
 export const positionLeft = 'left'
 
+const defaultStyles = {
+  line: {
+    stroke: '#acacac',
+    strokeWidth: '1',
+    fill: 'transparent',
+  },
+  tick: {
+    fontSize: 10,
+    color: '#000',
+    fontFamily: 'sans-serif'
+  }
+}
+
 class Axis extends PureComponent {
   static defaultProps = {
     tickArguments: [],
@@ -88,9 +101,16 @@ class Axis extends PureComponent {
       tickSizeInner,
       tickSizeOuter,
       display,
+      styles
     } = this.props
 
     const { rotation } = this.state
+
+    // Combine default styles with style props
+    const axisStyles = {
+      ...defaultStyles,
+      ...styles
+    }
 
     // Render Dependencies
     if (!axis || !display) {
@@ -109,7 +129,7 @@ class Axis extends PureComponent {
       directionMultiplier,
       tickOffset,
       gridOffset,
-      spacing,
+      spacing
     } = axis
 
     return (
@@ -176,12 +196,14 @@ class Axis extends PureComponent {
             }
           }
 
+          console.log(axisStyles);
+
           return (
             <g
               className='Axis'
-              fill='black'
-              fontSize='10'
-              fontFamily='sans-serif'
+              fill={axisStyles.tick.color}
+              fontSize={axisStyles.tick.fontSize}
+              fontFamily={axisStyles.tick.fontFamily}
               transform={
                 position === positionRight
                   ? translateX(width)
@@ -191,11 +213,7 @@ class Axis extends PureComponent {
               <Path
                 className='domain'
                 d={axisPath}
-                style={{
-                  stroke: '#acacac',
-                  strokeWidth: '1',
-                  fill: 'transparent',
-                }}
+                style={axisStyles.line}
               />
               <Transition
                 data={[...ticks]}

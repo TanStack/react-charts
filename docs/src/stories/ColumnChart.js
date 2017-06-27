@@ -40,7 +40,21 @@ class Story extends Component {
               getPrimary={d => d.x}
               getSecondary="nested.y"
             >
-              <Axis primary type="ordinal" position="bottom" />
+              <Axis
+                primary
+                type="ordinal"
+                position="bottom"
+                styles={{
+                  line: {
+                    stroke: 'green'
+                  },
+                  tick: {
+                    color: 'green',
+                    fontSize: 14,
+                    fontFamily: 'sans-serif'
+                  }
+                }}
+              />
               <Axis type="linear" position="left" stacked />
               <Series type={Bar} />
               <Tooltip />
