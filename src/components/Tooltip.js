@@ -45,8 +45,8 @@ class Tooltip extends PureComponent {
                         }}
                       >
                         {Math.floor(d.secondary) < d.secondary
-                          ? Math.round(d.secondary * 100) / 100
-                          : d.secondary}
+                          ? secondaryAxis.format(Math.round(d.secondary * 100) / 100)
+                          : secondaryAxis.format(d.secondary)}
                       </td>
                     </tr>)
                   )}
