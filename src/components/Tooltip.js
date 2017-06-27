@@ -30,7 +30,7 @@ class Tooltip extends PureComponent {
               <table>
                 <tbody>
                   {(secondaryAxis.stacked
-                    ? [...datums].reverse()
+                    ? [...datums].reverse().map(d => secondaryAxis.format(d))
                     : datums).map((d, i) =>
                     (<tr key={i}>
                       <td>
@@ -45,8 +45,8 @@ class Tooltip extends PureComponent {
                         }}
                       >
                         {Math.floor(d.secondary) < d.secondary
-                          ? Math.round(d.secondary * 100) / 100
-                          : d.secondary}
+                          ? secondaryAxis.format(Math.round(d.secondary * 100) / 100)
+                          : secondaryAxis.format(d.secondary)}
                       </td>
                     </tr>)
                   )}
