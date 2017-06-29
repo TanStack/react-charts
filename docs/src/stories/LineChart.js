@@ -35,7 +35,7 @@ class Story extends Component {
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
-              <Axis type="linear" position="left" />
+              <Axis type="linear" position="left" max={120} hardMax={140} />
               <Series type={Line} showPoints={false} />
               <Tooltip />
             </Chart>

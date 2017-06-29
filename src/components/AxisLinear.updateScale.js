@@ -36,6 +36,11 @@ export default function updateScale (props) {
     tickFormat,
     tickPadding,
     tickSizeInner,
+    base,
+    min: defaultMin,
+    max: defaultMax,
+    hardMin,
+    hardMax,
     // Context
     materializedData,
     width,
@@ -63,8 +68,8 @@ export default function updateScale (props) {
 
   // First we need to find unique values, min/max values and negative/positive totals
   let uniqueVals = []
-  let min = 0
-  let max = 0
+  let min
+  let max
   let datumValues = {}
   let negativeTotal = 0
   let positiveTotal = 0
@@ -81,33 +86,32 @@ export default function updateScale (props) {
     })
     domain = uniqueVals
   } else if (type === 'time') {
-    const firstRow = materializedData[0].data[0] || {}
-    min = max = firstRow[valueKey]
     materializedData.forEach(series => {
       const seriesValues = series.data.map(d => +d[valueKey])
       seriesValues.forEach((d, i) => {
         const key = groupKey ? series.data[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
       })
-      const seriesMin = Math.min(...seriesValues)
-      const seriesMax = Math.max(...seriesValues)
-      min = Math.min(min, seriesMin)
-      max = Math.max(max, seriesMax)
+      min = Math.min(
+        ...(typeof min !== 'undefined' ? [min] : []),
+        ...seriesValues
+      )
+      max = Math.max(
+        ...(typeof max !== 'undefined' ? [max] : []),
+        ...seriesValues
+      )
     })
     domain = [min, max]
   } else {
     materializedData.forEach(series => {
-      const seriesValues = series.data
-        .map(d => d[valueKey])
-        .filter(d => typeof d === 'number')
+      let seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach((d, i) => {
         const key = groupKey ? series.data[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
       })
-      const seriesMin = Math.min(...seriesValues)
-      const seriesMax = Math.max(...seriesValues)
-      min = Math.min(min, seriesMin)
-      max = Math.max(max, seriesMax)
+      seriesValues = seriesValues.filter(d => typeof d === 'number')
+      min = Math.min(...(typeof min === 'number' ? [min] : []), ...seriesValues)
+      max = Math.max(...(typeof max === 'number' ? [max] : []), ...seriesValues)
     })
     if (stacked) {
       // If we're stacking, calculate and use the max and min values for the largest stack
@@ -191,16 +195,41 @@ export default function updateScale (props) {
     scale = scales[type]()
   }
 
-  // Set the domain
-  scale.domain(invert ? [...domain].reverse() : domain)
+  // Set base, min, and max
+  if (typeof base === 'number') {
+    domain[0] = Math.min(domain[0], base)
+    domain[1] = Math.max(domain[1], base)
+  }
+  if (typeof defaultMin === 'number') {
+    domain[0] = Math.min(domain[0], defaultMin)
+  }
+  if (typeof defaultMax === 'number') {
+    domain[1] = Math.max(domain[1], defaultMax)
+  }
 
-  // Now set the range
-  scale.range(range)
+  // Set the domain
+  scale.domain(domain)
 
   // If we're not using an ordinal scale, round the ticks to "nice" values
   if (type !== 'ordinal') {
     scale.nice()
   }
+
+  // If hard min and max are set, override any "nice" rounding values
+  if (typeof hardMin === 'number') {
+    scale.domain([Math.max(domain[0], hardMin), scale.domain()[1]])
+  }
+  if (typeof hardMax === 'number') {
+    scale.domain([scale.domain()[0], Math.min(domain[1], hardMax)])
+  }
+
+  // Invert if necessary
+  if (invert) {
+    scale.domain([...scale.domain()].reverse())
+  }
+
+  // Now set the range
+  scale.range(range)
 
   // Pass down the axis config (including the scale itself) for posterity
   const axis = {

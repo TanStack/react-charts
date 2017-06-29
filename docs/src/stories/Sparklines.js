@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import source from '!raw!./LineChart'
+import source from '!raw!./Sparklines'
 import CodeHighlight from './components/codeHighlight'
 //
 import { Chart, Axis, Series, Tooltip, Line } from '../../../lib'
@@ -31,7 +31,7 @@ class Story extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={500} height={100}>
             <Chart data={data}>
               <Axis primary type="time" position="bottom" display={false} />
@@ -40,7 +40,7 @@ class Story extends Component {
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
 
         <br />
         <br />

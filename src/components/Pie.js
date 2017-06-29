@@ -66,8 +66,8 @@ class Pie extends PureComponent {
     const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
 
     const preData = series.data.map(d => ({
-      x: d.x,
-      y: d.y,
+      x: d.primary,
+      y: d.secondary,
     }))
 
     const pie = makePie().sort(null).padAngle(0.01).value(d => d.y)

@@ -1,5 +1,6 @@
 import { PureComponent } from 'react'
 import { Connect } from 'react-state'
+import { arc as makeArc, pie as makePie } from 'd3-shape'
 //
 import Selectors from '../utils/Selectors'
 
@@ -79,30 +80,91 @@ class AxisPie extends PureComponent {
       return
     }
 
-    const radius = Math.min(width, height) / 2 - outerPadding
+    const midX = width / 2
+    const midY = height / 2
+    const radius = Math.min(midX, midY) - outerPadding
 
-    // This arc is going to be used for label placement
-    // const arc = Arc().outerRadius(radius).innerRadius(radius * cutoutPercentage)
+    const outerRadius = radius
+    const innerRadius = radius * cutoutPercentage
+    const totalRadius = outerRadius - innerRadius
+    const seriesRadius = totalRadius / materializedData.length
+    const arcPaddingRadius = outerRadius * arcPadding * 20
+    const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
+    const padAngle = 0.01
 
-    const scale = d => d
+    const data = materializedData.map(series => {
+      const seriesInnerRadius = innerRadius + seriesRadius * series.index
+      const seriesOuterRadius = seriesRadius + seriesInnerRadius
+      const preData = series.data.map(d => ({
+        x: d.primary,
+        y: d.secondary,
+      }))
+      const pie = makePie().sort(null).padAngle(padAngle).value(d => d.y)
+      const pieData = pie(preData)
+      return pieData.map(d => {
+        const arcData = {
+          startAngle: d.startAngle,
+          endAngle: d.endAngle,
+          padAngle: d.padAngle,
+          padRadius: arcPaddingRadius,
+          innerRadius: seriesInnerRadius + seriesPaddingRadius,
+          outerRadius: seriesOuterRadius,
+          cornerRadius: cornerRadius,
+        }
+        // Calculate the arc for the centroid
+        const arc = makeArc()
+          .startAngle(arcData.startAngle)
+          .endAngle(arcData.endAngle)
+          .padAngle(arcData.padAngle)
+          .padRadius(arcPaddingRadius)
+          .innerRadius(seriesInnerRadius + seriesPaddingRadius)
+          .outerRadius(seriesOuterRadius)
+          .cornerRadius(cornerRadius)
+        const centroid = arc.centroid()
+        return {
+          x: centroid[0] + midX,
+          y: centroid[1] + midY,
+        }
+      })
+    })
+
+    const primaryScale = d =>
+      data[d.seriesIndex]
+        ? data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0
+        : 0
+    const secondaryScale = d =>
+      data[d.seriesIndex]
+        ? data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0
+        : 0
+    primaryScale.range = () => [0, width]
+    secondaryScale.range = () => [height, 0]
 
     const primaryAxis = {
       id,
-      scale,
+      scale: primaryScale,
       cutoutPercentage,
       type,
       primary: true,
+      format: d => d,
       width,
       height,
       radius,
       cornerRadius,
       arcPadding,
       seriesPadding,
+      outerRadius,
+      innerRadius,
+      totalRadius,
+      seriesRadius,
+      arcPaddingRadius,
+      seriesPaddingRadius,
+      padAngle,
     }
 
     const secondaryAxis = {
       id,
-      scale,
+      scale: secondaryScale,
+      format: d => d,
       type,
     }
 

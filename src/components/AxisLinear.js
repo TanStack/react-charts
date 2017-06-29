@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
 import { Animate, Transition } from 'react-move'
-import RAF from 'raf'
 //
 import Utils from '../utils/Utils'
 
@@ -36,6 +35,11 @@ const defaultStyles = {
 
 class Axis extends PureComponent {
   static defaultProps = {
+    min: undefined,
+    max: undefined,
+    hardMin: undefined,
+    hardMax: undefined,
+    base: undefined,
     tickArguments: [],
     tickValues: null,
     tickFormat: null,

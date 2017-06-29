@@ -17,6 +17,11 @@ class Interaction extends PureComponent {
     onHover: noop,
     onActivate: noop,
   }
+  constructor () {
+    super()
+    this.onHover = this.onHover.bind(this)
+    this.onClick = this.onClick.bind(this)
+  }
   render () {
     const {
       interaction,
@@ -27,12 +32,7 @@ class Interaction extends PureComponent {
     } = this.props
 
     // Don't render until we have all dependencies
-    if (
-      !stackData ||
-      !primaryAxis ||
-      !secondaryAxis ||
-      primaryAxis.type === 'pie'
-    ) {
+    if (!stackData || !primaryAxis || !secondaryAxis) {
       return null
     }
 
@@ -58,6 +58,7 @@ class Interaction extends PureComponent {
           datums: null,
           single: false,
         }))
+        .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
       const vor = voronoi().x(d => d.x).y(d => d.y).extent(extent)(voronoiData)
       polygons = vor.polygons()
     } else if (interaction === modeClosestPoint) {
@@ -71,6 +72,7 @@ class Interaction extends PureComponent {
           datums: [d],
           single: true,
         }))
+        .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
       const vor = voronoi().x(d => d.x).y(d => d.y).extent(extent)(voronoiData)
       polygons = vor.polygons()
     } else if (interaction === modeAxis) {
@@ -106,10 +108,7 @@ class Interaction extends PureComponent {
     // elements themselves, so do nothing for them here.
 
     return (
-      <g
-        className='Interaction'
-        onMouseLeave={this.onHover.bind(this, null, null)}
-      >
+      <g className='Interaction' onMouseLeave={() => this.onHover(null, null)}>
         {!!polygons &&
           polygons.map((points, i) => {
             // Only draw the voronoi if we need it
@@ -119,19 +118,14 @@ class Interaction extends PureComponent {
                 key={i}
                 d={path}
                 className='action-voronoi'
-                onMouseEnter={this.onHover.bind(
-                  this,
-                  points.data.series,
-                  points.data.datums
-                )}
-                onClick={this.onClick.bind(
-                  this,
-                  points.data.series,
-                  points.data.datums
-                )}
+                onMouseEnter={e =>
+                  this.onHover(points.data.series, points.data.datums)}
+                onClick={e =>
+                  this.onClick(points.data.series, points.data.datums)}
                 style={{
-                  fill: 'transparent',
-                  strokeWidth: 0,
+                  fill: 'rgba(0,0,0,.2)',
+                  strokeWidth: 5,
+                  stroke: 'rgba(255,255,255,.5)',
                   opacity: 0,
                 }}
               />

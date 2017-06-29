@@ -149,33 +149,45 @@ class Series extends PureComponent {
     // (mutation is okay here, since we have already made a materialized copy)
     stackData.forEach(series => {
       series.data.forEach((d, index) => {
-        d.x = xScale(d.x)
-        d.y = yScale(d.y)
-        d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
-        // Adjust non-bar elements for ordinal scales
-        if (series.type !== 'Bar') {
-          if (xAxis.type === 'ordinal') {
-            d.x += xAxis.tickOffset
+        // Data for cartesian charts
+        if (
+          series.type === 'Line' ||
+          series.type === 'Area' ||
+          series.type === 'Bar'
+        ) {
+          d.x = xScale(d.x)
+          d.y = yScale(d.y)
+          d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
+          // Adjust non-bar elements for ordinal scales
+          if (series.type !== 'Bar') {
+            if (xAxis.type === 'ordinal') {
+              d.x += xAxis.tickOffset
+            }
+            if (yAxis.type === 'ordinal') {
+              d.y += yAxis.tickOffset
+            }
           }
-          if (yAxis.type === 'ordinal') {
-            d.y += yAxis.tickOffset
-          }
-        }
 
-        // Set the default focus point
-        d.focus = {
-          x: d.x,
-          y: d.y,
-        }
+          // Set the default focus point
+          d.focus = {
+            x: d.x,
+            y: d.y,
+          }
 
-        // Adjust the focus point for specific elements
-        if (series.type === 'Bar') {
-          if (!xAxis.vertical) {
-            d.focus.x = d.x + xAxis.tickOffset
+          // Adjust the focus point for specific elements
+          if (series.type === 'Bar') {
+            if (!xAxis.vertical) {
+              d.focus.x = d.x + xAxis.tickOffset
+            }
+            if (!yAxis.vertical) {
+              d.focus.y = d.y + yAxis.tickOffset
+            }
           }
-          if (!yAxis.vertical) {
-            d.focus.y = d.y + yAxis.tickOffset
-          }
+        } else if (series.type === 'Pie') {
+          // data for Radial charts
+          d.focus = primaryAxis.scale(d)
+          d.x = d.focus.x
+          d.y = d.focus.y
         }
       })
     })

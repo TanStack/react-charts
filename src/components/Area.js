@@ -181,5 +181,8 @@ export default Connect(
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    statics: {
+      SeriesType: 'Area',
+    },
   }
 )(Area)

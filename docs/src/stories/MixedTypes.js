@@ -32,7 +32,7 @@ class Story extends Component {
         Ordinal Scale:
         <br />
         <br />
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={700} height={400}>
             <Chart
               data={data}
@@ -53,14 +53,14 @@ class Story extends Component {
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
         <br />
         <br />
 
         Linear Scale
         <br />
         <br />
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={700} height={400}>
             <Chart
               data={data}
@@ -75,7 +75,7 @@ class Story extends Component {
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
       </div>
     )
   }
@@ -106,9 +106,9 @@ function makeSeries(d, i) {
 // #############
 
 const CodeHighlight = require('./components/codeHighlight').default
-const source = require('!raw!./ColumnChart')
+const source = require('!raw!./MixedTypes')
 
-export default () => (
+export default () =>
   <div>
     <Story />
     <br />
@@ -116,4 +116,3 @@ export default () => (
     Source:
     <CodeHighlight>{() => source}</CodeHighlight>
   </div>
-)
