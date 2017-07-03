@@ -20,45 +20,46 @@ Simple, immersive &amp; interactive charts for React
 
 ## Features
 
-- **1kb!** (minified)
+- Hyper Responsive
+- Declarative & Deterministic
+- Highly performant
+- Built-in Animation (using React-Move)
+- Flexible data model support
+- Simple & powerful API
 
-## [Demo](https://react-charts.js.org/?selectedKind=2.%20Demos&selectedStory=Kitchen%20Sink&full=0&down=0&left=1&panelRight=0&downPanel=kadirahq%2Fstorybook-addon-actions%2Factions-panel)
+## [Demo](https://react-charts.js.org/#/story/line-chart)
 
 ## Table of Contents
 - [Installation](#installation)
-- [Example](#example)
+- [Quick Example](#quick-example)
+- [Examples](https://react-charts.js.org)
+
 
 ## Installation
 ```bash
 $ yarn add react-charts
 ```
 
-## Example
+## Quick Example
 ```javascript
 import React from 'react'
-import { Line } from 'react-charts'
+import { Chart, Axis, Series, Tooltip, Cursor, Line } from 'react-charts'
 
-const myChart = (
-  <Line
-    data={[...]}
-  />
-)
-```
-
-```javascript
-import React from 'react'
-import { Chart, Axis, Scale, Series, Toltip } from 'react-charts'
-
-const myCustomChart = (
-  <Chart>
-    <Axis>
-      <Scale>
-        <Series />
-        <Series />
-        <Series />
-      </Scale>
-    </Axis>
+const lineChart = (
+  <Chart data={...}>
+    <Axis
+      primary
+      type="time"
+      position="bottom"
+    />
+    <Axis
+      type="linear"
+      position="left"
+    />
+    <Series type={Line} />
     <Tooltip />
+    <Cursor primary />
+    <Cursor />
   </Chart>
 )
 ```
