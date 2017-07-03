@@ -13,8 +13,6 @@ import Text from '../primitives/Text'
 
 import Selectors from '../utils/Selectors'
 
-const fontSize = 10
-
 export const positionTop = 'top'
 export const positionRight = 'right'
 export const positionBottom = 'bottom'
@@ -29,8 +27,8 @@ const defaultStyles = {
   tick: {
     fontSize: 10,
     color: '#000',
-    fontFamily: 'sans-serif'
-  }
+    fontFamily: 'sans-serif',
+  },
 }
 
 class Axis extends PureComponent {
@@ -77,7 +75,11 @@ class Axis extends PureComponent {
       newProps.materializedData !== oldProps.materializedData ||
       newProps.height !== oldProps.height ||
       newProps.width !== oldProps.width ||
-      newProps.position !== oldProps.position
+      newProps.position !== oldProps.position ||
+      newProps.min !== oldProps.min ||
+      newProps.max !== oldProps.max ||
+      newProps.hardMin !== oldProps.hardMin ||
+      newProps.hardMax !== oldProps.hardMax
     ) {
       this.updateScale(newProps)
     }
@@ -105,7 +107,7 @@ class Axis extends PureComponent {
       tickSizeInner,
       tickSizeOuter,
       display,
-      styles
+      styles,
     } = this.props
 
     const { rotation } = this.state
@@ -113,7 +115,7 @@ class Axis extends PureComponent {
     // Combine default styles with style props
     const axisStyles = {
       ...defaultStyles,
-      ...styles
+      ...styles,
     }
 
     // Render Dependencies
@@ -133,7 +135,7 @@ class Axis extends PureComponent {
       directionMultiplier,
       tickOffset,
       gridOffset,
-      spacing
+      spacing,
     } = axis
 
     return (
@@ -209,11 +211,7 @@ class Axis extends PureComponent {
                   : position === positionBottom ? translateY(height) : undefined
               }
             >
-              <Path
-                className='domain'
-                d={axisPath}
-                style={axisStyles.line}
-              />
+              <Path className='domain' d={axisPath} style={axisStyles.line} />
               <Transition
                 data={[...ticks]}
                 getKey={(d, i) => String(d)}

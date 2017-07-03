@@ -217,10 +217,10 @@ export default function updateScale (props) {
 
   // If hard min and max are set, override any "nice" rounding values
   if (typeof hardMin === 'number') {
-    scale.domain([Math.max(domain[0], hardMin), scale.domain()[1]])
+    scale.domain([hardMin, scale.domain()[1]])
   }
   if (typeof hardMax === 'number') {
-    scale.domain([scale.domain()[0], Math.min(domain[1], hardMax)])
+    scale.domain([scale.domain()[0], hardMax])
   }
 
   // Invert if necessary
