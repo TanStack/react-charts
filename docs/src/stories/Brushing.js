@@ -29,6 +29,15 @@ class Story extends Component {
         >
           Randomize Data
         </button>
+        <button
+          onClick={() =>
+            this.setState({
+              min: null,
+              max: null
+            })}
+        >
+          Reset Zoom
+        </button>
 
         <br />
         <br />
