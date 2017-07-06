@@ -7,19 +7,19 @@ const defaultStyle = {
   fill: '#333',
   opacity: 1,
   rx: 0,
-  ry: 0
+  ry: 0,
 }
 
 export default class Rectangle extends PureComponent {
   static defaultProps = {
-    opacity: 1
+    opacity: 1,
   }
-  render() {
+  render () {
     const { style, opacity, x1, y1, x2, y2, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style
+      ...style,
     }
 
     const xStart = Math.min(x1, x2)
@@ -42,7 +42,7 @@ export default class Rectangle extends PureComponent {
               height={height}
               style={{
                 ...inter,
-                opacity: opacity * inter.opacity
+                opacity: opacity * inter.opacity,
               }}
             />
           )

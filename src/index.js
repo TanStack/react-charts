@@ -4,6 +4,7 @@ import Axis from './components/Axis'
 import Series from './components/Series'
 import Tooltip from './components/Tooltip'
 import Cursor from './components/Cursor'
+import Brush from './components/Brush'
 // types
 import Line from './components/Line'
 import Area from './components/Area'
@@ -20,6 +21,7 @@ module.exports = {
   Series,
   Tooltip,
   Cursor,
+  Brush,
   // Types
   Line,
   Area,

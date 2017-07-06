@@ -14,6 +14,7 @@ import ColumnChart from './stories/ColumnChart.js'
 import CustomStyles from './stories/CustomStyles.js'
 import CustomTooltip from './stories/CustomTooltip.js'
 import Cursors from './stories/Cursors.js'
+import Brushing from './stories/Brushing.js'
 import CustomCursors from './stories/CustomCursors.js'
 import InteractionModes from './stories/InteractionModes.js'
 import DynamicParent from './stories/DynamicParent.js'
@@ -30,7 +31,7 @@ export default class App extends React.Component {
           width: '100%',
           height: '100%'
         }}
-        pathPrefix='story/'
+        pathPrefix="story/"
         StoryWrapper={props =>
           <defaultProps.StoryWrapper
             css={{
@@ -38,7 +39,7 @@ export default class App extends React.Component {
             }}
           >
             <a
-              href='//github.com/tannerlinsley/react-charts'
+              href="//github.com/tannerlinsley/react-charts"
               style={{
                 display: 'block',
                 textAlign: 'center',
@@ -47,7 +48,7 @@ export default class App extends React.Component {
             >
               <img
                 src={bannerImg}
-                alt='React Charts Logo'
+                alt="React Charts Logo"
                 style={{
                   width: '100px'
                 }}
@@ -69,6 +70,7 @@ export default class App extends React.Component {
           { name: 'Custom Styles', component: CustomStyles },
           { name: 'Custom Tooltip', component: CustomTooltip },
           { name: 'Cursors', component: Cursors },
+          { name: 'Brushing', component: Brushing },
           { name: 'Custom Cursors', component: CustomCursors },
           { name: 'Interaction Modes', component: InteractionModes },
           { name: 'Dynamic Parent', component: DynamicParent },

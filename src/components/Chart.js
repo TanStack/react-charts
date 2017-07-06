@@ -24,8 +24,10 @@ class Chart extends PureComponent {
     super()
     this.updateDataModel = this.updateDataModel.bind(this)
     this.measure = this.measure.bind(this)
-    this.onCursor = Utils.throttle(this.onCursor.bind(this), 16)
-    this.onCursorLeave = this.onCursorLeave.bind(this)
+    this.onMouseMove = Utils.throttle(this.onMouseMove.bind(this), 16)
+    this.onMouseLeave = this.onMouseLeave.bind(this)
+    this.onMouseDown = this.onMouseDown.bind(this)
+    this.onMouseUp = this.onMouseUp.bind(this)
   }
   componentDidMount () {
     this.props.dispatch(
@@ -199,13 +201,15 @@ class Chart extends PureComponent {
                 transform={`translate(${gridX || 0}, ${gridY || 0})`}
                 onMouseEnter={e => {
                   e.persist()
-                  this.onCursor(e)
+                  this.onMouseMove(e)
                 }}
                 onMouseMove={e => {
                   e.persist()
-                  this.onCursor(e)
+                  this.onMouseMove(e)
                 }}
-                onMouseLeave={this.onCursorLeave}
+                onMouseLeave={this.onMouseLeave}
+                onMouseDown={this.onMouseDown}
+                onMouseUp={this.onMouseUp}
               >
                 <Rectangle
                   // This is to ensure the cursor always has something to hit
@@ -226,7 +230,7 @@ class Chart extends PureComponent {
       </div>
     )
   }
-  onCursor (e) {
+  onMouseMove (e) {
     const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
     const { gridX, gridY, dispatch } = this.props
@@ -235,9 +239,11 @@ class Chart extends PureComponent {
       state => ({
         ...state,
         cursor: {
+          ...state.cursor,
           active: true,
           x: clientX - this.dims.left - gridX,
           y: clientY - this.dims.top - gridY,
+          dragging: state.cursor && state.cursor.down,
         },
       }),
       {
@@ -245,7 +251,7 @@ class Chart extends PureComponent {
       }
     )
   }
-  onCursorLeave () {
+  onMouseLeave () {
     this.props.dispatch(
       state => ({
         ...state,
@@ -260,6 +266,44 @@ class Chart extends PureComponent {
       }),
       {
         type: 'cursor_hovered',
+      }
+    )
+  }
+  onMouseDown () {
+    const { dispatch } = this.props
+
+    dispatch(
+      state => ({
+        ...state,
+        cursor: {
+          ...state.cursor,
+          sourceX: state.cursor.x,
+          sourceY: state.cursor.y,
+          down: true,
+        },
+      }),
+      {
+        type: 'cursor',
+      }
+    )
+  }
+  onMouseUp () {
+    const { dispatch } = this.props
+    dispatch(
+      state => ({
+        ...state,
+        cursor: {
+          ...state.cursor,
+          down: false,
+          dragging: false,
+          released: {
+            x: state.cursor.x,
+            y: state.cursor.y,
+          },
+        },
+      }),
+      {
+        type: 'cursor',
       }
     )
   }

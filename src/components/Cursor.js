@@ -6,7 +6,10 @@ import Selectors from '../utils/Selectors'
 
 class Cursor extends PureComponent {
   static defaultProps = {
-    children: ({ label }) => <span>{label}</span>,
+    children: ({ label }) =>
+      (<span>
+        {label}
+      </span>),
   }
   constructor () {
     super()
@@ -60,9 +63,10 @@ class Cursor extends PureComponent {
           })
         })
         y = closestDatum.focus.x
-        label = typeof closestDatum.primary !== 'undefined'
-          ? axis.format(closestDatum.primary)
-          : undefined
+        label =
+          typeof closestDatum.primary !== 'undefined'
+            ? axis.format(closestDatum.primary)
+            : undefined
       } else {
         let smallestDistance = 10000000
         stackData.forEach(series => {
@@ -75,9 +79,10 @@ class Cursor extends PureComponent {
           })
         })
         x = closestDatum.focus.x
-        label = typeof closestDatum.primary !== 'undefined'
-          ? axis.format(closestDatum.primary)
-          : undefined
+        label =
+          typeof closestDatum.primary !== 'undefined'
+            ? axis.format(closestDatum.primary)
+            : undefined
       }
     }
 
@@ -86,9 +91,8 @@ class Cursor extends PureComponent {
       x2 = siblingRange[1]
       y1 = y - 1
       y2 = y + 1
-      label = typeof label !== 'undefined'
-        ? label
-        : axis.format(invert(cursor.y))
+      label =
+        typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -101,9 +105,8 @@ class Cursor extends PureComponent {
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label = typeof label !== 'undefined'
-        ? label
-        : axis.format(invert(cursor.x))
+      label =
+        typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -146,6 +149,7 @@ class Cursor extends PureComponent {
               opacity: inter.visibility,
             }}
           >
+            {JSON.stringify(cursor, null, 2)}
             <div
               style={{
                 position: 'absolute',
