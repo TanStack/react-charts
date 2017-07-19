@@ -4,6 +4,7 @@ import Axis from './components/Axis'
 import Series from './components/Series'
 import Tooltip from './components/Tooltip'
 import Cursor from './components/Cursor'
+import Brush from './components/Brush'
 // types
 import Line from './components/Line'
 import Area from './components/Area'
@@ -11,7 +12,7 @@ import Bar from './components/Bar'
 import Bubble from './components/Bubble'
 import Pie from './components/Pie'
 // Utils
-import DecorateGroups from './utils/DecorateGroups'
+import Curves from './utils/Curves'
 
 module.exports = {
   // Components
@@ -20,6 +21,7 @@ module.exports = {
   Series,
   Tooltip,
   Cursor,
+  Brush,
   // Types
   Line,
   Area,
@@ -27,5 +29,5 @@ module.exports = {
   Bubble,
   Pie,
   // Utils
-  DecorateGroups,
+  Curves,
 }
