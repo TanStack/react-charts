@@ -6,7 +6,7 @@ import { ResizableBox } from 'react-resizable'
 import source from '!raw!./CustomCursors'
 import CodeHighlight from './components/codeHighlight'
 //
-import { Chart, Axis, Series, Tooltip, Cursor, Area, Brush } from '../../../lib'
+import { Chart, Axis, Series, Tooltip, Cursor, Line, Brush } from '../../../lib'
 
 class Story extends Component {
   constructor() {
@@ -52,8 +52,8 @@ class Story extends Component {
                 hardMin={min}
                 hardMax={max}
               />
-              <Axis type="linear" position="left" stacked />
-              <Series type={Area} />
+              <Axis type="linear" position="left" />
+              <Series type={Line} />
               <Brush
                 onSelect={brushData => {
                   this.setState({

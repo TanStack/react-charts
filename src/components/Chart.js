@@ -312,6 +312,7 @@ class Chart extends PureComponent {
 const ReactChart = Connect(
   () => {
     const selectors = {
+      primaryAxis: Selectors.primaryAxis(),
       gridX: Selectors.gridX(),
       gridY: Selectors.gridY(),
       offset: Selectors.offset(),

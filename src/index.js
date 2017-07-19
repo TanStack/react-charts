@@ -12,7 +12,7 @@ import Bar from './components/Bar'
 import Bubble from './components/Bubble'
 import Pie from './components/Pie'
 // Utils
-import DecorateGroups from './utils/DecorateGroups'
+import Curves from './utils/Curves'
 
 module.exports = {
   // Components
@@ -29,5 +29,5 @@ module.exports = {
   Bubble,
   Pie,
   // Utils
-  DecorateGroups,
+  Curves,
 }

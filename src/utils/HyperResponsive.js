@@ -10,7 +10,7 @@ export default function HyperResponsive (WrappedComponent) {
       this.state = {
         ready: false,
         width: 0,
-        height: 0
+        height: 0,
       }
       this.resize = this.resize.bind(this)
     }
@@ -30,36 +30,26 @@ export default function HyperResponsive (WrappedComponent) {
       this.setState({
         ready: true,
         width: parseInt(window.getComputedStyle(this.el).width),
-        height: parseInt(window.getComputedStyle(this.el).height)
+        height: parseInt(window.getComputedStyle(this.el).height),
       })
     }
     render () {
-      const {
-        style,
-        ...rest
-      } = this.props
-      const {
-        ready,
-        width,
-        height
-      } = this.state
+      const { style, ...rest } = this.props
+      const { ready, width, height } = this.state
       return (
         <div
           className='ResponsiveWrapper'
-          ref={el => { this.el = el }}
+          ref={el => {
+            this.el = el
+          }}
           style={{
             width: '100%',
             height: '100%',
-            ...style
+            ...style,
           }}
         >
-          {ready && (
-            <WrappedComponent
-              width={width}
-              height={height}
-              {...rest}
-            />
-          )}
+          {ready &&
+            <WrappedComponent width={width} height={height} {...rest} />}
         </div>
       )
     }

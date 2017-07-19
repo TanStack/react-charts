@@ -31,7 +31,7 @@ class Story extends Component {
         <br />
         <br />
 
-        {_.range(1).map((d, i) => (
+        {_.range(1).map((d, i) =>
           <ResizableBox key={i} width={500} height={300}>
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
@@ -40,11 +40,13 @@ class Story extends Component {
               <Tooltip />
             </Chart>
           </ResizableBox>
-        ))}
+        )}
 
         <br />
         <br />
-        <CodeHighlight>{() => source}</CodeHighlight>
+        <CodeHighlight>
+          {() => source}
+        </CodeHighlight>
       </div>
     )
   }

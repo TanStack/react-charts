@@ -2,9 +2,10 @@ import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
 import { Connect } from 'react-state'
 
-import { area, line, curveMonotoneX } from 'd3-shape'
+import { area, line } from 'd3-shape'
 //
 import Utils from '../utils/Utils'
+import Curves from '../utils/Curves'
 import {
   selectSeries,
   selectDatum,
@@ -26,6 +27,7 @@ const circleDefaultStyle = {
 class Area extends PureComponent {
   static defaultProps = {
     showPoints: false,
+    curve: 'monotoneX',
   }
   constructor () {
     super()
@@ -39,6 +41,7 @@ class Area extends PureComponent {
       series,
       visibility,
       showPoints,
+      curve,
       //
       selected,
       hovered,
@@ -50,12 +53,12 @@ class Area extends PureComponent {
 
     const areaFn = area()
       .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
-      .curve(curveMonotoneX)
+      .curve(Curves[curve] || curve)
       .y0(d => d[2])
 
     const lineFn = line()
       .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
-      .curve(curveMonotoneX)
+      .curve(Curves[curve] || curve)
 
     const data = series.data.map(d => ({
       x: d.x,
@@ -90,14 +93,15 @@ class Area extends PureComponent {
             ])
           )
 
-          const seriesInteractionProps = interaction === 'series'
-            ? {
-              onClick: () => this.selectSeries(series),
-              onMouseEnter: () => this.hoverSeries(series),
-              onMouseMove: () => this.hoverSeries(series),
-              onMouseLeave: () => this.hoverSeries(null),
-            }
-            : {}
+          const seriesInteractionProps =
+            interaction === 'series'
+              ? {
+                onClick: () => this.selectSeries(series),
+                onMouseEnter: () => this.hoverSeries(series),
+                onMouseMove: () => this.hoverSeries(series),
+                onMouseLeave: () => this.hoverSeries(null),
+              }
+              : {}
 
           return (
             <g>
@@ -136,14 +140,15 @@ class Area extends PureComponent {
                     datum.statusStyles
                   )
 
-                  const datumInteractionProps = interaction === 'element'
-                    ? {
-                      onClick: () => this.selectDatum(datum),
-                      onMouseEnter: () => this.hoverDatum(datum),
-                      onMouseMove: () => this.hoverDatum(datum),
-                      onMouseLeave: () => this.hoverDatum(null),
-                    }
-                    : {}
+                  const datumInteractionProps =
+                    interaction === 'element'
+                      ? {
+                        onClick: () => this.selectDatum(datum),
+                        onMouseEnter: () => this.hoverDatum(datum),
+                        onMouseMove: () => this.hoverDatum(datum),
+                        onMouseLeave: () => this.hoverDatum(null),
+                      }
+                      : {}
 
                   return (
                     <Circle

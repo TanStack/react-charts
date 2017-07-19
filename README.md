@@ -64,6 +64,37 @@ const lineChart = (
 )
 ```
 
+## Curve Types
+All series types that support lines or curves can be configured to use any [curve function from `d3-shape`](https://github.com/d3/d3-shape#curves) by passing one of the following strings as the `curve` prop to a series component. You may also pass your own curve function directly from d3 or if you're feeling powerful, even create your own!
+
+Note the following string correspond to their respective d3 curve functions but with the `curve` prefix removed.
+- `basisClosed`
+- `basisOpen`
+- `basis`
+- `bundle`
+- `cardinalClosed`
+- `cardinalOpen`
+- `cardinal`
+- `catmullRomClosed`
+- `catmullRomOpen`
+- `catmullRom`
+- `linearClosed`
+- `linear`
+- `monotoneX` (default)
+- `monotoneY`
+- `natural`
+- `step`
+- `stepAfter`
+- `stepBefore`
+
+Example
+```javascript
+<Chart>
+  ...
+  <Series type={Line} curve='cardinal' />
+</Chart>
+```
+
 ## Contributing
 To suggest a feature, create an issue if it does not already exist.
 If you would like to help develop a suggested feature follow these steps:
