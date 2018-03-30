@@ -69,7 +69,7 @@ class Pie extends PureComponent {
 
     return (
       <Animate
-        default={{
+        start={{
           data,
           visibility: 0,
           seriesPaddingRadius: 0,
@@ -78,14 +78,14 @@ class Pie extends PureComponent {
           cornerRadius,
           arcPaddingRadius,
         }}
-        data={{
-          data,
-          visibility,
-          seriesPaddingRadius,
-          seriesInnerRadius,
-          seriesOuterRadius,
-          cornerRadius,
-          arcPaddingRadius,
+        update={{
+          data: [data],
+          visibility: [visibility],
+          seriesPaddingRadius: [seriesPaddingRadius],
+          seriesInnerRadius: [seriesInnerRadius],
+          seriesOuterRadius: [seriesOuterRadius],
+          cornerRadius: [cornerRadius],
+          arcPaddingRadius: [arcPaddingRadius],
         }}
         duration={500}
       >

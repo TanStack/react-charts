@@ -235,12 +235,6 @@ class Axis extends Component {
                   rotation: [rotation],
                   measureable: 1,
                   events: {
-                    start: () => {
-                      this.measure()
-                    },
-                    interrupt: () => {
-                      this.measure()
-                    },
                     end: () => {
                       this.measure()
                     },
@@ -253,12 +247,6 @@ class Axis extends Component {
                   rotation: [rotation],
                   measureable: 1,
                   events: {
-                    start: () => {
-                      this.measure()
-                    },
-                    interrupt: () => {
-                      this.measure()
-                    },
                     end: () => {
                       this.measure()
                     },

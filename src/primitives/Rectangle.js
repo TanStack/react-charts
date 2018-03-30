@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
-import { resolve } from 'uri-js'
 //
 
 const defaultStyle = {
