@@ -4,12 +4,7 @@ import { Animate } from 'react-move'
 //
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
-import {
-  selectSeries,
-  hoverSeries,
-  selectDatum,
-  hoverDatum,
-} from '../utils/interactionMethods'
+import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 import Rectangle from '../primitives/Rectangle'
 
@@ -47,32 +42,34 @@ class Bars extends PureComponent {
 
     return (
       <Animate
-        default={{
+        start={{
           data,
           barSize,
           barOffset,
-          visibility: 0,
         }}
-        data={{
-          data,
-          barSize,
-          barOffset,
-          visibility,
+        update={{
+          data: [data],
+          barSize: [barSize],
+          barOffset: [barOffset],
         }}
       >
         {inter => {
-          const seriesInteractionProps = interaction === 'series'
-            ? {
-              onClick: () => this.selectSeries(series),
-              onMouseEnter: () => this.hoverSeries(series),
-              onMouseMove: () => this.hoverSeries(series),
-              onMouseLeave: () => this.hoverSeries(null),
-            }
-            : {}
+          const seriesInteractionProps =
+            interaction === 'series'
+              ? {
+                  onClick: () => this.selectSeries(series),
+                  onMouseEnter: () => this.hoverSeries(series),
+                  onMouseMove: () => this.hoverSeries(series),
+                  onMouseLeave: () => this.hoverSeries(null),
+                }
+              : {}
           return (
-            <g className='series bar'>
+            <g className="series bar">
               {series.data.map((datum, i) => {
-                let x1, y1, x2, y2
+                let x1
+                let y1
+                let x2
+                let y2
                 if (primaryAxis.vertical) {
                   x1 = inter.data[i].base
                   x2 = inter.data[i].x
@@ -85,25 +82,18 @@ class Bars extends PureComponent {
                   y2 = inter.data[i].base
                 }
 
-                const status = Utils.datumStatus(
-                  series,
-                  datum,
-                  hovered,
-                  selected
-                )
-                const dataStyle = Utils.getStatusStyle(
-                  status,
-                  datum.statusStyles
-                )
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                const datumInteractionProps = interaction === 'element'
-                  ? {
-                    onClick: () => this.selectDatum(datum),
-                    onMouseEnter: () => this.hoverDatum(datum),
-                    onMouseMove: () => this.hoverDatum(datum),
-                    onMouseLeave: () => this.hoverDatum(null),
-                  }
-                  : {}
+                const datumInteractionProps =
+                  interaction === 'element'
+                    ? {
+                        onClick: () => this.selectDatum(datum),
+                        onMouseEnter: () => this.hoverDatum(datum),
+                        onMouseMove: () => this.hoverDatum(datum),
+                        onMouseLeave: () => this.hoverDatum(null),
+                      }
+                    : {}
 
                 return (
                   <Rectangle
@@ -114,11 +104,11 @@ class Bars extends PureComponent {
                       ...dataStyle.rectangle,
                     }}
                     key={i}
-                    x1={isNaN(x1) ? null : x1}
-                    y1={isNaN(y1) ? null : y1}
-                    x2={isNaN(x2) ? null : x2}
-                    y2={isNaN(y2) ? null : y2}
-                    opacity={inter.visibility}
+                    x1={Number.isNaN(x1) ? null : x1}
+                    y1={Number.isNaN(y1) ? null : y1}
+                    x2={Number.isNaN(x2) ? null : x2}
+                    y2={Number.isNaN(y2) ? null : y2}
+                    opacity={visibility}
                     {...seriesInteractionProps}
                     {...datumInteractionProps}
                   />
@@ -137,14 +127,12 @@ export default Connect(
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
     }
-    return (state, props) => {
-      return {
-        primaryAxis: selectors.primaryAxis(state),
-        hovered: state.hovered,
-        selected: state.selected,
-        interaction: state.interaction,
-      }
-    }
+    return state => ({
+      primaryAxis: selectors.primaryAxis(state),
+      hovered: state.hovered,
+      selected: state.selected,
+      interaction: state.interaction,
+    })
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',

@@ -5,12 +5,7 @@ import { pie as makePie, arc as makeArc } from 'd3-shape'
 
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
-import {
-  selectSeries,
-  selectDatum,
-  hoverSeries,
-  hoverDatum,
-} from '../utils/interactionMethods'
+import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 //
 import Path from '../primitives/Path'
@@ -48,11 +43,7 @@ class Pie extends PureComponent {
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const {
-      radius,
-      cutoutPercentage,
-      cornerRadius,
-      arcPadding,
-      seriesPadding,
+      radius, cutoutPercentage, cornerRadius, arcPadding, seriesPadding,
     } = primaryAxis
 
     const outerRadius = radius
@@ -70,7 +61,10 @@ class Pie extends PureComponent {
       y: d.secondary,
     }))
 
-    const pie = makePie().sort(null).padAngle(0.01).value(d => d.y)
+    const pie = makePie()
+      .sort(null)
+      .padAngle(0.01)
+      .value(d => d.y)
     const data = pie(preData)
 
     return (
@@ -96,40 +90,31 @@ class Pie extends PureComponent {
         duration={500}
       >
         {inter => {
-          const seriesInteractionProps = interaction === 'series'
-            ? {
-              onClick: () => this.selectSeries(series),
-              onMouseEnter: () => this.hoverSeries(series),
-              onMouseMove: () => this.hoverSeries(series),
-              onMouseLeave: () => this.hoverSeries(null),
-            }
-            : {}
+          const seriesInteractionProps =
+            interaction === 'series'
+              ? {
+                  onClick: () => this.selectSeries(series),
+                  onMouseEnter: () => this.hoverSeries(series),
+                  onMouseMove: () => this.hoverSeries(series),
+                  onMouseLeave: () => this.hoverSeries(null),
+                }
+              : {}
 
           return (
-            <g
-              transform={`translate(${primaryAxis.width /
-                2}, ${primaryAxis.height / 2})`}
-            >
+            <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
               {series.data.map((datum, i) => {
-                const status = Utils.datumStatus(
-                  series,
-                  datum,
-                  hovered,
-                  selected
-                )
-                const dataStyle = Utils.getStatusStyle(
-                  status,
-                  datum.statusStyles
-                )
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                const datumInteractionProps = interaction === 'element'
-                  ? {
-                    onClick: () => this.selectDatum(datum),
-                    onMouseEnter: () => this.hoverDatum(datum),
-                    onMouseMove: () => this.hoverDatum(datum),
-                    onMouseLeave: () => this.hoverDatum(null),
-                  }
-                  : {}
+                const datumInteractionProps =
+                  interaction === 'element'
+                    ? {
+                        onClick: () => this.selectDatum(datum),
+                        onMouseEnter: () => this.hoverDatum(datum),
+                        onMouseMove: () => this.hoverDatum(datum),
+                        onMouseLeave: () => this.hoverDatum(null),
+                      }
+                    : {}
 
                 const arc = Arc()
                   .startAngle(inter.data[i].startAngle)
@@ -170,14 +155,12 @@ export default Connect(
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
     }
-    return (state, props) => {
-      return {
-        primaryAxis: selectors.primaryAxis(state),
-        hovered: state.hovered,
-        selected: state.selected,
-        interaction: state.interaction,
-      }
-    }
+    return state => ({
+      primaryAxis: selectors.primaryAxis(state),
+      hovered: state.hovered,
+      selected: state.selected,
+      interaction: state.interaction,
+    })
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',

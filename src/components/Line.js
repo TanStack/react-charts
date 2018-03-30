@@ -7,12 +7,7 @@ import { line } from 'd3-shape'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 
-import {
-  selectSeries,
-  selectDatum,
-  hoverSeries,
-  hoverDatum,
-} from '../utils/interactionMethods'
+import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 //
 import Path from '../primitives/Path'
@@ -66,33 +61,27 @@ class Line extends PureComponent {
 
     return (
       <Animate
-        default={{
+        start={{
           data,
-          visibility: 0,
         }}
-        data={{
-          data,
-          visibility,
+        update={{
+          data: [data],
         }}
         duration={500}
-        ignore={['originalData']}
       >
         {inter => {
           const path = lineFn(
-            inter.data.map(d => [
-              isNaN(d.x) ? null : d.x,
-              isNaN(d.y) ? null : d.y,
-            ])
+            inter.data.map(d => [Number.isNaN(d.x) ? null : d.x, Number.isNaN(d.y) ? null : d.y])
           )
 
           const seriesInteractionProps =
             interaction === 'series'
               ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null),
-              }
+                  onClick: () => this.selectSeries(series),
+                  onMouseEnter: () => this.hoverSeries(series),
+                  onMouseMove: () => this.hoverSeries(series),
+                  onMouseLeave: () => this.hoverSeries(null),
+                }
               : {}
 
           return (
@@ -105,37 +94,29 @@ class Line extends PureComponent {
                   ...style.line,
                   fill: 'none',
                 }}
-                opacity={inter.visibility}
+                opacity={visibility}
                 {...seriesInteractionProps}
               />
               {showPoints &&
                 series.data.map((datum, i) => {
-                  const status = Utils.datumStatus(
-                    series,
-                    datum,
-                    hovered,
-                    selected
-                  )
-                  const dataStyle = Utils.getStatusStyle(
-                    status,
-                    datum.statusStyles
-                  )
+                  const status = Utils.datumStatus(series, datum, hovered, selected)
+                  const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
                   const datumInteractionProps =
                     interaction === 'element'
                       ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
+                          onClick: () => this.selectDatum(datum),
+                          onMouseEnter: () => this.hoverDatum(datum),
+                          onMouseMove: () => this.hoverDatum(datum),
+                          onMouseLeave: () => this.hoverDatum(null),
+                        }
                       : {}
 
                   return (
                     <Circle
                       key={i}
-                      x={inter.data[i].x}
-                      y={inter.data[i].y}
+                      x={inter.data[i] ? inter.data[i].x : undefined}
+                      y={inter.data[i] ? inter.data[i].y : undefined}
                       style={{
                         ...circleDefaultStyle,
                         ...style,
@@ -143,7 +124,7 @@ class Line extends PureComponent {
                         ...dataStyle,
                         ...dataStyle.circle,
                       }}
-                      opacity={inter.visibility}
+                      opacity={visibility}
                       {...seriesInteractionProps}
                       {...datumInteractionProps}
                     />
@@ -158,13 +139,11 @@ class Line extends PureComponent {
 }
 
 export default Connect(
-  (state, props) => {
-    return {
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
-    }
-  },
+  state => ({
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction,
+  }),
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
     statics: {

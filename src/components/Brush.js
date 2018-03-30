@@ -10,10 +10,7 @@ class Brush extends PureComponent {
   }
   componentWillReceiveProps (nextProps) {
     const { onSelect, cursor, primaryAxis } = this.props
-    if (
-      this.props.cursor &&
-      nextProps.cursor.released !== this.props.cursor.released
-    ) {
+    if (this.props.cursor && nextProps.cursor.released !== this.props.cursor.released) {
       onSelect({
         cursor: nextProps.cursor.released,
         start: primaryAxis.scale.invert(cursor.sourceX),
@@ -22,11 +19,13 @@ class Brush extends PureComponent {
     }
   }
   render () {
-    const { cursor = {}, offset, gridX, gridY, gridHeight } = this.props
+    const {
+      cursor = {}, offset, gridX, gridY, gridHeight,
+    } = this.props
 
     return (
       <div
-        className='Brush'
+        className="Brush"
         style={{
           pointerEvents: 'none',
           position: 'absolute',
@@ -50,7 +49,7 @@ class Brush extends PureComponent {
 }
 
 export default Connect(
-  state => {
+  () => {
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
       secondaryAxis: Selectors.secondaryAxis(),

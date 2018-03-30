@@ -1,4 +1,4 @@
-import { PureComponent } from 'react'
+import { Component } from 'react'
 import { Connect } from 'react-state'
 import { arc as makeArc, pie as makePie } from 'd3-shape'
 //
@@ -11,7 +11,7 @@ export const positionRight = 'right'
 export const positionBottom = 'bottom'
 export const positionLeft = 'left'
 
-class AxisPie extends PureComponent {
+class AxisPie extends Component {
   static defaultProps = {
     tickArguments: [],
     tickValues: null,
@@ -99,7 +99,10 @@ class AxisPie extends PureComponent {
         x: d.primary,
         y: d.secondary,
       }))
-      const pie = makePie().sort(null).padAngle(padAngle).value(d => d.y)
+      const pie = makePie()
+        .sort(null)
+        .padAngle(padAngle)
+        .value(d => d.y)
       const pieData = pie(preData)
       return pieData.map(d => {
         const arcData = {
@@ -109,7 +112,7 @@ class AxisPie extends PureComponent {
           padRadius: arcPaddingRadius,
           innerRadius: seriesInnerRadius + seriesPaddingRadius,
           outerRadius: seriesOuterRadius,
-          cornerRadius: cornerRadius,
+          cornerRadius,
         }
         // Calculate the arc for the centroid
         const arc = makeArc()
@@ -129,13 +132,9 @@ class AxisPie extends PureComponent {
     })
 
     const primaryScale = d =>
-      data[d.seriesIndex]
-        ? data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0
-        : 0
+      data[d.seriesIndex] ? (data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0) : 0
     const secondaryScale = d =>
-      data[d.seriesIndex]
-        ? data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0
-        : 0
+      data[d.seriesIndex] ? (data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0) : 0
     primaryScale.range = () => [0, width]
     secondaryScale.range = () => [height, 0]
 
@@ -193,17 +192,13 @@ export default Connect(
       gridWidth: Selectors.gridWidth(),
       gridHeight: Selectors.gridHeight(),
     }
-    return (state, props) => {
-      return {
-        materializedData: state.materializedData,
-        width: selectors.gridWidth(state),
-        height: selectors.gridHeight(state),
-      }
-    }
+    return state => ({
+      materializedData: state.materializedData,
+      width: selectors.gridWidth(state),
+      height: selectors.gridHeight(state),
+    })
   },
   {
-    filter: (oldState, newState, meta) => {
-      return meta.type !== 'cursor'
-    },
+    filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(AxisPie)

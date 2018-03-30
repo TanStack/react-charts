@@ -15,14 +15,11 @@ export default class Circle extends PureComponent {
     opacity: 1,
   }
   render () {
-    const { x, y, r, style, opacity, ...rest } = this.props
+    const {
+      x, y, r, style, opacity, ...rest
+    } = this.props
 
-    if (
-      typeof x !== 'number' ||
-      typeof y !== 'number' ||
-      isNaN(x) ||
-      isNaN(y)
-    ) {
+    if (typeof x !== 'number' || typeof y !== 'number' || Number.isNaN(x) || Number.isNaN(y)) {
       return null
     }
 
@@ -30,22 +27,26 @@ export default class Circle extends PureComponent {
       ...defaultStyle,
       ...style,
     }
+
+    const updateResolvedStyle = {}
+    Object.keys(resolvedStyle).forEach(key => {
+      updateResolvedStyle[key] = [resolvedStyle[key]]
+    })
+
     return (
-      <Animate data={resolvedStyle}>
-        {inter => {
-          return (
-            <circle
-              {...rest}
-              cx={x || 0}
-              cy={y || 0}
-              r={r || 0}
-              style={{
-                ...inter,
-                opacity: opacity * inter.opacity,
-              }}
-            />
-          )
-        }}
+      <Animate start={resolvedStyle} data={updateResolvedStyle}>
+        {inter => (
+          <circle
+            {...rest}
+            cx={x || 0}
+            cy={y || 0}
+            r={r || 0}
+            style={{
+              ...inter,
+              opacity: opacity * inter.opacity,
+            }}
+          />
+        )}
       </Animate>
     )
   }

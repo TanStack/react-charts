@@ -14,7 +14,7 @@ import Pie from './components/Pie'
 // Utils
 import Curves from './utils/Curves'
 
-module.exports = {
+export {
   // Components
   Chart,
   Axis,

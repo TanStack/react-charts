@@ -1,11 +1,6 @@
 import { scaleLinear, scaleLog, scaleTime, scaleBand } from 'd3-scale'
 //
-import {
-  positionTop,
-  positionLeft,
-  positionRight,
-  positionBottom,
-} from './AxisLinear'
+import { positionTop, positionLeft, positionRight, positionBottom } from './AxisLinear'
 
 const scales = {
   linear: scaleLinear,
@@ -14,10 +9,8 @@ const scales = {
   ordinal: scaleBand,
 }
 
-const detectVertical = position =>
-  [positionLeft, positionRight].indexOf(position) > -1
-const detectRTL = position =>
-  [positionTop, positionRight].indexOf(position) > -1
+const detectVertical = position => [positionLeft, positionRight].indexOf(position) > -1
+const detectRTL = position => [positionTop, positionRight].indexOf(position) > -1
 
 export default function updateScale (props) {
   const {
@@ -67,10 +60,10 @@ export default function updateScale (props) {
   // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
 
   // First we need to find unique values, min/max values and negative/positive totals
-  let uniqueVals = []
+  const uniqueVals = []
   let min
   let max
-  let datumValues = {}
+  const datumValues = {}
   let negativeTotal = 0
   let positiveTotal = 0
   let domain
@@ -92,14 +85,8 @@ export default function updateScale (props) {
         const key = groupKey ? series.data[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
       })
-      min = Math.min(
-        ...(typeof min !== 'undefined' ? [min] : []),
-        ...seriesValues
-      )
-      max = Math.max(
-        ...(typeof max !== 'undefined' ? [max] : []),
-        ...seriesValues
-      )
+      min = Math.min(...(typeof min !== 'undefined' ? [min] : []), ...seriesValues)
+      max = Math.max(...(typeof max !== 'undefined' ? [max] : []), ...seriesValues)
     })
     domain = [min, max]
   } else {
@@ -115,16 +102,12 @@ export default function updateScale (props) {
     })
     if (stacked) {
       // If we're stacking, calculate and use the max and min values for the largest stack
-      ;[positiveTotal, negativeTotal] = Object.keys(datumValues)
+      [positiveTotal, negativeTotal] = Object.keys(datumValues)
         .map(d => datumValues[d])
         .reduce(
           (totals, vals) => {
-            const positive = vals
-              .filter(d => d >= 0)
-              .reduce((ds, d) => ds + d, 0)
-            const negative = vals
-              .filter(d => d < 0)
-              .reduce((ds, d) => ds + d, 0)
+            const positive = vals.filter(d => d >= 0).reduce((ds, d) => ds + d, 0)
+            const negative = vals.filter(d => d < 0).reduce((ds, d) => ds + d, 0)
             return [
               positive > totals[0] ? positive : totals[0],
               negative < totals[1] ? negative : totals[1],
@@ -167,11 +150,7 @@ export default function updateScale (props) {
     bandScale = scaleBand()
       .domain(
         materializedData
-          .reduce(
-            (prev, current) =>
-              current.data.length > prev.length ? current.data : prev,
-            []
-          )
+          .reduce((prev, current) => (current.data.length > prev.length ? current.data : prev), [])
           .map(d => d.primary)
       )
       .rangeRound(range, 0.1)
@@ -246,23 +225,20 @@ export default function updateScale (props) {
     stepSize,
     domain,
     range,
-    max: position === positionBottom
-      ? -height
-      : position === positionLeft
-        ? width
-        : position === positionTop ? height : -width,
-    directionMultiplier: position === positionTop || position === positionLeft
-      ? -1
-      : 1,
+    max:
+      position === positionBottom
+        ? -height
+        : position === positionLeft ? width : position === positionTop ? height : -width,
+    directionMultiplier: position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? translateX : translateY,
-    ticks: (this.ticks = tickValues == null
-      ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain()
-      : tickValues),
-    format: tickFormat == null
-      ? scale.tickFormat
-        ? scale.tickFormat.apply(scale, tickArguments)
-        : identity
-      : tickFormat,
+    ticks: (this.ticks =
+      tickValues == null
+        ? scale.ticks ? scale.ticks(...tickArguments) : scale.domain()
+        : tickValues),
+    format:
+      tickFormat == null
+        ? scale.tickFormat ? scale.tickFormat(...tickArguments) : identity
+        : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }
 
@@ -297,9 +273,9 @@ function identity (x) {
 }
 
 function translateX (x) {
-  return 'translate(' + x + ', 0)'
+  return `translate(${x}, 0)`
 }
 
 function translateY (y) {
-  return 'translate(0, ' + y + ')'
+  return `translate(0, ${y})`
 }

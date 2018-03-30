@@ -1,6 +1,7 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { Animate } from 'react-move'
 import { Provider, Connect } from 'react-state'
+import RAF from 'raf'
 //
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
@@ -9,25 +10,16 @@ import Utils from '../utils/Utils'
 import Rectangle from '../primitives/Rectangle'
 import Voronoi from '../components/Voronoi'
 
-class Chart extends PureComponent {
+class Chart extends Component {
   static defaultProps = {
     getData: d => d,
-    getLabel: (d, i) => 'Series ' + (i + 1),
+    getLabel: (d, i) => `Series ${i + 1}`,
     getSeriesID: (d, i) => i,
     getPrimary: d => (Array.isArray(d) ? d[0] : d.x),
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
     getR: d => (Array.isArray(d) ? d[0] : d.r),
-    decorate: d => ({}),
+    decorate: () => ({}),
     interaction: 'closestPoint',
-  }
-  constructor () {
-    super()
-    this.updateDataModel = this.updateDataModel.bind(this)
-    this.measure = this.measure.bind(this)
-    this.onMouseMove = Utils.throttle(this.onMouseMove.bind(this), 16)
-    this.onMouseLeave = this.onMouseLeave.bind(this)
-    this.onMouseDown = this.onMouseDown.bind(this)
-    this.onMouseUp = this.onMouseUp.bind(this)
   }
   componentDidMount () {
     this.props.dispatch(
@@ -84,17 +76,12 @@ class Chart extends PureComponent {
     return false
   }
   componentDidUpdate (prevProps) {
-    Utils.requestAnimationFrame(() => this.measure(prevProps))
+    RAF(() => this.measure(prevProps))
   }
-  updateDataModel (props) {
+  updateDataModel = props => {
     const { data } = props
     let {
-      getData,
-      getLabel,
-      getSeriesID,
-      getPrimary,
-      getSecondary,
-      getR,
+      getData, getLabel, getSeriesID, getPrimary, getSecondary, getR,
     } = props
 
     // Normalize getters
@@ -106,7 +93,7 @@ class Chart extends PureComponent {
     getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
-    let materializedData = data.map((s, seriesIndex) => {
+    const materializedData = data.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {
@@ -114,19 +101,17 @@ class Chart extends PureComponent {
         index: seriesIndex,
         id: seriesID,
         label: seriesLabel,
-        data: getData(s, seriesIndex).map((d, index) => {
-          return {
-            row: s,
-            seriesIndex,
-            seriesID,
-            seriesLabel,
-            index,
-            datum: d,
-            primary: getPrimary(d, index),
-            secondary: getSecondary(d, index),
-            r: getR(d, index),
-          }
-        }),
+        data: getData(s, seriesIndex).map((d, index) => ({
+          row: s,
+          seriesIndex,
+          seriesID,
+          seriesLabel,
+          index,
+          datum: d,
+          primary: getPrimary(d, index),
+          secondary: getSecondary(d, index),
+          r: getR(d, index),
+        })),
       }
       return series
     })
@@ -142,7 +127,7 @@ class Chart extends PureComponent {
       }
     )
   }
-  measure (prevProps) {
+  measure = prevProps => {
     if (
       prevProps &&
       (this.props.offset.left !== prevProps.offset.left ||
@@ -163,7 +148,9 @@ class Chart extends PureComponent {
     }
   }
   render () {
-    const { style, width, height, gridX, gridY, children } = this.props
+    const {
+      style, width, height, gridX, gridY, children,
+    } = this.props
 
     const allChildren = React.Children.toArray(children)
     const svgChildren = allChildren.filter(d => !d.type.isHTML)
@@ -171,26 +158,27 @@ class Chart extends PureComponent {
 
     return (
       <div
-        className='Chart'
+        className="ReactChart"
         style={{
-          height: '0',
-          width: '0',
+          width: 0,
+          height: 0,
         }}
       >
         <Animate
-          data={{
+          start={{
             gridX,
             gridY,
           }}
+          update={{
+            gridX: [gridX],
+            gridY: [gridY],
+          }}
         >
-          {({ gridX, gridY }) =>
-            (<svg
-              ref={el => {
-                this.el = el
-              }}
+          {({ gridX, gridY }) => (
+            <svg
               style={{
-                width: width,
-                height: height,
+                width,
+                height,
                 ...style,
               }}
             >
@@ -224,13 +212,14 @@ class Chart extends PureComponent {
                 {svgChildren}
                 <Voronoi />
               </g>
-            </svg>)}
+            </svg>
+          )}
         </Animate>
         {htmlChildren}
       </div>
     )
   }
-  onMouseMove (e) {
+  onMouseMove = Utils.throttle(e => {
     const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
     const { gridX, gridY, dispatch } = this.props
@@ -250,8 +239,8 @@ class Chart extends PureComponent {
         type: 'cursor',
       }
     )
-  }
-  onMouseLeave () {
+  })
+  onMouseLeave = () => {
     this.props.dispatch(
       state => ({
         ...state,
@@ -269,7 +258,7 @@ class Chart extends PureComponent {
       }
     )
   }
-  onMouseDown () {
+  onMouseDown = () => {
     const { dispatch } = this.props
 
     dispatch(
@@ -287,7 +276,7 @@ class Chart extends PureComponent {
       }
     )
   }
-  onMouseUp () {
+  onMouseUp = () => {
     const { dispatch } = this.props
     dispatch(
       state => ({
@@ -317,22 +306,26 @@ const ReactChart = Connect(
       gridY: Selectors.gridY(),
       offset: Selectors.offset(),
     }
-    return state => {
-      return {
-        data: state.data,
-        width: state.width,
-        height: state.height,
-        gridX: selectors.gridX(state),
-        gridY: selectors.gridY(state),
-        active: state.active,
-        offset: selectors.offset(state),
-        selected: state.selected,
-      }
-    }
+    return state => ({
+      data: state.data,
+      width: state.width,
+      height: state.height,
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+      active: state.active,
+      offset: selectors.offset(state),
+      selected: state.selected,
+    })
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(Chart)
 
-export default HyperResponsive(Provider(ReactChart))
+const ProvidedChart = Provider(ReactChart)
+
+export default props => (
+  <HyperResponsive
+    render={({ width, height }) => <ProvidedChart {...props} width={width} height={height} />}
+  />
+)

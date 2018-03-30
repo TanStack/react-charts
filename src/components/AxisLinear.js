@@ -1,6 +1,6 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { Connect } from 'react-state'
-import { Animate, Transition } from 'react-move'
+import { Animate, NodeGroup } from 'react-move'
 //
 import Utils from '../utils/Utils'
 
@@ -31,7 +31,7 @@ const defaultStyles = {
   },
 }
 
-class Axis extends PureComponent {
+class Axis extends Component {
   static defaultProps = {
     min: undefined,
     max: undefined,
@@ -50,15 +50,13 @@ class Axis extends PureComponent {
     showGrid: 1,
     display: true,
   }
-  // Lifecycle
   constructor () {
     super()
     this.state = {
       rotation: 0,
     }
-    this.measureRotation = Utils.throttle(measure.bind(this))
     this.measure = Utils.throttle(measure.bind(this))
-    this.updateScale = updateScale.bind(this)
+    this.measureRotation = Utils.throttle(measure.bind(this))
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
@@ -88,14 +86,12 @@ class Axis extends PureComponent {
     this.updateScale(this.props)
   }
   shouldComponentUpdate (newProps, nextState) {
-    if (
-      newProps.axis !== this.props.axis ||
-      this.state.rotation !== nextState.rotation
-    ) {
+    if (newProps.axis !== this.props.axis || this.state.rotation !== nextState.rotation) {
       return true
     }
     return false
   }
+  updateScale = updateScale
   render () {
     const {
       type,
@@ -138,23 +134,35 @@ class Axis extends PureComponent {
       spacing,
     } = axis
 
+    const start = {
+      _: 0, // This will ensure that an "end" event is fired on first load
+      width,
+      height,
+      max,
+      range0,
+      range1,
+      directionMultiplier,
+      tickSizeOuter,
+      tickOffset,
+      gridOffset,
+      spacing,
+      rotation,
+    }
+
+    const update = {
+      _: 1,
+      events: {
+        end: () => {
+          this.measureRotation(true)
+        },
+      },
+    }
+    Object.keys(start).forEach(key => {
+      update[key] = [start[key]]
+    })
+
     return (
-      <Animate
-        data={{
-          width,
-          height,
-          max,
-          range0,
-          range1,
-          directionMultiplier,
-          tickSizeOuter,
-          tickOffset,
-          gridOffset,
-          spacing,
-          rotation,
-        }}
-        onRest={() => this.measureRotation(true)}
-      >
+      <Animate start={start} update={update}>
         {({
           width,
           height,
@@ -184,58 +192,84 @@ class Axis extends PureComponent {
                 H ${tickSizeOuter}
               `
             }
-          } else {
-            if (position === positionBottom) {
-              axisPath = `
+          } else if (position === positionBottom) {
+            axisPath = `
                 M 0, ${tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${tickSizeOuter}
               `
-            } else {
-              axisPath = `
+          } else {
+            axisPath = `
                 M 0, ${-tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${-tickSizeOuter}
               `
-            }
           }
 
           return (
             <g
-              className='Axis'
+              className="Axis"
               transform={
                 position === positionRight
                   ? translateX(width)
                   : position === positionBottom ? translateY(height) : undefined
               }
             >
-              <Path className='domain' d={axisPath} style={axisStyles.line} />
-              <Transition
+              <Path className="domain" d={axisPath} style={axisStyles.line} />
+              <NodeGroup
                 data={[...ticks]}
-                getKey={(d, i) => String(d)}
-                update={d => ({
-                  tick: scale(d),
-                  visibility: 1,
-                  measureable: 1,
-                  rotation,
-                })}
-                enter={d => ({
+                keyAccessor={d => String(d)}
+                start={d => ({
+                  _: 0, // Ensure an "end" event is fired on first mount
                   tick: this.prevAxis.scale(d),
                   visibility: 0,
-                  measureable: 1,
                   rotation,
+                  measureable: 1,
+                })}
+                enter={d => ({
+                  _: 1,
+                  tick: [scale(d)],
+                  visibility: [1],
+                  rotation: [rotation],
+                  measureable: 1,
+                  events: {
+                    start: () => {
+                      this.measure()
+                    },
+                    interrupt: () => {
+                      this.measure()
+                    },
+                    end: () => {
+                      this.measure()
+                    },
+                  },
+                })}
+                update={d => ({
+                  _: 1,
+                  tick: [scale(d)],
+                  visibility: [1],
+                  rotation: [rotation],
+                  measureable: 1,
+                  events: {
+                    start: () => {
+                      this.measure()
+                    },
+                    interrupt: () => {
+                      this.measure()
+                    },
+                    end: () => {
+                      this.measure()
+                    },
+                  },
                 })}
                 leave={d => ({
-                  tick: scale(d),
-                  visibility: 0,
+                  tick: [scale(d)],
+                  visibility: [0],
+                  rotation: [rotation],
                   measureable: 0,
-                  rotation,
                 })}
-                ignore={['measureable']}
-                duration={500}
-                onRest={() => this.measure()}
               >
                 {inters => {
                   let showGridLine = showGrid
@@ -247,96 +281,76 @@ class Axis extends PureComponent {
 
                   return (
                     <g
-                      className='ticks'
+                      className="ticks"
                       ref={el => {
                         this.el = el
                       }}
                     >
-                      {inters.map((inter, index) => {
-                        return (
-                          <g
-                            key={inter.key}
-                            className={
-                              'tick' +
-                              (inter.state.measureable ? ' -measureable' : '')
-                            }
-                            transform={transform(inter.state.tick)}
-                          >
+                      {inters.map((inter, index) => (
+                        <g
+                          key={inter.key}
+                          className={`tick${inter.state.measureable ? ' -measureable' : ''}`}
+                          transform={transform(inter.state.tick)}
+                        >
+                          <Line
+                            x1={vertical ? 0 : tickOffset}
+                            x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
+                            y1={vertical ? tickOffset : 0}
+                            y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
+                            style={{
+                              strokeWidth: 1,
+                            }}
+                            opacity={inter.state.visibility * 0.2}
+                          />
+                          {showGridLine && (
                             <Line
-                              x1={vertical ? 0 : tickOffset}
-                              x2={
-                                vertical
-                                  ? directionMultiplier * tickSizeInner
-                                  : tickOffset
-                              }
-                              y1={vertical ? tickOffset : 0}
-                              y2={
-                                vertical
-                                  ? tickOffset
-                                  : directionMultiplier * tickSizeInner
-                              }
+                              x1={vertical ? 0 : gridOffset}
+                              x2={vertical ? max : gridOffset}
+                              y1={vertical ? gridOffset : 0}
+                              y2={vertical ? gridOffset : max}
                               style={{
                                 strokeWidth: 1,
                               }}
-                              opacity={inter.state.visibility * 0.2}
+                              opacity={
+                                inter.state.visibility *
+                                (index !== 0 && index !== inters.length - 1 && inter.data === 0
+                                  ? 0.5
+                                  : 0.2)
+                              }
                             />
-                            {showGridLine &&
-                              <Line
-                                x1={vertical ? 0 : gridOffset}
-                                x2={vertical ? max : gridOffset}
-                                y1={vertical ? gridOffset : 0}
-                                y2={vertical ? gridOffset : max}
-                                style={{
-                                  strokeWidth: 1,
-                                }}
-                                opacity={
-                                  inter.state.visibility *
-                                  (index !== 0 &&
-                                    index !== inters.length - 1 &&
-                                    inter.data === 0
-                                    ? 0.5
-                                    : 0.2)
-                                }
-                              />}
-                            <Text
-                              opacity={inter.state.visibility}
-                              style={axisStyles.tick}
-                              transform={`
-                                translate(${vertical
-                                  ? directionMultiplier * spacing
-                                  : tickOffset}, ${vertical
-                                ? tickOffset
-                                : directionMultiplier * spacing})
+                          )}
+                          <Text
+                            opacity={inter.state.visibility}
+                            style={axisStyles.tick}
+                            transform={`
+                                translate(${
+                                  vertical ? directionMultiplier * spacing : tickOffset
+                                }, ${vertical ? tickOffset : directionMultiplier * spacing})
                                 rotate(${-inter.state.rotation})
                               `}
-                              dominantBaseline={
-                                inter.state.rotation
-                                  ? 'central'
-                                  : position === positionBottom
-                                    ? 'hanging'
-                                    : position === positionTop
-                                      ? 'alphabetic'
-                                      : 'central'
-                              }
-                              textAnchor={
-                                inter.state.rotation
-                                  ? 'end'
-                                  : position === positionRight
-                                    ? 'start'
-                                    : position === positionLeft
-                                      ? 'end'
-                                      : 'middle'
-                              }
-                            >
-                              {format(inter.data)}
-                            </Text>
-                          </g>
-                        )
-                      })}
+                            dominantBaseline={
+                              inter.state.rotation
+                                ? 'central'
+                                : position === positionBottom
+                                  ? 'hanging'
+                                  : position === positionTop ? 'alphabetic' : 'central'
+                            }
+                            textAnchor={
+                              inter.state.rotation
+                                ? 'end'
+                                : position === positionRight
+                                  ? 'start'
+                                  : position === positionLeft ? 'end' : 'middle'
+                            }
+                          >
+                            {format(inter.data)}
+                          </Text>
+                        </g>
+                      ))}
                     </g>
                   )
                 }}
-              </Transition>
+              </NodeGroup>
             </g>
           )
         }}
@@ -368,16 +382,14 @@ export default Connect(
     }
   },
   {
-    filter: (oldState, newState, meta) => {
-      return meta.type !== 'cursor'
-    },
+    filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(Axis)
 
 function translateX (x) {
-  return 'translate(' + x + ', 0)'
+  return `translate(${x}, 0)`
 }
 
 function translateY (y) {
-  return 'translate(0, ' + y + ')'
+  return `translate(0, ${y})`
 }

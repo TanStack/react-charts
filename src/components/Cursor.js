@@ -6,10 +6,7 @@ import Selectors from '../utils/Selectors'
 
 class Cursor extends PureComponent {
   static defaultProps = {
-    children: ({ label }) =>
-      (<span>
-        {label}
-      </span>),
+    children: ({ label }) => <span>{label}</span>,
   }
   constructor () {
     super()
@@ -46,7 +43,13 @@ class Cursor extends PureComponent {
 
     const invert = axis.scale.invert || (d => d)
 
-    let x1, x2, y1, y2, label, alignPctX, alignPctY
+    let x1
+    let x2
+    let y1
+    let y2
+    let label
+    let alignPctX
+    let alignPctY
 
     if (primary && (axis.type === 'ordinal' || snap)) {
       animated = true
@@ -91,8 +94,7 @@ class Cursor extends PureComponent {
       x2 = siblingRange[1]
       y1 = y - 1
       y2 = y + 1
-      label =
-        typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
+      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -105,8 +107,7 @@ class Cursor extends PureComponent {
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label =
-        typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
+      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -126,7 +127,7 @@ class Cursor extends PureComponent {
 
     return (
       <Animate
-        data={{
+        start={{
           xStart,
           yStart,
           width,
@@ -135,11 +136,20 @@ class Cursor extends PureComponent {
           y1,
           visibility: cursor.active ? 1 : 0,
         }}
+        update={{
+          xStart: [xStart],
+          yStart: [yStart],
+          width: [width],
+          height: [height],
+          x1: [x1],
+          y1: [y1],
+          visibility: [cursor.active ? 1 : 0],
+        }}
         duration={400}
       >
-        {inter =>
-          (<div
-            className='Cursor'
+        {inter => (
+          <div
+            className="Cursor"
             onMouseLeave={e => this.onHover(null, e)}
             style={{
               pointerEvents: 'none',
@@ -153,9 +163,9 @@ class Cursor extends PureComponent {
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated
-                  ? inter.xStart
-                  : xStart}px, ${animated ? inter.yStart : yStart}px, 0px)`,
+                transform: `translate3d(${animated ? inter.xStart : xStart}px, ${
+                  animated ? inter.yStart : yStart
+                }px, 0px)`,
                 width: `${animated ? inter.width : width}px`,
                 height: `${animated ? inter.height : height}px`,
                 background: 'rgba(0,0,0,.3)',
@@ -165,9 +175,9 @@ class Cursor extends PureComponent {
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated
-                  ? inter.x1
-                  : x1}px, ${animated ? inter.y1 : y1}px, 0px)`,
+                transform: `translate3d(${animated ? inter.x1 : x1}px, ${
+                  animated ? inter.y1 : y1
+                }px, 0px)`,
               }}
             >
               <div
@@ -187,11 +197,12 @@ class Cursor extends PureComponent {
                 })}
               </div>
             </div>
-          </div>)}
+          </div>
+        )}
       </Animate>
     )
   }
-  onHover (hovered, e) {
+  onHover (hovered) {
     return this.props.dispatch(
       state => ({
         ...state,
@@ -202,7 +213,7 @@ class Cursor extends PureComponent {
       }
     )
   }
-  onActivate (newActive, e) {
+  onActivate (newActive) {
     const { active, dispatch } = this.props
     if (active === newActive) {
       return dispatch(
@@ -268,7 +279,8 @@ export default Connect(
     y={y1}
     fontSize={fontSize}
     textAnchor={axis.position === 'left' ? 'end' : axis.position === 'right' ? 'start' : 'middle'}
-    dominantBaseline={axis.position === 'top' ? 'alphabetic' : axis.position === 'bottom' ? 'hanging' : 'central'}
+    dominantBaseline={axis.position === 'top' ? 'alphabetic' : axis.position ===
+    'bottom' ? 'hanging' : 'central'}
   >
     {label}
   </Text>

@@ -20,7 +20,7 @@ export default function Memo (...args) {
       return recompute()
     }
 
-    for (var i = 0; i < newParams.length; i++) {
+    for (let i = 0; i < newParams.length; i++) {
       if (newParams[i] !== p[i]) {
         return recompute()
       }

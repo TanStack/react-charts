@@ -18,15 +18,14 @@ export default class Line extends PureComponent {
       ...style,
     }
 
+    const updateResolvedStyle = {}
+    Object.keys(resolvedStyle).forEach(key => {
+      updateResolvedStyle[key] = [resolvedStyle[key]]
+    })
+
     return (
-      <Animate
-        data={{
-          ...resolvedStyle,
-        }}
-      >
-        {inter => {
-          return <line {...inter} {...rest} />
-        }}
+      <Animate start={resolvedStyle} update={updateResolvedStyle}>
+        {inter => <line {...inter} {...rest} />}
       </Animate>
     )
   }

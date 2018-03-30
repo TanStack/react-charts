@@ -13,47 +13,46 @@ class Tooltip extends PureComponent {
     position: 'average',
     align: 'top',
     children: props => {
-      const { series, datums, primaryAxis, secondaryAxis } = props
-      return series
-        ? <div>
-            <strong>{series.label}</strong><br />
+      const {
+        series, datums, primaryAxis, secondaryAxis,
+      } = props
+      return series ? (
+        <div>
+          <strong>{series.label}</strong>
+          <br />
+        </div>
+      ) : datums && datums.length ? (
+        <div>
+          <div
+            style={{
+              marginBottom: '3px',
+            }}
+          >
+            <strong>{primaryAxis.format(datums[0].primary)}</strong>
           </div>
-        : datums && datums.length
-          ? <div>
-              <div
-                style={{
-                  marginBottom: '3px',
-                }}
-              >
-                <strong>{primaryAxis.format(datums[0].primary)}</strong>
-              </div>
-              <table>
-                <tbody>
-                  {(secondaryAxis.stacked
-                    ? [...datums].reverse()
-                    : datums).map((d, i) =>
-                    (<tr key={i}>
-                      <td>
-                        <span style={{ color: d.statusStyles.hovered.fill }}>
-                          &#9679;
-                        </span>
-                        {' '}{d.seriesLabel}: &nbsp;
-                      </td>
-                      <td
-                        style={{
-                          textAlign: 'right',
-                        }}
-                      >
-                        {Math.floor(d.secondary) < d.secondary
-                          ? secondaryAxis.format(Math.round(d.secondary * 100) / 100)
-                          : secondaryAxis.format(d.secondary)}
-                      </td>
-                    </tr>)
-                  )}
-                </tbody>
-              </table>
-            </div>
-          : null
+          <table>
+            <tbody>
+              {(secondaryAxis.stacked ? [...datums].reverse() : datums).map((d, i) => (
+                <tr key={i}>
+                  <td>
+                    <span style={{ color: d.statusStyles.hovered.fill }}>&#9679;</span>{' '}
+                    {d.seriesLabel}: &nbsp;
+                  </td>
+                  <td
+                    style={{
+                      textAlign: 'right',
+                    }}
+                  >
+                    {Math.floor(d.secondary) < d.secondary
+                      ? secondaryAxis.format(Math.round(d.secondary * 100) / 100)
+                      : secondaryAxis.format(d.secondary)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null
     },
   }
   render () {
@@ -75,11 +74,13 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    const datums = hovered.datums && hovered.datums.length
-      ? hovered.datums
-      : hovered.series ? hovered.series.data : null
+    const datums =
+      hovered.datums && hovered.datums.length
+        ? hovered.datums
+        : hovered.series ? hovered.series.data : null
 
-    // TODO: tooltip origin: hovered or chart or custom. Allows the user to position the tooltip relative to different parts of the chart
+    // TODO: tooltip origin: hovered or chart or custom.
+    // Allows the user to position the tooltip relative to different parts of the chart
     // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
 
     const focus = datums
@@ -95,9 +96,7 @@ class Tooltip extends PureComponent {
                 ? Utils.getCenterPointOfSide('bottom', datums)
                 : position === 'center'
                   ? Utils.getCenterPointOfSide('center', datums)
-                  : position === 'cursor'
-                    ? cursor
-                    : Utils.getClosestPoint(cursor, datums).focus // : quadTree.find(cursor.x, cursor.y)
+                  : position === 'cursor' ? cursor : Utils.getClosestPoint(cursor, datums).focus // : quadTree.find(cursor.x, cursor.y)
       : {
         x: gridX,
         y: gridY,
@@ -166,22 +165,28 @@ class Tooltip extends PureComponent {
 
     const visibility = hovered.active ? 1 : 0
 
+    const start = {
+      x,
+      y,
+      alignX,
+      alignY,
+      triangleStyles,
+      visibility,
+    }
+
+    const update = {}
+    Object.keys(start).forEach(key => {
+      update[key] = [start[key]]
+    })
+
     return (
-      <Animate
-        data={{
-          x,
-          y,
-          alignX,
-          alignY,
-          triangleStyles,
-          visibility,
-        }}
-        duration={400}
-      >
-        {({ x, y, alignX, alignY, triangleStyles, visibility }) =>
-          (<div
-            className='tooltip-wrap'
-            style={{
+      <Animate start={start} update={update} duration={400}>
+        {({
+ x, y, alignX, alignY, triangleStyles, visibility,
+}) => (
+  <div
+    className="tooltip-wrap"
+    style={{
               pointerEvents: 'none',
               position: 'absolute',
               left: `${left}px`,
@@ -189,20 +194,20 @@ class Tooltip extends PureComponent {
               opacity: visibility,
             }}
           >
-            <div
-              style={{
+    <div
+      style={{
                 transform: `translate3d(${x}px, ${y}px, 0px)`,
               }}
             >
-              <div
-                style={{
+      <div
+        style={{
                   transform: `translate3d(${alignX}, ${alignY}, 0)`,
                   padding: '7px',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: fontSize + 'px',
+        <div
+          style={{
+                    fontSize: `${fontSize}px`,
                     padding: '5px',
                     background: 'rgba(38, 38, 38, 0.8)',
                     color: 'white',
@@ -210,23 +215,24 @@ class Tooltip extends PureComponent {
                     position: 'relative',
                   }}
                 >
-                  {children({
+          {children({
                     ...hovered,
                     primaryAxis,
                     secondaryAxis,
                   })}
-                  <div
-                    style={{
+          <div
+            style={{
                       position: 'absolute',
                       width: '0',
                       height: '0',
                       ...triangleStyles,
                     }}
                   />
-                </div>
-              </div>
-            </div>
-          </div>)}
+        </div>
+      </div>
+    </div>
+  </div>
+        )}
       </Animate>
     )
   }

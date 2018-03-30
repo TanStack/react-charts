@@ -59,7 +59,10 @@ class Interaction extends PureComponent {
           single: false,
         }))
         .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
-      const vor = voronoi().x(d => d.x).y(d => d.y).extent(extent)(voronoiData)
+      const vor = voronoi()
+        .x(d => d.x)
+        .y(d => d.y)
+        .extent(extent)(voronoiData)
       polygons = vor.polygons()
     } else if (interaction === modeClosestPoint) {
       // Closest Point Voronoi
@@ -73,15 +76,15 @@ class Interaction extends PureComponent {
           single: true,
         }))
         .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
-      const vor = voronoi().x(d => d.x).y(d => d.y).extent(extent)(voronoiData)
+      const vor = voronoi()
+        .x(d => d.x)
+        .y(d => d.y)
+        .extent(extent)(voronoiData)
       polygons = vor.polygons()
     } else if (interaction === modeAxis) {
       // Axis Voronoi
       // Group all data points based on primaryAxis
-      const allDatums = stackData.reduce(
-        (prev, now) => prev.concat(now.data),
-        []
-      )
+      const allDatums = stackData.reduce((prev, now) => prev.concat(now.data), [])
       const datumsByAxis = {}
       allDatums.forEach(d => {
         const key = String(d.primary)
@@ -108,7 +111,7 @@ class Interaction extends PureComponent {
     // elements themselves, so do nothing for them here.
 
     return (
-      <g className='Interaction' onMouseLeave={() => this.onHover(null, null)}>
+      <g className="Interaction" onMouseLeave={() => this.onHover(null, null)}>
         {!!polygons &&
           polygons.map((points, i) => {
             // Only draw the voronoi if we need it
@@ -117,11 +120,9 @@ class Interaction extends PureComponent {
               <Path
                 key={i}
                 d={path}
-                className='action-voronoi'
-                onMouseEnter={e =>
-                  this.onHover(points.data.series, points.data.datums)}
-                onClick={e =>
-                  this.onClick(points.data.series, points.data.datums)}
+                className="action-voronoi"
+                onMouseEnter={() => this.onHover(points.data.series, points.data.datums)}
+                onClick={() => this.onClick(points.data.series, points.data.datums)}
                 style={{
                   fill: 'rgba(0,0,0,.2)',
                   strokeWidth: 5,
@@ -138,16 +139,14 @@ class Interaction extends PureComponent {
     // activate the hover with any series or datums
     if (series || datums) {
       return this.props.dispatch(
-        state => {
-          return {
-            ...state,
-            hovered: {
-              active: true,
-              series,
-              datums,
-            },
-          }
-        },
+        state => ({
+          ...state,
+          hovered: {
+            active: true,
+            series,
+            datums,
+          },
+        }),
         {
           type: 'hoveredVoronoi',
         }
@@ -155,15 +154,13 @@ class Interaction extends PureComponent {
     }
     // If we just left the area, deactive the hover
     return this.props.dispatch(
-      state => {
-        return {
-          ...state,
-          hovered: {
-            ...state.hovered,
-            active: false,
-          },
-        }
-      },
+      state => ({
+        ...state,
+        hovered: {
+          ...state.hovered,
+          active: false,
+        },
+      }),
       {
         type: 'hoveredVoronoi',
       }
@@ -172,16 +169,14 @@ class Interaction extends PureComponent {
   onClick (series, datums) {
     if (series || datums) {
       return this.props.dispatch(
-        state => {
-          return {
-            ...state,
-            selected: {
-              active: true,
-              series,
-              datums,
-            },
-          }
-        },
+        state => ({
+          ...state,
+          selected: {
+            active: true,
+            series,
+            datums,
+          },
+        }),
         {
           type: 'selectedVoronoi',
         }

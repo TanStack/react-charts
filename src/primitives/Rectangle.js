@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Animate } from 'react-move'
+import { resolve } from 'uri-js'
 //
 
 const defaultStyle = {
@@ -15,12 +16,19 @@ export default class Rectangle extends PureComponent {
     opacity: 1,
   }
   render () {
-    const { style, opacity, x1, y1, x2, y2, ...rest } = this.props
+    const {
+      style, opacity, x1, y1, x2, y2, ...rest
+    } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
       ...style,
     }
+
+    const updateResolvedStyle = {}
+    Object.keys(resolvedStyle).forEach(key => {
+      updateResolvedStyle[key] = [resolvedStyle[key]]
+    })
 
     const xStart = Math.min(x1, x2)
     const yStart = Math.min(y1, y2)
@@ -31,22 +39,20 @@ export default class Rectangle extends PureComponent {
     const width = Math.max(xEnd - xStart, 0)
 
     return (
-      <Animate data={resolvedStyle}>
-        {inter => {
-          return (
-            <rect
-              {...rest}
-              x={xStart}
-              y={yStart}
-              width={width}
-              height={height}
-              style={{
-                ...inter,
-                opacity: opacity * inter.opacity,
-              }}
-            />
-          )
-        }}
+      <Animate start={resolvedStyle} update={updateResolvedStyle}>
+        {inter => (
+          <rect
+            {...rest}
+            x={xStart}
+            y={yStart}
+            width={width}
+            height={height}
+            style={{
+              ...inter,
+              opacity: opacity * inter.opacity,
+            }}
+          />
+        )}
       </Animate>
     )
   }

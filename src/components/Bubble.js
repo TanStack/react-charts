@@ -3,12 +3,7 @@ import { Connect } from 'react-state'
 import { Animate } from 'react-move'
 
 import Utils from '../utils/Utils'
-import {
-  selectSeries,
-  hoverSeries,
-  selectDatum,
-  hoverDatum,
-} from '../utils/interactionMethods'
+import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 //
 import Circle from '../primitives/Circle'
@@ -57,36 +52,30 @@ class Line extends PureComponent {
         }}
       >
         {inter => {
-          const seriesInteractionProps = interaction === 'series'
-            ? {
-              onClick: () => this.selectSeries(series),
-              onMouseEnter: () => this.hoverSeries(series),
-              onMouseMove: () => this.hoverSeries(series),
-              onMouseLeave: () => this.hoverSeries(null),
-            }
-            : {}
+          const seriesInteractionProps =
+            interaction === 'series'
+              ? {
+                  onClick: () => this.selectSeries(series),
+                  onMouseEnter: () => this.hoverSeries(series),
+                  onMouseMove: () => this.hoverSeries(series),
+                  onMouseLeave: () => this.hoverSeries(null),
+                }
+              : {}
           return (
             <g>
               {inter.data.map((datum, i) => {
-                const status = Utils.datumStatus(
-                  series,
-                  datum,
-                  hovered,
-                  selected
-                )
-                const dataStyle = Utils.getStatusStyle(
-                  status,
-                  datum.statusStyles
-                )
+                const status = Utils.datumStatus(series, datum, hovered, selected)
+                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                const datumInteractionProps = interaction === 'element'
-                  ? {
-                    onClick: () => this.selectDatum(datum),
-                    onMouseEnter: () => this.hoverDatum(datum),
-                    onMouseMove: () => this.hoverDatum(datum),
-                    onMouseLeave: () => this.hoverDatum(null),
-                  }
-                  : {}
+                const datumInteractionProps =
+                  interaction === 'element'
+                    ? {
+                        onClick: () => this.selectDatum(datum),
+                        onMouseEnter: () => this.hoverDatum(datum),
+                        onMouseMove: () => this.hoverDatum(datum),
+                        onMouseLeave: () => this.hoverDatum(null),
+                      }
+                    : {}
 
                 return (
                   <Circle
@@ -116,13 +105,11 @@ class Line extends PureComponent {
 }
 
 export default Connect(
-  (state, props) => {
-    return {
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
-    }
-  },
+  state => ({
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction,
+  }),
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }

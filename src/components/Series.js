@@ -1,11 +1,10 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { Connect } from 'react-state'
 import { quadtree as QuadTree } from 'd3-quadtree'
+import { NodeGroup } from 'react-move'
 //
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
-
-import { Transition } from 'react-move'
 
 const defaultColors = [
   '#4ab5eb',
@@ -22,17 +21,15 @@ const defaultColors = [
 
 const getType = (type, data, i) => {
   // Allow dynamic types
-  const typeGetter = typeof type === 'function' &&
-    type.prototype.isReactComponent
-    ? () => type
-    : type
+  const typeGetter =
+    typeof type === 'function' && type.prototype.isReactComponent ? () => type : type
   return typeGetter(data, i)
 }
 
-class Series extends PureComponent {
+class Series extends Component {
   static defaultProps = {
-    getStyles: d => ({}),
-    getDataStyles: d => ({}),
+    getStyles: () => ({}),
+    getDataStyles: () => ({}),
   }
   componentDidMount () {
     this.updateStackData(this.props)
@@ -105,12 +102,12 @@ class Series extends PureComponent {
       })
     }
 
-    let stackData = materializedData.map((series, seriesIndex) => {
+    const stackData = materializedData.map((series, seriesIndex) => {
       const SeriesComponent = getType(type, series, seriesIndex) || {}
       return {
         ...series,
         type: SeriesComponent.SeriesType,
-        data: series.data.map((d, index) => {
+        data: series.data.map(d => {
           const datum = {
             ...d,
             x: d[xKey],
@@ -118,11 +115,11 @@ class Series extends PureComponent {
             base: 0,
           }
           if (secondaryStacked) {
-            let start = totals[d.primary]
+            const start = totals[d.primary]
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
               // Should we use positive or negative base?
-              let key = datum.x >= 0 ? 'positive' : 'negative'
+              const key = datum.x >= 0 ? 'positive' : 'negative'
               // Assign the base
               datum.base = start[key]
               // Add the value to the base
@@ -131,7 +128,7 @@ class Series extends PureComponent {
               totals[d.primary][key] = datum.x
             } else {
               // Should we use positive or negative base?
-              let key = datum.y >= 0 ? 'positive' : 'negative'
+              const key = datum.y >= 0 ? 'positive' : 'negative'
               // Assign the base
               datum.base = start[key]
               // Add the value to the base
@@ -148,13 +145,9 @@ class Series extends PureComponent {
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
     stackData.forEach(series => {
-      series.data.forEach((d, index) => {
+      series.data.forEach(d => {
         // Data for cartesian charts
-        if (
-          series.type === 'Line' ||
-          series.type === 'Area' ||
-          series.type === 'Bar'
-        ) {
+        if (series.type === 'Line' || series.type === 'Area' || series.type === 'Bar') {
           d.x = xScale(d.x)
           d.y = yScale(d.y)
           d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
@@ -195,20 +188,20 @@ class Series extends PureComponent {
     // Not we need to precalculate all of the possible status styles by
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
     stackData.forEach(series => {
-      const defaults = series.type !== 'Pie'
-        ? {
+      const defaults =
+        series.type !== 'Pie'
+          ? {
             // Pass some sane defaults
-          color: defaultColors[series.index % (defaultColors.length - 1)],
-        }
-        : {}
+            color: defaultColors[series.index % (defaultColors.length - 1)],
+          }
+          : {}
 
       series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
       // We also need to decorate each datum in the same fashion
       series.data.forEach(datum => {
         if (series.type === 'Pie') {
-          defaults.color =
-            defaultColors[datum.index % (defaultColors.length - 1)]
+          defaults.color = defaultColors[datum.index % (defaultColors.length - 1)]
         }
         datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
           ...defaults,
@@ -225,7 +218,10 @@ class Series extends PureComponent {
       })
     })
 
-    const quadTree = QuadTree().x(d => d.x).y(d => d.y).addAll(allPoints)
+    const quadTree = QuadTree()
+      .x(d => d.x)
+      .y(d => d.y)
+      .addAll(allPoints)
 
     this.props.dispatch(
       state => ({
@@ -239,7 +235,9 @@ class Series extends PureComponent {
     )
   }
   render () {
-    const { type, getStyles, getDataStyles, ...rest } = this.props
+    const {
+      type, getStyles, getDataStyles, ...rest
+    } = this.props
     const { stackData } = this
 
     if (!stackData) {
@@ -247,40 +245,40 @@ class Series extends PureComponent {
     }
 
     return (
-      <Transition
+      <NodeGroup
         data={stackData} // The stack is reversed for proper z-index painting
-        getKey={(d, i) => d.id}
-        update={d => ({
-          visibility: 1,
-        })}
-        enter={(d, i) => ({
+        keyAccessor={d => d.id}
+        start={() => ({
           visibility: 0,
         })}
-        leave={d => ({
-          visibility: 0,
+        enter={() => ({
+          visibility: [1],
         })}
-        ignore={['visibility']}
+        update={() => ({
+          visibility: [1],
+        })}
+        leave={() => ({
+          visibility: [0],
+        })}
         duration={500}
       >
-        {inters => {
-          return (
-            <g className='Series'>
-              {inters.map((inter, i) => {
-                const StackCmp = getType(type, inter.data, inter.data.id)
-                return (
-                  <StackCmp
-                    {...rest}
-                    key={inter.key}
-                    series={inter.data}
-                    stackData={stackData}
-                    visibility={inter.state.visibility}
-                  />
-                )
-              })}
-            </g>
-          )
-        }}
-      </Transition>
+        {inters => (
+          <g className="Series">
+            {inters.map(inter => {
+              const StackCmp = getType(type, inter.data, inter.data.id)
+              return (
+                <StackCmp
+                  {...rest}
+                  key={inter.key}
+                  series={inter.data}
+                  stackData={stackData}
+                  visibility={inter.state.visibility}
+                />
+              )
+            })}
+          </g>
+        )}
+      </NodeGroup>
     )
   }
 }
@@ -291,16 +289,14 @@ export default Connect(
       primaryAxis: Selectors.primaryAxis(),
       secondaryAxis: Selectors.secondaryAxis(),
     }
-    return (state, props) => {
-      return {
-        materializedData: state.materializedData,
-        stackData: state.stackData,
-        primaryAxis: selectors.primaryAxis(state),
-        secondaryAxis: selectors.secondaryAxis(state),
-        hovered: state.hovered,
-        selected: state.selected,
-      }
-    }
+    return state => ({
+      materializedData: state.materializedData,
+      stackData: state.stackData,
+      primaryAxis: selectors.primaryAxis(state),
+      secondaryAxis: selectors.secondaryAxis(state),
+      hovered: state.hovered,
+      selected: state.selected,
+    })
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',

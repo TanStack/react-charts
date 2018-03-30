@@ -7,41 +7,37 @@ const defaultStyle = {
   stroke: 'none',
   fill: 'black',
   fontSize: 10,
-  opacity: 1
+  opacity: 1,
 }
 
 export default class Text extends PureComponent {
   static defaultProps = {
-    opacity: 1
+    opacity: 1,
   }
   render () {
-    const {
-      style,
-      opacity,
-      ...rest
-    } = this.props
+    const { style, opacity, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style
+      ...style,
     }
 
-    return (
-      <Animate
-        data={resolvedStyle}
+    const updateResolvedStyle = {}
+    Object.keys(resolvedStyle).forEach(key => {
+      updateResolvedStyle[key] = [resolvedStyle[key]]
+    })
 
-      >
-        {(inter) => {
-          return (
-            <text
-              {...rest}
-              style={{
-                ...inter,
-                opacity: opacity * inter.opacity
-              }}
-            />
-          )
-        }}
+    return (
+      <Animate start={resolvedStyle} update={updateResolvedStyle}>
+        {inter => (
+          <text
+            {...rest}
+            style={{
+              ...inter,
+              opacity: opacity * inter.opacity,
+            }}
+          />
+        )}
       </Animate>
     )
   }

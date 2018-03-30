@@ -1,8 +1,5 @@
 import React from 'react'
-import { Animate } from 'react-move'
 import RAF from 'raf'
-
-Animate.defaults.immutable = false
 
 export default {
   requestAnimationFrame: RAF,
@@ -148,7 +145,10 @@ function getStatusStyle (status, styles) {
 }
 
 function getCenterPointOfSide (position, points) {
-  let xMin, xMax, yMin, yMax
+  let xMin
+  let xMax
+  let yMin
+  let yMax
 
   xMin = points[0].focus.x
   xMax = points[0].focus.x
@@ -197,9 +197,7 @@ function getClosestPoint (position, points) {
   let closestDistance = Infinity
   let closestPoint = points[0] || {}
   points.forEach(p => {
-    const distance = Math.sqrt(
-      Math.pow(p.focus.x - position.x, 2) + Math.pow(p.focus.y - position.y, 2)
-    )
+    const distance = Math.sqrt(p.focus.x - position.x ** 2 + (p.focus.y - position.y ** 2))
     if (distance < closestDistance) {
       closestDistance = distance
       closestPoint = p
@@ -209,11 +207,15 @@ function getClosestPoint (position, points) {
 }
 
 function normalizeComponent (Comp, params = {}, fallback = Comp) {
-  return typeof Comp === 'function'
-    ? Object.getPrototypeOf(Comp).isReactComponent
-      ? <Comp {...params} />
-      : Comp(params)
-    : fallback
+  return typeof Comp === 'function' ? (
+    Object.getPrototypeOf(Comp).isReactComponent ? (
+      <Comp {...params} />
+    ) : (
+      Comp(params)
+    )
+  ) : (
+    fallback
+  )
 }
 
 function materializeStyles (style = {}, defaults = {}) {
@@ -221,8 +223,8 @@ function materializeStyles (style = {}, defaults = {}) {
     ...style,
     stroke: style.stroke || style.color || defaults.stroke || defaults.color,
     fill: style.fill || style.color || defaults.fill || defaults.color,
-  }
-  ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
+  };
+  ['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
   })
   return style
@@ -242,7 +244,7 @@ function normalizePathGetter (getter) {
   if (typeof getter === 'function') {
     return getter
   }
-  return (d, i) => get(d, getter)
+  return d => get(d, getter)
 }
 
 function get (obj, path, def) {
@@ -260,22 +262,22 @@ function get (obj, path, def) {
   let val
   try {
     val = pathObj.reduce((current, pathPart) => current[pathPart], obj)
-  } catch (e) {}
+  } catch (e) {
+    // do nothing
+  }
   return typeof val !== 'undefined' ? val : def
 }
 
 function mapValues (obj, cb) {
   const newObj = {}
-  for (var prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      newObj[prop] = cb(obj[prop], prop, obj)
-    }
-  }
+  Object.keys(obj).forEach(key => {
+    newObj[key] = cb(obj[key], key, obj)
+  })
   return newObj
 }
 
 function uniq (arr) {
-  return arr.filter((d, i) => arr.filter(dd => dd === d).length === 1)
+  return arr.filter(d => arr.filter(dd => dd === d).length === 1)
 }
 
 function groupBy (xs, key) {
@@ -326,7 +328,7 @@ function flattenDeep (arr, newArr = []) {
   if (!isArray(arr)) {
     newArr.push(arr)
   } else {
-    for (var i = 0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
       flattenDeep(arr[i], newArr)
     }
   }

@@ -6,12 +6,7 @@ import { area, line } from 'd3-shape'
 //
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-import {
-  selectSeries,
-  selectDatum,
-  hoverSeries,
-  hoverDatum,
-} from '../utils/interactionMethods'
+import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
@@ -69,38 +64,33 @@ class Area extends PureComponent {
 
     return (
       <Animate
-        default={{
+        start={{
           data,
-          visibility: 0,
         }}
-        data={{
-          data,
-          visibility,
+        update={{
+          data: [data],
         }}
       >
         {inter => {
           const areaPath = areaFn(
             inter.data.map(d => [
-              isNaN(d.x) ? null : d.x,
-              isNaN(d.y) ? null : d.y,
-              isNaN(d.base) ? null : d.base,
+              Number.isNaN(d.x) ? null : d.x,
+              Number.isNaN(d.y) ? null : d.y,
+              Number.isNaN(d.base) ? null : d.base,
             ])
           )
           const linePath = lineFn(
-            inter.data.map(d => [
-              isNaN(d.x) ? null : d.x,
-              isNaN(d.y) ? null : d.y,
-            ])
+            inter.data.map(d => [Number.isNaN(d.x) ? null : d.x, Number.isNaN(d.y) ? null : d.y])
           )
 
           const seriesInteractionProps =
             interaction === 'series'
               ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null),
-              }
+                  onClick: () => this.selectSeries(series),
+                  onMouseEnter: () => this.hoverSeries(series),
+                  onMouseMove: () => this.hoverSeries(series),
+                  onMouseLeave: () => this.hoverSeries(null),
+                }
               : {}
 
           return (
@@ -113,7 +103,7 @@ class Area extends PureComponent {
                   ...style.area,
                   stroke: 'transparent',
                 }}
-                opacity={inter.visibility}
+                opacity={visibility}
                 {...seriesInteractionProps}
               />
               <Path
@@ -124,30 +114,22 @@ class Area extends PureComponent {
                   ...style.line,
                   fill: 'none',
                 }}
-                opacity={inter.visibility}
+                opacity={visibility}
                 {...seriesInteractionProps}
               />
               {showPoints &&
                 series.data.map((datum, i) => {
-                  const status = Utils.datumStatus(
-                    series,
-                    datum,
-                    hovered,
-                    selected
-                  )
-                  const dataStyle = Utils.getStatusStyle(
-                    status,
-                    datum.statusStyles
-                  )
+                  const status = Utils.datumStatus(series, datum, hovered, selected)
+                  const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
                   const datumInteractionProps =
                     interaction === 'element'
                       ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
+                          onClick: () => this.selectDatum(datum),
+                          onMouseEnter: () => this.hoverDatum(datum),
+                          onMouseMove: () => this.hoverDatum(datum),
+                          onMouseLeave: () => this.hoverDatum(null),
+                        }
                       : {}
 
                   return (
@@ -162,7 +144,7 @@ class Area extends PureComponent {
                         ...dataStyle,
                         ...dataStyle.circle,
                       }}
-                      opacity={inter.visibility}
+                      opacity={visibility}
                       {...seriesInteractionProps}
                       {...datumInteractionProps}
                     />
@@ -177,13 +159,11 @@ class Area extends PureComponent {
 }
 
 export default Connect(
-  (state, props) => {
-    return {
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
-    }
-  },
+  state => ({
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction,
+  }),
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
     statics: {
