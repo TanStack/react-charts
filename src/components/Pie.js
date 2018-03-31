@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from 'react-move'
+import { Animate } from './ReactMove'
 import { pie as makePie, arc as makeArc } from 'd3-shape'
 
 import Selectors from '../utils/Selectors'

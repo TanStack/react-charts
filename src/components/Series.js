@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Connect } from 'react-state'
 import { quadtree as QuadTree } from 'd3-quadtree'
-import { NodeGroup } from 'react-move'
 //
+import { NodeGroup } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 

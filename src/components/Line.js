@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from 'react-move'
+import { Animate } from './ReactMove'
 
 import { line } from 'd3-shape'
 

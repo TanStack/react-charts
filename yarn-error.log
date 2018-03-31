@@ -43,7 +43,7 @@ npm manifest:
       "raf": "^3.4.0",
       "react": "^16.2.0",
       "react-dom": "^16.2.0",
-      "react-move": "^2.7.0",
+      "./ReactMove": "^2.7.0",
       "react-resizable": "^1.7.5",
       "react-state": "^2.0.1",
       "react-story": "0.0.10"
@@ -7143,9 +7143,9 @@ Lockfile:
     dependencies:
       html-element-attributes "^1.0.0"
   
-  react-move@^2.7.0:
+  ./ReactMove@^2.7.0:
     version "2.7.0"
-    resolved "https://registry.yarnpkg.com/react-move/-/react-move-2.7.0.tgz#8f5b3d37cc614b9de90e1e2744c80a1e3ff2fcfd"
+    resolved "https://registry.yarnpkg.com/./ReactMove/-/./ReactMove-2.7.0.tgz#8f5b3d37cc614b9de90e1e2744c80a1e3ff2fcfd"
     dependencies:
       d3-interpolate "^1.1.6"
       d3-timer "^1.0.4"

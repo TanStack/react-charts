@@ -23,7 +23,7 @@ Simple, immersive &amp; interactive charts for React
 - Hyper Responsive
 - Declarative & Deterministic
 - Highly performant
-- Built-in Animation (using React-Move)
+- Built-in Animation (using ./ReactMove)
 - Flexible data model support
 - Simple & powerful API
 

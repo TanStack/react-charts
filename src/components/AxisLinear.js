@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Connect } from 'react-state'
-import { Animate, NodeGroup } from 'react-move'
 //
+import { Animate, NodeGroup } from './ReactMove'
 import Utils from '../utils/Utils'
 
 import measure from './AxisLinear.measure'
@@ -57,6 +57,7 @@ class Axis extends Component {
     }
     this.measure = Utils.throttle(measure.bind(this))
     this.measureRotation = Utils.throttle(measure.bind(this))
+    this.updateScale = updateScale.bind(this)
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
@@ -91,7 +92,6 @@ class Axis extends Component {
     }
     return false
   }
-  updateScale = updateScale
   render () {
     const {
       type,
@@ -157,6 +157,7 @@ class Axis extends Component {
         },
       },
     }
+
     Object.keys(start).forEach(key => {
       update[key] = [start[key]]
     })
@@ -219,7 +220,7 @@ class Axis extends Component {
             >
               <Path className="domain" d={axisPath} style={axisStyles.line} />
               <NodeGroup
-                data={[...ticks]}
+                data={ticks}
                 keyAccessor={d => String(d)}
                 start={d => ({
                   _: 0, // Ensure an "end" event is fired on first mount

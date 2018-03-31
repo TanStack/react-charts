@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animate } from 'react-move'
+import { Animate } from './ReactMove'
 import { Provider, Connect } from 'react-state'
 import RAF from 'raf'
 //
