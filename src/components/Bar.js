@@ -53,7 +53,7 @@ class Bars extends PureComponent {
           barOffset: [barOffset],
         }}
       >
-        {({ data, barSize, barOffset }) => {
+        {inter => {
           const seriesInteractionProps =
             interaction === 'series'
               ? {
@@ -71,15 +71,15 @@ class Bars extends PureComponent {
                 let x2
                 let y2
                 if (primaryAxis.vertical) {
-                  x1 = data[i].base
-                  x2 = data[i].x
-                  y1 = data[i].y + barOffset
-                  y2 = y1 + barSize
+                  x1 = inter.data[i].base
+                  x2 = inter.data[i].x
+                  y1 = inter.data[i].y + inter.barOffset
+                  y2 = y1 + inter.barSize
                 } else {
-                  x1 = data[i].x + barOffset
-                  x2 = x1 + barSize
-                  y1 = data[i].y
-                  y2 = data[i].base
+                  x1 = inter.data[i].x + inter.barOffset
+                  x2 = x1 + inter.barSize
+                  y1 = inter.data[i].y
+                  y2 = inter.data[i].base
                 }
 
                 const status = Utils.datumStatus(series, datum, hovered, selected)

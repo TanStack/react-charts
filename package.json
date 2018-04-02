@@ -4,12 +4,7 @@
   "description": "react-charts React component",
   "main": "lib/index.js",
   "module": "es/index.js",
-  "files": [
-    "css",
-    "es",
-    "lib",
-    "umd"
-  ],
+  "files": ["css", "es", "lib", "umd"],
   "scripts": {
     "build": "nwb build-react-component",
     "clean": "nwb clean-module && nwb clean-demo",
@@ -28,7 +23,7 @@
     "raf": "^3.4.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "./ReactMove": "^2.7.0",
+    "react-move": "^2.7.0",
     "react-resizable": "^1.7.5",
     "react-state": "^2.0.1",
     "react-story": "0.0.10"
@@ -45,7 +40,5 @@
   "homepage": "",
   "license": "MIT",
   "repository": "",
-  "keywords": [
-    "react-component"
-  ]
+  "keywords": ["react-component"]
 }

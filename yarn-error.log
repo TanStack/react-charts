@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn add --dev serve
+  /usr/local/bin/node /usr/local/bin/yarn
 
 PATH: 
   /Applications/Minecraft.app/Contents/runtime/jre-x64/1.8.0_74/bin/:/Users/tannerlinsley/.yarn/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/tannerlinsley/go/bin:/Users/tannerlinsley/google-cloud-sdk/bin:/usr/local/bin:/Applications/mongodb/:/Users/tannerlinsley/bin:/Users/tannerlinsley/.nvm/versions/node/v6.3.1/bin:~/Library/Python/3.6/bin:./node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/tannerlinsley/go/bin:/Users/tannerlinsley/google-cloud-sdk/bin:/usr/local/bin:/Applications/mongodb/:/Users/tannerlinsley/bin:/Users/tannerlinsley/.nvm/versions/node/v6.3.1/bin:~/Library/Python/3.6/bin
@@ -30,12 +30,13 @@ npm manifest:
       "build": "nwb build-react-component",
       "clean": "nwb clean-module && nwb clean-demo",
       "start": "nwb serve-react-demo",
-      "serve": "serve demo/dist -p 3000"
+      "serve": "serve demo/dist -p 3000",
       "test": "nwb test-react",
       "test:coverage": "nwb test-react --coverage",
       "test:watch": "nwb test-react --server"
     },
     "dependencies": {
+      "d3-ease": "^1.0.3",
       "d3-quadtree": "^1.0.3",
       "d3-scale": "^2.0.0",
       "d3-shape": "^1.2.0",
@@ -53,7 +54,8 @@ npm manifest:
     },
     "devDependencies": {
       "eslint-config-react-tools": "^1.2.5",
-      "nwb": "0.21.x"
+      "nwb": "0.21.x",
+      "serve": "^6.5.3"
     },
     "author": "",
     "homepage": "",
@@ -2546,6 +2548,10 @@ Lockfile:
   d3-color@1:
     version "1.0.3"
     resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.0.3.tgz#bc7643fca8e53a8347e2fbdaffa236796b58509b"
+  
+  d3-ease@^1.0.3:
+    version "1.0.3"
+    resolved "https://registry.yarnpkg.com/d3-ease/-/d3-ease-1.0.3.tgz#68bfbc349338a380c44d8acc4fbc3304aa2d8c0e"
   
   d3-format@1:
     version "1.2.2"
@@ -9190,9 +9196,12 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
 
 Trace: 
-  SyntaxError: /Users/tannerlinsley/GitHub/react-charts/package.json: Unexpected string in JSON at position 400
-      at JSON.parse (<anonymous>)
-      at /usr/local/lib/node_modules/yarn/lib/cli.js:770:59
+  SyntaxError: Unknown token: { line: 5999, col: 2, type: 'INVALID', value: undefined } 5999:2 in /Users/tannerlinsley/GitHub/react-charts/yarn.lock
+      at Parser.unexpected (/usr/local/lib/node_modules/yarn/lib/cli.js:59676:11)
+      at Parser.parse (/usr/local/lib/node_modules/yarn/lib/cli.js:59781:14)
+      at parse (/usr/local/lib/node_modules/yarn/lib/cli.js:59850:17)
+      at module.exports.exports.default (/usr/local/lib/node_modules/yarn/lib/cli.js:59443:96)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:1976:63
       at Generator.next (<anonymous>)
       at step (/usr/local/lib/node_modules/yarn/lib/cli.js:92:30)
       at /usr/local/lib/node_modules/yarn/lib/cli.js:103:13

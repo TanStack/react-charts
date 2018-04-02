@@ -30,12 +30,12 @@ class Story extends Component {
         <br />
 
         {_.range(1).map((d, i) => (
-          <ResizableBox key={i} width={900} height={700}>
+          <ResizableBox key={i} width={900} height={300}>
             <Chart data={data} getData={d => d.data} interaction="axis">
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
-              <Tooltip>
+              <Tooltip align="bottom" origin={['center', 'chartBottom']}>
                 {props => (
                   <div
                     style={{
@@ -67,7 +67,7 @@ class Story extends Component {
                         ]}
                       >
                         <Axis primary type="ordinal" position="bottom" />
-                        <Axis type="linear" position="left" display={false} />
+                        <Axis type="linear" position="left" stacked />
                         <Series
                           type={Bar}
                           getDataStyles={datum => ({
@@ -100,7 +100,7 @@ class Story extends Component {
 export default () => <Story />
 
 function makeData () {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 4), 1)), makeSeries)
+  return _.map(_.range(3), makeSeries)
 }
 
 function makeSeries (i) {
@@ -114,7 +114,7 @@ function makeSeries (i) {
     label: `Series ${i + 1}`,
     data: _.map(_.range(length), () => ({
       x: startDate.setMinutes(startDate.getMinutes() + 30),
-      y: -max + Math.round(Math.random() * max * 2),
+      y: 0 + Math.round(Math.random() * max * 2),
       r: Math.round(Math.random() * 10),
     })),
   }

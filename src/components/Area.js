@@ -135,8 +135,8 @@ class Area extends PureComponent {
                   return (
                     <Circle
                       key={i}
-                      x={inter.data[i].x}
-                      y={inter.data[i].y}
+                      x={inter.data[i] ? inter.data[i].x : undefined}
+                      y={inter.data[i] ? inter.data[i].y : undefined}
                       style={{
                         ...circleDefaultStyle,
                         ...style,

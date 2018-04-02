@@ -8,7 +8,7 @@ export default {
   datumStatus,
   getStatusStyles,
   getStatusStyle,
-  getCenterPointOfSide,
+  getFocusForOrigins,
   getClosestPoint,
   normalizeComponent,
   materializeStyles,
@@ -144,53 +144,130 @@ function getStatusStyle (status, styles) {
   return styles.default
 }
 
-function getCenterPointOfSide (position, points) {
-  let xMin
-  let xMax
-  let yMin
-  let yMax
+function getFocusForOrigins ({
+  origins,
+  points,
+  gridX,
+  gridY,
+  gridWidth,
+  gridHeight,
+  width,
+  height,
+}) {
+  const invalid = () => {
+    throw new Error(
+      `${JSON.stringify(
+        origin
+      )} is not a valid tooltip origin. You should use a single origin or 2 non-conflicting origins.`
+    )
+  }
 
-  xMin = points[0].focus.x
-  xMax = points[0].focus.x
-  yMin = points[0].focus.y
-  yMax = points[0].focus.y
+  let x
+  let y
+
+  let xMin = gridX + points[0].focus.x
+  let xMax = gridX + points[0].focus.x
+  let yMin = gridY + points[0].focus.y
+  let yMax = gridY + points[0].focus.y
 
   points.forEach(point => {
-    xMin = Math.min(point.focus.x, xMin)
-    xMax = Math.max(point.focus.x, xMax)
-    yMin = Math.min(point.focus.y, yMin)
-    yMax = Math.max(point.focus.y, yMax)
+    xMin = Math.min(gridX + point.focus.x, xMin)
+    xMax = Math.max(gridX + point.focus.x, xMax)
+    yMin = Math.min(gridY + point.focus.y, yMin)
+    yMax = Math.max(gridY + point.focus.y, yMax)
   })
 
-  if (position === 'left') {
-    return {
-      x: xMin,
-      y: (yMin + yMax) / 2,
+  if (origins.length > 2) {
+    return invalid()
+  }
+
+  origins = origins.sort((a, b) => (a.includes('center') || a.includes('Center') ? 1 : -1))
+
+  for (let i = 0; i < origins.length; i++) {
+    const origin = origins[i]
+
+    // Horizontal Positioning
+    if (['left', 'right', 'gridLeft', 'gridRight', 'chartLeft', 'chartRight'].includes(origin)) {
+      if (typeof x !== 'undefined') {
+        invalid()
+      }
+      if (origin === 'left') {
+        x = xMin
+      } else if (origin === 'right') {
+        x = xMax
+      } else if (origin === 'gridLeft') {
+        x = gridX
+      } else if (origin === 'gridRight') {
+        x = gridX + gridWidth
+      } else if (origin === 'chartLeft') {
+        x = 0
+      } else if (origin === 'chartRight') {
+        x = width
+      } else {
+        invalid()
+      }
+    }
+
+    // Vertical Positioning
+    if (['top', 'bottom', 'gridTop', 'gridBottom', 'chartTop', 'chartBottom'].includes(origin)) {
+      if (typeof y !== 'undefined') {
+        invalid()
+      }
+      if (origin === 'top') {
+        y = yMin
+      } else if (origin === 'bottom') {
+        y = yMax
+      } else if (origin === 'gridTop') {
+        y = gridY
+      } else if (origin === 'gridBottom') {
+        y = gridY + gridHeight
+      } else if (origin === 'chartTop') {
+        y = 0
+      } else if (origin === 'chartBottom') {
+        y = height
+      } else {
+        invalid()
+      }
+    }
+
+    // Center Positioning
+    if (['center', 'gridCenter', 'chartCenter'].includes(origin)) {
+      if (origin === 'center') {
+        if (typeof y !== 'undefined') {
+          x = (xMin + xMax) / 2
+        } else {
+          y = (yMin + yMax) / 2
+        }
+      } else if (origin === 'gridCenter') {
+        if (typeof y !== 'undefined') {
+          x = gridX + gridWidth / 2
+        } else {
+          y = gridY + gridHeight / 2
+        }
+      } else if (origin === 'chartCenter') {
+        if (typeof y !== 'undefined') {
+          x = width / 2
+        } else {
+          y = height / 2
+        }
+      } else {
+        invalid()
+      }
+    }
+
+    // Auto center the remainder if there is only one origin listed
+    if (origins.length === 1) {
+      if (origins[0].includes('grid')) {
+        origins.push('gridCenter')
+      } else if (origins[0].includes('chart')) {
+        origins.push('chartCenter')
+      } else {
+        origins.push('center')
+      }
     }
   }
-  if (position === 'right') {
-    return {
-      x: xMax,
-      y: (yMin + yMax) / 2,
-    }
-  }
-  if (position === 'top') {
-    return {
-      x: (xMin + xMax) / 2,
-      y: yMin,
-    }
-  }
-  if (position === 'bottom') {
-    return {
-      x: (xMin + xMax) / 2,
-      y: yMax,
-    }
-  }
-  // Center
-  return {
-    x: (xMin + xMax) / 2,
-    y: (yMin + yMax) / 2,
-  }
+
+  return { x, y }
 }
 
 function getClosestPoint (position, points) {
