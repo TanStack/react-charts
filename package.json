@@ -9,7 +9,7 @@
     "build": "nwb build-react-component",
     "clean": "nwb clean-module && nwb clean-demo",
     "start": "nwb serve-react-demo",
-    "serve": "serve demo/dist -p 3000",
+    "serve": "serve demo/dist -p 3000 -s",
     "test": "nwb test-react",
     "test:coverage": "nwb test-react --coverage",
     "test:watch": "nwb test-react --server"
@@ -20,13 +20,10 @@
     "d3-scale": "^2.0.0",
     "d3-shape": "^1.2.0",
     "d3-voronoi": "^1.1.2",
+    "javascript-detect-element-resize": "^0.5.3",
     "raf": "^3.4.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
     "react-move": "^2.7.0",
-    "react-resizable": "^1.7.5",
-    "react-state": "^2.0.1",
-    "react-story": "0.0.10"
+    "react-state": "^2.0.1"
   },
   "peerDependencies": {
     "react": "16.x"
@@ -34,7 +31,12 @@
   "devDependencies": {
     "eslint-config-react-tools": "^1.2.5",
     "nwb": "0.21.x",
-    "serve": "^6.5.3"
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-resizable": "^1.7.5",
+    "react-router-dom": "^4.2.2",
+    "serve": "^6.5.3",
+    "styled-components": "^3.2.5"
   },
   "author": "",
   "homepage": "",

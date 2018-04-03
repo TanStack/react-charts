@@ -3,10 +3,12 @@ import { Connect } from 'react-state'
 import { Animate } from './ReactMove'
 //
 import Selectors from '../utils/Selectors'
+import Utils from '../utils/Utils'
 
 class Cursor extends PureComponent {
   static defaultProps = {
     children: ({ label }) => <span>{label}</span>,
+    snap: true,
   }
   constructor () {
     super()
@@ -23,9 +25,14 @@ class Cursor extends PureComponent {
       secondaryAxis,
       cursor,
       offset: { left, top },
+      gridHeight,
+      gridWidth,
       gridX,
       gridY,
+      hovered,
+      render,
       children,
+      Component: Comp,
     } = this.props
 
     // Don't render until we have all dependencies
@@ -33,68 +40,73 @@ class Cursor extends PureComponent {
       return null
     }
 
-    let x = cursor.x
-    let y = cursor.y
+    // Get the cursor information
+    let { x, y } = cursor
     let animated = false
+    let coordinate
+    let value
+    let label
+    let visibility = cursor.active ? 1 : 0
 
+    // If the cursor isn't in the grid, don't display
+    if (x < -1 || x > gridWidth + 1 || y < -1 || y > gridHeight + 1) {
+      visibility = 0
+    }
+
+    // Determine the axis to use
     const axis = primary ? primaryAxis : secondaryAxis
+    // Determine the sibling axis to use
     const siblingAxis = primary ? secondaryAxis : primaryAxis
+    // Get the sibling range
     const siblingRange = siblingAxis.scale.range()
 
+    // Resolve the invert function
     const invert = axis.scale.invert || (d => d)
 
     let x1
     let x2
     let y1
     let y2
-    let label
     let alignPctX
     let alignPctY
 
-    if (primary && (axis.type === 'ordinal' || snap)) {
+    if (axis.type === 'ordinal' || snap) {
+      // For snapping we need the hovered datums
+      if (!hovered || !hovered.datums || !hovered.datums.length) {
+        return null
+      }
+      // Must be ordinal axis or snap is on, so turn animation on
       animated = true
-      let closestDatum = { focus: {} }
-      if (primaryAxis.vertical) {
-        let smallestDistance = 10000000
-        stackData.forEach(series => {
-          series.data.forEach(datum => {
-            const distance = Math.abs(y - datum.focus.x)
-            if (distance < smallestDistance) {
-              smallestDistance = distance
-              closestDatum = datum
-            }
-          })
-        })
-        y = closestDatum.focus.x
+
+      // Vertical snapping
+      if (axis.vertical) {
+        const datum = Utils.getClosestPoint(cursor, hovered.datums)
+        y = datum.focus.y
         label =
-          typeof closestDatum.primary !== 'undefined'
-            ? axis.format(closestDatum.primary)
+          typeof datum.primary !== 'undefined'
+            ? axis.format(axis.stacked ? datum.total : primary ? datum.primary : datum.secondary)
             : undefined
       } else {
-        let smallestDistance = 10000000
-        stackData.forEach(series => {
-          series.data.forEach(datum => {
-            const distance = Math.abs(x - datum.focus.x)
-            if (distance < smallestDistance) {
-              smallestDistance = distance
-              closestDatum = datum
-            }
-          })
-        })
-        x = closestDatum.focus.x
+        // Horizontal snapping
+        const datum = Utils.getClosestPoint(cursor, hovered.datums)
+        x = datum.focus.x
         label =
-          typeof closestDatum.primary !== 'undefined'
-            ? axis.format(closestDatum.primary)
+          typeof datum.primary !== 'undefined'
+            ? axis.format(axis.stacked ? datum.total : primary ? datum.primary : datum.secondary)
             : undefined
       }
     }
 
+    // Vertical alignment
     if (axis.vertical) {
+      y = Math.max(0, Math.min(gridHeight, y)) // Limit within grid size
+      coordinate = y
       x1 = siblingRange[0]
       x2 = siblingRange[1]
       y1 = y - 1
       y2 = y + 1
-      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.y))
+      value = invert(y)
+      label = typeof label !== 'undefined' ? label : axis.format(value)
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -103,11 +115,14 @@ class Cursor extends PureComponent {
         alignPctY = -50
       }
     } else {
+      x = Math.max(0, Math.min(gridWidth, x)) // Limit within grid size
+      coordinate = x
       x1 = x - 1
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      label = typeof label !== 'undefined' ? label : axis.format(invert(cursor.x))
+      value = invert(x)
+      label = typeof label !== 'undefined' ? label : axis.format(value)
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -117,35 +132,51 @@ class Cursor extends PureComponent {
       }
     }
 
-    const xStart = Math.min(x1, x2)
-    const yStart = Math.min(y1, y2)
-    const xEnd = Math.max(x1, x2)
-    const yEnd = Math.max(y1, y2)
+    const lineStartX = Math.min(x1, x2)
+    const lineStartY = Math.min(y1, y2)
+    const lineEndX = Math.max(x1, x2)
+    const lineEndY = Math.max(y1, y2)
+    const bubbleX = x1 + (!axis.vertical ? 1 : 0)
+    const bubbleY = y1 + (axis.vertical ? 1 : 0)
 
-    const height = Math.max(yEnd - yStart, 0)
-    const width = Math.max(xEnd - xStart, 0)
+    const lineHeight = Math.max(lineEndY - lineStartY, 0)
+    const lineWidth = Math.max(lineEndX - lineStartX, 0)
+
+    let renderedChildren
+
+    const renderProps = {
+      coordinate,
+      value,
+      label,
+    }
+
+    if (Comp) {
+      renderedChildren = React.createElement(Comp, null, renderProps)
+    } else {
+      renderedChildren = (render || children)(renderProps)
+    }
 
     return (
       <Animate
         start={{
-          xStart,
-          yStart,
-          width,
-          height,
-          x1,
-          y1,
-          visibility: cursor.active ? 1 : 0,
+          lineStartX,
+          lineStartY,
+          lineWidth,
+          lineHeight,
+          bubbleX,
+          bubbleY,
+          visibility,
         }}
         update={{
-          xStart: [xStart],
-          yStart: [yStart],
-          width: [width],
-          height: [height],
-          x1: [x1],
-          y1: [y1],
-          visibility: [cursor.active ? 1 : 0],
+          lineStartX: [lineStartX],
+          lineStartY: [lineStartY],
+          lineWidth: [lineWidth],
+          lineHeight: [lineHeight],
+          bubbleX: [bubbleX],
+          bubbleY: [bubbleY],
+          visibility: [visibility],
         }}
-        duration={400}
+        duration={500}
       >
         {inter => (
           <div
@@ -159,27 +190,33 @@ class Cursor extends PureComponent {
               opacity: inter.visibility,
             }}
           >
-            {JSON.stringify(cursor, null, 2)}
+            {/* Render the cursor line */}
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated ? inter.xStart : xStart}px, ${
-                  animated ? inter.yStart : yStart
+                top: 0,
+                left: 0,
+                transform: `translate3d(${animated ? inter.lineStartX : lineStartX}px, ${
+                  animated ? inter.lineStartY : lineStartY
                 }px, 0px)`,
-                width: `${animated ? inter.width : width}px`,
-                height: `${animated ? inter.height : height}px`,
+                width: `${animated ? inter.lineWidth : lineWidth}px`,
+                height: `${animated ? inter.lineHeight : lineHeight}px`,
                 background: 'rgba(0,0,0,.3)',
                 WebkitBackfaceVisibility: 'hidden',
               }}
             />
+            {/* Render the cursor bubble */}
             <div
               style={{
                 position: 'absolute',
-                transform: `translate3d(${animated ? inter.x1 : x1}px, ${
-                  animated ? inter.y1 : y1
+                top: 0,
+                left: 0,
+                transform: `translate3d(${animated ? inter.bubbleX : bubbleX}px, ${
+                  animated ? inter.bubbleY : bubbleY
                 }px, 0px)`,
               }}
             >
+              {/* Render the cursor label */}
               <div
                 style={{
                   padding: '5px',
@@ -192,9 +229,7 @@ class Cursor extends PureComponent {
                   whiteSpace: !axis.vertical && 'nowrap',
                 }}
               >
-                {children({
-                  label,
-                })}
+                {renderedChildren}
               </div>
             </div>
           </div>
@@ -244,6 +279,8 @@ export default Connect(
       primaryAxis: Selectors.primaryAxis(),
       secondaryAxis: Selectors.secondaryAxis(),
       offset: Selectors.offset(),
+      gridHeight: Selectors.gridHeight(),
+      gridWidth: Selectors.gridWidth(),
       gridX: Selectors.gridX(),
       gridY: Selectors.gridY(),
     }
@@ -252,7 +289,10 @@ export default Connect(
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
       cursor: state.cursor,
+      hovered: state.hovered,
       offset: selectors.offset(state),
+      gridHeight: selectors.gridHeight(state),
+      gridWidth: selectors.gridWidth(state),
       gridX: selectors.gridX(state),
       gridY: selectors.gridY(state),
     })
@@ -263,25 +303,3 @@ export default Connect(
     },
   }
 )(Cursor)
-
-/* <g
-
-  >
-
-  <Rectangle
-    x1={labelX1}
-    x2={labelX2}
-    y1={labelY1}
-    y2={labelY2}
-  />
-  <Text
-    x={x1}
-    y={y1}
-    fontSize={fontSize}
-    textAnchor={axis.position === 'left' ? 'end' : axis.position === 'right' ? 'start' : 'middle'}
-    dominantBaseline={axis.position === 'top' ? 'alphabetic' : axis.position ===
-    'bottom' ? 'hanging' : 'central'}
-  >
-    {label}
-  </Text>
-</g> */

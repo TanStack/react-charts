@@ -6,12 +6,16 @@ import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
 
-const fontSize = 12
-
 const defaultRenderer = props => {
   const {
     series, datums, primaryAxis, secondaryAxis,
   } = props
+
+  const formatSecondary = val =>
+    Math.floor(val) < val
+      ? secondaryAxis.format(Math.round(val * 100) / 100)
+      : secondaryAxis.format(val)
+
   return series ? (
     <div>
       <strong>{series.label}</strong>
@@ -22,6 +26,7 @@ const defaultRenderer = props => {
       <div
         style={{
           marginBottom: '3px',
+          textAlign: 'center',
         }}
       >
         <strong>{primaryAxis.format(datums[0].primary)}</strong>
@@ -30,21 +35,36 @@ const defaultRenderer = props => {
         <tbody>
           {(secondaryAxis.stacked ? [...datums].reverse() : datums).map((d, i) => (
             <tr key={i}>
-              <td>
-                <span style={{ color: d.statusStyles.hovered.fill }}>&#9679;</span> {d.seriesLabel}:
-                &nbsp;
-              </td>
+              <td style={{ color: d.statusStyles.hovered.fill }}>&#9679;</td>
+              <td>{d.seriesLabel}: &nbsp;</td>
               <td
                 style={{
                   textAlign: 'right',
                 }}
               >
-                {Math.floor(d.secondary) < d.secondary
-                  ? secondaryAxis.format(Math.round(d.secondary * 100) / 100)
-                  : secondaryAxis.format(d.secondary)}
+                {formatSecondary(d.secondary)}
               </td>
             </tr>
           ))}
+          {secondaryAxis.stacked ? (
+            <tr>
+              <td style={{ color: 'rgba(255,255,255,.3)' }}>&#9679;</td>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                Total:
+              </td>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                {formatSecondary([...datums].reverse()[0].total)}
+              </td>
+            </tr>
+          ) : null}
         </tbody>
       </table>
     </div>
@@ -53,7 +73,7 @@ const defaultRenderer = props => {
 
 class Tooltip extends PureComponent {
   static defaultProps = {
-    origin: ['top', 'right'],
+    origin: 'closest',
     align: 'top',
     children: defaultRenderer,
   }
@@ -102,7 +122,7 @@ class Tooltip extends PureComponent {
       if (typeof origin === 'function') {
         focus = origin(datums, cursor)
       } else if (origin === 'closest') {
-        focus = Utils.getClosestPoint(cursor, datums).focus // : quadTree.find(cursor.x, cursor.y)
+        focus = Utils.getClosestPoint(cursor, datums).focus
       } else if (origin === 'cursor') {
         focus = cursor
       } else {
@@ -219,7 +239,6 @@ class Tooltip extends PureComponent {
       <Animate
         start={start}
         update={update}
-        duration={400}
         timing={{
           duration: 500,
         }}
@@ -247,8 +266,8 @@ class Tooltip extends PureComponent {
               style={{
                 pointerEvents: 'none',
                 position: 'absolute',
-                left: `${left}px`,
-                top: `${top}px`,
+                left: `${left + gridX}px`,
+                top: `${top + gridY}px`,
                 opacity: visibility,
               }}
             >
@@ -265,7 +284,7 @@ class Tooltip extends PureComponent {
                 >
                   <div
                     style={{
-                      fontSize: `${fontSize}px`,
+                      fontSize: '12px',
                       padding: '5px',
                       background: 'rgba(38, 38, 38, 0.8)',
                       color: 'white',
@@ -273,15 +292,15 @@ class Tooltip extends PureComponent {
                       position: 'relative',
                     }}
                   >
-                    {renderedChildren}
                     <div
                       style={{
                         position: 'absolute',
-                        width: '0',
-                        height: '0',
+                        width: 0,
+                        height: 0,
                         ...triangleStyles,
                       }}
                     />
+                    {renderedChildren}
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-/* eslint-disable import/no-webpack-loader-syntax */
+
 import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'

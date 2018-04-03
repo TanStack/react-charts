@@ -5,12 +5,14 @@ import AxisLinear from './AxisLinear'
 
 export default class Axis extends PureComponent {
   render () {
-    const { type } = this.props
+    const { type, primary, position } = this.props
+
+    const resolvedPosition = position || (primary ? 'bottom' : 'left')
 
     if (type === 'pie') {
-      return <AxisPie {...this.props} />
+      return <AxisPie {...this.props} position={resolvedPosition} />
     }
 
-    return <AxisLinear {...this.props} />
+    return <AxisLinear {...this.props} position={resolvedPosition} />
   }
 }

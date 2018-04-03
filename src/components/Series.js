@@ -119,22 +119,26 @@ class Series extends Component {
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
               // Should we use positive or negative base?
-              const key = datum.x >= 0 ? 'positive' : 'negative'
+              const totalKey = datum.x >= 0 ? 'positive' : 'negative'
               // Assign the base
-              datum.base = start[key]
-              // Add the value to the base
-              datum.x = datum.base + datum.x
+              datum.base = start[totalKey]
+              // Add the value for a total
+              datum.total = datum.base + datum.x
               // Update the totals
-              totals[d.primary][key] = datum.x
+              totals[d.primary][totalKey] = datum.total
+              // Make the total the new value
+              datum.x = datum.total
             } else {
               // Should we use positive or negative base?
-              const key = datum.y >= 0 ? 'positive' : 'negative'
+              const totalKey = datum.y >= 0 ? 'positive' : 'negative'
               // Assign the base
-              datum.base = start[key]
+              datum.base = start[totalKey]
               // Add the value to the base
-              datum.y = datum.base + datum.y
+              datum.total = datum.base + datum.y
               // Update the totals
-              totals[d.primary][key] = datum.y
+              totals[d.primary][totalKey] = datum.total
+              // Make the total the new value
+              datum.y = datum.total
             }
           }
           return datum
@@ -244,9 +248,12 @@ class Series extends Component {
       return null
     }
 
+    // Force lines to render on top
+    const sortedStackData = stackData.sort(a => (a.type === 'Line' ? 1 : 0))
+
     return (
       <NodeGroup
-        data={stackData} // The stack is reversed for proper z-index painting
+        data={sortedStackData}
         keyAccessor={d => d.id}
         start={() => ({
           visibility: 0,

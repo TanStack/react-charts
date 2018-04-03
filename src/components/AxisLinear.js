@@ -224,14 +224,14 @@ class Axis extends Component {
                 keyAccessor={d => String(d)}
                 start={d => ({
                   _: 0, // Ensure an "end" event is fired on first mount
-                  tick: this.prevAxis.scale(d),
+                  tick: this.prevAxis.scale(d) || 0,
                   visibility: 0,
                   rotation,
                   measureable: 1,
                 })}
                 enter={d => ({
                   _: 1,
-                  tick: [scale(d)],
+                  tick: [scale(d) || 0],
                   visibility: [1],
                   rotation: [rotation],
                   measureable: 1,
@@ -243,7 +243,7 @@ class Axis extends Component {
                 })}
                 update={d => ({
                   _: 1,
-                  tick: [scale(d)],
+                  tick: [scale(d) || 0],
                   visibility: [1],
                   rotation: [rotation],
                   measureable: 1,
@@ -254,7 +254,7 @@ class Axis extends Component {
                   },
                 })}
                 leave={d => ({
-                  tick: [scale(d)],
+                  tick: [scale(d) || 0],
                   visibility: [0],
                   rotation: [rotation],
                   measureable: 0,
@@ -332,7 +332,7 @@ class Axis extends Component {
                                   : position === positionLeft ? 'end' : 'middle'
                             }
                           >
-                            {format(inter.data)}
+                            {String(format(inter.data))}
                           </Text>
                         </g>
                       ))}

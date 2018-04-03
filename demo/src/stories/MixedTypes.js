@@ -1,94 +1,44 @@
-/* eslint-disable import/no-webpack-loader-syntax */
-import React, { Component } from 'react'
-import _ from 'lodash'
-import { ResizableBox } from 'react-resizable'
-//
-//
-import { Chart, Axis, Series, Tooltip, Bar, Line } from '../../../src'
+import React from 'react'
 
-export default class Story extends Component {
-  constructor () {
-    super()
-    this.state = {
-      data: makeData(),
-    }
-  }
-  render () {
-    const { data } = this.state
-    return (
+//
+
+import ChartConfig from './components/ChartConfig'
+
+import { Chart, Axis, Series, Tooltip, Line, Bar } from '../../../src'
+
+export default () => (
+  <ChartConfig dataType="ordinal">
+    {({ data }) => (
       <div>
-        <button
-          onClick={() =>
-            this.setState({
-              data: makeData(),
-            })
-          }
-        >
-          Randomize Data
-        </button>
-        <br />
-        <br />
         Ordinal Scale:
         <br />
         <br />
-        {_.range(1).map((d, i) => (
-          <ResizableBox key={i} width={700} height={400}>
-            <Chart
-              data={data}
-              getData={d => d.data}
-              getLabel={d => d.label}
-              getPrimary={d => d.x}
-              getSecondary="nested.y"
-            >
-              <Axis primary type="ordinal" position="bottom" paddingOuter={1} showGrid />
-              <Axis type="linear" position="left" />
+        <ChartConfig canRandomize={false}>
+          {() => (
+            <Chart data={data} getData={d => d.data}>
+              <Axis primary type="ordinal" />
+              <Axis type="linear" min={0} />
               <Series type={(s, i) => (i % 2 ? Bar : Line)} />
               <Tooltip />
             </Chart>
-          </ResizableBox>
-        ))}
+          )}
+        </ChartConfig>
         <br />
         <br />
         Linear Scale
         <br />
         <br />
-        {_.range(1).map((d, i) => (
-          <ResizableBox key={i} width={700} height={400}>
-            <Chart
-              data={data}
-              getData={d => d.data}
-              getLabel={d => d.label}
-              getPrimary={d => d.x}
-              getSecondary="nested.y"
-            >
-              <Axis primary type="linear" position="bottom" paddingOuter={1} />
-              <Axis type="linear" position="left" />
+        <ChartConfig canRandomize={false}>
+          {() => (
+            <Chart data={data} getData={d => d.data}>
+              <Axis primary type="linear" />
+              <Axis type="linear" min={0} />
               <Series type={(s, i) => (i % 2 ? Bar : Line)} />
               <Tooltip />
             </Chart>
-          </ResizableBox>
-        ))}
+          )}
+        </ChartConfig>
       </div>
-    )
-  }
-}
-
-function makeData () {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 4), 2)), makeSeries)
-}
-
-function makeSeries (d, i) {
-  const length = 15
-  const max = 100
-  const multiplier = 1
-  return {
-    label: `Series ${i + 1}`,
-    data: _.map(_.range(length), d => ({
-      x: d * multiplier,
-      nested: {
-        y: Math.round(-max + Math.random() * max * 2),
-        r: Math.round(Math.random() * 10),
-      },
-    })),
-  }
-}
+    )}
+  </ChartConfig>
+)

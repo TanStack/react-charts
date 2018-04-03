@@ -159,10 +159,9 @@ export default function updateScale (props) {
     if (type === 'ordinal') {
       bandScale.paddingOuter(outerPadding).paddingInner(innerPadding)
       barSize = bandScale.bandwidth()
-    } else {
-      barSize = bandScale.bandwidth()
     }
 
+    barSize = bandScale.bandwidth()
     stepSize = bandScale.step()
   }
 
@@ -231,14 +230,12 @@ export default function updateScale (props) {
         : position === positionLeft ? width : position === positionTop ? height : -width,
     directionMultiplier: position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? translateX : translateY,
-    ticks: (this.ticks =
-      tickValues == null
-        ? scale.ticks ? scale.ticks(...tickArguments) : scale.domain()
-        : tickValues),
-    format:
-      tickFormat == null
-        ? scale.tickFormat ? scale.tickFormat(...tickArguments) : identity
-        : tickFormat,
+    ticks: (this.ticks = !tickValues
+      ? scale.ticks ? scale.ticks(...tickArguments) : scale.domain()
+      : tickValues),
+    format: !tickFormat
+      ? scale.tickFormat ? scale.tickFormat(...tickArguments) : identity
+      : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }
 
@@ -248,7 +245,7 @@ export default function updateScale (props) {
     axis.barOffset = 0
   } else {
     axis.tickOffset = 0
-    axis.barOffset = -axis.barSize / 2
+    axis.barOffset = 0
   }
 
   // Make sure we start with a prevAxis

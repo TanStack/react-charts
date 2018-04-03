@@ -66,20 +66,23 @@ class Bars extends PureComponent {
           return (
             <g className="series bar">
               {series.data.map((datum, i) => {
+                const x = inter.data[i] ? inter.data[i].x : 0
+                const y = inter.data[i] ? inter.data[i].y : 0
+                const base = inter.data[i] ? inter.data[i].base : 0
                 let x1
                 let y1
                 let x2
                 let y2
                 if (primaryAxis.vertical) {
-                  x1 = inter.data[i].base
-                  x2 = inter.data[i].x
-                  y1 = inter.data[i].y + inter.barOffset
+                  x1 = base
+                  x2 = x
+                  y1 = y + inter.barOffset
                   y2 = y1 + inter.barSize
                 } else {
-                  x1 = inter.data[i].x + inter.barOffset
+                  x1 = x + inter.barOffset
                   x2 = x1 + inter.barSize
-                  y1 = inter.data[i].y
-                  y2 = inter.data[i].base
+                  y1 = y
+                  y2 = base
                 }
 
                 const status = Utils.datumStatus(series, datum, hovered, selected)

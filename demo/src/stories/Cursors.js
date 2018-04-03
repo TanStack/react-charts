@@ -1,4 +1,4 @@
-/* eslint-disable import/no-webpack-loader-syntax */
+
 import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
@@ -42,9 +42,9 @@ class Story extends Component {
                 <Axis primary type="time" position="bottom" />
                 <Axis type="linear" position="left" stacked cursor={{}} />
                 <Series type={Area} />
-                <Tooltip />
                 <Cursor primary />
                 <Cursor />
+                <Tooltip />
               </Chart>
             </div>
           </ResizableBox>
@@ -71,10 +71,10 @@ function makeSeries (i) {
   return {
     label: `Series ${i + 1}`,
     data: _.map(_.range(length), d => {
-      let date = new Date()
+      const date = new Date()
       date.setMinutes(startDate.getMinutes() + 30 * d)
       date.setSeconds(0)
-      date = date.setMilliseconds(0)
+      date.setMilliseconds(0)
       return {
         // x: d * multiplier,
         x: date,

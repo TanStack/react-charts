@@ -11,6 +11,9 @@ class Brush extends PureComponent {
   componentWillReceiveProps (nextProps) {
     const { onSelect, cursor, primaryAxis } = this.props
     if (this.props.cursor && nextProps.cursor.released !== this.props.cursor.released) {
+      if (Math.abs(cursor.sourceX - cursor.x) < 20) {
+        return
+      }
       onSelect({
         cursor: nextProps.cursor.released,
         start: primaryAxis.scale.invert(cursor.sourceX),
@@ -20,7 +23,7 @@ class Brush extends PureComponent {
   }
   render () {
     const {
-      cursor = {}, offset, gridX, gridY, gridHeight,
+      cursor = {}, offset, gridX, gridY, gridHeight, style = {},
     } = this.props
 
     return (
@@ -31,7 +34,7 @@ class Brush extends PureComponent {
           position: 'absolute',
           left: `${offset.left + gridX}px`,
           top: `${offset.top + gridY}px`,
-          opacity: !cursor.dragging ? 0 : 1,
+          opacity: cursor.dragging ? (Math.abs(cursor.sourceX - cursor.x) < 20 ? 0.5 : 1) : 0,
         }}
       >
         <div
@@ -40,7 +43,8 @@ class Brush extends PureComponent {
             left: `${Math.min(cursor.x, cursor.sourceX)}px`,
             width: `${Math.abs(cursor.x - cursor.sourceX)}px`,
             height: `${gridHeight}px`,
-            background: 'rgba(0,0,0,.2)',
+            background: 'rgba(0,0,0,.3)',
+            ...style,
           }}
         />
       </div>

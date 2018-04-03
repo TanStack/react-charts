@@ -1,4 +1,4 @@
-/* eslint-disable import/no-webpack-loader-syntax */
+
 import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
@@ -36,7 +36,7 @@ class Story extends Component {
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Tooltip />
-              <Cursor primary>
+              <Cursor primary snap>
                 {props => (
                   <span>
                     <span role="img" aria-label="icon">
@@ -46,7 +46,7 @@ class Story extends Component {
                   </span>
                 )}
               </Cursor>
-              <Cursor>
+              <Cursor snap>
                 {props => (
                   <span>
                     <span role="img" aria-label="icon">
@@ -80,11 +80,17 @@ function makeSeries (i) {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return {
     label: `Series ${i + 1}`,
-    data: _.map(_.range(length), d => ({
+    data: _.map(_.range(length), d => {
       // x: d * multiplier,
-      x: new Date().setMinutes(startDate.getMinutes() + 30 * d),
-      y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
-      r: Math.round(Math.random() * 5),
-    })),
+      const date = new Date()
+      date.setMinutes(startDate.getMinutes() + 30 * d)
+      date.setSeconds(0)
+      date.setMilliseconds(0)
+      return {
+        x: date,
+        y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
+        r: Math.round(Math.random() * 5),
+      }
+    }),
   }
 }

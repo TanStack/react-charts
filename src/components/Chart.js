@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Animate } from './ReactMove'
 import { Provider, Connect } from 'react-state'
 import RAF from 'raf'
 //
+import { Animate } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
@@ -19,7 +19,7 @@ class Chart extends Component {
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
     getR: d => (Array.isArray(d) ? d[0] : d.r),
     decorate: () => ({}),
-    interaction: 'closestPoint',
+    interaction: 'axis',
   }
   componentDidMount () {
     this.props.dispatch(
@@ -197,7 +197,6 @@ class Chart extends Component {
                 }}
                 onMouseLeave={this.onMouseLeave}
                 onMouseDown={this.onMouseDown}
-                onMouseUp={this.onMouseUp}
               >
                 <Rectangle
                   // This is to ensure the cursor always has something to hit
@@ -222,7 +221,9 @@ class Chart extends Component {
   onMouseMove = Utils.throttle(e => {
     const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
-    const { gridX, gridY, dispatch } = this.props
+    const {
+      gridX, gridY, gridWidth, gridHeight, dispatch,
+    } = this.props
 
     dispatch(
       state => ({
@@ -261,6 +262,9 @@ class Chart extends Component {
   onMouseDown = () => {
     const { dispatch } = this.props
 
+    document.addEventListener('mouseup', this.onMouseUp)
+    document.addEventListener('mousemove', this.onMouseMove)
+
     dispatch(
       state => ({
         ...state,
@@ -278,6 +282,10 @@ class Chart extends Component {
   }
   onMouseUp = () => {
     const { dispatch } = this.props
+
+    document.removeEventListener('mouseup', this.onMouseUp)
+    document.removeEventListener('mousemove', this.onMouseMove)
+
     dispatch(
       state => ({
         ...state,
@@ -302,6 +310,8 @@ const ReactChart = Connect(
   () => {
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
+      gridWidth: Selectors.gridWidth(),
+      gridHeight: Selectors.gridHeight(),
       gridX: Selectors.gridX(),
       gridY: Selectors.gridY(),
       offset: Selectors.offset(),
@@ -310,6 +320,8 @@ const ReactChart = Connect(
       data: state.data,
       width: state.width,
       height: state.height,
+      gridWidth: selectors.gridWidth(state),
+      gridHeight: selectors.gridHeight(state),
       gridX: selectors.gridX(state),
       gridY: selectors.gridY(state),
       active: state.active,

@@ -27,6 +27,12 @@ class Pie extends PureComponent {
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
+  componentDidMount () {
+    this.props.dispatch(state => ({
+      ...state,
+      interaction: 'element',
+    }))
+  }
   render () {
     const {
       series,
@@ -105,6 +111,10 @@ class Pie extends PureComponent {
               {series.data.map((datum, i) => {
                 const status = Utils.datumStatus(series, datum, hovered, selected)
                 const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
+
+                if (!inter.data[i]) {
+                  return null
+                }
 
                 const datumInteractionProps =
                   interaction === 'element'

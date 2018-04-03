@@ -125,7 +125,6 @@ class Interaction extends PureComponent {
                 onClick={() => this.onClick(points.data.series, points.data.datums)}
                 style={{
                   fill: 'rgba(0,0,0,.2)',
-                  strokeWidth: 5,
                   stroke: 'rgba(255,255,255,.5)',
                   opacity: 0,
                 }}

@@ -274,7 +274,7 @@ function getClosestPoint (position, points) {
   let closestDistance = Infinity
   let closestPoint = points[0] || {}
   points.forEach(p => {
-    const distance = Math.sqrt(p.focus.x - position.x ** 2 + (p.focus.y - position.y ** 2))
+    const distance = Math.sqrt((p.focus.x - position.x) ** 2 + (p.focus.y - position.y) ** 2)
     if (distance < closestDistance) {
       closestDistance = distance
       closestPoint = p

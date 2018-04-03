@@ -20,27 +20,40 @@ const options = {
   secondaryAxisPosition: ['top', 'left', 'right', 'bottom'],
   secondaryAxisStack: [true, false],
   interaction: ['axis', 'series', 'closestSeries', 'closestPoint', 'element'],
-  tooltipPosition: ['top', 'bottom', 'left', 'right', 'center', 'cursor', 'closest'],
+  tooltipPosition: [
+    'top',
+    'bottom',
+    'left',
+    'right',
+    'center',
+    'gridTop',
+    'gridBottom',
+    'gridLeft',
+    'gridRight',
+    'gridCenter',
+    'chartTop',
+    'chartBottom',
+    'chartLeft',
+    'chartRight',
+    'chartCenter',
+    'cursor',
+    'closest',
+  ],
   tooltipAlign: ['top', 'bottom', 'left', 'right', 'center'],
   snapCursor: [true, false],
 }
 
-const optionKeys = [
-  'elementType',
-  'primaryAxisType',
-  'primaryAxisPosition',
-  'secondaryAxisType',
-  'secondaryAxisPosition',
-  'secondaryAxisStack',
-  'interaction',
-  'tooltipPosition',
-  'tooltipAlign',
-  'snapCursor',
-]
+const optionKeys = Object.keys(options)
 
 export default class ChartConfig extends Component {
   static defaultProps = {
-    show: optionKeys,
+    count: 1,
+    resizable: true,
+    width: 500,
+    height: 300,
+    canRandomize: true,
+    dataType: 'time',
+    show: [],
     elementType: 'line',
     primaryAxisType: 'time',
     secondaryAxisType: 'linear',
@@ -57,11 +70,14 @@ export default class ChartConfig extends Component {
     super()
     this.state = {
       ...props,
-      data: makeData(),
+      data: makeData(props.dataType),
     }
+    console.log(this.state.data)
   }
   render () {
-    const { children, show } = this.props
+    const {
+      render, children, show, count, resizable, width, height, canRandomize,
+    } = this.props
     return (
       <div>
         {optionKeys.map(
@@ -90,49 +106,68 @@ export default class ChartConfig extends Component {
             )
         )}
 
-        <button
-          onClick={() =>
-            this.setState({
-              data: makeData(),
-            })
-          }
-        >
-          Randomize Data
-        </button>
+        {canRandomize && (
+          <div>
+            <button
+              onClick={() =>
+                this.setState({
+                  data: makeData(this.props.dataType),
+                })
+              }
+            >
+              Randomize Data
+            </button>
 
-        <br />
-        <br />
+            <br />
+            <br />
+          </div>
+        )}
 
-        {_.range(1).map((d, i) => (
-          <ResizableBox key={i} width={500} height={300}>
-            {children({
-              ...this.state,
-              elementType: types[this.state.elementType],
-            })}
-          </ResizableBox>
-        ))}
+        {_.range(count).map(
+          (d, i) =>
+            resizable ? (
+              <ResizableBox key={i} width={width} height={height}>
+                {(render || children)({
+                  ...this.state,
+                  elementType: types[this.state.elementType],
+                })}
+              </ResizableBox>
+            ) : (
+              (render || children)({
+                ...this.state,
+                elementType: types[this.state.elementType],
+              })
+            )
+        )}
       </div>
     )
   }
 }
 
-function makeData () {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 5), 1)), makeSeries)
+function makeData (dataType) {
+  return _.map(_.range(Math.max(Math.round(Math.random() * 5), 1)), d => makeSeries(d, dataType))
 }
 
-function makeSeries (i) {
+function makeSeries (i, dataType) {
+  const start = 0
   const startDate = new Date()
-  startDate.setMilliseconds(0)
   startDate.setSeconds(0)
+  startDate.setMilliseconds(0)
   const length = Math.round(Math.random() * 30)
-  // const length = 30
   const max = 100
   return {
     label: `Series ${i + 1}`,
-    data: _.map(_.range(length), () => ({
-      x: startDate.setMinutes(startDate.getMinutes() + 30),
-      y: -max + Math.round(Math.random() * max * 2),
-      r: Math.round(Math.random() * 10),
-    })),
+    data: _.map(_.range(length), d => {
+      // x: d * multiplier,
+      let x = start + d
+      if (dataType === 'time') {
+        x = new Date(startDate.getTime() + 60 * 1000 * 30 * d)
+      }
+      return {
+        x,
+        y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
+        r: Math.round(Math.random() * 5),
+      }
+    }),
   }
 }
