@@ -7,53 +7,67 @@ export default class HyperResponsive extends Component {
   constructor () {
     super()
     this.state = {
-      ready: false,
       width: 0,
       height: 0,
     }
   }
   componentDidMount () {
     if (!this.resizeListener && this.el) {
-      this.resizeListener = window.addResizeListener(this.el, this.resize)
+      this.resizeListener = window.addResizeListener(this.el.parentElement, this.resize)
     }
     this.resize()
   }
   componentWillUnmount () {
     if (this.resizeListener) {
-      window.removeResizeListener(this.el, this.resize)
+      window.removeResizeListener(this.el.parentElement, this.resize)
     }
   }
   resize = Utils.throttle(() => {
+    const computed = window.getComputedStyle(this.el.parentElement)
+
+    const {
+      paddingTop,
+      paddingBottom,
+      paddingLeft,
+      paddingRight,
+      boxSizing,
+      borderTopWidth,
+      borderLeftWidth,
+    } = computed
+
+    let { width, height } = computed
+
+    width = parseInt(width)
+    height = parseInt(height)
+
+    if (boxSizing === 'border-box') {
+      width -= parseInt(paddingLeft)
+      width -= parseInt(paddingRight)
+
+      height -= parseInt(paddingTop)
+      height -= parseInt(paddingBottom)
+
+      width -= parseInt(borderLeftWidth)
+      height -= parseInt(borderTopWidth)
+    }
+
     this.setState({
-      ready: true,
-      width: parseInt(window.getComputedStyle(this.el).width),
-      height: parseInt(window.getComputedStyle(this.el).height),
+      width,
+      height,
     })
   })
   handleRef = el => {
     this.el = el
   }
   render () {
-    const { style, render, children } = this.props
-    const { ready, width, height } = this.state
+    const { render, children } = this.props
+    const { width, height } = this.state
+    const { handleRef } = this
 
-    return (
-      <div
-        className="ResponsiveWrapper"
-        ref={this.handleRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          ...style,
-        }}
-      >
-        {ready
-          ? (render || children)({
-              width,
-              height,
-            })
-          : null}
-      </div>
-    )
+    return (render || children)({
+      handleRef,
+      width,
+      height,
+    })
   }
 }

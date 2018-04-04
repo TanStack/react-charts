@@ -133,10 +133,12 @@ export default class ChartConfig extends Component {
                 })}
               </ResizableBox>
             ) : (
-              (render || children)({
-                ...this.state,
-                elementType: types[this.state.elementType],
-              })
+              <div key={i}>
+                {(render || children)({
+                  ...this.state,
+                  elementType: types[this.state.elementType],
+                })}
+              </div>
             )
         )}
       </div>
@@ -155,6 +157,8 @@ function makeSeries (i, dataType) {
   startDate.setMilliseconds(0)
   const length = Math.round(Math.random() * 30)
   const max = 100
+  const rMin = 2
+  const rMax = 30
   return {
     label: `Series ${i + 1}`,
     data: _.map(_.range(length), d => {
@@ -163,10 +167,16 @@ function makeSeries (i, dataType) {
       if (dataType === 'time') {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * d)
       }
+      const distribution = 1.1
+      const idx =
+        rMax -
+        Math.floor(
+          Math.log(Math.random() * (distribution ** rMax - rMin) + rMin) / Math.log(distribution)
+        )
       return {
         x,
         y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
-        r: Math.round(Math.random() * 5),
+        r: idx,
       }
     }),
   }

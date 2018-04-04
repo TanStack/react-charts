@@ -10,6 +10,7 @@ class Cursor extends PureComponent {
     children: ({ label }) => <span>{label}</span>,
     snap: true,
   }
+  static isHTML = true
   constructor () {
     super()
     this.onHover = this.onHover.bind(this)
@@ -273,33 +274,26 @@ class Cursor extends PureComponent {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
-      secondaryAxis: Selectors.secondaryAxis(),
-      offset: Selectors.offset(),
-      gridHeight: Selectors.gridHeight(),
-      gridWidth: Selectors.gridWidth(),
-      gridX: Selectors.gridX(),
-      gridY: Selectors.gridY(),
-    }
-    return state => ({
-      stackData: state.stackData,
-      primaryAxis: selectors.primaryAxis(state),
-      secondaryAxis: selectors.secondaryAxis(state),
-      cursor: state.cursor,
-      hovered: state.hovered,
-      offset: selectors.offset(state),
-      gridHeight: selectors.gridHeight(state),
-      gridWidth: selectors.gridWidth(state),
-      gridX: selectors.gridX(state),
-      gridY: selectors.gridY(state),
-    })
-  },
-  {
-    statics: {
-      isHTML: true,
-    },
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis(),
+    offset: Selectors.offset(),
+    gridHeight: Selectors.gridHeight(),
+    gridWidth: Selectors.gridWidth(),
+    gridX: Selectors.gridX(),
+    gridY: Selectors.gridY(),
   }
-)(Cursor)
+  return state => ({
+    stackData: state.stackData,
+    primaryAxis: selectors.primaryAxis(state),
+    secondaryAxis: selectors.secondaryAxis(state),
+    cursor: state.cursor,
+    hovered: state.hovered,
+    offset: selectors.offset(state),
+    gridHeight: selectors.gridHeight(state),
+    gridWidth: selectors.gridWidth(state),
+    gridX: selectors.gridX(state),
+    gridY: selectors.gridY(state),
+  })
+})(Cursor)

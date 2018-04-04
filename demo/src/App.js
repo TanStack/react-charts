@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import 'react-resizable/css/styles.css'
 
 import LineChart from './stories/LineChart.js'
+import BubbleChart from './stories/BubbleChart.js'
 import AreaChart from './stories/AreaChart.js'
 import BarChart from './stories/BarChart.js'
 import ColumnChart from './stories/ColumnChart.js'
@@ -22,6 +23,7 @@ import DoughnutChart from './stories/DoughnutChart.js'
 
 const stories = [
   { name: 'Line Chart', slug: 'line', component: LineChart },
+  { name: 'Bubble Chart', slug: 'bubble', component: BubbleChart },
   { name: 'Area Chart', slug: 'area', component: AreaChart },
   { name: 'Bar Chart', slug: 'bar', component: BarChart },
   { name: 'Column Chart', slug: 'column', component: ColumnChart },

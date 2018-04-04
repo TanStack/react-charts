@@ -9,7 +9,7 @@ import { Chart, Axis, Series, Tooltip, Area } from '../../../src'
 export default () => (
   <ChartConfig dataType="time">
     {({ data }) => (
-      <Chart data={data} getData={d => d.data}>
+      <Chart data={data}>
         <Axis primary type="time" position="bottom" />
         <Axis type="linear" position="left" stacked />
         <Series type={Area} />

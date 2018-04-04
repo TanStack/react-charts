@@ -8,17 +8,16 @@ import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
 
 import Rectangle from '../primitives/Rectangle'
-import Voronoi from '../components/Voronoi'
+import Voronoi, { isVoronoiPriority } from '../components/Voronoi'
 
 class Chart extends Component {
   static defaultProps = {
-    getData: d => d,
-    getLabel: (d, i) => `Series ${i + 1}`,
+    getData: d => d.data,
+    getLabel: (d, i) => d.label || `Series ${i + 1}`,
     getSeriesID: (d, i) => i,
     getPrimary: d => (Array.isArray(d) ? d[0] : d.x),
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
-    getR: d => (Array.isArray(d) ? d[0] : d.r),
-    decorate: () => ({}),
+    getR: d => (Array.isArray(d) ? d[2] : d.r),
     interaction: 'axis',
   }
   componentDidMount () {
@@ -107,7 +106,7 @@ class Chart extends Component {
           seriesID,
           seriesLabel,
           index,
-          datum: d,
+          original: d,
           primary: getPrimary(d, index),
           secondary: getSecondary(d, index),
           r: getR(d, index),
@@ -149,7 +148,7 @@ class Chart extends Component {
   }
   render () {
     const {
-      style, width, height, gridX, gridY, children,
+      style, width, height, handleRef, gridX, gridY, interaction, children,
     } = this.props
 
     const allChildren = React.Children.toArray(children)
@@ -158,10 +157,12 @@ class Chart extends Component {
 
     return (
       <div
+        ref={handleRef}
         className="ReactChart"
         style={{
           width: 0,
           height: 0,
+          position: 'relative',
         }}
       >
         <Animate
@@ -208,8 +209,17 @@ class Chart extends Component {
                     opacity: 0,
                   }}
                 />
-                {svgChildren}
-                <Voronoi />
+                {isVoronoiPriority(interaction) ? (
+                  <React.Fragment>
+                    {svgChildren}
+                    <Voronoi />
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    <Voronoi />
+                    {svgChildren}
+                  </React.Fragment>
+                )}
               </g>
             </svg>
           )}
@@ -338,6 +348,8 @@ const ProvidedChart = Provider(ReactChart)
 
 export default props => (
   <HyperResponsive
-    render={({ width, height }) => <ProvidedChart {...props} width={width} height={height} />}
+    render={({ handleRef, width, height }) => (
+      <ProvidedChart {...props} width={width} height={height} handleRef={handleRef} />
+    )}
   />
 )

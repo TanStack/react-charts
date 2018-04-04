@@ -11,6 +11,11 @@ const noop = () => null
 const modeClosestSeries = 'closestSeries'
 const modeClosestPoint = 'closestPoint'
 const modeAxis = 'axis'
+const modeSeries = 'series'
+const modeElement = 'element'
+
+export const isVoronoiPriority = mode =>
+  [modeClosestSeries, modeClosestPoint, modeAxis].includes(mode)
 
 class Interaction extends PureComponent {
   static defaultProps = {
@@ -45,92 +50,123 @@ class Interaction extends PureComponent {
     ]
     const lineFn = line()
 
-    let polygons
+    let vor
+    let polygons = null
 
-    if (interaction === modeClosestSeries) {
-      // Closest Point Voronoi
-      const voronoiData = stackData
-        .reduce((prev, now) => prev.concat(now.data), [])
-        .map(d => ({
-          x: d.focus.x,
-          y: d.focus.y,
-          series: stackData[d.seriesIndex],
-          datums: null,
-          single: false,
-        }))
-        .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
-      const vor = voronoi()
-        .x(d => d.x)
-        .y(d => d.y)
-        .extent(extent)(voronoiData)
-      polygons = vor.polygons()
-    } else if (interaction === modeClosestPoint) {
-      // Closest Point Voronoi
-      const voronoiData = stackData
-        .reduce((prev, now) => prev.concat(now.data), [])
-        .map(d => ({
-          x: d.focus.x,
-          y: d.focus.y,
-          series: null,
-          datums: [d],
-          single: true,
-        }))
-        .filter(d => typeof d.x === 'number' && typeof d.y === 'number')
-      const vor = voronoi()
-        .x(d => d.x)
-        .y(d => d.y)
-        .extent(extent)(voronoiData)
-      polygons = vor.polygons()
-    } else if (interaction === modeAxis) {
-      // Axis Voronoi
-      // Group all data points based on primaryAxis
-      const allDatums = stackData.reduce((prev, now) => prev.concat(now.data), [])
-      const datumsByAxis = {}
-      allDatums.forEach(d => {
-        const key = String(d.primary)
-        datumsByAxis[key] = datumsByAxis[key] || {
-          x: d.focus.x,
-          y: d.focus.y,
-          series: null, // AxisAxis can't be the series, so don't send it
-          datums: [],
-          single: false,
-        }
-        datumsByAxis[key].datums.push(d)
+    if (interaction === modeClosestSeries || interaction === modeSeries) {
+      const voronoiData = []
+      stackData.forEach(series => {
+        series.data.forEach(datum => {
+          datum.cursorPoints.forEach(cursorPoint => {
+            if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
+              return
+            }
+            voronoiData.push({
+              x: cursorPoint.x,
+              y: cursorPoint.y,
+              cursorPoints: datum.cursorPoints,
+              series: stackData[datum.seriesIndex],
+              datums: null,
+              single: false,
+            })
+          })
+        })
       })
-      const voronoiData = Object.keys(datumsByAxis).map(d => datumsByAxis[d])
-      const vor = voronoi()
+
+      vor = voronoi()
+        .x(d => d.x)
+        .y(d => d.y)
+        .extent(extent)(voronoiData)
+    } else if (interaction === modeClosestPoint || interaction === modeElement) {
+      const voronoiData = []
+      stackData.forEach(series => {
+        series.data.forEach(datum => {
+          datum.cursorPoints.forEach(cursorPoint => {
+            if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
+              return
+            }
+            voronoiData.push({
+              x: cursorPoint.x,
+              y: cursorPoint.y,
+              cursorPoints: datum.cursorPoints,
+              series: null,
+              datums: [datum],
+              single: true,
+            })
+          })
+          console.log(series.index, datum.cursorPoints)
+        })
+      })
+
+      vor = voronoi()
+        .x(d => d.x)
+        .y(d => d.y)
+        .extent(extent)(voronoiData)
+    } else if (interaction === modeAxis) {
+      // Group all data points based on primaryAxis
+      const datumsByAxis = {}
+
+      stackData.forEach(series => {
+        series.data.forEach(datum => {
+          const key = String(datum.primary)
+          datumsByAxis[key] = datumsByAxis[key] || []
+          datumsByAxis[key].push(datum)
+        })
+      })
+
+      const voronoiData = []
+
+      Object.keys(datumsByAxis).forEach(axisKey => {
+        const datums = datumsByAxis[axisKey]
+        datums.forEach(datum => {
+          datum.cursorPoints.forEach(cursorPoint => {
+            voronoiData.push({
+              x: cursorPoint.x,
+              y: cursorPoint.y,
+              cursorPoints: datum.cursorPoints,
+              series: null, // AxisAxis can't be the series, so don't send it
+              datums, // Send all of the datums in this axis
+              single: false,
+            })
+          })
+        })
+      })
+
+      vor = voronoi()
         .x(d => (primaryAxis.vertical ? 0 : d.x))
         .y(d => (primaryAxis.vertical ? d.y : 0))
         .extent(extent)(voronoiData)
-      polygons = vor.polygons()
     } else {
       return null
     }
+
+    polygons = vor.polygons()
 
     // Series and Element interactions modes are handled by the
     // elements themselves, so do nothing for them here.
 
     return (
       <g className="Interaction" onMouseLeave={() => this.onHover(null, null)}>
-        {!!polygons &&
-          polygons.map((points, i) => {
-            // Only draw the voronoi if we need it
-            const path = lineFn(points)
-            return (
-              <Path
-                key={i}
-                d={path}
-                className="action-voronoi"
-                onMouseEnter={() => this.onHover(points.data.series, points.data.datums)}
-                onClick={() => this.onClick(points.data.series, points.data.datums)}
-                style={{
-                  fill: 'rgba(0,0,0,.2)',
-                  stroke: 'rgba(255,255,255,.5)',
-                  opacity: 0,
-                }}
-              />
-            )
-          })}
+        {polygons
+          ? polygons.map((points, i) => {
+              // Only draw the voronoi if we need it
+              const path = lineFn(points)
+              return (
+                <Path
+                  key={i}
+                  d={path}
+                  className="action-voronoi"
+                  onMouseEnter={() => this.onHover(points.data.series, points.data.datums)}
+                  onClick={() => this.onClick(points.data.series, points.data.datums)}
+                  style={{
+                    fill: 'rgba(0,0,0,.2)',
+                    stroke: 'rgba(255,255,255,.5)',
+                    opacity: 0,
+                  }}
+                />
+              )
+            })
+          : null}
       </g>
     )
   }

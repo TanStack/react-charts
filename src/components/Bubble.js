@@ -1,7 +1,9 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from './ReactMove'
 
+//
+
+import { Animate } from './ReactMove'
 import Utils from '../utils/Utils'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
@@ -19,6 +21,46 @@ class Line extends PureComponent {
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
+  }
+  static plotDatum = (datum, {
+    xScale, yScale, primaryAxis, xAxis, yAxis,
+  }) => {
+    datum.x = xScale(datum.xValue)
+    datum.y = yScale(datum.yValue)
+    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+    // Adjust non-bar elements for ordinal scales
+    if (xAxis.type === 'ordinal') {
+      datum.x += xAxis.tickOffset
+    }
+    if (yAxis.type === 'ordinal') {
+      datum.y += yAxis.tickOffset
+    }
+
+    // Set the default focus point
+    datum.focus = {
+      x: datum.x,
+      y: datum.y,
+      padding: datum.r,
+    }
+
+    // Set the cursor points (used in voronoi)
+    datum.cursorPoints = [datum.focus]
+  }
+  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+    const defaults = {
+      // Pass some sane defaults
+      color: defaultColors[series.index % (defaultColors.length - 1)],
+    }
+
+    series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
+
+    // We also need to decorate each datum in the same fashion
+    series.data.forEach(datum => {
+      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
+        ...series.statusStyles.default,
+        ...defaults,
+      })
+    })
   }
   render () {
     const {
@@ -42,13 +84,11 @@ class Line extends PureComponent {
 
     return (
       <Animate
-        default={{
+        start={{
           data,
-          visibility: 0,
         }}
-        data={{
-          data,
-          visibility,
+        update={{
+          data: [data],
         }}
       >
         {inter => {
@@ -63,7 +103,7 @@ class Line extends PureComponent {
               : {}
           return (
             <g>
-              {inter.data.map((datum, i) => {
+              {series.data.map((datum, i) => {
                 const status = Utils.datumStatus(series, datum, hovered, selected)
                 const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
@@ -80,17 +120,21 @@ class Line extends PureComponent {
                 return (
                   <Circle
                     key={i}
-                    x={inter.data[i].x}
-                    y={inter.data[i].y}
-                    r={inter.data[i].r}
+                    x={inter.data[i] ? inter.data[i].x : undefined}
+                    y={inter.data[i] ? inter.data[i].y : undefined}
                     style={{
                       ...circleDefaultStyle,
                       ...style,
                       ...style.circle,
                       ...dataStyle,
                       ...dataStyle.circle,
+                      ...(typeof datum.r !== 'undefined'
+                        ? {
+                            r: datum.r,
+                          }
+                        : {}),
                     }}
-                    opacity={inter.visibility}
+                    opacity={visibility}
                     {...seriesInteractionProps}
                     {...datumInteractionProps}
                   />

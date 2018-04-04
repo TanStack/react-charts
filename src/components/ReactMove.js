@@ -18,11 +18,18 @@ export class Animate extends Component {
 
   render () {
     const {
-      show, start, enter, update, leave, children, render, timing,
+      show,
+      start,
+      enter,
+      update,
+      leave,
+      children,
+      render,
+      timing = defaultTiming,
     } = this.props
 
     return (
-      <NodeGroup
+      <RMNodeGroup
         data={show ? [true] : []}
         keyAccessor={d => d}
         start={typeof start === 'function' ? start : () => start}
@@ -38,7 +45,7 @@ export class Animate extends Component {
           const rendered = (render || children)(inters[0].state)
           return rendered ? React.Children.only(rendered) : null
         }}
-      </NodeGroup>
+      </RMNodeGroup>
     )
   }
 }

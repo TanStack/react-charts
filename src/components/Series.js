@@ -4,7 +4,8 @@ import { quadtree as QuadTree } from 'd3-quadtree'
 //
 import { NodeGroup } from './ReactMove'
 import Selectors from '../utils/Selectors'
-import Utils from '../utils/Utils'
+
+const debug = process.env.NODE_ENV === 'development'
 
 const defaultColors = [
   '#4ab5eb',
@@ -102,16 +103,22 @@ class Series extends Component {
       })
     }
 
-    const stackData = materializedData.map((series, seriesIndex) => {
-      const SeriesComponent = getType(type, series, seriesIndex) || {}
+    let stackData = materializedData.map((series, seriesIndex) => {
+      const SeriesComponent = getType(type, series, seriesIndex)
+      if (debug && !SeriesComponent) {
+        console.log(series)
+        throw new Error(
+          `An invalid series component was passed for the series above (index: ${seriesIndex}.`
+        )
+      }
       return {
         ...series,
-        type: SeriesComponent.SeriesType,
+        Component: SeriesComponent,
         data: series.data.map(d => {
           const datum = {
             ...d,
-            x: d[xKey],
-            y: d[yKey],
+            xValue: d[xKey],
+            yValue: d[yKey],
             base: 0,
           }
           if (secondaryStacked) {
@@ -119,26 +126,26 @@ class Series extends Component {
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
               // Should we use positive or negative base?
-              const totalKey = datum.x >= 0 ? 'positive' : 'negative'
+              const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
               // Assign the base
-              datum.base = start[totalKey]
+              datum.baseValue = start[totalKey]
               // Add the value for a total
-              datum.total = datum.base + datum.x
+              datum.totalValue = datum.baseValue + datum.xValue
               // Update the totals
-              totals[d.primary][totalKey] = datum.total
+              totals[d.primary][totalKey] = datum.totalValue
               // Make the total the new value
-              datum.x = datum.total
+              datum.xValue = datum.totalValue
             } else {
               // Should we use positive or negative base?
-              const totalKey = datum.y >= 0 ? 'positive' : 'negative'
+              const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
               // Assign the base
-              datum.base = start[totalKey]
+              datum.baseValue = start[totalKey]
               // Add the value to the base
-              datum.total = datum.base + datum.y
+              datum.totalValue = datum.baseValue + datum.yValue
               // Update the totals
-              totals[d.primary][totalKey] = datum.total
+              totals[d.primary][totalKey] = datum.totalValue
               // Make the total the new value
-              datum.y = datum.total
+              datum.yValue = datum.totalValue
             }
           }
           return datum
@@ -148,77 +155,53 @@ class Series extends Component {
 
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
-    stackData.forEach(series => {
-      series.data.forEach(d => {
+    stackData.forEach((series, i) => {
+      if (debug && !series.Component.plotDatum) {
+        console.log(series)
+        throw new Error(
+          `Could not find a [SeriesType].plotDatum() static method for the series Component above (index: ${i})`
+        )
+      }
+      series.data = series.data.map(d => {
         // Data for cartesian charts
-        if (series.type === 'Line' || series.type === 'Area' || series.type === 'Bar') {
-          d.x = xScale(d.x)
-          d.y = yScale(d.y)
-          d.base = primaryAxis.vertical ? xScale(d.base) : yScale(d.base)
-          // Adjust non-bar elements for ordinal scales
-          if (series.type !== 'Bar') {
-            if (xAxis.type === 'ordinal') {
-              d.x += xAxis.tickOffset
-            }
-            if (yAxis.type === 'ordinal') {
-              d.y += yAxis.tickOffset
-            }
-          }
+        const result = series.Component.plotDatum(d, {
+          xScale,
+          yScale,
+          primaryAxis,
+          secondaryAxis,
+          xAxis,
+          yAxis,
+        })
 
-          // Set the default focus point
-          d.focus = {
-            x: d.x,
-            y: d.y,
-          }
-
-          // Adjust the focus point for specific elements
-          if (series.type === 'Bar') {
-            if (!xAxis.vertical) {
-              d.focus.x = d.x + xAxis.tickOffset
-            }
-            if (!yAxis.vertical) {
-              d.focus.y = d.y + yAxis.tickOffset
-            }
-          }
-        } else if (series.type === 'Pie') {
-          // data for Radial charts
-          d.focus = primaryAxis.scale(d)
-          d.x = d.focus.x
-          d.y = d.focus.y
-        }
+        return result || d
       })
     })
 
     // Not we need to precalculate all of the possible status styles by
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
-    stackData.forEach(series => {
-      const defaults =
-        series.type !== 'Pie'
-          ? {
-            // Pass some sane defaults
-            color: defaultColors[series.index % (defaultColors.length - 1)],
-          }
-          : {}
-
-      series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
-
-      // We also need to decorate each datum in the same fashion
-      series.data.forEach(datum => {
-        if (series.type === 'Pie') {
-          defaults.color = defaultColors[datum.index % (defaultColors.length - 1)]
-        }
-        datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
-          ...defaults,
-          ...series.statusStyles.default,
-        })
+    stackData = stackData.map(series => {
+      if (debug && !series.Component.buildStyles) {
+        console.log(series)
+        throw new Error(
+          `Could not find a SeriesType.plotDatum() static method for the series Component above (index: ${i})`
+        )
+      }
+      const result = series.Component.buildStyles(series, {
+        getStyles,
+        getDataStyles,
+        defaultColors,
       })
+
+      return result || series
     })
 
     const allPoints = []
 
     stackData.forEach(s => {
       s.data.forEach(d => {
-        allPoints.push(d)
+        d.cursorPoints.forEach(p => {
+          allPoints.push(p)
+        })
       })
     })
 

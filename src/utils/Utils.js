@@ -85,7 +85,7 @@ function datumStatus (series, datum, hovered, selected) {
   return status
 }
 
-function getStatusStyles (item, decorator, defaults) {
+function getStatusStyles (item, decorator, defaults = {}) {
   const styles = {
     default: decorator(item),
     selected: decorator({
@@ -181,7 +181,7 @@ function getFocusForOrigins ({
     return invalid()
   }
 
-  origins = origins.sort((a, b) => (a.includes('center') || a.includes('Center') ? 1 : -1))
+  origins = origins.sort(a => (a.includes('center') || a.includes('Center') ? 1 : -1))
 
   for (let i = 0; i < origins.length; i++) {
     const origin = origins[i]
@@ -270,17 +270,21 @@ function getFocusForOrigins ({
   return { x, y }
 }
 
-function getClosestPoint (position, points) {
+function getClosestPoint (position, datums) {
   let closestDistance = Infinity
-  let closestPoint = points[0] || {}
-  points.forEach(p => {
-    const distance = Math.sqrt((p.focus.x - position.x) ** 2 + (p.focus.y - position.y) ** 2)
-    if (distance < closestDistance) {
-      closestDistance = distance
-      closestPoint = p
-    }
+  let closestDatum = datums[0] || {}
+  datums.forEach(datum => {
+    datum.cursorPoints.forEach(cursorPoint => {
+      const distance = Math.sqrt(
+        (cursorPoint.x - position.x) ** 2 + (cursorPoint.y - position.y) ** 2
+      )
+      if (distance < closestDistance) {
+        closestDistance = distance
+        closestDatum = datum
+      }
+    })
   })
-  return closestPoint
+  return closestDatum
 }
 
 function normalizeComponent (Comp, params = {}, fallback = Comp) {

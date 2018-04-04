@@ -1,9 +1,9 @@
 import React, { PureComponent } from 'react'
-import { Animate } from './ReactMove'
 import { Connect } from 'react-state'
 
 import { area, line } from 'd3-shape'
 //
+import { Animate } from './ReactMove'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -30,6 +30,45 @@ class Area extends PureComponent {
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
+  }
+  static plotDatum = (datum, {
+    xScale, yScale, primaryAxis, xAxis, yAxis,
+  }) => {
+    datum.x = xScale(datum.xValue)
+    datum.y = yScale(datum.yValue)
+    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+    // Adjust non-bar elements for ordinal scales
+    if (xAxis.type === 'ordinal') {
+      datum.x += xAxis.tickOffset
+    }
+    if (yAxis.type === 'ordinal') {
+      datum.y += yAxis.tickOffset
+    }
+
+    // Set the default focus point
+    datum.focus = {
+      x: datum.x,
+      y: datum.y,
+    }
+
+    // Set the cursor points (used in voronoi)
+    datum.cursorPoints = [datum.focus]
+  }
+  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+    const defaults = {
+      // Pass some sane defaults
+      color: defaultColors[series.index % (defaultColors.length - 1)],
+    }
+
+    series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
+
+    // We also need to decorate each datum in the same fashion
+    series.data.forEach(datum => {
+      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
+        ...series.statusStyles.default,
+        ...defaults,
+      })
+    })
   }
   render () {
     const {

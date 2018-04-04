@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react'
 //
 import ChartConfig from './components/ChartConfig'
@@ -11,7 +10,7 @@ class Story extends Component {
       <div>
         <ChartConfig interaction="axis" show={['elementType', 'interaction']}>
           {({ elementType, interaction, data }) => (
-            <Chart data={data} getData={s => s.data} interaction={interaction}>
+            <Chart data={data} interaction={interaction}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
               <Series

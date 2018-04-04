@@ -16,6 +16,58 @@ class Bars extends PureComponent {
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
+  static plotDatum = (datum, {
+    xScale, yScale, primaryAxis, xAxis, yAxis,
+  }) => {
+    datum.x = xScale(datum.xValue)
+    datum.y = yScale(datum.yValue)
+    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+
+    // Set the default focus point
+    datum.focus = {
+      x: datum.x,
+      y: datum.y,
+    }
+
+    // Adjust the focus point for bars
+    if (!xAxis.vertical) {
+      datum.focus.x = datum.x + xAxis.tickOffset
+    }
+    if (!yAxis.vertical) {
+      datum.focus.y = datum.y + yAxis.tickOffset
+    }
+
+    // Set the cursor points (used in voronoi)
+    datum.cursorPoints = [
+      // End of bar
+      datum.focus,
+      // Start of bar
+      {
+        x: primaryAxis.vertical
+          ? primaryAxis.position === 'left' ? datum.base - 1 : datum.base
+          : datum.focus.x,
+        y: !primaryAxis.vertical
+          ? primaryAxis.position === 'bottom' ? datum.base - 1 : datum.base
+          : datum.focus.y,
+      },
+    ]
+  }
+  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+    const defaults = {
+      // Pass some sane defaults
+      color: defaultColors[series.index % (defaultColors.length - 1)],
+    }
+
+    series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
+
+    // We also need to decorate each datum in the same fashion
+    series.data.forEach(datum => {
+      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
+        ...series.statusStyles.default,
+        ...defaults,
+      })
+    })
+  }
   render () {
     const {
       series,

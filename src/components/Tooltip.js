@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from './ReactMove'
 //
+import { Animate } from './ReactMove'
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
@@ -31,12 +31,16 @@ const defaultRenderer = props => {
       >
         <strong>{primaryAxis.format(datums[0].primary)}</strong>
       </div>
-      <table>
+      <table
+        style={{
+          whiteSpace: 'nowrap',
+        }}
+      >
         <tbody>
           {(secondaryAxis.stacked ? [...datums].reverse() : datums).map((d, i) => (
             <tr key={i}>
-              <td style={{ color: d.statusStyles.hovered.fill }}>&#9679;</td>
-              <td>{d.seriesLabel}: &nbsp;</td>
+              <td style={{ color: d.statusStyles.hovered.fill }}>&#9679;&nbsp;</td>
+              <td>{d.seriesLabel}:&nbsp;</td>
               <td
                 style={{
                   textAlign: 'right',
@@ -48,20 +52,20 @@ const defaultRenderer = props => {
           ))}
           {secondaryAxis.stacked ? (
             <tr>
-              <td style={{ color: 'rgba(255,255,255,.3)' }}>&#9679;</td>
+              <td style={{ color: 'rgba(255,255,255,.3)' }}>&#9679;&nbsp;</td>
               <td
                 style={{
                   paddingTop: '5px',
                 }}
               >
-                Total:
+                Total:&nbsp;
               </td>
               <td
                 style={{
                   paddingTop: '5px',
                 }}
               >
-                {formatSecondary([...datums].reverse()[0].total)}
+                {formatSecondary([...datums].reverse()[0].totalValue)}
               </td>
             </tr>
           ) : null}
@@ -76,7 +80,9 @@ class Tooltip extends PureComponent {
     origin: 'closest',
     align: 'top',
     children: defaultRenderer,
+    padding: 1,
   }
+  static isHTML = true
   render () {
     const {
       hovered,
@@ -93,6 +99,7 @@ class Tooltip extends PureComponent {
       //
       origin,
       align,
+      padding,
       children,
       render,
       Component: Comp,
@@ -101,33 +108,39 @@ class Tooltip extends PureComponent {
 
     let { arrowPosition } = this.props
 
-    if (!primaryAxis || !secondaryAxis || !hovered || !cursor) {
+    if (!primaryAxis || !secondaryAxis) {
       return null
     }
 
-    const datums =
-      hovered.datums && hovered.datums.length
-        ? hovered.datums
-        : hovered.series ? hovered.series.data : null
+    let datums = []
+
+    if (hovered) {
+      datums =
+        hovered.datums && hovered.datums.length
+          ? hovered.datums
+          : hovered.series ? hovered.series.data : null
+    }
 
     // TODO: tooltip origin: hovered or chart or custom.
     // Allows the user to origin the tooltip relative to different parts of the chart
     // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
 
-    let focus = {
+    this.focus = this.focus || {
       x: gridX,
       y: gridY,
+      padding: 0,
     }
-    if (datums) {
+
+    if (datums && datums.length) {
       if (typeof origin === 'function') {
-        focus = origin(datums, cursor)
+        this.focus = origin(datums, cursor)
       } else if (origin === 'closest') {
-        focus = Utils.getClosestPoint(cursor, datums).focus
+        this.focus = Utils.getClosestPoint(cursor, datums).focus
       } else if (origin === 'cursor') {
-        focus = cursor
+        this.focus = cursor
       } else {
         const origins = Utils.isArray(origin) ? [...origin] : [origin]
-        focus = Utils.getFocusForOrigins({
+        this.focus = Utils.getFocusForOrigins({
           origins,
           points: datums,
           gridX,
@@ -140,7 +153,7 @@ class Tooltip extends PureComponent {
       }
     }
 
-    const { x, y } = focus
+    const { x, y, padding: focusPadding = 0 } = this.focus
 
     if (!arrowPosition) {
       if (align === 'left') {
@@ -219,11 +232,12 @@ class Tooltip extends PureComponent {
       }
     }
 
-    const visibility = hovered.active ? 1 : 0
+    const visibility = hovered && hovered.active ? 1 : 0
 
     const start = {
       x,
       y,
+      padding: padding + focusPadding,
       alignX,
       alignY,
       triangleStyles,
@@ -239,11 +253,8 @@ class Tooltip extends PureComponent {
       <Animate
         start={start}
         update={update}
-        timing={{
-          duration: 500,
-        }}
         render={({
- x, y, alignX, alignY, triangleStyles,
+ x, y, alignX, alignY, triangleStyles, padding, visibility,
 }) => {
           let renderedChildren
           const renderProps = {
@@ -279,7 +290,7 @@ class Tooltip extends PureComponent {
                 <div
                   style={{
                     transform: `translate3d(${alignX}, ${alignY}, 0)`,
-                    padding: '7px',
+                    padding: `${7 + padding}px`,
                   }}
                 >
                   <div
@@ -312,35 +323,28 @@ class Tooltip extends PureComponent {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
-      secondaryAxis: Selectors.secondaryAxis(),
-      gridX: Selectors.gridX(),
-      gridY: Selectors.gridY(),
-      gridWidth: Selectors.gridWidth(),
-      gridHeight: Selectors.gridHeight(),
-      offset: Selectors.offset(),
-    }
-    return state => ({
-      primaryAxis: selectors.primaryAxis(state),
-      secondaryAxis: selectors.secondaryAxis(state),
-      gridX: selectors.gridX(state),
-      gridY: selectors.gridY(state),
-      gridWidth: selectors.gridWidth(state),
-      gridHeight: selectors.gridHeight(state),
-      width: state.width,
-      height: state.height,
-      hovered: state.hovered,
-      cursor: state.cursor,
-      offset: selectors.offset(state),
-      quadTree: state.quadTree,
-    })
-  },
-  {
-    statics: {
-      isHTML: true,
-    },
+export default Connect(() => {
+  const selectors = {
+    primaryAxis: Selectors.primaryAxis(),
+    secondaryAxis: Selectors.secondaryAxis(),
+    gridX: Selectors.gridX(),
+    gridY: Selectors.gridY(),
+    gridWidth: Selectors.gridWidth(),
+    gridHeight: Selectors.gridHeight(),
+    offset: Selectors.offset(),
   }
-)(Tooltip)
+  return state => ({
+    primaryAxis: selectors.primaryAxis(state),
+    secondaryAxis: selectors.secondaryAxis(state),
+    gridX: selectors.gridX(state),
+    gridY: selectors.gridY(state),
+    gridWidth: selectors.gridWidth(state),
+    gridHeight: selectors.gridHeight(state),
+    width: state.width,
+    height: state.height,
+    hovered: state.hovered,
+    cursor: state.cursor,
+    offset: selectors.offset(state),
+    quadTree: state.quadTree,
+  })
+})(Tooltip)

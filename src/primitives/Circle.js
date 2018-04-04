@@ -40,7 +40,7 @@ export default class Circle extends PureComponent {
             {...rest}
             cx={x || 0}
             cy={y || 0}
-            r={r || 0}
+            r={1}
             style={{
               ...inter,
               opacity: opacity * inter.opacity,

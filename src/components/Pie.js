@@ -1,8 +1,8 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from './ReactMove'
 import { pie as makePie, arc as makeArc } from 'd3-shape'
 
+import { Animate } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -20,18 +20,48 @@ class Pie extends PureComponent {
   static defaultProps = {
     showPoints: true,
   }
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
+    this.props.dispatch(state => ({
+      ...state,
+      interaction: 'element',
+    }))
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
-  componentDidMount () {
-    this.props.dispatch(state => ({
-      ...state,
-      interaction: 'element',
-    }))
+  static plotDatum = (datum, { primaryAxis }) => {
+    // Set the focus point
+    const coords = primaryAxis.scale(datum)
+
+    // Add the x and y coords to the datum
+    datum = {
+      ...datum,
+      ...coords,
+    }
+
+    // Set the focus point
+    datum.focus = coords
+
+    // Set the cursor points (used in voronoi)
+    datum.cursorPoints = [datum.focus]
+
+    // Return the new datum
+    return datum
+  }
+  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+    // Series styles
+    series.statusStyles = Utils.getStatusStyles(series, getStyles)
+
+    // Datum styles
+    series.data.forEach(datum => {
+      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
+        ...series.statusStyles.default,
+        // Default color each slice
+        color: defaultColors[datum.index % (defaultColors.length - 1)],
+      })
+    })
   }
   render () {
     const {

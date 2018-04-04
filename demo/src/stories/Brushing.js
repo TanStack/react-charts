@@ -33,7 +33,7 @@ export default class extends Component {
         <br />
         <ChartConfig dataType="time">
           {({ data }) => (
-            <Chart data={data} getData={d => d.data}>
+            <Chart data={data}>
               <Axis primary type="time" position="bottom" hardMin={min} hardMax={max} />
               <Axis type="linear" position="left" />
               <Series type={Line} />

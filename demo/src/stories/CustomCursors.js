@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
@@ -31,7 +30,7 @@ class Story extends Component {
 
         {_.range(1).map((d, i) => (
           <ResizableBox key={i} width={500} height={300}>
-            <Chart data={data} getData={d => d.data}>
+            <Chart data={data}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />

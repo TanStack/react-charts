@@ -7,9 +7,9 @@ import ChartConfig from './components/ChartConfig'
 import { Chart, Axis, Series, Tooltip, Bar } from '../../../src'
 
 export default () => (
-  <ChartConfig dataType='ordinal'>
+  <ChartConfig dataType="ordinal">
     {({ data }) => (
-      <Chart data={data} getData={d => d.data}>
+      <Chart data={data}>
         <Axis primary type="ordinal" />
         <Axis type="linear" stacked />
         <Series type={Bar} />

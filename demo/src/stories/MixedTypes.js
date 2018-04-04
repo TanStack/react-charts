@@ -15,7 +15,7 @@ export default () => (
         <br />
         <ChartConfig canRandomize={false}>
           {() => (
-            <Chart data={data} getData={d => d.data}>
+            <Chart data={data}>
               <Axis primary type="ordinal" />
               <Axis type="linear" min={0} />
               <Series type={(s, i) => (i % 2 ? Bar : Line)} />
@@ -30,7 +30,7 @@ export default () => (
         <br />
         <ChartConfig canRandomize={false}>
           {() => (
-            <Chart data={data} getData={d => d.data}>
+            <Chart data={data}>
               <Axis primary type="linear" />
               <Axis type="linear" min={0} />
               <Series type={(s, i) => (i % 2 ? Bar : Line)} />

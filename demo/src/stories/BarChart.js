@@ -7,15 +7,15 @@ import ChartConfig from './components/ChartConfig'
 import { Chart, Axis, Series, Tooltip, Bar, Cursor } from '../../../src'
 
 export default () => (
-  <ChartConfig dataType='ordinal'>
+  <ChartConfig dataType="ordinal">
     {({ data }) => (
-      <Chart data={data} getData={d => d.data}>
-        <Axis primary type="ordinal" />
-        <Axis type="linear" stacked />
+      <Chart data={data}>
+        <Axis primary type="ordinal" position="left" />
+        <Axis type="linear" stacked position="bottom" />
         <Series type={Bar} />
         <Cursor primary />
         <Cursor />
-        <Tooltip origin='cursor' />
+        <Tooltip />
       </Chart>
     )}
   </ChartConfig>
