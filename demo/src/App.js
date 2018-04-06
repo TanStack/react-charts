@@ -86,7 +86,7 @@ const Styles = styled.div`
   }
 
   .content {
-    flex: 1;
+    flex: 0;
     padding: 1rem;
   }
 `

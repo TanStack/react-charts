@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from './ReactMove'
+import { Animate } from '../components/ReactMove'
 //
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
@@ -8,20 +8,45 @@ import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/int
 
 import Rectangle from '../primitives/Rectangle'
 
-class Bars extends PureComponent {
-  constructor () {
-    super()
+class Bar extends PureComponent {
+  static isBar = true
+  constructor (props) {
+    super(props)
+    if (!props.interaction) {
+      this.props.dispatch(state => ({
+        ...state,
+        interaction: 'element',
+      }))
+    }
+    if (!props.hoverGroup) {
+      this.props.dispatch(state => ({
+        ...state,
+        hoverGroup: 'primaryAxis',
+      }))
+    }
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
   static plotDatum = (datum, {
-    xScale, yScale, primaryAxis, xAxis, yAxis,
+    xScale, yScale, primaryAxis, secondaryAxis,
   }) => {
     datum.x = xScale(datum.xValue)
     datum.y = yScale(datum.yValue)
-    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+    datum.base = secondaryAxis.scale(datum.baseValue)
+    datum.size = primaryAxis.barSize
+
+    if (!secondaryAxis.stacked) {
+      datum.size = primaryAxis.seriesBarSize
+      // Use the seriesTypeIndex here in case we have mixed types.
+      const seriesBandScaleOffset = primaryAxis.seriesBandScale(datum.seriesTypeIndex)
+      if (secondaryAxis.vertical) {
+        datum.x += seriesBandScaleOffset
+      } else {
+        datum.y += seriesBandScaleOffset
+      }
+    }
 
     // Set the default focus point
     datum.focus = {
@@ -30,11 +55,10 @@ class Bars extends PureComponent {
     }
 
     // Adjust the focus point for bars
-    if (!xAxis.vertical) {
-      datum.focus.x = datum.x + xAxis.tickOffset
-    }
-    if (!yAxis.vertical) {
-      datum.focus.y = datum.y + yAxis.tickOffset
+    if (!primaryAxis.vertical) {
+      datum.focus.x += datum.size / 2
+    } else {
+      datum.focus.y += datum.size / 2
     }
 
     // Set the cursor points (used in voronoi)
@@ -82,45 +106,45 @@ class Bars extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const barSize = primaryAxis.barSize
-    const barOffset = primaryAxis.barOffset
+    const { barOffset } = primaryAxis
 
     const data = series.data.map(d => ({
       x: d.x,
       y: d.y,
       r: d.r,
       base: d.base,
+      size: d.size,
     }))
 
     return (
       <Animate
         start={{
           data,
-          barSize,
           barOffset,
         }}
         update={{
           data: [data],
-          barSize: [barSize],
           barOffset: [barOffset],
         }}
       >
         {inter => {
-          const seriesInteractionProps =
-            interaction === 'series'
-              ? {
-                  onClick: () => this.selectSeries(series),
-                  onMouseEnter: () => this.hoverSeries(series),
-                  onMouseMove: () => this.hoverSeries(series),
-                  onMouseLeave: () => this.hoverSeries(null),
-                }
-              : {}
+          const interactiveSeries = interaction === 'series'
+          const seriesInteractionProps = interactiveSeries
+            ? {
+                onClick: () => this.selectSeries(series),
+                onMouseEnter: () => this.hoverSeries(series),
+                onMouseMove: () => this.hoverSeries(series),
+                onMouseLeave: () => this.hoverSeries(null),
+              }
+            : {}
           return (
             <g className="series bar">
               {series.data.map((datum, i) => {
                 const x = inter.data[i] ? inter.data[i].x : 0
                 const y = inter.data[i] ? inter.data[i].y : 0
                 const base = inter.data[i] ? inter.data[i].base : 0
+                const size = inter.data[i] ? inter.data[i].size : 0
+                const barOffset = inter.barOffset
                 let x1
                 let y1
                 let x2
@@ -128,11 +152,11 @@ class Bars extends PureComponent {
                 if (primaryAxis.vertical) {
                   x1 = base
                   x2 = x
-                  y1 = y + inter.barOffset
-                  y2 = y1 + inter.barSize
+                  y1 = y + barOffset
+                  y2 = y1 + size
                 } else {
-                  x1 = x + inter.barOffset
-                  x2 = x1 + inter.barSize
+                  x1 = x + barOffset
+                  x2 = x1 + size
                   y1 = y
                   y2 = base
                 }
@@ -140,15 +164,15 @@ class Bars extends PureComponent {
                 const status = Utils.datumStatus(series, datum, hovered, selected)
                 const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                const datumInteractionProps =
-                  interaction === 'element'
-                    ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
-                    : {}
+                const interactiveDatum = interaction === 'element'
+                const datumInteractionProps = interactiveDatum
+                  ? {
+                      onClick: () => this.selectDatum(datum),
+                      onMouseEnter: () => this.hoverDatum(datum),
+                      onMouseMove: () => this.hoverDatum(datum),
+                      onMouseLeave: () => this.hoverDatum(null),
+                    }
+                  : {}
 
                 return (
                   <Rectangle
@@ -157,6 +181,7 @@ class Bars extends PureComponent {
                       ...style.rectangle,
                       ...dataStyle,
                       ...dataStyle.rectangle,
+                      pointerEvents: interactiveSeries || interactiveDatum ? 'all' : 'none',
                     }}
                     key={i}
                     x1={Number.isNaN(x1) ? null : x1}
@@ -191,8 +216,5 @@ export default Connect(
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
-    statics: {
-      SeriesType: 'Bar',
-    },
   }
-)(Bars)
+)(Bar)

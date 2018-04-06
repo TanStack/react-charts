@@ -28,7 +28,6 @@ class AxisPie extends Component {
   // Lifecycle
   constructor () {
     super()
-    // this.measure = measure.bind(this)
     this.updateScale = this.updateScale.bind(this)
   }
   componentWillReceiveProps (newProps) {
@@ -46,20 +45,12 @@ class AxisPie extends Component {
   }
   componentDidMount () {
     this.updateScale(this.props)
-    // this.measure()
   }
   shouldComponentUpdate (newProps) {
     if (newProps.axis !== this.props.axis) {
       return true
     }
     return false
-  }
-  componentDidUpdate () {
-    // RAF(() => {
-    //   if (!this.measure()) {
-    //     window.setTimeout(() => this.componentDidUpdate(), 1)
-    //   }
-    // })
   }
   updateScale (props) {
     const {

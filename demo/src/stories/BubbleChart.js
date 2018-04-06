@@ -9,7 +9,7 @@ import { Chart, Axis, Series, Tooltip, Bubble, Cursor } from '../../../src'
 export default () => (
   <ChartConfig>
     {({ data }) => (
-      <Chart data={data} interaction="closestPoint">
+      <Chart data={data}>
         <Axis primary type="time" position="bottom" />
         <Axis type="linear" position="left" />
         <Series type={Bubble} />

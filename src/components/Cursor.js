@@ -47,7 +47,7 @@ class Cursor extends PureComponent {
     let coordinate
     let value
     let label
-    let visibility = cursor.active ? 1 : 0
+    let visibility = snap ? (hovered.active ? 1 : 0) : cursor.active ? 1 : 0
 
     // If the cursor isn't in the grid, don't display
     if (x < -1 || x > gridWidth + 1 || y < -1 || y > gridHeight + 1) {
@@ -85,7 +85,9 @@ class Cursor extends PureComponent {
         y = datum.focus.y
         label =
           typeof datum.primary !== 'undefined'
-            ? axis.format(axis.stacked ? datum.total : primary ? datum.primary : datum.secondary)
+            ? axis.format(
+              axis.stacked && !primary ? datum.total : primary ? datum.primary : datum.secondary
+            )
             : undefined
       } else {
         // Horizontal snapping
@@ -93,7 +95,9 @@ class Cursor extends PureComponent {
         x = datum.focus.x
         label =
           typeof datum.primary !== 'undefined'
-            ? axis.format(axis.stacked ? datum.total : primary ? datum.primary : datum.secondary)
+            ? axis.format(
+              axis.stacked && !primary ? datum.total : primary ? datum.primary : datum.secondary
+            )
             : undefined
       }
     }

@@ -90,6 +90,7 @@ export default function updateScale (props) {
     })
     domain = [min, max]
   } else {
+    // Linear scale
     materializedData.forEach(series => {
       let seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach((d, i) => {
@@ -144,6 +145,9 @@ export default function updateScale (props) {
   let barSize = 1
   let stepSize = 0
 
+  let seriesBandScale = d => d
+  let seriesBarSize = 1
+
   if (type === 'ordinal' || primary) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
@@ -163,6 +167,14 @@ export default function updateScale (props) {
 
     barSize = bandScale.bandwidth()
     stepSize = bandScale.step()
+
+    // Create a seriesBandScale in case this axis isn't stacked
+    seriesBandScale = scaleBand()
+      .paddingInner(innerPadding / 2)
+      .domain(materializedData.filter(d => d.Component.isBar).map((d, i) => i))
+      .rangeRound([0, barSize])
+
+    seriesBarSize = seriesBandScale.bandwidth()
   }
 
   if (type === 'ordinal') {
@@ -222,6 +234,8 @@ export default function updateScale (props) {
     stacked,
     barSize,
     stepSize,
+    seriesBandScale,
+    seriesBarSize,
     domain,
     range,
     max:
@@ -245,7 +259,7 @@ export default function updateScale (props) {
     axis.barOffset = 0
   } else {
     axis.tickOffset = 0
-    axis.barOffset = 0
+    axis.barOffset = -axis.barSize / 2
   }
 
   // Make sure we start with a prevAxis

@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Connect } from 'react-state'
-import { quadtree as QuadTree } from 'd3-quadtree'
 //
 import { NodeGroup } from './ReactMove'
 import Selectors from '../utils/Selectors'
@@ -33,17 +32,26 @@ class Series extends Component {
     getDataStyles: () => ({}),
   }
   componentDidMount () {
+    this.updateMaterializedData(this.props)
     this.updateStackData(this.props)
   }
   componentWillReceiveProps (newProps) {
     const oldProps = this.props
 
     // If any of the following change,
+    // we need to update the materializedData
+    if (
+      newProps.type !== oldProps.type ||
+      newProps.preMaterializedData !== oldProps.preMaterializedData
+    ) {
+      this.updateMaterializedData(newProps)
+    }
+
+    // If any of the following change,
     // we need to update the stack
     if (
       newProps.materializedData !== oldProps.materializedData ||
       newProps.axes !== oldProps.axes ||
-      newProps.type !== oldProps.type ||
       newProps.seriesKey !== oldProps.seriesKey ||
       newProps.primaryAxis !== oldProps.primaryAxis ||
       newProps.secondaryAxis !== oldProps.secondaryAxis
@@ -58,9 +66,46 @@ class Series extends Component {
     }
     return false
   }
+  updateMaterializedData (props) {
+    const { preMaterializedData, type, dispatch } = props
+
+    // We need preMaterializedData to proceed
+    if (!preMaterializedData) {
+      return
+    }
+
+    dispatch(state => ({
+      ...state,
+      materializedData: preMaterializedData
+        .map((series, index) => {
+          const SeriesComponent = getType(type, series, index)
+          if (debug && !SeriesComponent) {
+            console.log(series)
+            throw new Error(
+              `An invalid series component was passed for the series above (index: ${index}.`
+            )
+          }
+          return {
+            ...series,
+            Component: SeriesComponent,
+          }
+        })
+        .map((series, i, all) => {
+          const seriesTypeIndex = all.filter((d, j) => j < i && d.Component === series.Component)
+            .length
+          return {
+            ...series,
+            seriesTypeIndex,
+            data: series.data.map(datum => ({
+              ...datum,
+              seriesTypeIndex,
+            })),
+          }
+        }),
+    }))
+  }
   updateStackData (props) {
     const {
-      type,
       getStyles,
       getDataStyles,
       //
@@ -69,13 +114,8 @@ class Series extends Component {
       secondaryAxis,
     } = props
 
-    // We need materializedData to proceed
-    if (!materializedData) {
-      return
-    }
-
-    // If the axes are not ready, just provide the materializedData
-    if (!primaryAxis || !secondaryAxis) {
+    // We need materializedData and both axes to continue
+    if (!materializedData || !primaryAxis || !secondaryAxis) {
       return
     }
 
@@ -103,55 +143,47 @@ class Series extends Component {
       })
     }
 
-    let stackData = materializedData.map((series, seriesIndex) => {
-      const SeriesComponent = getType(type, series, seriesIndex)
-      if (debug && !SeriesComponent) {
-        console.log(series)
-        throw new Error(
-          `An invalid series component was passed for the series above (index: ${seriesIndex}.`
-        )
-      }
-      return {
-        ...series,
-        Component: SeriesComponent,
-        data: series.data.map(d => {
-          const datum = {
-            ...d,
-            xValue: d[xKey],
-            yValue: d[yKey],
-            base: 0,
+    // Determine the correct primary and secondary values for each axis
+    // Also calculate bases and totals if either axis is stacked
+    let stackData = materializedData.map(series => ({
+      ...series,
+      data: series.data.map(d => {
+        const datum = {
+          ...d,
+          xValue: d[xKey],
+          yValue: d[yKey],
+          baseValue: 0,
+        }
+        if (secondaryStacked) {
+          const start = totals[d.primary]
+          // Stack the x or y values (according to axis positioning)
+          if (primaryAxis.vertical) {
+            // Should we use positive or negative base?
+            const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
+            // Assign the base
+            datum.baseValue = start[totalKey]
+            // Add the value for a total
+            datum.totalValue = datum.baseValue + datum.xValue
+            // Update the totals
+            totals[d.primary][totalKey] = datum.totalValue
+            // Make the total the new value
+            datum.xValue = datum.totalValue
+          } else {
+            // Should we use positive or negative base?
+            const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
+            // Assign the base
+            datum.baseValue = start[totalKey]
+            // Add the value to the base
+            datum.totalValue = datum.baseValue + datum.yValue
+            // Update the totals
+            totals[d.primary][totalKey] = datum.totalValue
+            // Make the total the new value
+            datum.yValue = datum.totalValue
           }
-          if (secondaryStacked) {
-            const start = totals[d.primary]
-            // Stack the x or y values (according to axis positioning)
-            if (primaryAxis.vertical) {
-              // Should we use positive or negative base?
-              const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
-              // Assign the base
-              datum.baseValue = start[totalKey]
-              // Add the value for a total
-              datum.totalValue = datum.baseValue + datum.xValue
-              // Update the totals
-              totals[d.primary][totalKey] = datum.totalValue
-              // Make the total the new value
-              datum.xValue = datum.totalValue
-            } else {
-              // Should we use positive or negative base?
-              const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
-              // Assign the base
-              datum.baseValue = start[totalKey]
-              // Add the value to the base
-              datum.totalValue = datum.baseValue + datum.yValue
-              // Update the totals
-              totals[d.primary][totalKey] = datum.totalValue
-              // Make the total the new value
-              datum.yValue = datum.totalValue
-            }
-          }
-          return datum
-        }),
-      }
-    })
+        }
+        return datum
+      }),
+    }))
 
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
@@ -205,16 +237,10 @@ class Series extends Component {
       })
     })
 
-    const quadTree = QuadTree()
-      .x(d => d.x)
-      .y(d => d.y)
-      .addAll(allPoints)
-
     this.props.dispatch(
       state => ({
         ...state,
         stackData,
-        quadTree,
       }),
       {
         type: 'stackData',
@@ -231,12 +257,9 @@ class Series extends Component {
       return null
     }
 
-    // Force lines to render on top
-    const sortedStackData = stackData.sort(a => (a.type === 'Line' ? 1 : 0))
-
     return (
       <NodeGroup
-        data={sortedStackData}
+        data={stackData}
         keyAccessor={d => d.id}
         start={() => ({
           visibility: 0,
@@ -280,6 +303,7 @@ export default Connect(
       secondaryAxis: Selectors.secondaryAxis(),
     }
     return state => ({
+      preMaterializedData: state.preMaterializedData,
       materializedData: state.materializedData,
       stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),

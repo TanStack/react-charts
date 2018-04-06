@@ -3,7 +3,7 @@ import { Connect } from 'react-state'
 
 //
 
-import { Animate } from './ReactMove'
+import { Animate } from '../components/ReactMove'
 import Utils from '../utils/Utils'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
@@ -15,8 +15,14 @@ const circleDefaultStyle = {
 }
 
 class Line extends PureComponent {
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
+    if (!props.hoverGroup) {
+      this.props.dispatch(state => ({
+        ...state,
+        hoverGroup: 'closestPoint',
+      }))
+    }
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
@@ -92,30 +98,30 @@ class Line extends PureComponent {
         }}
       >
         {inter => {
-          const seriesInteractionProps =
-            interaction === 'series'
-              ? {
-                  onClick: () => this.selectSeries(series),
-                  onMouseEnter: () => this.hoverSeries(series),
-                  onMouseMove: () => this.hoverSeries(series),
-                  onMouseLeave: () => this.hoverSeries(null),
-                }
-              : {}
+          const interactiveSeries = interaction === 'series'
+          const seriesInteractionProps = interactiveSeries
+            ? {
+                onClick: () => this.selectSeries(series),
+                onMouseEnter: () => this.hoverSeries(series),
+                onMouseMove: () => this.hoverSeries(series),
+                onMouseLeave: () => this.hoverSeries(null),
+              }
+            : {}
           return (
             <g>
               {series.data.map((datum, i) => {
                 const status = Utils.datumStatus(series, datum, hovered, selected)
                 const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                const datumInteractionProps =
-                  interaction === 'element'
-                    ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
-                    : {}
+                const iteractiveDatum = interaction === 'element'
+                const datumInteractionProps = iteractiveDatum
+                  ? {
+                      onClick: () => this.selectDatum(datum),
+                      onMouseEnter: () => this.hoverDatum(datum),
+                      onMouseMove: () => this.hoverDatum(datum),
+                      onMouseLeave: () => this.hoverDatum(null),
+                    }
+                  : {}
 
                 return (
                   <Circle
@@ -133,6 +139,7 @@ class Line extends PureComponent {
                             r: datum.r,
                           }
                         : {}),
+                      pointerEvents: interactiveSeries || iteractiveDatum ? 'all' : 'none',
                     }}
                     opacity={visibility}
                     {...seriesInteractionProps}

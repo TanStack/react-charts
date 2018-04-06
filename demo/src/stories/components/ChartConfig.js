@@ -19,7 +19,14 @@ const options = {
   primaryAxisPosition: ['top', 'left', 'right', 'bottom'],
   secondaryAxisPosition: ['top', 'left', 'right', 'bottom'],
   secondaryAxisStack: [true, false],
-  interaction: ['axis', 'series', 'closestSeries', 'closestPoint', 'element'],
+  interaction: [
+    'closestPoint',
+    'closestSeries',
+    'primaryAxis',
+    'secondaryAxis',
+    'element',
+    'series',
+  ],
   tooltipPosition: [
     'top',
     'bottom',
@@ -61,7 +68,7 @@ export default class ChartConfig extends Component {
     secondaryAxisPosition: 'left',
     primaryAxisStack: false,
     secondaryAxisStack: true,
-    interaction: 'axis',
+    interaction: 'primaryAxis',
     tooltipPosition: 'closest',
     tooltipAlign: 'top',
     snapCursor: true,
@@ -155,7 +162,8 @@ function makeSeries (i, dataType) {
   const startDate = new Date()
   startDate.setSeconds(0)
   startDate.setMilliseconds(0)
-  const length = Math.round(Math.random() * 30)
+  const length = 5 + Math.round(Math.random() * 15)
+  const min = 0
   const max = 100
   const rMin = 2
   const rMax = 30
@@ -168,15 +176,16 @@ function makeSeries (i, dataType) {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * d)
       }
       const distribution = 1.1
-      const idx =
+      const y = min + Math.round(Math.random() * (max - min))
+      const r =
         rMax -
         Math.floor(
           Math.log(Math.random() * (distribution ** rMax - rMin) + rMin) / Math.log(distribution)
         )
       return {
         x,
-        y: Math.round(Math.random() * max + Math.round(Math.random() * 50)),
-        r: idx,
+        y,
+        r,
       }
     }),
   }

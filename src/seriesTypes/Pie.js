@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
 import { pie as makePie, arc as makeArc } from 'd3-shape'
 
-import { Animate } from './ReactMove'
+import { Animate } from '../components/ReactMove'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -22,10 +22,18 @@ class Pie extends PureComponent {
   }
   constructor (props) {
     super(props)
-    this.props.dispatch(state => ({
-      ...state,
-      interaction: 'element',
-    }))
+    if (!props.interaction) {
+      this.props.dispatch(state => ({
+        ...state,
+        interaction: 'element',
+      }))
+    }
+    if (!props.hoverGroup) {
+      this.props.dispatch(state => ({
+        ...state,
+        hoverGroup: 'closestPoint',
+      }))
+    }
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
@@ -126,15 +134,15 @@ class Pie extends PureComponent {
         duration={500}
       >
         {inter => {
-          const seriesInteractionProps =
-            interaction === 'series'
-              ? {
-                  onClick: () => this.selectSeries(series),
-                  onMouseEnter: () => this.hoverSeries(series),
-                  onMouseMove: () => this.hoverSeries(series),
-                  onMouseLeave: () => this.hoverSeries(null),
-                }
-              : {}
+          const interactiveSeries = interaction === 'series'
+          const seriesInteractionProps = interactiveSeries
+            ? {
+                onClick: () => this.selectSeries(series),
+                onMouseEnter: () => this.hoverSeries(series),
+                onMouseMove: () => this.hoverSeries(series),
+                onMouseLeave: () => this.hoverSeries(null),
+              }
+            : {}
 
           return (
             <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
@@ -146,15 +154,15 @@ class Pie extends PureComponent {
                   return null
                 }
 
-                const datumInteractionProps =
-                  interaction === 'element'
-                    ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
-                    : {}
+                const iteractiveDatum = interaction === 'element'
+                const datumInteractionProps = iteractiveDatum
+                  ? {
+                      onClick: () => this.selectDatum(datum),
+                      onMouseEnter: () => this.hoverDatum(datum),
+                      onMouseMove: () => this.hoverDatum(datum),
+                      onMouseLeave: () => this.hoverDatum(null),
+                    }
+                  : {}
 
                 const arc = Arc()
                   .startAngle(inter.data[i].startAngle)
@@ -175,6 +183,7 @@ class Pie extends PureComponent {
                       ...style.arc,
                       ...dataStyle,
                       ...dataStyle.arc,
+                      pointerEvents: iteractiveDatum ? 'all' : 'none',
                     }}
                     opacity={inter.visibility}
                     {...seriesInteractionProps}
@@ -204,8 +213,5 @@ export default Connect(
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
-    statics: {
-      SeriesType: 'Pie',
-    },
   }
 )(Pie)

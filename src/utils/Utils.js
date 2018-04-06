@@ -165,16 +165,16 @@ function getFocusForOrigins ({
   let x
   let y
 
-  let xMin = gridX + points[0].focus.x
-  let xMax = gridX + points[0].focus.x
-  let yMin = gridY + points[0].focus.y
-  let yMax = gridY + points[0].focus.y
+  let xMin = points[0].focus.x
+  let xMax = points[0].focus.x
+  let yMin = points[0].focus.y
+  let yMax = points[0].focus.y
 
   points.forEach(point => {
-    xMin = Math.min(gridX + point.focus.x, xMin)
-    xMax = Math.max(gridX + point.focus.x, xMax)
-    yMin = Math.min(gridY + point.focus.y, yMin)
-    yMax = Math.max(gridY + point.focus.y, yMax)
+    xMin = Math.min(point.focus.x, xMin)
+    xMax = Math.max(point.focus.x, xMax)
+    yMin = Math.min(point.focus.y, yMin)
+    yMax = Math.max(point.focus.y, yMax)
   })
 
   if (origins.length > 2) {
@@ -233,22 +233,26 @@ function getFocusForOrigins ({
     // Center Positioning
     if (['center', 'gridCenter', 'chartCenter'].includes(origin)) {
       if (origin === 'center') {
-        if (typeof y !== 'undefined') {
-          x = (xMin + xMax) / 2
-        } else {
+        if (typeof y === 'undefined') {
           y = (yMin + yMax) / 2
         }
+        if (typeof x === 'undefined') {
+          console.log(xMin, xMax, (xMin + xMax) / 2)
+          x = (xMin + xMax) / 2
+        }
       } else if (origin === 'gridCenter') {
-        if (typeof y !== 'undefined') {
-          x = gridX + gridWidth / 2
-        } else {
+        if (typeof y === 'undefined') {
           y = gridY + gridHeight / 2
         }
+        if (typeof x === 'undefined') {
+          x = gridX + gridWidth / 2
+        }
       } else if (origin === 'chartCenter') {
-        if (typeof y !== 'undefined') {
-          x = width / 2
-        } else {
+        if (typeof y === 'undefined') {
           y = height / 2
+        }
+        if (typeof x === 'undefined') {
+          x = width / 2
         }
       } else {
         invalid()

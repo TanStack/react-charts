@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
-import { Chart, Axis, Series, Tooltip, Area, Bar } from '../../../src'
+import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from '../../../src'
 
 class Story extends Component {
   constructor () {
@@ -30,63 +30,68 @@ class Story extends Component {
 
         {_.range(1).map((d, i) => (
           <ResizableBox key={i} width={900} height={300}>
-            <Chart data={data} interaction="axis">
+            <Chart data={data}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
+              <Cursor primary />
               <Tooltip align="bottom" origin={['center', 'chartBottom']}>
-                {props => (
-                  <div
-                    style={{
-                      color: 'white',
-                    }}
-                  >
-                    <h3
-                      style={{
-                        display: 'block',
-                        textAlign: 'center',
-                      }}
-                    >
-                      {props.primaryAxis.format(props.datums[0].primary)}
-                    </h3>
+                {props =>
+                  props.datums.length && (
                     <div
                       style={{
-                        width: '200px',
-                        height: '100px',
-                        background: 'white',
+                        color: 'white',
                       }}
                     >
-                      <Chart
-                        data={[
-                          props.datums.map(d => ({
-                            x: d.seriesLabel,
-                            y: d.secondary,
-                            color: d.statusStyles.default.fill,
-                          })),
-                        ]}
+                      <h3
+                        style={{
+                          display: 'block',
+                          textAlign: 'center',
+                        }}
                       >
-                        <Axis primary type="ordinal" position="bottom" />
-                        <Axis type="linear" position="left" stacked />
-                        <Series
-                          type={Bar}
-                          getDataStyles={datum => ({
-                            color: datum.datum.color,
-                          })}
-                        />
-                      </Chart>
+                        {props.primaryAxis.format(props.datums[0].primary)}
+                      </h3>
+                      <div
+                        style={{
+                          width: '200px',
+                          height: '100px',
+                          background: 'white',
+                        }}
+                      >
+                        <Chart
+                          data={[
+                            {
+                              data: props.datums.map(d => ({
+                                x: d.seriesLabel,
+                                y: d.secondary,
+                                color: d.statusStyles.default.fill,
+                              })),
+                            },
+                          ]}
+                        >
+                          <Axis primary type="ordinal" position="bottom" />
+                          <Axis type="linear" position="left" stacked />
+                          <Series
+                            type={Bar}
+                            getDataStyles={datum => ({
+                              color: datum.original.color,
+                            })}
+                          />
+                        </Chart>
+                      </div>
+                      <img
+                        src="https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif"
+                        alt=""
+                        style={{
+                          width: '200px',
+                          height: 'auto',
+                          display: 'block',
+                          margin: '0 auto',
+                        }}
+                      />
                     </div>
-                    <img
-                      src="https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif"
-                      alt=""
-                      style={{
-                        width: '200px',
-                        height: 'auto',
-                        display: 'block',
-                        margin: '0 auto',
-                      }}
-                    />
-                  </div>
-                )}
+                  )
+                }
               </Tooltip>
             </Chart>
           </ResizableBox>

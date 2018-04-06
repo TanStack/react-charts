@@ -10,14 +10,10 @@ const noop = () => null
 
 const modeClosestSeries = 'closestSeries'
 const modeClosestPoint = 'closestPoint'
-const modeAxis = 'axis'
-const modeSeries = 'series'
-const modeElement = 'element'
+const modePrimaryAxis = 'primaryAxis'
+const modeSecondaryAxis = 'secondaryAxis'
 
-export const isVoronoiPriority = mode =>
-  [modeClosestSeries, modeClosestPoint, modeAxis].includes(mode)
-
-class Interaction extends PureComponent {
+class Voronoi extends PureComponent {
   static defaultProps = {
     onHover: noop,
     onActivate: noop,
@@ -29,11 +25,12 @@ class Interaction extends PureComponent {
   }
   render () {
     const {
-      interaction,
+      hoverGroup,
       //
       stackData,
       primaryAxis,
       secondaryAxis,
+      showVoronoi,
     } = this.props
 
     // Don't render until we have all dependencies
@@ -53,7 +50,7 @@ class Interaction extends PureComponent {
     let vor
     let polygons = null
 
-    if (interaction === modeClosestSeries || interaction === modeSeries) {
+    if (hoverGroup === modeClosestSeries) {
       const voronoiData = []
       stackData.forEach(series => {
         series.data.forEach(datum => {
@@ -66,7 +63,7 @@ class Interaction extends PureComponent {
               y: cursorPoint.y,
               cursorPoints: datum.cursorPoints,
               series: stackData[datum.seriesIndex],
-              datums: null,
+              datums: [],
               single: false,
             })
           })
@@ -77,7 +74,7 @@ class Interaction extends PureComponent {
         .x(d => d.x)
         .y(d => d.y)
         .extent(extent)(voronoiData)
-    } else if (interaction === modeClosestPoint || interaction === modeElement) {
+    } else if (hoverGroup === modeClosestPoint) {
       const voronoiData = []
       stackData.forEach(series => {
         series.data.forEach(datum => {
@@ -94,7 +91,6 @@ class Interaction extends PureComponent {
               single: true,
             })
           })
-          console.log(series.index, datum.cursorPoints)
         })
       })
 
@@ -102,15 +98,16 @@ class Interaction extends PureComponent {
         .x(d => d.x)
         .y(d => d.y)
         .extent(extent)(voronoiData)
-    } else if (interaction === modeAxis) {
+    } else if ([modePrimaryAxis, modeSecondaryAxis].includes(hoverGroup)) {
       // Group all data points based on primaryAxis
       const datumsByAxis = {}
 
       stackData.forEach(series => {
         series.data.forEach(datum => {
-          const key = String(datum.primary)
-          datumsByAxis[key] = datumsByAxis[key] || []
-          datumsByAxis[key].push(datum)
+          const axisKey = String(hoverGroup === modePrimaryAxis ? datum.primary : datum.secondary)
+
+          datumsByAxis[axisKey] = datumsByAxis[axisKey] || []
+          datumsByAxis[axisKey].push(datum)
         })
       })
 
@@ -123,7 +120,6 @@ class Interaction extends PureComponent {
             voronoiData.push({
               x: cursorPoint.x,
               y: cursorPoint.y,
-              cursorPoints: datum.cursorPoints,
               series: null, // AxisAxis can't be the series, so don't send it
               datums, // Send all of the datums in this axis
               single: false,
@@ -142,11 +138,11 @@ class Interaction extends PureComponent {
 
     polygons = vor.polygons()
 
-    // Series and Element interactions modes are handled by the
+    // Series and Element hoverGroups modes are handled by the
     // elements themselves, so do nothing for them here.
 
     return (
-      <g className="Interaction" onMouseLeave={() => this.onHover(null, null)}>
+      <g className="Voronoi" onMouseLeave={() => this.onHover(null, null)}>
         {polygons
           ? polygons.map((points, i) => {
               // Only draw the voronoi if we need it
@@ -161,7 +157,7 @@ class Interaction extends PureComponent {
                   style={{
                     fill: 'rgba(0,0,0,.2)',
                     stroke: 'rgba(255,255,255,.5)',
-                    opacity: 0,
+                    opacity: showVoronoi ? 1 : 0,
                   }}
                 />
               )
@@ -230,10 +226,11 @@ export default Connect(
       stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
-      interaction: state.interaction,
+      hoverGroup: state.hoverGroup,
+      showVoronoi: state.showVoronoi,
     })
   },
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
-)(Interaction)
+)(Voronoi)

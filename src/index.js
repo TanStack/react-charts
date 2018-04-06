@@ -6,11 +6,11 @@ import Tooltip from './components/Tooltip'
 import Cursor from './components/Cursor'
 import Brush from './components/Brush'
 // types
-import Line from './components/Line'
-import Area from './components/Area'
-import Bar from './components/Bar'
-import Bubble from './components/Bubble'
-import Pie from './components/Pie'
+import Line from './seriesTypes/Line'
+import Area from './seriesTypes/Area'
+import Bar from './seriesTypes/Bar'
+import Bubble from './seriesTypes/Bubble'
+import Pie from './seriesTypes/Pie'
 // Utils
 import Curves from './utils/Curves'
 

@@ -16,12 +16,31 @@ const defaultRenderer = props => {
       ? secondaryAxis.format(Math.round(val * 100) / 100)
       : secondaryAxis.format(val)
 
-  return series ? (
-    <div>
-      <strong>{series.label}</strong>
-      <br />
-    </div>
-  ) : datums && datums.length ? (
+  if (series) {
+    return (
+      <div>
+        <strong>{series.label}</strong>
+        <br />
+      </div>
+    )
+  }
+
+  if (!datums || !datums.length) {
+    return null
+  }
+
+  const sortedDatums = [...datums]
+    .sort((a, b) => {
+      if (a.secondary < b.secondary) {
+        return -1
+      } else if (a.secondary > b.secondary) {
+        return 1
+      }
+      return 0
+    })
+    .reverse()
+
+  return (
     <div>
       <div
         style={{
@@ -37,10 +56,26 @@ const defaultRenderer = props => {
         }}
       >
         <tbody>
-          {(secondaryAxis.stacked ? [...datums].reverse() : datums).map((d, i) => (
+          {sortedDatums.map((d, i) => (
             <tr key={i}>
-              <td style={{ color: d.statusStyles.hovered.fill }}>&#9679;&nbsp;</td>
-              <td>{d.seriesLabel}:&nbsp;</td>
+              <td
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '5px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: d.statusStyles.hovered.fill,
+                    borderRadius: '50px',
+                  }}
+                />
+              </td>
+              <td>{d.seriesLabel}: </td>
               <td
                 style={{
                   textAlign: 'right',
@@ -52,13 +87,26 @@ const defaultRenderer = props => {
           ))}
           {secondaryAxis.stacked ? (
             <tr>
-              <td style={{ color: 'rgba(255,255,255,.3)' }}>&#9679;&nbsp;</td>
               <td
                 style={{
                   paddingTop: '5px',
                 }}
               >
-                Total:&nbsp;
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: 'rgba(255,255,255,.2)',
+                    borderRadius: '50px',
+                  }}
+                />
+              </td>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                Total:{' '}
               </td>
               <td
                 style={{
@@ -72,7 +120,7 @@ const defaultRenderer = props => {
         </tbody>
       </table>
     </div>
-  ) : null
+  )
 }
 
 class Tooltip extends PureComponent {
@@ -112,14 +160,10 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    let datums = []
-
-    if (hovered) {
-      datums =
-        hovered.datums && hovered.datums.length
-          ? hovered.datums
-          : hovered.series ? hovered.series.data : null
-    }
+    const datums =
+      hovered.datums && hovered.datums.length
+        ? hovered.datums
+        : hovered.series ? hovered.series.data : []
 
     // TODO: tooltip origin: hovered or chart or custom.
     // Allows the user to origin the tooltip relative to different parts of the chart
@@ -129,15 +173,24 @@ class Tooltip extends PureComponent {
       x: gridX,
       y: gridY,
       padding: 0,
+      datum: null,
     }
 
     if (datums && datums.length) {
       if (typeof origin === 'function') {
-        this.focus = origin(datums, cursor)
+        if (cursor) {
+          this.focus = origin(datums, cursor)
+        }
       } else if (origin === 'closest') {
-        this.focus = Utils.getClosestPoint(cursor, datums).focus
+        if (cursor) {
+          const datum = Utils.getClosestPoint(cursor, datums)
+          this.focus = datum.focus
+          this.focus.datum = datum
+        }
       } else if (origin === 'cursor') {
-        this.focus = cursor
+        if (cursor) {
+          this.focus = cursor
+        }
       } else {
         const origins = Utils.isArray(origin) ? [...origin] : [origin]
         this.focus = Utils.getFocusForOrigins({
@@ -232,7 +285,7 @@ class Tooltip extends PureComponent {
       }
     }
 
-    const visibility = hovered && hovered.active ? 1 : 0
+    const visibility = hovered.active ? 1 : 0
 
     const start = {
       x,
@@ -345,6 +398,5 @@ export default Connect(() => {
     hovered: state.hovered,
     cursor: state.cursor,
     offset: selectors.offset(state),
-    quadTree: state.quadTree,
   })
 })(Tooltip)

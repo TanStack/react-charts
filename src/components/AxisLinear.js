@@ -217,6 +217,9 @@ class Axis extends Component {
                   ? translateX(width)
                   : position === positionBottom ? translateY(height) : undefined
               }
+              style={{
+                pointerEvents: 'none',
+              }}
             >
               <Path className="domain" d={axisPath} style={axisStyles.line} />
               <NodeGroup

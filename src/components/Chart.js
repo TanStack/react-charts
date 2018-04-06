@@ -8,7 +8,7 @@ import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
 
 import Rectangle from '../primitives/Rectangle'
-import Voronoi, { isVoronoiPriority } from '../components/Voronoi'
+import Voronoi from '../components/Voronoi'
 
 class Chart extends Component {
   static defaultProps = {
@@ -18,28 +18,42 @@ class Chart extends Component {
     getPrimary: d => (Array.isArray(d) ? d[0] : d.x),
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
     getR: d => (Array.isArray(d) ? d[2] : d.r),
-    interaction: 'axis',
+    interaction: null,
+    hoverGroup: 'primaryAxis',
+    showVoronoi: false,
   }
   componentDidMount () {
-    this.props.dispatch(
-      state => ({
-        ...state,
-        interaction: this.props.interaction,
-      }),
-      {
-        type: 'interaction',
-      }
-    )
+    const {
+      interaction, hoverGroup, showVoronoi, dispatch,
+    } = this.props
+    if (interaction || hoverGroup || showVoronoi) {
+      dispatch(
+        state => ({
+          ...state,
+          interaction,
+          hoverGroup,
+        }),
+        {
+          type: 'interaction',
+        }
+      )
+    }
     this.updateDataModel(this.props)
     this.componentDidUpdate(this.props)
   }
   componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
-    if (nextProps.interaction !== this.props.interaction) {
+    if (
+      nextProps.interaction !== this.props.interaction ||
+      nextProps.hoverGroup !== this.props.hoverGroup ||
+      nextProps.showVoronoi !== this.props.showVoronoi
+    ) {
       this.props.dispatch(
         state => ({
           ...state,
           interaction: nextProps.interaction,
+          hoverGroup: nextProps.hoverGroup,
+          showVoronoi: nextProps.showVoronoi,
         }),
         {
           type: 'interaction',
@@ -92,7 +106,7 @@ class Chart extends Component {
     getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
-    const materializedData = data.map((s, seriesIndex) => {
+    const preMaterializedData = data.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {
@@ -115,14 +129,14 @@ class Chart extends Component {
       return series
     })
 
-    // Provide the materializedData to the chart instance
+    // Provide the preMaterializedData to the chart instance
     this.props.dispatch(
       state => ({
         ...state,
-        materializedData,
+        preMaterializedData,
       }),
       {
-        type: 'materializedData',
+        type: 'preMaterializedData',
       }
     )
   }
@@ -209,17 +223,8 @@ class Chart extends Component {
                     opacity: 0,
                   }}
                 />
-                {isVoronoiPriority(interaction) ? (
-                  <React.Fragment>
-                    {svgChildren}
-                    <Voronoi />
-                  </React.Fragment>
-                ) : (
-                  <React.Fragment>
-                    <Voronoi />
-                    {svgChildren}
-                  </React.Fragment>
-                )}
+                <Voronoi />
+                {svgChildren}
               </g>
             </svg>
           )}
@@ -231,9 +236,7 @@ class Chart extends Component {
   onMouseMove = Utils.throttle(e => {
     const { clientX, clientY } = e
     this.dims = this.el.getBoundingClientRect()
-    const {
-      gridX, gridY, gridWidth, gridHeight, dispatch,
-    } = this.props
+    const { gridX, gridY, dispatch } = this.props
 
     dispatch(
       state => ({
@@ -344,7 +347,15 @@ const ReactChart = Connect(
   }
 )(Chart)
 
-const ProvidedChart = Provider(ReactChart)
+const ProvidedChart = Provider(ReactChart, {
+  initial: {
+    hovered: {
+      active: false,
+      series: null,
+      datums: [],
+    },
+  },
+})
 
 export default props => (
   <HyperResponsive

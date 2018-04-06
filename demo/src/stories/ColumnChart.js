@@ -11,7 +11,7 @@ export default () => (
     {({ data }) => (
       <Chart data={data}>
         <Axis primary type="ordinal" />
-        <Axis type="linear" stacked />
+        <Axis type="linear" min={0} max={0} />
         <Series type={Bar} />
         <Tooltip />
       </Chart>

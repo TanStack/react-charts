@@ -6,7 +6,7 @@ export function hoverSeries (series) {
         ? {
           active: true,
           series,
-          datums: null,
+          datums: [],
           single: false,
         }
         : {
@@ -50,7 +50,7 @@ export function selectSeries (series) {
         ? {
           active: true,
           series,
-          datums: null,
+          datums: [],
           single: false,
         }
         : {

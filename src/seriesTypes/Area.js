@@ -1,15 +1,13 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from './ReactMove'
 
-import { line } from 'd3-shape'
-
+import { area, line } from 'd3-shape'
+//
+import { Animate } from '../components/ReactMove'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
-//
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
@@ -21,13 +19,19 @@ const circleDefaultStyle = {
   r: 2,
 }
 
-class Line extends PureComponent {
+class Area extends PureComponent {
   static defaultProps = {
-    showPoints: true,
+    showPoints: false,
     curve: 'monotoneX',
   }
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
+    if (!props.hoverGroup) {
+      this.props.dispatch(state => ({
+        ...state,
+        hoverGroup: 'primaryAxis',
+      }))
+    }
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
@@ -54,7 +58,17 @@ class Line extends PureComponent {
     }
 
     // Set the cursor points (used in voronoi)
-    datum.cursorPoints = [datum.focus]
+    datum.cursorPoints = [
+      datum.focus,
+      {
+        x: primaryAxis.vertical
+          ? primaryAxis.position === 'left' ? datum.base - 1 : datum.base
+          : datum.focus.x,
+        y: !primaryAxis.vertical
+          ? primaryAxis.position === 'bottom' ? datum.base - 1 : datum.base
+          : datum.focus.y,
+      },
+    ]
   }
   static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
     const defaults = {
@@ -87,9 +101,14 @@ class Line extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const lineFn = line()
-      .curve(Curves[curve] || curve)
+    const areaFn = area()
       .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .curve(Curves[curve] || curve)
+      .y0(d => d[2])
+
+    const lineFn = line()
+      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .curve(Curves[curve] || curve)
 
     const data = series.data.map(d => ({
       x: d.x,
@@ -106,32 +125,51 @@ class Line extends PureComponent {
         update={{
           data: [data],
         }}
-        duration={500}
       >
         {inter => {
-          const path = lineFn(
+          const areaPath = areaFn(
+            inter.data.map(d => [
+              Number.isNaN(d.x) ? null : d.x,
+              Number.isNaN(d.y) ? null : d.y,
+              Number.isNaN(d.base) ? null : d.base,
+            ])
+          )
+          const linePath = lineFn(
             inter.data.map(d => [Number.isNaN(d.x) ? null : d.x, Number.isNaN(d.y) ? null : d.y])
           )
 
-          const seriesInteractionProps =
-            interaction === 'series'
-              ? {
-                  onClick: () => this.selectSeries(series),
-                  onMouseEnter: () => this.hoverSeries(series),
-                  onMouseMove: () => this.hoverSeries(series),
-                  onMouseLeave: () => this.hoverSeries(null),
-                }
-              : {}
+          const interactiveSeries = interaction === 'series'
+          const seriesInteractionProps = interactiveSeries
+            ? {
+                onClick: () => this.selectSeries(series),
+                onMouseEnter: () => this.hoverSeries(series),
+                onMouseMove: () => this.hoverSeries(series),
+                onMouseLeave: () => this.hoverSeries(null),
+              }
+            : {}
 
           return (
             <g>
               <Path
-                d={path}
+                d={areaPath}
+                style={{
+                  ...pathDefaultStyle,
+                  ...style,
+                  ...style.area,
+                  stroke: 'transparent',
+                  pointerEvents: interactiveSeries ? 'all' : 'none',
+                }}
+                opacity={visibility}
+                {...seriesInteractionProps}
+              />
+              <Path
+                d={linePath}
                 style={{
                   ...pathDefaultStyle,
                   ...style,
                   ...style.line,
                   fill: 'none',
+                  pointerEvents: interactiveSeries ? 'all' : 'none',
                 }}
                 opacity={visibility}
                 {...seriesInteractionProps}
@@ -141,15 +179,15 @@ class Line extends PureComponent {
                   const status = Utils.datumStatus(series, datum, hovered, selected)
                   const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-                  const datumInteractionProps =
-                    interaction === 'element'
-                      ? {
-                          onClick: () => this.selectDatum(datum),
-                          onMouseEnter: () => this.hoverDatum(datum),
-                          onMouseMove: () => this.hoverDatum(datum),
-                          onMouseLeave: () => this.hoverDatum(null),
-                        }
-                      : {}
+                  const iteractiveDatum = interaction === 'element'
+                  const datumInteractionProps = iteractiveDatum
+                    ? {
+                        onClick: () => this.selectDatum(datum),
+                        onMouseEnter: () => this.hoverDatum(datum),
+                        onMouseMove: () => this.hoverDatum(datum),
+                        onMouseLeave: () => this.hoverDatum(null),
+                      }
+                    : {}
 
                   return (
                     <Circle
@@ -162,6 +200,7 @@ class Line extends PureComponent {
                         ...style.circle,
                         ...dataStyle,
                         ...dataStyle.circle,
+                        pointerEvents: iteractiveDatum ? 'all' : 'none',
                       }}
                       opacity={visibility}
                       {...seriesInteractionProps}
@@ -185,8 +224,5 @@ export default Connect(
   }),
   {
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
-    statics: {
-      SeriesType: 'Line',
-    },
   }
-)(Line)
+)(Area)
