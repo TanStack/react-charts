@@ -15,7 +15,7 @@ class Story extends Component {
     <Axis primary type="time" position="bottom" />
     <Axis type="linear" position="left" stacked />
     <Series type={elementType} />
-    <Tooltip origin={tooltipPosition} />
+    <Tooltip focus={tooltipPosition} />
   </Chart>
           )}
         </ChartConfig>

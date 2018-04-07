@@ -18,10 +18,10 @@ class Bar extends PureComponent {
         interaction: 'element',
       }))
     }
-    if (!props.hoverGroup) {
+    if (!props.hoverMode) {
       this.props.dispatch(state => ({
         ...state,
-        hoverGroup: 'primaryAxis',
+        hoverMode: 'primary',
       }))
     }
     this.selectSeries = selectSeries.bind(this)

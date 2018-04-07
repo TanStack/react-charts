@@ -68,7 +68,7 @@ export default class ChartConfig extends Component {
     secondaryAxisPosition: 'left',
     primaryAxisStack: false,
     secondaryAxisStack: true,
-    interaction: 'primaryAxis',
+    hoverMode: 'primary',
     tooltipPosition: 'closest',
     tooltipAlign: 'top',
     snapCursor: true,
@@ -79,7 +79,6 @@ export default class ChartConfig extends Component {
       ...props,
       data: makeData(props.dataType),
     }
-    console.log(this.state.data)
   }
   render () {
     const {

@@ -19,6 +19,9 @@ const defaultColors = [
   '#cd82ad',
 ]
 
+const modePrimary = 'primary'
+const modeSecondary = 'secondary'
+
 const getType = (type, data, i) => {
   // Allow dynamic types
   const typeGetter =
@@ -54,7 +57,8 @@ class Series extends Component {
       newProps.axes !== oldProps.axes ||
       newProps.seriesKey !== oldProps.seriesKey ||
       newProps.primaryAxis !== oldProps.primaryAxis ||
-      newProps.secondaryAxis !== oldProps.secondaryAxis
+      newProps.secondaryAxis !== oldProps.secondaryAxis ||
+      newProps.groupMode !== oldProps.groupMode
     ) {
       this.updateStackData(newProps)
     }
@@ -112,6 +116,7 @@ class Series extends Component {
       materializedData,
       primaryAxis,
       secondaryAxis,
+      groupMode,
     } = props
 
     // We need materializedData and both axes to continue
@@ -185,6 +190,12 @@ class Series extends Component {
       }),
     }))
 
+    stackData.forEach(series => {
+      series.data.forEach(datum => {
+        datum.series = series
+      })
+    })
+
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
     stackData.forEach((series, i) => {
@@ -208,6 +219,28 @@ class Series extends Component {
         return result || d
       })
     })
+
+    // Do any data grouping ahead of time
+    if ([modePrimary, modeSecondary].includes(groupMode)) {
+      const datumsByGrouping = {}
+
+      stackData.forEach(series => {
+        series.data.forEach(datum => {
+          const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
+
+          datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
+          datumsByGrouping[axisKey].push(datum)
+        })
+      })
+
+      stackData.forEach(series => {
+        series.data.forEach(datum => {
+          const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
+
+          datum.group = datumsByGrouping[axisKey]
+        })
+      })
+    }
 
     // Not we need to precalculate all of the possible status styles by
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
@@ -310,6 +343,7 @@ export default Connect(
       secondaryAxis: selectors.secondaryAxis(state),
       hovered: state.hovered,
       selected: state.selected,
+      groupMode: state.groupMode,
     })
   },
   {

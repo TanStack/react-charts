@@ -19,22 +19,55 @@ class Chart extends Component {
     getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
     getR: d => (Array.isArray(d) ? d[2] : d.r),
     interaction: null,
-    hoverGroup: 'primaryAxis',
+    hoverMode: 'primary',
+    groupMode: 'primary',
     showVoronoi: false,
   }
   componentDidMount () {
     const {
-      interaction, hoverGroup, showVoronoi, dispatch,
+      interaction, hoverMode, groupMode, showVoronoi, dispatch,
     } = this.props
-    if (interaction || hoverGroup || showVoronoi) {
+    if (interaction) {
       dispatch(
         state => ({
           ...state,
           interaction,
-          hoverGroup,
         }),
         {
           type: 'interaction',
+        }
+      )
+    }
+    if (hoverMode) {
+      dispatch(
+        state => ({
+          ...state,
+          hoverMode,
+        }),
+        {
+          type: 'hoverMode',
+        }
+      )
+    }
+    if (groupMode) {
+      dispatch(
+        state => ({
+          ...state,
+          groupMode,
+        }),
+        {
+          type: 'groupMode',
+        }
+      )
+    }
+    if (showVoronoi) {
+      dispatch(
+        state => ({
+          ...state,
+          showVoronoi,
+        }),
+        {
+          type: 'showVoronoi',
         }
       )
     }
@@ -43,20 +76,48 @@ class Chart extends Component {
   }
   componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
-    if (
-      nextProps.interaction !== this.props.interaction ||
-      nextProps.hoverGroup !== this.props.hoverGroup ||
-      nextProps.showVoronoi !== this.props.showVoronoi
-    ) {
+    if (nextProps.interaction !== this.props.interaction) {
       this.props.dispatch(
         state => ({
           ...state,
           interaction: nextProps.interaction,
-          hoverGroup: nextProps.hoverGroup,
-          showVoronoi: nextProps.showVoronoi,
         }),
         {
           type: 'interaction',
+        }
+      )
+    }
+
+    if (nextProps.hoverMode !== this.props.hoverMode) {
+      this.props.dispatch(
+        state => ({
+          ...state,
+          hoverMode: nextProps.hoverMode,
+        }),
+        {
+          type: 'hoverMode',
+        }
+      )
+    }
+    if (nextProps.groupMode !== this.props.groupMode) {
+      this.props.dispatch(
+        state => ({
+          ...state,
+          groupMode: nextProps.groupMode,
+        }),
+        {
+          type: 'groupMode',
+        }
+      )
+    }
+    if (nextProps.showVoronoi !== this.props.showVoronoi) {
+      this.props.dispatch(
+        state => ({
+          ...state,
+          showVoronoi: nextProps.showVoronoi,
+        }),
+        {
+          type: 'showVoronoi',
         }
       )
     }
@@ -162,12 +223,12 @@ class Chart extends Component {
   }
   render () {
     const {
-      style, width, height, handleRef, gridX, gridY, interaction, children,
+      style, width, height, handleRef, gridX, gridY, children,
     } = this.props
 
     const allChildren = React.Children.toArray(children)
-    const svgChildren = allChildren.filter(d => !d.type.isHTML)
-    const htmlChildren = allChildren.filter(d => d.type.isHTML)
+    const svgChildren = allChildren.filter(d => !d.type.isHtml)
+    const htmlChildren = allChildren.filter(d => d.type.isHtml)
 
     return (
       <div
@@ -191,6 +252,9 @@ class Chart extends Component {
         >
           {({ gridX, gridY }) => (
             <svg
+              ref={el => {
+                this.el = el
+              }}
               style={{
                 width,
                 height,
@@ -198,9 +262,6 @@ class Chart extends Component {
               }}
             >
               <g
-                ref={el => {
-                  this.el = el
-                }}
                 transform={`translate(${gridX || 0}, ${gridY || 0})`}
                 onMouseEnter={e => {
                   e.persist()
@@ -239,16 +300,19 @@ class Chart extends Component {
     const { gridX, gridY, dispatch } = this.props
 
     dispatch(
-      state => ({
-        ...state,
-        cursor: {
+      state => {
+        const cursor = {
           ...state.cursor,
           active: true,
           x: clientX - this.dims.left - gridX,
           y: clientY - this.dims.top - gridY,
           dragging: state.cursor && state.cursor.down,
-        },
-      }),
+        }
+        return {
+          ...state,
+          cursor,
+        }
+      },
       {
         type: 'cursor',
       }

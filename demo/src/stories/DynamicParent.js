@@ -11,6 +11,7 @@ export default () => (
     {({ data }) => (
       <div
         style={{
+          width: '500px',
           display: 'flex',
           flexDirection: 'column',
           padding: '12px',

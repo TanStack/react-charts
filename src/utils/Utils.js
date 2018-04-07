@@ -8,7 +8,7 @@ export default {
   datumStatus,
   getStatusStyles,
   getStatusStyle,
-  getFocusForOrigins,
+  getMultiFocus,
   getClosestPoint,
   normalizeComponent,
   materializeStyles,
@@ -144,21 +144,14 @@ function getStatusStyle (status, styles) {
   return styles.default
 }
 
-function getFocusForOrigins ({
-  origins,
-  points,
-  gridX,
-  gridY,
-  gridWidth,
-  gridHeight,
-  width,
-  height,
+function getMultiFocus ({
+  focus, points, gridX, gridY, gridWidth, gridHeight, width, height,
 }) {
   const invalid = () => {
     throw new Error(
       `${JSON.stringify(
-        origin
-      )} is not a valid tooltip origin. You should use a single origin or 2 non-conflicting origins.`
+        focus
+      )} is not a valid tooltip focus option. You should use a single focus option or 2 non-conflicting focus options.`
     )
   }
 
@@ -177,31 +170,31 @@ function getFocusForOrigins ({
     yMax = Math.max(point.focus.y, yMax)
   })
 
-  if (origins.length > 2) {
+  if (focus.length > 2) {
     return invalid()
   }
 
-  origins = origins.sort(a => (a.includes('center') || a.includes('Center') ? 1 : -1))
+  focus = focus.sort(a => (a.includes('center') || a.includes('Center') ? 1 : -1))
 
-  for (let i = 0; i < origins.length; i++) {
-    const origin = origins[i]
+  for (let i = 0; i < focus.length; i++) {
+    const focusPart = focus[i]
 
     // Horizontal Positioning
-    if (['left', 'right', 'gridLeft', 'gridRight', 'chartLeft', 'chartRight'].includes(origin)) {
+    if (['left', 'right', 'gridLeft', 'gridRight', 'chartLeft', 'chartRight'].includes(focusPart)) {
       if (typeof x !== 'undefined') {
         invalid()
       }
-      if (origin === 'left') {
+      if (focusPart === 'left') {
         x = xMin
-      } else if (origin === 'right') {
+      } else if (focusPart === 'right') {
         x = xMax
-      } else if (origin === 'gridLeft') {
+      } else if (focusPart === 'gridLeft') {
         x = gridX
-      } else if (origin === 'gridRight') {
+      } else if (focusPart === 'gridRight') {
         x = gridX + gridWidth
-      } else if (origin === 'chartLeft') {
+      } else if (focusPart === 'chartLeft') {
         x = 0
-      } else if (origin === 'chartRight') {
+      } else if (focusPart === 'chartRight') {
         x = width
       } else {
         invalid()
@@ -209,21 +202,21 @@ function getFocusForOrigins ({
     }
 
     // Vertical Positioning
-    if (['top', 'bottom', 'gridTop', 'gridBottom', 'chartTop', 'chartBottom'].includes(origin)) {
+    if (['top', 'bottom', 'gridTop', 'gridBottom', 'chartTop', 'chartBottom'].includes(focusPart)) {
       if (typeof y !== 'undefined') {
         invalid()
       }
-      if (origin === 'top') {
+      if (focusPart === 'top') {
         y = yMin
-      } else if (origin === 'bottom') {
+      } else if (focusPart === 'bottom') {
         y = yMax
-      } else if (origin === 'gridTop') {
+      } else if (focusPart === 'gridTop') {
         y = gridY
-      } else if (origin === 'gridBottom') {
+      } else if (focusPart === 'gridBottom') {
         y = gridY + gridHeight
-      } else if (origin === 'chartTop') {
+      } else if (focusPart === 'chartTop') {
         y = 0
-      } else if (origin === 'chartBottom') {
+      } else if (focusPart === 'chartBottom') {
         y = height
       } else {
         invalid()
@@ -231,23 +224,22 @@ function getFocusForOrigins ({
     }
 
     // Center Positioning
-    if (['center', 'gridCenter', 'chartCenter'].includes(origin)) {
-      if (origin === 'center') {
+    if (['center', 'gridCenter', 'chartCenter'].includes(focusPart)) {
+      if (focusPart === 'center') {
         if (typeof y === 'undefined') {
           y = (yMin + yMax) / 2
         }
         if (typeof x === 'undefined') {
-          console.log(xMin, xMax, (xMin + xMax) / 2)
           x = (xMin + xMax) / 2
         }
-      } else if (origin === 'gridCenter') {
+      } else if (focusPart === 'gridCenter') {
         if (typeof y === 'undefined') {
           y = gridY + gridHeight / 2
         }
         if (typeof x === 'undefined') {
           x = gridX + gridWidth / 2
         }
-      } else if (origin === 'chartCenter') {
+      } else if (focusPart === 'chartCenter') {
         if (typeof y === 'undefined') {
           y = height / 2
         }
@@ -259,14 +251,14 @@ function getFocusForOrigins ({
       }
     }
 
-    // Auto center the remainder if there is only one origin listed
-    if (origins.length === 1) {
-      if (origins[0].includes('grid')) {
-        origins.push('gridCenter')
-      } else if (origins[0].includes('chart')) {
-        origins.push('chartCenter')
+    // Auto center the remainder if there is only one focusPart listed
+    if (focus.length === 1) {
+      if (focus[0].includes('grid')) {
+        focus.push('gridCenter')
+      } else if (focus[0].includes('chart')) {
+        focus.push('chartCenter')
       } else {
-        origins.push('center')
+        focus.push('center')
       }
     }
   }
@@ -275,8 +267,11 @@ function getFocusForOrigins ({
 }
 
 function getClosestPoint (position, datums) {
+  if (!datums || !position || !datums.length) {
+    return
+  }
   let closestDistance = Infinity
-  let closestDatum = datums[0] || {}
+  let closestDatum = datums[0]
   datums.forEach(datum => {
     datum.cursorPoints.forEach(cursorPoint => {
       const distance = Math.sqrt(

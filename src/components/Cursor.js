@@ -10,7 +10,7 @@ class Cursor extends PureComponent {
     children: ({ label }) => <span>{label}</span>,
     snap: true,
   }
-  static isHTML = true
+  static isHtml = true
   constructor () {
     super()
     this.onHover = this.onHover.bind(this)
@@ -56,6 +56,7 @@ class Cursor extends PureComponent {
 
     // Determine the axis to use
     const axis = primary ? primaryAxis : secondaryAxis
+    const axisKey = primary ? 'primary' : 'secondary'
     // Determine the sibling axis to use
     const siblingAxis = primary ? secondaryAxis : primaryAxis
     // Get the sibling range
@@ -80,24 +81,20 @@ class Cursor extends PureComponent {
       animated = true
 
       // Vertical snapping
+      const datum = Utils.getClosestPoint(cursor, hovered.datums)
+
       if (axis.vertical) {
-        const datum = Utils.getClosestPoint(cursor, hovered.datums)
         y = datum.focus.y
         label =
-          typeof datum.primary !== 'undefined'
-            ? axis.format(
-              axis.stacked && !primary ? datum.total : primary ? datum.primary : datum.secondary
-            )
+          typeof datum[axisKey] !== 'undefined'
+            ? axis.format(axis.stacked && !primary ? datum.totalValue : datum[axisKey])
             : undefined
       } else {
         // Horizontal snapping
-        const datum = Utils.getClosestPoint(cursor, hovered.datums)
         x = datum.focus.x
         label =
-          typeof datum.primary !== 'undefined'
-            ? axis.format(
-              axis.stacked && !primary ? datum.total : primary ? datum.primary : datum.secondary
-            )
+          typeof datum[axisKey] !== 'undefined'
+            ? axis.format(axis.stacked && !primary ? datum.totalValue : datum[axisKey])
             : undefined
       }
     }

@@ -17,10 +17,10 @@ const circleDefaultStyle = {
 class Line extends PureComponent {
   constructor (props) {
     super(props)
-    if (!props.hoverGroup) {
+    if (!props.hoverMode) {
       this.props.dispatch(state => ({
         ...state,
-        hoverGroup: 'closestPoint',
+        hoverMode: 'closestPoint',
       }))
     }
     this.selectSeries = selectSeries.bind(this)

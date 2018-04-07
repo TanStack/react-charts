@@ -47,7 +47,7 @@ class Axis extends Component {
     maxLabelRotation: 50,
     innerPadding: 0.2,
     outerPadding: 0.1,
-    showGrid: 1,
+    showGrid: null,
     display: true,
   }
   constructor () {
@@ -267,8 +267,10 @@ class Axis extends Component {
                   let showGridLine = showGrid
 
                   // If ordinal and showGrid isn't explicit, hide it
-                  if (type === 'ordinal' && showGrid === 1) {
+                  if (type === 'ordinal' && typeof showGrid !== 'boolean') {
                     showGridLine = false
+                  } else {
+                    showGridLine = true
                   }
 
                   return (

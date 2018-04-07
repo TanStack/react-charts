@@ -6,131 +6,14 @@ import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
 
-const defaultRenderer = props => {
-  const {
-    series, datums, primaryAxis, secondaryAxis,
-  } = props
-
-  const formatSecondary = val =>
-    Math.floor(val) < val
-      ? secondaryAxis.format(Math.round(val * 100) / 100)
-      : secondaryAxis.format(val)
-
-  if (series) {
-    return (
-      <div>
-        <strong>{series.label}</strong>
-        <br />
-      </div>
-    )
-  }
-
-  if (!datums || !datums.length) {
-    return null
-  }
-
-  const sortedDatums = [...datums]
-    .sort((a, b) => {
-      if (a.secondary < b.secondary) {
-        return -1
-      } else if (a.secondary > b.secondary) {
-        return 1
-      }
-      return 0
-    })
-    .reverse()
-
-  return (
-    <div>
-      <div
-        style={{
-          marginBottom: '3px',
-          textAlign: 'center',
-        }}
-      >
-        <strong>{primaryAxis.format(datums[0].primary)}</strong>
-      </div>
-      <table
-        style={{
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <tbody>
-          {sortedDatums.map((d, i) => (
-            <tr key={i}>
-              <td
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: '5px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: d.statusStyles.hovered.fill,
-                    borderRadius: '50px',
-                  }}
-                />
-              </td>
-              <td>{d.seriesLabel}: </td>
-              <td
-                style={{
-                  textAlign: 'right',
-                }}
-              >
-                {formatSecondary(d.secondary)}
-              </td>
-            </tr>
-          ))}
-          {secondaryAxis.stacked ? (
-            <tr>
-              <td
-                style={{
-                  paddingTop: '5px',
-                }}
-              >
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: 'rgba(255,255,255,.2)',
-                    borderRadius: '50px',
-                  }}
-                />
-              </td>
-              <td
-                style={{
-                  paddingTop: '5px',
-                }}
-              >
-                Total:{' '}
-              </td>
-              <td
-                style={{
-                  paddingTop: '5px',
-                }}
-              >
-                {formatSecondary([...datums].reverse()[0].totalValue)}
-              </td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
 class Tooltip extends PureComponent {
   static defaultProps = {
-    origin: 'closest',
+    focus: 'closest',
     align: 'top',
     children: defaultRenderer,
     padding: 1,
   }
-  static isHTML = true
+  static isHtml = true
   render () {
     const {
       hovered,
@@ -145,7 +28,7 @@ class Tooltip extends PureComponent {
       height,
       cursor,
       //
-      origin,
+      focus,
       align,
       padding,
       children,
@@ -160,50 +43,54 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    const datums =
-      hovered.datums && hovered.datums.length
-        ? hovered.datums
-        : hovered.series ? hovered.series.data : []
+    const hoveredDatums = hovered.datums && hovered.datums.length ? hovered.datums : []
 
-    // TODO: tooltip origin: hovered or chart or custom.
-    // Allows the user to origin the tooltip relative to different parts of the chart
+    // TODO: tooltip focus: hovered or chart or custom.
+    // Allows the user to focus the tooltip relative to different parts of the chart
     // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
 
-    this.focus = this.focus || {
+    // Default the focus point
+    this.focus = {
       x: gridX,
       y: gridY,
       padding: 0,
-      datum: null,
     }
 
-    if (datums && datums.length) {
-      if (typeof origin === 'function') {
-        if (cursor) {
-          this.focus = origin(datums, cursor)
-        }
-      } else if (origin === 'closest') {
-        if (cursor) {
-          const datum = Utils.getClosestPoint(cursor, datums)
-          this.focus = datum.focus
-          this.focus.datum = datum
-        }
-      } else if (origin === 'cursor') {
-        if (cursor) {
-          this.focus = cursor
-        }
-      } else {
-        const origins = Utils.isArray(origin) ? [...origin] : [origin]
-        this.focus = Utils.getFocusForOrigins({
-          origins,
-          points: datums,
-          gridX,
-          gridY,
-          gridWidth,
-          gridHeight,
-          width,
-          height,
+    // Get the closest focus datum out of the hoveredDatums
+    this.focusDatum = Utils.getClosestPoint(cursor, hoveredDatums)
+
+    // If there is a focusDatum, default the focus to its x and y
+    if (this.focusDatum) {
+      this.focus = this.focusDatum.focus
+    }
+
+    if (typeof focus === 'function') {
+      // Support functional override for focus
+      if (cursor) {
+        this.focus = focus({
+          hoveredDatums,
+          cursor,
+          focusDatum: this.focusDatum,
         })
       }
+    } else if (focus === 'cursor') {
+      // Support cursor-bound focus
+      this.focus = cursor
+    } else if (focus === 'closest') {
+      // Do nothing, this is already calculated
+    } else if (hoveredDatums && hoveredDatums.length) {
+      // Support manual definition of focus point using relative multiFocus strategy
+      const multiFocus = Utils.isArray(focus) ? [...focus] : [focus]
+      this.focus = Utils.getMultiFocus({
+        focus: multiFocus,
+        points: hoveredDatums,
+        gridX,
+        gridY,
+        gridWidth,
+        gridHeight,
+        width,
+        height,
+      })
     }
 
     const { x, y, padding: focusPadding = 0 } = this.focus
@@ -311,7 +198,7 @@ class Tooltip extends PureComponent {
 }) => {
           let renderedChildren
           const renderProps = {
-            ...hovered,
+            datum: this.focusDatum,
             primaryAxis,
             secondaryAxis,
           }
@@ -374,6 +261,120 @@ class Tooltip extends PureComponent {
       />
     )
   }
+}
+
+function defaultRenderer (props) {
+  const { datum, primaryAxis, secondaryAxis } = props
+
+  if (!datum) {
+    return null
+  }
+
+  const formatSecondary = val =>
+    Math.floor(val) < val
+      ? secondaryAxis.format(Math.round(val * 100) / 100)
+      : secondaryAxis.format(val)
+
+  const sortedGroupDatums = secondaryAxis.stacked
+    ? [...datum.group].reverse()
+    : [...datum.group]
+      .sort((a, b) => {
+        if (a.secondary < b.secondary) {
+          return -1
+        } else if (a.secondary > b.secondary) {
+          return 1
+        }
+        return 0
+      })
+      .reverse()
+
+  return (
+    <div>
+      <div
+        style={{
+          marginBottom: '3px',
+          textAlign: 'center',
+        }}
+      >
+        <strong>{primaryAxis.format(datum.primary)}</strong>
+      </div>
+      <table
+        style={{
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <tbody>
+          {sortedGroupDatums.map((d, i) => (
+            <tr
+              key={i}
+              style={{
+                opacity: d === datum ? 1 : 0.8,
+              }}
+            >
+              <td
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '5px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: d.statusStyles.hovered.fill,
+                    borderRadius: '50px',
+                    boxShadow: d === datum ? '0 0 0 1px white, 0 0 5px rgba(0,0,0,.3)' : 'none',
+                  }}
+                />
+              </td>
+              <td>{d.seriesLabel}: </td>
+              <td
+                style={{
+                  textAlign: 'right',
+                }}
+              >
+                {formatSecondary(d.secondary)}
+              </td>
+            </tr>
+          ))}
+          {secondaryAxis.stacked && datum.group.length > 1 ? (
+            <tr>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: 'rgba(255,255,255,.2)',
+                    borderRadius: '50px',
+                  }}
+                />
+              </td>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                Total:{' '}
+              </td>
+              <td
+                style={{
+                  paddingTop: '5px',
+                }}
+              >
+                {formatSecondary([...datum.group].reverse()[0].totalValue)}
+              </td>
+            </tr>
+          ) : null}
+        </tbody>
+      </table>
+    </div>
+  )
 }
 
 export default Connect(() => {

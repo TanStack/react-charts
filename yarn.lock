@@ -7012,8 +7012,8 @@ react-deep-force-update@^1.0.0:
   resolved "https://registry.yarnpkg.com/react-deep-force-update/-/react-deep-force-update-1.1.1.tgz#bcd31478027b64b3339f108921ab520b4313dc2c"
 
 react-dom@^16.2.0:
-  version "16.3.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.0.tgz#b318e52184188ecb5c3e81117420cca40618643e"
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.1.tgz#6a3c90a4fb62f915bdbcf6204422d93a7d4ca573"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -7072,8 +7072,10 @@ react-router@^4.2.0:
     warning "^3.0.0"
 
 react-state@^2.0.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/react-state/-/react-state-2.1.1.tgz#dddefdcf2a8f1cc02eb3b4eca7b57fd133c46eb3"
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/react-state/-/react-state-2.1.2.tgz#459ba75d8130ab4d86e68a5e191e211f07987590"
+  dependencies:
+    hoist-non-react-statics "^2.5.0"
 
 react-transform-catch-errors@1.0.2:
   version "1.0.2"
@@ -7087,8 +7089,8 @@ react-transform-hmr@1.0.4:
     react-proxy "^1.1.7"
 
 react@^16.2.0:
-  version "16.3.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.3.0.tgz#fc5a01c68f91e9b38e92cf83f7b795ebdca8ddff"
+  version "16.3.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.1.tgz#4a2da433d471251c69b6033ada30e2ed1202cfd8"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"

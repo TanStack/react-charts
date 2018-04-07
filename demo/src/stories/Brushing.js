@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 
 import ChartConfig from './components/ChartConfig'
 
-import { Chart, Axis, Series, Line, Brush, Tooltip } from '../../../src'
+import { Chart, Axis, Series, Line, Brush, Tooltip, Cursor } from '../../../src'
 
 export default class extends Component {
   constructor () {
@@ -37,6 +37,8 @@ export default class extends Component {
               <Axis primary type="time" position="bottom" hardMin={min} hardMax={max} />
               <Axis type="linear" position="left" />
               <Series type={Line} />
+              <Cursor primary />
+              <Tooltip />
               <Brush
                 onSelect={brushData => {
                   this.setState({

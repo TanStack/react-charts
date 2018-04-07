@@ -35,9 +35,9 @@ class Story extends Component {
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Cursor primary />
-              <Tooltip align="bottom" origin={['center', 'chartBottom']}>
-                {props =>
-                  props.datums.length && (
+              <Tooltip align="bottom" focus={['center', 'chartBottom']}>
+                {({ datum, primaryAxis, secondaryAxis }) =>
+                  datum ? (
                     <div
                       style={{
                         color: 'white',
@@ -49,7 +49,7 @@ class Story extends Component {
                           textAlign: 'center',
                         }}
                       >
-                        {props.primaryAxis.format(props.datums[0].primary)}
+                        {primaryAxis.format(datum.primary)}
                       </h3>
                       <div
                         style={{
@@ -61,7 +61,7 @@ class Story extends Component {
                         <Chart
                           data={[
                             {
-                              data: props.datums.map(d => ({
+                              data: datum.group.map(d => ({
                                 x: d.seriesLabel,
                                 y: d.secondary,
                                 color: d.statusStyles.default.fill,
@@ -90,7 +90,7 @@ class Story extends Component {
                         }}
                       />
                     </div>
-                  )
+                  ) : null
                 }
               </Tooltip>
             </Chart>

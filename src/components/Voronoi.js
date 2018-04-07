@@ -8,10 +8,9 @@ import Selectors from '../utils/Selectors'
 
 const noop = () => null
 
-const modeClosestSeries = 'closestSeries'
 const modeClosestPoint = 'closestPoint'
-const modePrimaryAxis = 'primaryAxis'
-const modeSecondaryAxis = 'secondaryAxis'
+const modePrimary = 'primary'
+const modeSecondary = 'secondary'
 
 class Voronoi extends PureComponent {
   static defaultProps = {
@@ -21,11 +20,10 @@ class Voronoi extends PureComponent {
   constructor () {
     super()
     this.onHover = this.onHover.bind(this)
-    this.onClick = this.onClick.bind(this)
   }
   render () {
     const {
-      hoverGroup,
+      hoverMode,
       //
       stackData,
       primaryAxis,
@@ -50,7 +48,7 @@ class Voronoi extends PureComponent {
     let vor
     let polygons = null
 
-    if (hoverGroup === modeClosestSeries) {
+    if (hoverMode === modeClosestPoint) {
       const voronoiData = []
       stackData.forEach(series => {
         series.data.forEach(datum => {
@@ -61,34 +59,7 @@ class Voronoi extends PureComponent {
             voronoiData.push({
               x: cursorPoint.x,
               y: cursorPoint.y,
-              cursorPoints: datum.cursorPoints,
-              series: stackData[datum.seriesIndex],
-              datums: [],
-              single: false,
-            })
-          })
-        })
-      })
-
-      vor = voronoi()
-        .x(d => d.x)
-        .y(d => d.y)
-        .extent(extent)(voronoiData)
-    } else if (hoverGroup === modeClosestPoint) {
-      const voronoiData = []
-      stackData.forEach(series => {
-        series.data.forEach(datum => {
-          datum.cursorPoints.forEach(cursorPoint => {
-            if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
-              return
-            }
-            voronoiData.push({
-              x: cursorPoint.x,
-              y: cursorPoint.y,
-              cursorPoints: datum.cursorPoints,
-              series: null,
               datums: [datum],
-              single: true,
             })
           })
         })
@@ -98,13 +69,14 @@ class Voronoi extends PureComponent {
         .x(d => d.x)
         .y(d => d.y)
         .extent(extent)(voronoiData)
-    } else if ([modePrimaryAxis, modeSecondaryAxis].includes(hoverGroup)) {
+    } else if ([modePrimary, modeSecondary].includes(hoverMode)) {
       // Group all data points based on primaryAxis
       const datumsByAxis = {}
 
       stackData.forEach(series => {
         series.data.forEach(datum => {
-          const axisKey = String(hoverGroup === modePrimaryAxis ? datum.primary : datum.secondary)
+          const axis = modePrimary ? primaryAxis : secondaryAxis
+          const axisKey = String(axis.vertical ? datum.y : datum.x)
 
           datumsByAxis[axisKey] = datumsByAxis[axisKey] || []
           datumsByAxis[axisKey].push(datum)
@@ -120,9 +92,7 @@ class Voronoi extends PureComponent {
             voronoiData.push({
               x: cursorPoint.x,
               y: cursorPoint.y,
-              series: null, // AxisAxis can't be the series, so don't send it
-              datums, // Send all of the datums in this axis
-              single: false,
+              datums,
             })
           })
         })
@@ -138,48 +108,40 @@ class Voronoi extends PureComponent {
 
     polygons = vor.polygons()
 
-    // Series and Element hoverGroups modes are handled by the
-    // elements themselves, so do nothing for them here.
-
     return (
-      <g className="Voronoi" onMouseLeave={() => this.onHover(null, null)}>
-        {polygons
-          ? polygons.map((points, i) => {
-              // Only draw the voronoi if we need it
-              const path = lineFn(points)
-              return (
-                <Path
-                  key={i}
-                  d={path}
-                  className="action-voronoi"
-                  onMouseEnter={() => this.onHover(points.data.series, points.data.datums)}
-                  onClick={() => this.onClick(points.data.series, points.data.datums)}
-                  style={{
-                    fill: 'rgba(0,0,0,.2)',
-                    stroke: 'rgba(255,255,255,.5)',
-                    opacity: showVoronoi ? 1 : 0,
-                  }}
-                />
-              )
-            })
-          : null}
+      <g className="Voronoi" onMouseLeave={() => this.onHover(null)}>
+        {polygons.map((points, i) => {
+          const path = lineFn(points)
+          return (
+            <Path
+              key={i}
+              d={path}
+              className="action-voronoi"
+              onMouseEnter={() => this.onHover(points.data.datums)}
+              style={{
+                fill: 'rgba(0,0,0,.2)',
+                stroke: 'rgba(255,255,255,.5)',
+                opacity: showVoronoi ? 1 : 0,
+              }}
+            />
+          )
+        })}
       </g>
     )
   }
-  onHover (series, datums) {
+  onHover (datums) {
     // activate the hover with any series or datums
-    if (series || datums) {
+    if (datums) {
       return this.props.dispatch(
         state => ({
           ...state,
           hovered: {
             active: true,
-            series,
             datums,
           },
         }),
         {
-          type: 'hoveredVoronoi',
+          type: 'hovered',
         }
       )
     }
@@ -193,26 +155,9 @@ class Voronoi extends PureComponent {
         },
       }),
       {
-        type: 'hoveredVoronoi',
+        type: 'hovered',
       }
     )
-  }
-  onClick (series, datums) {
-    if (series || datums) {
-      return this.props.dispatch(
-        state => ({
-          ...state,
-          selected: {
-            active: true,
-            series,
-            datums,
-          },
-        }),
-        {
-          type: 'selectedVoronoi',
-        }
-      )
-    }
   }
 }
 
@@ -226,7 +171,7 @@ export default Connect(
       stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
-      hoverGroup: state.hoverGroup,
+      hoverMode: state.hoverMode,
       showVoronoi: state.showVoronoi,
     })
   },

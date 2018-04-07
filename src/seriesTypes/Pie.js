@@ -28,10 +28,10 @@ class Pie extends PureComponent {
         interaction: 'element',
       }))
     }
-    if (!props.hoverGroup) {
+    if (!props.hoverMode) {
       this.props.dispatch(state => ({
         ...state,
-        hoverGroup: 'closestPoint',
+        hoverMode: 'closestPoint',
       }))
     }
     this.selectSeries = selectSeries.bind(this)

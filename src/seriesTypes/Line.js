@@ -28,10 +28,10 @@ class Line extends PureComponent {
   }
   constructor (props) {
     super(props)
-    if (!props.hoverGroup) {
+    if (!props.hoverMode) {
       this.props.dispatch(state => ({
         ...state,
-        hoverGroup: 'primaryAxis',
+        hoverMode: 'primary',
       }))
     }
     this.selectSeries = selectSeries.bind(this)
