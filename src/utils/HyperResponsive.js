@@ -1,7 +1,10 @@
 import React, { Component } from 'react'
-import 'javascript-detect-element-resize'
 //
 import Utils from '../utils/Utils'
+
+if (typeof document !== 'undefined') {
+  require('javascript-detect-element-resize')
+}
 
 export default class HyperResponsive extends Component {
   constructor () {

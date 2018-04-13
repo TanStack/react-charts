@@ -1,7 +1,11 @@
 import React, { Component } from 'react'
 import { Connect } from 'react-state'
+
 //
+
 import { NodeGroup } from './ReactMove'
+
+import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 
 const debug = process.env.NODE_ENV === 'development'
@@ -163,27 +167,31 @@ class Series extends Component {
           const start = totals[d.primary]
           // Stack the x or y values (according to axis positioning)
           if (primaryAxis.vertical) {
+            // Is this a valid point?
+            const validPoint = Utils.isValidPoint(datum.xValue)
             // Should we use positive or negative base?
             const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
             // Assign the base
             datum.baseValue = start[totalKey]
             // Add the value for a total
-            datum.totalValue = datum.baseValue + datum.xValue
+            datum.totalValue = datum.baseValue + (validPoint ? datum.xValue : 0)
             // Update the totals
             totals[d.primary][totalKey] = datum.totalValue
             // Make the total the new value
-            datum.xValue = datum.totalValue
+            datum.xValue = validPoint ? datum.totalValue : null
           } else {
+            // Is this a valid point?
+            const validPoint = Utils.isValidPoint(datum.yValue)
             // Should we use positive or negative base?
             const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
             // Assign the base
             datum.baseValue = start[totalKey]
             // Add the value to the base
-            datum.totalValue = datum.baseValue + datum.yValue
+            datum.totalValue = datum.baseValue + (validPoint ? datum.yValue : 0)
             // Update the totals
             totals[d.primary][totalKey] = datum.totalValue
             // Make the total the new value
-            datum.yValue = datum.totalValue
+            datum.yValue = validPoint ? datum.totalValue : null
           }
         }
         return datum
@@ -306,7 +314,6 @@ class Series extends Component {
         leave={() => ({
           visibility: [0],
         })}
-        duration={500}
       >
         {inters => (
           <g className="Series">

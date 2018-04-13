@@ -158,28 +158,24 @@ class Cursor extends PureComponent {
       renderedChildren = (render || children)(renderProps)
     }
 
+    const start = {
+      lineStartX,
+      lineStartY,
+      lineWidth,
+      lineHeight,
+      bubbleX,
+      bubbleY,
+      visibility: 0,
+    }
+
+    const update = {}
+    Object.keys(start).forEach(key => {
+      update[key] = [start[key]]
+    })
+    update.visibility = [visibility]
+
     return (
-      <Animate
-        start={{
-          lineStartX,
-          lineStartY,
-          lineWidth,
-          lineHeight,
-          bubbleX,
-          bubbleY,
-          visibility,
-        }}
-        update={{
-          lineStartX: [lineStartX],
-          lineStartY: [lineStartY],
-          lineWidth: [lineWidth],
-          lineHeight: [lineHeight],
-          bubbleX: [bubbleX],
-          bubbleY: [bubbleY],
-          visibility: [visibility],
-        }}
-        duration={500}
-      >
+      <Animate show={visibility} start={start} enter={update} update={update} leave={update}>
         {inter => (
           <div
             className="Cursor"

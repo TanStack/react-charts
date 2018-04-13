@@ -3,7 +3,7 @@ import { NodeGroup as RMNodeGroup } from 'react-move'
 import { easeCubicOut } from 'd3-ease'
 
 const defaultTiming = {
-  duration: 300,
+  duration: process.env.NODE_ENV === 'development' ? 0 : 300,
   ease: easeCubicOut,
 }
 

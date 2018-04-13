@@ -15,9 +15,9 @@ class Chart extends Component {
     getData: d => d.data,
     getLabel: (d, i) => d.label || `Series ${i + 1}`,
     getSeriesID: (d, i) => i,
-    getPrimary: d => (Array.isArray(d) ? d[0] : d.x),
-    getSecondary: d => (Array.isArray(d) ? d[1] : d.y),
-    getR: d => (Array.isArray(d) ? d[2] : d.r),
+    getPrimary: d => (Utils.isArray(d) ? d[0] : d.x),
+    getSecondary: d => (Utils.isArray(d) ? d[1] : d.y),
+    getR: d => (Utils.isArray(d) ? d[2] : d.r),
     interaction: null,
     hoverMode: 'primary',
     groupMode: 'primary',
@@ -171,12 +171,12 @@ class Chart extends Component {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {
-        row: s,
+        original: s,
         index: seriesIndex,
         id: seriesID,
         label: seriesLabel,
         data: getData(s, seriesIndex).map((d, index) => ({
-          row: s,
+          originalSeries: s,
           seriesIndex,
           seriesID,
           seriesLabel,

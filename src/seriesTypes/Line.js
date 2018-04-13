@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from '../components/ReactMove'
-
 import { line } from 'd3-shape'
+
+//
+
+import { Animate } from '../components/ReactMove'
 
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
-//
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
 
@@ -42,9 +42,10 @@ class Line extends PureComponent {
   static plotDatum = (datum, {
     xScale, yScale, primaryAxis, xAxis, yAxis,
   }) => {
-    datum.x = xScale(datum.xValue)
-    datum.y = yScale(datum.yValue)
+    datum.x = Utils.isValidPoint(datum.xValue) ? xScale(datum.xValue) : null
+    datum.y = Utils.isValidPoint(datum.yValue) ? yScale(datum.yValue) : null
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
       datum.x += xAxis.tickOffset
@@ -112,7 +113,6 @@ class Line extends PureComponent {
         update={{
           data: [data],
         }}
-        duration={500}
       >
         {inter => {
           const path = lineFn(

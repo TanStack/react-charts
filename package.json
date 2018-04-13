@@ -20,6 +20,7 @@
     "test:watch": "nwb test-react --server"
   },
   "dependencies": {
+    "d3-delaunay": "^2.0.1",
     "d3-ease": "^1.0.3",
     "d3-scale": "^2.0.0",
     "d3-shape": "^1.2.0",

@@ -85,8 +85,7 @@ class Voronoi extends PureComponent {
 
       const voronoiData = []
 
-      Object.keys(datumsByAxis).forEach(axisKey => {
-        const datums = datumsByAxis[axisKey]
+      Object.values(datumsByAxis).forEach(datums => {
         datums.forEach(datum => {
           datum.cursorPoints.forEach(cursorPoint => {
             voronoiData.push({

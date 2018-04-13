@@ -50,11 +50,6 @@ class Tooltip extends PureComponent {
     // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
 
     // Default the focus point
-    this.focus = {
-      x: gridX,
-      y: gridY,
-      padding: 0,
-    }
 
     // Get the closest focus datum out of the hoveredDatums
     this.focusDatum = Utils.getClosestPoint(cursor, hoveredDatums)
@@ -91,6 +86,10 @@ class Tooltip extends PureComponent {
         width,
         height,
       })
+    }
+
+    if (!this.focus) {
+      return null
     }
 
     const { x, y, padding: focusPadding = 0 } = this.focus
@@ -181,18 +180,22 @@ class Tooltip extends PureComponent {
       alignX,
       alignY,
       triangleStyles,
-      visibility,
+      visibility: 0,
     }
 
     const update = {}
     Object.keys(start).forEach(key => {
       update[key] = [start[key]]
     })
+    update.visibility = [visibility]
 
     return (
       <Animate
+        show={visibility}
         start={start}
+        enter={update}
         update={update}
+        leave={update}
         render={({
  x, y, alignX, alignY, triangleStyles, padding, visibility,
 }) => {
@@ -325,11 +328,14 @@ function defaultRenderer (props) {
                     height: '12px',
                     backgroundColor: d.statusStyles.hovered.fill,
                     borderRadius: '50px',
-                    boxShadow: d === datum ? '0 0 0 1px white, 0 0 5px rgba(0,0,0,.3)' : 'none',
+                    boxShadow:
+                      d === datum
+                        ? '0 0 0 2px white, 0 0 8px rgba(0,0,0,.5)'
+                        : '0 0 0 1px white, 0 0 8px rgba(0,0,0,.5)',
                   }}
                 />
               </td>
-              <td>{d.seriesLabel}: </td>
+              <td>{d.seriesLabel}: &nbsp;</td>
               <td
                 style={{
                   textAlign: 'right',
@@ -360,7 +366,7 @@ function defaultRenderer (props) {
                   paddingTop: '5px',
                 }}
               >
-                Total:{' '}
+                Total: &nbsp;
               </td>
               <td
                 style={{

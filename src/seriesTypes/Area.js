@@ -40,8 +40,9 @@ class Area extends PureComponent {
   static plotDatum = (datum, {
     xScale, yScale, primaryAxis, xAxis, yAxis,
   }) => {
-    datum.x = xScale(datum.xValue)
-    datum.y = yScale(datum.yValue)
+    console.log(datum.xValue, datum.yValue)
+    datum.x = Utils.isValidPoint(datum.xValue) ? xScale(datum.xValue) : null
+    datum.y = Utils.isValidPoint(datum.yValue) ? yScale(datum.yValue) : null
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
@@ -50,6 +51,8 @@ class Area extends PureComponent {
     if (yAxis.type === 'ordinal') {
       datum.y += yAxis.tickOffset
     }
+
+    console.log(datum.x, datum.y)
 
     // Set the default focus point
     datum.focus = {

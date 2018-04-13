@@ -9,11 +9,12 @@ import { Chart, Axis, Series, Tooltip, Line, Cursor } from '../../../src'
 export default () => (
   <ChartConfig>
     {({ data }) => (
-      <Chart data={data}>
+      <Chart data={data} getPrimary={d => new Date(d.x)}>
         <Axis primary type="time" position="bottom" />
         <Axis type="linear" position="left" />
-        <Series type={Line} showPoints={false} />
+        <Series type={Line} />
         <Cursor primary />
+        <Cursor />
         <Tooltip />
       </Chart>
     )}

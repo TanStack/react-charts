@@ -14,12 +14,8 @@ export default {
   materializeStyles,
   normalizeGetter,
   normalizePathGetter,
-  get,
-  mapValues,
-  uniq,
-  groupBy,
-  orderBy,
   isArray,
+  isValidPoint,
 }
 
 function throttle (func) {
@@ -392,10 +388,6 @@ function isArray (a) {
   return Array.isArray(a)
 }
 
-// ########################################################################
-// Non-exported Helpers
-// ########################################################################
-
 function makePathArray (obj) {
   return flattenDeep(obj)
     .join('.')
@@ -413,4 +405,23 @@ function flattenDeep (arr, newArr = []) {
     }
   }
   return newArr
+}
+
+function isValidPoint (d) {
+  if (d === null) {
+    return false
+  }
+  if (typeof d === 'undefined') {
+    return false
+  }
+  if (typeof d === 'string') {
+    if (d === 'null') {
+      return false
+    }
+    const parsed = parseInt(d)
+    if (Number.isNaN(parsed)) {
+      return false
+    }
+  }
+  return true
 }

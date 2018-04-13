@@ -131,7 +131,6 @@ class Pie extends PureComponent {
           cornerRadius: [cornerRadius],
           arcPaddingRadius: [arcPaddingRadius],
         }}
-        duration={500}
       >
         {inter => {
           const interactiveSeries = interaction === 'series'
