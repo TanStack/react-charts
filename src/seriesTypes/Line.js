@@ -101,91 +101,70 @@ class Line extends PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    const data = series.data.map(d => ({
-      x: d.x,
-      y: d.y,
-      r: d.r,
-      base: d.base,
-      defined: d.defined,
-    }))
+    const path = lineFn(series.data)
+
+    const interactiveSeries = interaction === 'series'
+    const seriesInteractionProps = interactiveSeries
+      ? {
+        onClick: () => this.selectSeries(series),
+        onMouseEnter: () => this.hoverSeries(series),
+        onMouseMove: () => this.hoverSeries(series),
+        onMouseLeave: () => this.hoverSeries(null),
+      }
+      : {}
 
     return (
-      <Animate
-        start={{
-          data,
-        }}
-        update={{
-          data: [data],
-        }}
-      >
-        {inter => {
-          const path = lineFn(inter.data)
+      <g>
+        <Path
+          d={path}
+          style={{
+            ...pathDefaultStyle,
+            ...style,
+            ...style.line,
+            fill: 'none',
+            pointerEvents: interactiveSeries ? 'all' : 'none',
+          }}
+          opacity={visibility}
+          {...seriesInteractionProps}
+        />
+        {showPoints &&
+          series.data.map((datum, i) => {
+            if (!datum.defined) {
+              return null
+            }
+            const status = Utils.datumStatus(series, datum, hovered, selected)
+            const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-          const interactiveSeries = interaction === 'series'
-          const seriesInteractionProps = interactiveSeries
-            ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null),
-              }
-            : {}
+            const iteractiveDatum = interaction === 'element'
+            const datumInteractionProps = iteractiveDatum
+              ? {
+                  onClick: () => this.selectDatum(datum),
+                  onMouseEnter: () => this.hoverDatum(datum),
+                  onMouseMove: () => this.hoverDatum(datum),
+                  onMouseLeave: () => this.hoverDatum(null),
+                }
+              : {}
 
-          return (
-            <g>
-              <Path
-                d={path}
+            return (
+              <Circle
+                key={i}
+                x={datum ? datum.x : undefined}
+                y={datum ? datum.y : undefined}
                 style={{
-                  ...pathDefaultStyle,
+                  ...circleDefaultStyle,
                   ...style,
-                  ...style.line,
-                  fill: 'none',
-                  pointerEvents: interactiveSeries ? 'all' : 'none',
+                  ...style.circle,
+                  ...dataStyle,
+                  ...dataStyle.circle,
+                  pointerEvents: iteractiveDatum ? 'all' : 'none',
                 }}
                 opacity={visibility}
                 {...seriesInteractionProps}
+                {...datumInteractionProps}
               />
-              {showPoints &&
-                series.data.map((datum, i) => {
-                  if (!datum.defined) {
-                    return null
-                  }
-                  const status = Utils.datumStatus(series, datum, hovered, selected)
-                  const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
-
-                  const iteractiveDatum = interaction === 'element'
-                  const datumInteractionProps = iteractiveDatum
-                    ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
-                    : {}
-
-                  return (
-                    <Circle
-                      key={i}
-                      x={inter.data[i] ? inter.data[i].x : undefined}
-                      y={inter.data[i] ? inter.data[i].y : undefined}
-                      style={{
-                        ...circleDefaultStyle,
-                        ...style,
-                        ...style.circle,
-                        ...dataStyle,
-                        ...dataStyle.circle,
-                        pointerEvents: iteractiveDatum ? 'all' : 'none',
-                      }}
-                      opacity={visibility}
-                      {...seriesInteractionProps}
-                      {...datumInteractionProps}
-                    />
-                  )
-                })}
-            </g>
-          )
-        }}
-      </Animate>
+            )
+          })}
+      </g>
     )
   }
 }

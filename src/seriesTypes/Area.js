@@ -111,111 +111,86 @@ class Area extends PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    const data = series.data.map(d => ({
-      x: d.x,
-      y: d.y,
-      r: d.r,
-      base: d.base,
-      defined: d.defined,
-    }))
+    const areaPath = areaFn(series.data)
+    const linePath = lineFn(series.data)
+
+    const interactiveSeries = interaction === 'series'
+    const seriesInteractionProps = interactiveSeries
+      ? {
+        onClick: () => this.selectSeries(series),
+        onMouseEnter: () => this.hoverSeries(series),
+        onMouseMove: () => this.hoverSeries(series),
+        onMouseLeave: () => this.hoverSeries(null),
+      }
+      : {}
 
     return (
-      <Animate
-        start={{
-          data,
-        }}
-        update={{
-          data: [data],
-        }}
-      >
-        {inter => {
-          const areaPath = areaFn(inter.data)
-          const linePath = lineFn(inter.data)
+      <g>
+        <Path
+          d={areaPath}
+          style={{
+            ...style,
+            ...style.area,
+            stroke: 'transparent',
+            pointerEvents: interactiveSeries ? 'all' : 'none',
+          }}
+          opacity={visibility}
+          {...seriesInteractionProps}
+        />
+        <Path
+          d={linePath}
+          style={{
+            ...style,
+            ...style.line,
+            fill: 'none',
+            pointerEvents: interactiveSeries ? 'all' : 'none',
+          }}
+          opacity={visibility}
+          {...seriesInteractionProps}
+        />
+        {showOrphans &&
+          series.data.map((datum, i, all) => {
+            // Don't render points on the line, just null data orphans
+            const prev = all[i - 1] || { defined: true }
+            const next = all[i + 1] || { defined: true }
+            if (!datum.defined || (prev.defined && next.defined)) {
+              return null
+            }
+            const status = Utils.datumStatus(series, datum, hovered, selected)
+            const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-          const interactiveSeries = interaction === 'series'
-          const seriesInteractionProps = interactiveSeries
-            ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null),
-              }
-            : {}
+            const iteractiveDatum = interaction === 'element'
+            const datumInteractionProps = iteractiveDatum
+              ? {
+                  onClick: () => this.selectDatum(datum),
+                  onMouseEnter: () => this.hoverDatum(datum),
+                  onMouseMove: () => this.hoverDatum(datum),
+                  onMouseLeave: () => this.hoverDatum(null),
+                }
+              : {}
 
-          return (
-            <g>
-              <Path
-                d={areaPath}
+            return (
+              <Line
                 style={{
-                  ...style,
-                  ...style.area,
-                  stroke: 'transparent',
-                  pointerEvents: interactiveSeries ? 'all' : 'none',
-                }}
-                opacity={visibility}
-                {...seriesInteractionProps}
-              />
-              <Path
-                d={linePath}
-                style={{
+                  ...lineDefaultStyle,
                   ...style,
                   ...style.line,
-                  fill: 'none',
+                  ...dataStyle,
+                  ...dataStyle.line,
                   pointerEvents: interactiveSeries ? 'all' : 'none',
                 }}
+                key={i}
+                x1={!datum || Number.isNaN(datum.x) ? null : datum.x}
+                y1={!datum || Number.isNaN(datum.base) ? null : datum.base}
+                x2={!datum || Number.isNaN(datum.x) ? null : datum.x}
+                y2={!datum || Number.isNaN(datum.y) ? null : datum.y}
                 opacity={visibility}
                 {...seriesInteractionProps}
+                {...datumInteractionProps}
               />
-              {showOrphans &&
-                series.data.map((datum, i, all) => {
-                  // Don't render points on the line, just null data orphans
-                  const prev = all[i - 1] || { defined: true }
-                  const next = all[i + 1] || { defined: true }
-                  if (!datum.defined || (prev.defined && next.defined)) {
-                    return null
-                  }
-                  const status = Utils.datumStatus(series, datum, hovered, selected)
-                  const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
-
-                  const iteractiveDatum = interaction === 'element'
-                  const datumInteractionProps = iteractiveDatum
-                    ? {
-                        onClick: () => this.selectDatum(datum),
-                        onMouseEnter: () => this.hoverDatum(datum),
-                        onMouseMove: () => this.hoverDatum(datum),
-                        onMouseLeave: () => this.hoverDatum(null),
-                      }
-                    : {}
-
-                  return (
-                    <Line
-                      style={{
-                        ...lineDefaultStyle,
-                        ...style,
-                        ...style.line,
-                        ...dataStyle,
-                        ...dataStyle.line,
-                        pointerEvents: interactiveSeries ? 'all' : 'none',
-                      }}
-                      key={i}
-                      x1={!inter.data[i] || Number.isNaN(inter.data[i].x) ? null : inter.data[i].x}
-                      y1={
-                        !inter.data[i] || Number.isNaN(inter.data[i].base)
-                          ? null
-                          : inter.data[i].base
-                      }
-                      x2={!inter.data[i] || Number.isNaN(inter.data[i].x) ? null : inter.data[i].x}
-                      y2={!inter.data[i] || Number.isNaN(inter.data[i].y) ? null : inter.data[i].y}
-                      opacity={visibility}
-                      {...seriesInteractionProps}
-                      {...datumInteractionProps}
-                    />
-                  )
-                })}
-            </g>
-          )
-        }}
-      </Animate>
+            )
+          })}
+      </g>
     )
   }
 }

@@ -243,56 +243,43 @@ class Chart extends Component {
           position: 'relative',
         }}
       >
-        <Animate
-          start={{
-            gridX,
-            gridY,
+        <svg
+          ref={el => {
+            this.el = el
           }}
-          update={{
-            gridX: [gridX],
-            gridY: [gridY],
+          style={{
+            width,
+            height,
+            ...style,
           }}
         >
-          {({ gridX, gridY }) => (
-            <svg
-              ref={el => {
-                this.el = el
-              }}
+          <g
+            transform={`translate(${gridX || 0}, ${gridY || 0})`}
+            onMouseEnter={e => {
+              e.persist()
+              this.onMouseMove(e)
+            }}
+            onMouseMove={e => {
+              e.persist()
+              this.onMouseMove(e)
+            }}
+            onMouseLeave={this.onMouseLeave}
+            onMouseDown={this.onMouseDown}
+          >
+            <Rectangle
+              // This is to ensure the cursor always has something to hit
+              x1={-gridX}
+              x2={width - gridX}
+              y1={-gridY}
+              y2={height - gridY}
               style={{
-                width,
-                height,
-                ...style,
+                opacity: 0,
               }}
-            >
-              <g
-                transform={`translate(${gridX || 0}, ${gridY || 0})`}
-                onMouseEnter={e => {
-                  e.persist()
-                  this.onMouseMove(e)
-                }}
-                onMouseMove={e => {
-                  e.persist()
-                  this.onMouseMove(e)
-                }}
-                onMouseLeave={this.onMouseLeave}
-                onMouseDown={this.onMouseDown}
-              >
-                <Rectangle
-                  // This is to ensure the cursor always has something to hit
-                  x1={-gridX}
-                  x2={width - gridX}
-                  y1={-gridY}
-                  y2={height - gridY}
-                  style={{
-                    opacity: 0,
-                  }}
-                />
-                <Voronoi />
-                {svgChildren}
-              </g>
-            </svg>
-          )}
-        </Animate>
+            />
+            <Voronoi />
+            {svgChildren}
+          </g>
+        </svg>
         {htmlChildren}
       </div>
     )

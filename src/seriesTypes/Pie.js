@@ -31,7 +31,7 @@ class Pie extends PureComponent {
     if (!props.hoverMode) {
       this.props.dispatch(state => ({
         ...state,
-        hoverMode: 'closestPoint',
+        hoverMode: 'primary',
       }))
     }
     this.selectSeries = selectSeries.bind(this)
@@ -100,100 +100,66 @@ class Pie extends PureComponent {
     const arcPaddingRadius = outerRadius * arcPadding * 20
     const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
 
-    const preData = series.data.map(d => ({
-      x: d.primary,
-      y: d.secondary,
-    }))
-
     const pie = makePie()
       .sort(null)
       .padAngle(0.01)
-      .value(d => d.y)
-    const data = pie(preData)
+      .value(d => d.primary)
+
+    const pieData = pie(series.data)
+
+    const interactiveSeries = interaction === 'series'
+    const seriesInteractionProps = interactiveSeries
+      ? {
+        onClick: () => this.selectSeries(series),
+        onMouseEnter: () => this.hoverSeries(series),
+        onMouseMove: () => this.hoverSeries(series),
+        onMouseLeave: () => this.hoverSeries(null),
+      }
+      : {}
 
     return (
-      <Animate
-        start={{
-          data,
-          visibility: 0,
-          seriesPaddingRadius: 0,
-          seriesInnerRadius: outerRadius,
-          seriesOuterRadius: outerRadius,
-          cornerRadius,
-          arcPaddingRadius,
-        }}
-        update={{
-          data: [data],
-          visibility: [visibility],
-          seriesPaddingRadius: [seriesPaddingRadius],
-          seriesInnerRadius: [seriesInnerRadius],
-          seriesOuterRadius: [seriesOuterRadius],
-          cornerRadius: [cornerRadius],
-          arcPaddingRadius: [arcPaddingRadius],
-        }}
-      >
-        {inter => {
-          const interactiveSeries = interaction === 'series'
-          const seriesInteractionProps = interactiveSeries
+      <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
+        {series.data.map((datum, i) => {
+          const status = Utils.datumStatus(series, datum, hovered, selected)
+          const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
+
+          const iteractiveDatum = interaction === 'element'
+          const datumInteractionProps = iteractiveDatum
             ? {
-                onClick: () => this.selectSeries(series),
-                onMouseEnter: () => this.hoverSeries(series),
-                onMouseMove: () => this.hoverSeries(series),
-                onMouseLeave: () => this.hoverSeries(null),
+                onClick: () => this.selectDatum(datum),
+                onMouseEnter: () => this.hoverDatum(datum),
+                onMouseMove: () => this.hoverDatum(datum),
+                onMouseLeave: () => this.hoverDatum(null),
               }
             : {}
 
+          const arc = Arc()
+            .startAngle(pieData[i].startAngle)
+            .endAngle(pieData[i].endAngle)
+            .padAngle(pieData[i].padAngle)
+            .padRadius(arcPaddingRadius)
+            .innerRadius(seriesInnerRadius + seriesPaddingRadius)
+            .outerRadius(seriesOuterRadius)
+            .cornerRadius(cornerRadius)
+
           return (
-            <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
-              {series.data.map((datum, i) => {
-                const status = Utils.datumStatus(series, datum, hovered, selected)
-                const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
-
-                if (!inter.data[i]) {
-                  return null
-                }
-
-                const iteractiveDatum = interaction === 'element'
-                const datumInteractionProps = iteractiveDatum
-                  ? {
-                      onClick: () => this.selectDatum(datum),
-                      onMouseEnter: () => this.hoverDatum(datum),
-                      onMouseMove: () => this.hoverDatum(datum),
-                      onMouseLeave: () => this.hoverDatum(null),
-                    }
-                  : {}
-
-                const arc = Arc()
-                  .startAngle(inter.data[i].startAngle)
-                  .endAngle(inter.data[i].endAngle)
-                  .padAngle(inter.data[i].padAngle)
-                  .padRadius(inter.arcPaddingRadius)
-                  .innerRadius(inter.seriesInnerRadius + seriesPaddingRadius)
-                  .outerRadius(inter.seriesOuterRadius)
-                  .cornerRadius(inter.cornerRadius)
-
-                return (
-                  <Path
-                    key={i}
-                    d={arc()}
-                    style={{
-                      ...arcDefaultStyle,
-                      ...style,
-                      ...style.arc,
-                      ...dataStyle,
-                      ...dataStyle.arc,
-                      pointerEvents: iteractiveDatum ? 'all' : 'none',
-                    }}
-                    opacity={inter.visibility}
-                    {...seriesInteractionProps}
-                    {...datumInteractionProps}
-                  />
-                )
-              })}
-            </g>
+            <Path
+              key={i}
+              d={arc()}
+              style={{
+                ...arcDefaultStyle,
+                ...style,
+                ...style.arc,
+                ...dataStyle,
+                ...dataStyle.arc,
+                pointerEvents: iteractiveDatum ? 'all' : 'none',
+              }}
+              {...seriesInteractionProps}
+              {...datumInteractionProps}
+            />
           )
-        }}
-      </Animate>
+        })}
+      </g>
     )
   }
 }

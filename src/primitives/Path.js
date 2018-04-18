@@ -21,23 +21,6 @@ export default class Path extends PureComponent {
       ...style,
     }
 
-    const updateResolvedStyle = {}
-    Object.keys(resolvedStyle).forEach(key => {
-      updateResolvedStyle[key] = [resolvedStyle[key]]
-    })
-
-    return (
-      <Animate start={resolvedStyle} update={updateResolvedStyle}>
-        {inter => (
-          <path
-            {...rest}
-            style={{
-              ...inter,
-              opacity: opacity * inter.opacity,
-            }}
-          />
-        )}
-      </Animate>
-    )
+    return <path {...rest} style={resolvedStyle} />
   }
 }

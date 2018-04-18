@@ -28,26 +28,6 @@ export default class Circle extends PureComponent {
       ...style,
     }
 
-    const updateResolvedStyle = {}
-    Object.keys(resolvedStyle).forEach(key => {
-      updateResolvedStyle[key] = [resolvedStyle[key]]
-    })
-
-    return (
-      <Animate start={resolvedStyle} data={updateResolvedStyle}>
-        {inter => (
-          <circle
-            {...rest}
-            cx={x || 0}
-            cy={y || 0}
-            r={1}
-            style={{
-              ...inter,
-              opacity: opacity * inter.opacity,
-            }}
-          />
-        )}
-      </Animate>
-    )
+    return <circle {...rest} cx={x || 0} cy={y || 0} r={1} style={resolvedStyle} />
   }
 }

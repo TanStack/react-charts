@@ -22,23 +22,6 @@ export default class Text extends PureComponent {
       ...style,
     }
 
-    const updateResolvedStyle = {}
-    Object.keys(resolvedStyle).forEach(key => {
-      updateResolvedStyle[key] = [resolvedStyle[key]]
-    })
-
-    return (
-      <Animate start={resolvedStyle} update={updateResolvedStyle}>
-        {inter => (
-          <text
-            {...rest}
-            style={{
-              ...inter,
-              opacity: opacity * inter.opacity,
-            }}
-          />
-        )}
-      </Animate>
-    )
+    return <text {...rest} style={resolvedStyle} />
   }
 }

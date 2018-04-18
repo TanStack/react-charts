@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Connect } from 'react-state'
+import RAF from 'raf'
 //
 import { Animate, NodeGroup } from './ReactMove'
 import Utils from '../utils/Utils'
@@ -81,11 +82,14 @@ class Axis extends Component {
       newProps.hardMax !== oldProps.hardMax
     ) {
       this.updateScale(newProps)
-      this.measure(newProps)
+      this.measure()
     }
   }
   componentDidMount () {
     this.updateScale(this.props)
+  }
+  componentDidUpdate () {
+    RAF(() => this.measure())
   }
   shouldComponentUpdate (newProps, nextState) {
     if (newProps.axis !== this.props.axis || this.state.rotation !== nextState.rotation) {
@@ -135,221 +139,120 @@ class Axis extends Component {
       spacing,
     } = axis
 
-    const start = {
-      _: 0, // This will ensure that an "end" event is fired on first load
-      width,
-      height,
-      max,
-      range0,
-      range1,
-      directionMultiplier,
-      tickSizeOuter,
-      tickOffset,
-      gridOffset,
-      spacing,
-      rotation,
-    }
-
-    const update = {
-      _: 1,
-      events: {
-        end: () => {
-          this.measureRotation(true)
-        },
-      },
-    }
-
-    Object.keys(start).forEach(key => {
-      update[key] = [start[key]]
-    })
-
-    return (
-      <Animate start={start} update={update}>
-        {({
-          width,
-          height,
-          max,
-          range0,
-          range1,
-          directionMultiplier,
-          tickSizeOuter,
-          tickOffset,
-          gridOffset,
-          spacing,
-        }) => {
-          let axisPath
-          if (vertical) {
-            if (position === positionLeft) {
-              axisPath = `
+    let axisPath
+    if (vertical) {
+      if (position === positionLeft) {
+        axisPath = `
                 M ${-tickSizeOuter}, ${range0}
                 H 0
                 V ${range1}
                 H ${-tickSizeOuter}
               `
-            } else {
-              axisPath = `
+      } else {
+        axisPath = `
                 M ${tickSizeOuter}, ${range0}
                 H 0
                 V ${range1}
                 H ${tickSizeOuter}
               `
-            }
-          } else if (position === positionBottom) {
-            axisPath = `
+      }
+    } else if (position === positionBottom) {
+      axisPath = `
                 M 0, ${tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${tickSizeOuter}
               `
-          } else {
-            axisPath = `
+    } else {
+      axisPath = `
                 M 0, ${-tickSizeOuter}
                 V 0
                 H ${range1}
                 V ${-tickSizeOuter}
               `
-          }
+    }
 
-          return (
-            <g
-              className="Axis"
-              transform={
-                position === positionRight
-                  ? translateX(width)
-                  : position === positionBottom ? translateY(height) : undefined
-              }
-              style={{
-                pointerEvents: 'none',
-              }}
-            >
-              <Path className="domain" d={axisPath} style={axisStyles.line} />
-              <NodeGroup
-                data={ticks}
-                keyAccessor={d => String(d)}
-                start={d => ({
-                  _: 0, // Ensure an "end" event is fired on first mount
-                  tick: this.prevAxis.scale(d) || 0,
-                  visibility: 0,
-                  rotation,
-                  measureable: 1,
-                })}
-                enter={d => ({
-                  _: 1,
-                  tick: [scale(d) || 0],
-                  visibility: [1],
-                  rotation: [rotation],
-                  measureable: 1,
-                  events: {
-                    end: () => {
-                      this.measure()
-                    },
-                  },
-                })}
-                update={d => ({
-                  _: 1,
-                  tick: [scale(d) || 0],
-                  visibility: [1],
-                  rotation: [rotation],
-                  measureable: 1,
-                  events: {
-                    end: () => {
-                      this.measure()
-                    },
-                  },
-                })}
-                leave={d => ({
-                  tick: [scale(d) || 0],
-                  visibility: [0],
-                  rotation: [rotation],
-                  measureable: 0,
-                })}
-              >
-                {inters => {
-                  let showGridLine = showGrid
-
-                  // If ordinal and showGrid isn't explicit, hide it
-                  if (type === 'ordinal' && typeof showGrid !== 'boolean') {
-                    showGridLine = false
-                  } else {
-                    showGridLine = true
-                  }
-
-                  return (
-                    <g
-                      className="ticks"
-                      ref={el => {
-                        this.el = el
-                      }}
-                    >
-                      {inters.map((inter, index) => (
-                        <g
-                          key={inter.key}
-                          className={`tick${inter.state.measureable ? ' -measureable' : ''}`}
-                          transform={transform(inter.state.tick)}
-                        >
-                          <Line
-                            x1={vertical ? 0 : tickOffset}
-                            x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
-                            y1={vertical ? tickOffset : 0}
-                            y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
-                            style={{
-                              strokeWidth: 1,
-                            }}
-                            opacity={inter.state.visibility * 0.2}
-                          />
-                          {showGridLine && (
-                            <Line
-                              x1={vertical ? 0 : gridOffset}
-                              x2={vertical ? max : gridOffset}
-                              y1={vertical ? gridOffset : 0}
-                              y2={vertical ? gridOffset : max}
-                              style={{
-                                strokeWidth: 1,
-                              }}
-                              opacity={
-                                inter.state.visibility *
-                                (index !== 0 && index !== inters.length - 1 && inter.data === 0
-                                  ? 0.5
-                                  : 0.2)
-                              }
-                            />
-                          )}
-                          <Text
-                            opacity={inter.state.visibility}
-                            style={axisStyles.tick}
-                            transform={`
-                                translate(${
-                                  vertical ? directionMultiplier * spacing : tickOffset
-                                }, ${vertical ? tickOffset : directionMultiplier * spacing})
-                                rotate(${-inter.state.rotation})
-                              `}
-                            dominantBaseline={
-                              inter.state.rotation
-                                ? 'central'
-                                : position === positionBottom
-                                  ? 'hanging'
-                                  : position === positionTop ? 'alphabetic' : 'central'
-                            }
-                            textAnchor={
-                              inter.state.rotation
-                                ? 'end'
-                                : position === positionRight
-                                  ? 'start'
-                                  : position === positionLeft ? 'end' : 'middle'
-                            }
-                          >
-                            {String(format(inter.data))}
-                          </Text>
-                        </g>
-                      ))}
-                    </g>
-                  )
-                }}
-              </NodeGroup>
-            </g>
-          )
+    let showGridLine = showGrid
+    // If ordinal and showGrid isn't explicit, hide it
+    if (type === 'ordinal' && typeof showGrid !== 'boolean') {
+      showGridLine = false
+    } else {
+      showGridLine = true
+    }
+    return (
+      <g
+        className="Axis"
+        transform={
+          position === positionRight
+            ? translateX(width)
+            : position === positionBottom ? translateY(height) : undefined
+        }
+        style={{
+          pointerEvents: 'none',
         }}
-      </Animate>
+      >
+        <Path className="domain" d={axisPath} style={axisStyles.line} />
+        <g
+          className="ticks"
+          ref={el => {
+            this.el = el
+          }}
+        >
+          {ticks.map(tick => (
+            <g key={tick} className="tick" transform={transform(scale(tick) || 0)}>
+              {/* Render the tick line  */}
+              <Line
+                x1={vertical ? 0 : tickOffset}
+                x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
+                y1={vertical ? tickOffset : 0}
+                y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
+                style={{
+                  strokeWidth: 1,
+                  ...axisStyles.line,
+                }}
+              />
+              {/* Render the grid line */}
+              {showGridLine && (
+                <Line
+                  x1={vertical ? 0 : gridOffset}
+                  x2={vertical ? max : gridOffset}
+                  y1={vertical ? gridOffset : 0}
+                  y2={vertical ? gridOffset : max}
+                  style={{
+                    strokeWidth: 1,
+                    ...axisStyles.line,
+                  }}
+                />
+              )}
+              <Text
+                style={axisStyles.tick}
+                transform={`
+                  translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${
+                  vertical ? tickOffset : directionMultiplier * spacing
+                })
+                  rotate(${-rotation})
+                `}
+                dominantBaseline={
+                  rotation
+                    ? 'central'
+                    : position === positionBottom
+                      ? 'hanging'
+                      : position === positionTop ? 'alphabetic' : 'central'
+                }
+                textAnchor={
+                  rotation
+                    ? 'end'
+                    : position === positionRight
+                      ? 'start'
+                      : position === positionLeft ? 'end' : 'middle'
+                }
+              >
+                {String(format(tick))}
+              </Text>
+            </g>
+          ))}
+        </g>
+      </g>
     )
   }
 }

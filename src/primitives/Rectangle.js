@@ -24,11 +24,6 @@ export default class Rectangle extends PureComponent {
       ...style,
     }
 
-    const updateResolvedStyle = {}
-    Object.keys(resolvedStyle).forEach(key => {
-      updateResolvedStyle[key] = [resolvedStyle[key]]
-    })
-
     const xStart = Math.min(x1, x2)
     const yStart = Math.min(y1, y2)
     const xEnd = Math.max(x1, x2)
@@ -38,21 +33,7 @@ export default class Rectangle extends PureComponent {
     const width = Math.max(xEnd - xStart, 0)
 
     return (
-      <Animate start={resolvedStyle} update={updateResolvedStyle}>
-        {inter => (
-          <rect
-            {...rest}
-            x={xStart}
-            y={yStart}
-            width={width}
-            height={height}
-            style={{
-              ...inter,
-              opacity: opacity * inter.opacity,
-            }}
-          />
-        )}
-      </Animate>
+      <rect {...rest} x={xStart} y={yStart} width={width} height={height} style={resolvedStyle} />
     )
   }
 }

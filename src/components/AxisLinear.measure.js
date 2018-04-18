@@ -31,7 +31,7 @@ export default function measure (isRotation) {
   }
 
   const isHorizontal = position === positionTop || position === positionBottom
-  const labelDims = Array(...this.el.querySelectorAll('.tick.-measureable text')).map(el => ({
+  const labelDims = Array(...this.el.querySelectorAll('.tick text')).map(el => ({
     ...el.getBoundingClientRect().toJSON(),
   }))
 
@@ -39,7 +39,7 @@ export default function measure (isRotation) {
   // This is just a ridiculously large tick spacing that would never happen (hopefully)
   // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
   if (isHorizontal) {
-    const tickDims = Array(...this.el.querySelectorAll('.tick.-measureable')).map(el =>
+    const tickDims = Array(...this.el.querySelectorAll('.tick')).map(el =>
       el.getBoundingClientRect()
     )
     // Determine the smallest gap in ticks on the axis
@@ -64,23 +64,22 @@ export default function measure (isRotation) {
     )
 
     // Determine axis rotation before we measure
-    if (isRotation) {
-      let newRotation = Math.min(
-        Math.max(
-          Math.abs(radiansToDegrees(Math.acos(smallestTickGap / (largestLabel.width + fontSize)))),
-          0
-        ),
-        maxLabelRotation
-      )
+    // if (isRotation) {
+    let newRotation = Math.min(
+      Math.max(
+        Math.abs(radiansToDegrees(Math.acos(smallestTickGap / (largestLabel.width + fontSize)))),
+        0
+      ),
+      maxLabelRotation
+    )
 
-      newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
-      if (Math.abs(rotation - newRotation) > 20) {
-        this.setState({
-          rotation: axis.position === 'top' ? -newRotation : newRotation,
-        })
-      }
-      return
+    newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
+    if (Math.abs(rotation - newRotation) > 10) {
+      this.setState({
+        rotation: axis.position === 'top' ? -newRotation : newRotation,
+      })
     }
+    // }
   }
 
   const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)

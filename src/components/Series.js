@@ -236,6 +236,8 @@ class Series extends Component {
         series.data.filter(d => d.defined).forEach(datum => {
           const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
 
+          console.log(axisKey)
+
           datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
           datumsByGrouping[axisKey].push(datum)
         })
@@ -254,7 +256,6 @@ class Series extends Component {
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
     stackData = stackData.map(series => {
       if (debug && !series.Component.buildStyles) {
-        console.log(series)
         throw new Error(
           `Could not find a SeriesType.plotDatum() static method for the series Component above (index: ${i})`
         )
@@ -297,39 +298,12 @@ class Series extends Component {
     }
 
     return (
-      <NodeGroup
-        data={stackData}
-        keyAccessor={d => d.id}
-        start={() => ({
-          visibility: 0,
+      <g className="Series">
+        {stackData.map(stack => {
+          const StackCmp = getType(type, stack, stack.id)
+          return <StackCmp {...rest} key={stack.id} series={stack} stackData={stackData} />
         })}
-        enter={() => ({
-          visibility: [1],
-        })}
-        update={() => ({
-          visibility: [1],
-        })}
-        leave={() => ({
-          visibility: [0],
-        })}
-      >
-        {inters => (
-          <g className="Series">
-            {inters.map(inter => {
-              const StackCmp = getType(type, inter.data, inter.data.id)
-              return (
-                <StackCmp
-                  {...rest}
-                  key={inter.key}
-                  series={inter.data}
-                  stackData={stackData}
-                  visibility={inter.state.visibility}
-                />
-              )
-            })}
-          </g>
-        )}
-      </NodeGroup>
+      </g>
     )
   }
 }

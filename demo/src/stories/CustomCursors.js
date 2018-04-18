@@ -34,7 +34,6 @@ class Story extends Component {
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
-              <Tooltip />
               <Cursor primary snap>
                 {props => (
                   <span>
@@ -55,6 +54,7 @@ class Story extends Component {
                   </span>
                 )}
               </Cursor>
+              <Tooltip />
             </Chart>
           </ResizableBox>
         ))}
