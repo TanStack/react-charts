@@ -21,7 +21,7 @@ export const positionLeft = 'left'
 
 const defaultStyles = {
   line: {
-    stroke: '#acacac',
+    stroke: 'rgba(0,0,0,.1)',
     strokeWidth: '1',
     fill: 'transparent',
   },
@@ -49,7 +49,8 @@ class Axis extends Component {
     innerPadding: 0.2,
     outerPadding: 0.1,
     showGrid: null,
-    display: true,
+    showTicks: true,
+    show: true,
   }
   constructor () {
     super()
@@ -82,14 +83,13 @@ class Axis extends Component {
       newProps.hardMax !== oldProps.hardMax
     ) {
       this.updateScale(newProps)
-      this.measure()
     }
   }
   componentDidMount () {
     this.updateScale(this.props)
   }
   componentDidUpdate () {
-    RAF(() => this.measure())
+    this.measure()
   }
   shouldComponentUpdate (newProps, nextState) {
     if (newProps.axis !== this.props.axis || this.state.rotation !== nextState.rotation) {
@@ -104,10 +104,11 @@ class Axis extends Component {
       position,
       width,
       height,
-      showGrid,
       tickSizeInner,
       tickSizeOuter,
-      display,
+      show,
+      showGrid,
+      showTicks,
       styles,
     } = this.props
 
@@ -120,7 +121,7 @@ class Axis extends Component {
     }
 
     // Render Dependencies
-    if (!axis || !display) {
+    if (!axis || !show) {
       return null
     }
 
@@ -201,16 +202,18 @@ class Axis extends Component {
           {ticks.map(tick => (
             <g key={tick} className="tick" transform={transform(scale(tick) || 0)}>
               {/* Render the tick line  */}
-              <Line
-                x1={vertical ? 0 : tickOffset}
-                x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
-                y1={vertical ? tickOffset : 0}
-                y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
-                style={{
-                  strokeWidth: 1,
-                  ...axisStyles.line,
-                }}
-              />
+              {showTicks ? (
+                <Line
+                  x1={vertical ? 0 : tickOffset}
+                  x2={vertical ? directionMultiplier * tickSizeInner : tickOffset}
+                  y1={vertical ? tickOffset : 0}
+                  y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
+                  style={{
+                    strokeWidth: 1,
+                    ...axisStyles.line,
+                  }}
+                />
+              ) : null}
               {/* Render the grid line */}
               {showGridLine && (
                 <Line
@@ -224,31 +227,33 @@ class Axis extends Component {
                   }}
                 />
               )}
-              <Text
-                style={axisStyles.tick}
-                transform={`
+              {showTicks ? (
+                <Text
+                  style={axisStyles.tick}
+                  transform={`
                   translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${
-                  vertical ? tickOffset : directionMultiplier * spacing
-                })
+                    vertical ? tickOffset : directionMultiplier * spacing
+                  })
                   rotate(${-rotation})
                 `}
-                dominantBaseline={
-                  rotation
-                    ? 'central'
-                    : position === positionBottom
-                      ? 'hanging'
-                      : position === positionTop ? 'alphabetic' : 'central'
-                }
-                textAnchor={
-                  rotation
-                    ? 'end'
-                    : position === positionRight
-                      ? 'start'
-                      : position === positionLeft ? 'end' : 'middle'
-                }
-              >
-                {String(format(tick))}
-              </Text>
+                  dominantBaseline={
+                    rotation
+                      ? 'central'
+                      : position === positionBottom
+                        ? 'hanging'
+                        : position === positionTop ? 'alphabetic' : 'central'
+                  }
+                  textAnchor={
+                    rotation
+                      ? 'end'
+                      : position === positionRight
+                        ? 'start'
+                        : position === positionLeft ? 'end' : 'middle'
+                  }
+                >
+                  {String(format(tick))}
+                </Text>
+              ) : null}
             </g>
           ))}
         </g>

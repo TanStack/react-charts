@@ -236,8 +236,6 @@ class Series extends Component {
         series.data.filter(d => d.defined).forEach(datum => {
           const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
 
-          console.log(axisKey)
-
           datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
           datumsByGrouping[axisKey].push(datum)
         })

@@ -10,8 +10,8 @@ export default () => (
   <ChartConfig width={500} height={100}>
     {({ data }) => (
       <Chart data={data}>
-        <Axis primary type="time" position="bottom" display={false} />
-        <Axis type="linear" position="left" display={false} />
+        <Axis primary type="time" position="bottom" show={false} />
+        <Axis type="linear" position="left" show={false} />
         <Series type={Line} />
         <Tooltip />
       </Chart>

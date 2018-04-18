@@ -10,6 +10,7 @@ import BubbleChart from './stories/BubbleChart.js'
 import AreaChart from './stories/AreaChart.js'
 import BarChart from './stories/BarChart.js'
 import ColumnChart from './stories/ColumnChart.js'
+import AxisOptions from './stories/AxisOptions.js'
 import CustomStyles from './stories/CustomStyles.js'
 import CustomTooltip from './stories/CustomTooltip.js'
 import Cursors from './stories/Cursors.js'
@@ -27,6 +28,7 @@ const stories = [
   { name: 'Area Chart', slug: 'area', component: AreaChart },
   { name: 'Bar Chart', slug: 'bar', component: BarChart },
   { name: 'Column Chart', slug: 'column', component: ColumnChart },
+  { name: 'Axis Options', slug: 'axis-options', component: AxisOptions },
   { name: 'Custom Styles', slug: 'custom-styles', component: CustomStyles },
   { name: 'Custom Tooltip', slug: 'custom-tooltip', component: CustomTooltip },
   { name: 'Cursors', slug: 'cursors', component: Cursors },

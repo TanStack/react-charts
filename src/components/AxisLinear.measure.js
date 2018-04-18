@@ -5,7 +5,7 @@ const fontSize = 10
 const getPixel = d => d
 const radiansToDegrees = r => r * (180 / Math.PI)
 
-export default function measure (isRotation) {
+export default function measure () {
   // Measure finds the amount of overflow this axis produces and
   // updates the margins to ensure that the axis is visibility
   // Unfortunately, this currently happens after a render, but potentially
@@ -27,6 +27,19 @@ export default function measure (isRotation) {
   const { visibleLabelStep } = this
 
   if (!this.el) {
+    // If the entire axis is hidden, then we need to remove the axis dimensions
+    dispatch(
+      state => ({
+        ...state,
+        axisDimensions: {
+          ...state.axisDimensions,
+          [position]: undefined,
+        },
+      }),
+      {
+        type: 'axisDimensions',
+      }
+    )
     return
   }
 
@@ -64,7 +77,6 @@ export default function measure (isRotation) {
     )
 
     // Determine axis rotation before we measure
-    // if (isRotation) {
     let newRotation = Math.min(
       Math.max(
         Math.abs(radiansToDegrees(Math.acos(smallestTickGap / (largestLabel.width + fontSize)))),
@@ -79,7 +91,6 @@ export default function measure (isRotation) {
         rotation: axis.position === 'top' ? -newRotation : newRotation,
       })
     }
-    // }
   }
 
   const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)

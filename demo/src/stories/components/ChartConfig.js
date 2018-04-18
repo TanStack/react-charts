@@ -19,6 +19,8 @@ const options = {
   primaryAxisPosition: ['top', 'left', 'right', 'bottom'],
   secondaryAxisPosition: ['top', 'left', 'right', 'bottom'],
   secondaryAxisStack: [true, false],
+  primaryAxisShow: [true, false],
+  secondaryAxisShow: [true, false],
   interaction: [
     'closestPoint',
     'closestSeries',
@@ -68,6 +70,8 @@ export default class ChartConfig extends Component {
     secondaryAxisPosition: 'left',
     primaryAxisStack: false,
     secondaryAxisStack: true,
+    primaryAxisShow: true,
+    secondaryAxisShow: true,
     hoverMode: 'primary',
     tooltipPosition: 'closest',
     tooltipAlign: 'top',
