@@ -51,7 +51,7 @@ class Voronoi extends PureComponent {
     if (hoverMode === modeClosestPoint) {
       const voronoiData = []
       stackData.forEach(series => {
-        series.data.forEach(datum => {
+        series.data.filter(d => d.defined).forEach(datum => {
           datum.cursorPoints.forEach(cursorPoint => {
             if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
               return
@@ -74,7 +74,7 @@ class Voronoi extends PureComponent {
       const datumsByAxis = {}
 
       stackData.forEach(series => {
-        series.data.forEach(datum => {
+        series.data.filter(d => d.defined).forEach(datum => {
           const axis = modePrimary ? primaryAxis : secondaryAxis
           const axisKey = String(axis.vertical ? datum.y : datum.x)
 

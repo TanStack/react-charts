@@ -6,10 +6,13 @@ import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
 
+const backgroundColor = 'rgba(38, 38, 38, 0.9)'
+
 class Tooltip extends PureComponent {
   static defaultProps = {
     focus: 'closest',
-    align: 'top',
+    align: 'auto',
+    alignPriority: ['right', 'top', 'left', 'bottom'],
     children: defaultRenderer,
     padding: 1,
   }
@@ -30,6 +33,7 @@ class Tooltip extends PureComponent {
       //
       focus,
       align,
+      autoAlign,
       padding,
       children,
       render,
@@ -38,18 +42,13 @@ class Tooltip extends PureComponent {
     } = this.props
 
     let { arrowPosition } = this.props
+    const { alignPriority } = this.props
 
     if (!primaryAxis || !secondaryAxis) {
       return null
     }
 
     const hoveredDatums = hovered.datums && hovered.datums.length ? hovered.datums : []
-
-    // TODO: tooltip focus: hovered or chart or custom.
-    // Allows the user to focus the tooltip relative to different parts of the chart
-    // TODO: tooltip hardcoded offset and/or dynamic offset based on target element
-
-    // Default the focus point
 
     // Get the closest focus datum out of the hoveredDatums
     this.focusDatum = Utils.getClosestPoint(cursor, hoveredDatums)
@@ -94,39 +93,119 @@ class Tooltip extends PureComponent {
 
     const { x, y, padding: focusPadding = 0 } = this.focus
 
-    if (!arrowPosition) {
-      if (align === 'left') {
-        arrowPosition = 'right'
-      } else if (align === 'right') {
-        arrowPosition = 'left'
-      } else if (align === 'top') {
-        arrowPosition = 'bottom'
-      } else if (align === 'bottom') {
-        arrowPosition = 'top'
+    let alignX
+    let alignY
+    let triangleStyles = {}
+    let resolvedAlign = align || 'auto'
+
+    if (align === 'auto') {
+      if (this.el) {
+        const gridDims = this.el.getBoundingClientRect()
+        const tooltipDims = this.tooltipEl.getBoundingClientRect()
+        let container = this.el
+        const space = {
+          left: Infinity,
+          top: Infinity,
+          right: Infinity,
+          bottom: Infinity,
+        }
+
+        while (container !== document.body) {
+          container = container.parentElement
+          const { overflowX, overflowY } = window.getComputedStyle(container)
+          if (
+            container === document.body ||
+            [overflowX, overflowY].find(d => ['auto', 'hidden'].includes(d))
+          ) {
+            const containerDims = container.getBoundingClientRect()
+            const left = gridDims.left - containerDims.left + this.focus.x
+            const top = gridDims.top - containerDims.top + this.focus.y
+            const right = containerDims.width - left
+            const bottom = containerDims.height - top
+
+            space.left = Math.min(space.left, left)
+            space.top = Math.min(space.top, top)
+            space.right = Math.min(space.right, right)
+            space.bottom = Math.min(space.bottom, bottom)
+          }
+        }
+
+        // console.log(space)
+
+        const comparisons = {
+          left: {
+            sizeCompare: 'width',
+            splitCompare: 'height',
+          },
+          top: {
+            sizeCompare: 'height',
+            splitCompare: 'width',
+          },
+          right: {
+            sizeCompare: 'width',
+            splitCompare: 'height',
+          },
+          bottom: {
+            sizeCompare: 'height',
+            splitCompare: 'width',
+          },
+        }
+
+        resolvedAlign = null
+
+        alignPriority.forEach(priority => {
+          const { sizeCompare, splitCompare } = comparisons[priority]
+          if (resolvedAlign) {
+            return
+          }
+          if (
+            space[priority] - 7 - padding > tooltipDims[sizeCompare] &&
+            (splitCompare === 'height'
+              ? space.top > tooltipDims.height / 2 && space.bottom > tooltipDims.height / 2
+              : space.left > tooltipDims.width / 2 && space.right > tooltipDims.width / 2)
+          ) {
+            resolvedAlign = priority
+          }
+        })
       }
     }
 
-    let alignX
-    let alignY
-
-    let triangleStyles = {}
-
-    if (align === 'top') {
+    if (resolvedAlign === 'top') {
       alignX = '-50%'
       alignY = '-100%'
-    } else if (align === 'bottom') {
-      alignX = '-50%'
-      alignY = '0%'
-    } else if (align === 'left') {
-      alignX = '-100%'
-      alignY = '-50%'
-    } else if (align === 'right') {
+    } else if (resolvedAlign === 'topRight') {
+      alignX = '0%'
+      alignY = '-100%'
+    } else if (resolvedAlign === 'right') {
       alignX = '0%'
       alignY = '-50%'
-    } else {
-      // TODO: Automatic Mode
+    } else if (resolvedAlign === 'bottomRight') {
+      alignX = '0%'
+      alignY = '0%'
+    } else if (resolvedAlign === 'bottom') {
       alignX = '-50%'
+      alignY = '0%'
+    } else if (resolvedAlign === 'bottomLeft') {
+      alignX = '-100%'
+      alignY = '0%'
+    } else if (resolvedAlign === 'left') {
+      alignX = '-100%'
       alignY = '-50%'
+    } else if (resolvedAlign === 'topLeft') {
+      alignX = '-100%'
+      alignY = '-100%'
+    }
+
+    if (!arrowPosition) {
+      if (resolvedAlign === 'left') {
+        arrowPosition = 'right'
+      } else if (resolvedAlign === 'right') {
+        arrowPosition = 'left'
+      } else if (resolvedAlign === 'top') {
+        arrowPosition = 'bottom'
+      } else if (resolvedAlign === 'bottom') {
+        arrowPosition = 'top'
+      }
     }
 
     if (arrowPosition === 'bottom') {
@@ -136,7 +215,7 @@ class Tooltip extends PureComponent {
         transform: 'translate(-50%, 0%)',
         borderLeft: '5px solid transparent',
         borderRight: '5px solid transparent',
-        borderTop: '5px solid rgba(38, 38, 38, 0.8)',
+        borderTop: `5px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'top') {
       triangleStyles = {
@@ -145,7 +224,7 @@ class Tooltip extends PureComponent {
         transform: 'translate(-50%, -100%)',
         borderLeft: '5px solid transparent',
         borderRight: '5px solid transparent',
-        borderBottom: '5px solid rgba(38, 38, 38, 0.8)',
+        borderBottom: `5px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'right') {
       triangleStyles = {
@@ -154,7 +233,7 @@ class Tooltip extends PureComponent {
         transform: 'translate(0%, -50%)',
         borderTop: '5px solid transparent',
         borderBottom: '5px solid transparent',
-        borderLeft: '5px solid rgba(38, 38, 38, 0.8)',
+        borderLeft: `5px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'left') {
       triangleStyles = {
@@ -163,7 +242,7 @@ class Tooltip extends PureComponent {
         transform: 'translate(-100%, -50%)',
         borderTop: '5px solid transparent',
         borderBottom: '5px solid transparent',
-        borderRight: '5px solid rgba(38, 38, 38, 0.8)',
+        borderRight: `5px solid ${backgroundColor}`,
       }
     } else {
       triangleStyles = {
@@ -204,6 +283,7 @@ class Tooltip extends PureComponent {
             datum: this.focusDatum,
             primaryAxis,
             secondaryAxis,
+            ...rest,
           }
           if (Comp) {
             renderedChildren = React.createElement(Comp, null, {
@@ -217,16 +297,24 @@ class Tooltip extends PureComponent {
           return (
             <div
               className="tooltip-wrap"
+              ref={el => {
+                this.el = el
+              }}
               style={{
                 pointerEvents: 'none',
                 position: 'absolute',
                 left: `${left + gridX}px`,
                 top: `${top + gridY}px`,
+                width: `${gridWidth}px`,
+                height: `${gridHeight}px`,
                 opacity: visibility,
               }}
             >
               <div
                 style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
                   transform: `translate3d(${x}px, ${y}px, 0px)`,
                 }}
               >
@@ -234,13 +322,17 @@ class Tooltip extends PureComponent {
                   style={{
                     transform: `translate3d(${alignX}, ${alignY}, 0)`,
                     padding: `${7 + padding}px`,
+                    width: 'auto',
                   }}
                 >
                   <div
+                    ref={el => {
+                      this.tooltipEl = el
+                    }}
                     style={{
                       fontSize: '12px',
                       padding: '5px',
-                      background: 'rgba(38, 38, 38, 0.8)',
+                      background: backgroundColor,
                       color: 'white',
                       borderRadius: '3px',
                       position: 'relative',
@@ -267,16 +359,20 @@ class Tooltip extends PureComponent {
 }
 
 function defaultRenderer (props) {
-  const { datum, primaryAxis, secondaryAxis } = props
+  const {
+    datum, primaryAxis, secondaryAxis, formatSecondary,
+  } = props
 
   if (!datum) {
     return null
   }
 
-  const formatSecondary = val =>
-    Math.floor(val) < val
-      ? secondaryAxis.format(Math.round(val * 100) / 100)
-      : secondaryAxis.format(val)
+  const resolvedFormatSecondary =
+    formatSecondary ||
+    (val =>
+      Math.floor(val) < val
+        ? secondaryAxis.format(Math.round(val * 100) / 100)
+        : secondaryAxis.format(val))
 
   const sortedGroupDatums = secondaryAxis.stacked
     ? [...datum.group].reverse()
@@ -341,7 +437,7 @@ function defaultRenderer (props) {
                   textAlign: 'right',
                 }}
               >
-                {formatSecondary(d.secondary)}
+                {resolvedFormatSecondary(d.secondary)}
               </td>
             </tr>
           ))}
@@ -373,7 +469,7 @@ function defaultRenderer (props) {
                   paddingTop: '5px',
                 }}
               >
-                {formatSecondary([...datum.group].reverse()[0].totalValue)}
+                {resolvedFormatSecondary([...datum.group].reverse()[0].totalValue)}
               </td>
             </tr>
           ) : null}

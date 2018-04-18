@@ -34,6 +34,7 @@ class Bar extends PureComponent {
   }) => {
     datum.x = xScale(datum.xValue)
     datum.y = yScale(datum.yValue)
+    datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = secondaryAxis.scale(datum.baseValue)
     datum.size = primaryAxis.barSize
 

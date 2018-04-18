@@ -233,7 +233,7 @@ class Series extends Component {
       const datumsByGrouping = {}
 
       stackData.forEach(series => {
-        series.data.forEach(datum => {
+        series.data.filter(d => d.defined).forEach(datum => {
           const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
 
           datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
@@ -289,9 +289,7 @@ class Series extends Component {
     )
   }
   render () {
-    const {
-      type, getStyles, getDataStyles, ...rest
-    } = this.props
+    const { type, getDataStyles, ...rest } = this.props
     const { stackData } = this
 
     if (!stackData) {

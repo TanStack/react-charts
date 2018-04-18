@@ -414,14 +414,8 @@ function isValidPoint (d) {
   if (typeof d === 'undefined') {
     return false
   }
-  if (typeof d === 'string') {
-    if (d === 'null') {
-      return false
-    }
-    const parsed = parseInt(d)
-    if (Number.isNaN(parsed)) {
-      return false
-    }
+  if (typeof d === 'string' && d === 'null') {
+    return false
   }
   return true
 }

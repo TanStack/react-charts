@@ -42,8 +42,9 @@ class Line extends PureComponent {
   static plotDatum = (datum, {
     xScale, yScale, primaryAxis, xAxis, yAxis,
   }) => {
-    datum.x = Utils.isValidPoint(datum.xValue) ? xScale(datum.xValue) : null
-    datum.y = Utils.isValidPoint(datum.yValue) ? yScale(datum.yValue) : null
+    datum.x = xScale(datum.xValue)
+    datum.y = yScale(datum.yValue)
+    datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
 
     // Adjust non-bar elements for ordinal scales
@@ -95,14 +96,17 @@ class Line extends PureComponent {
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const lineFn = line()
+      .x(d => d.x)
+      .y(d => d.y)
+      .defined(d => d.defined)
       .curve(Curves[curve] || curve)
-      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
 
     const data = series.data.map(d => ({
       x: d.x,
       y: d.y,
       r: d.r,
       base: d.base,
+      defined: d.defined,
     }))
 
     return (
@@ -115,9 +119,7 @@ class Line extends PureComponent {
         }}
       >
         {inter => {
-          const path = lineFn(
-            inter.data.map(d => [Number.isNaN(d.x) ? null : d.x, Number.isNaN(d.y) ? null : d.y])
-          )
+          const path = lineFn(inter.data)
 
           const interactiveSeries = interaction === 'series'
           const seriesInteractionProps = interactiveSeries
@@ -145,6 +147,9 @@ class Line extends PureComponent {
               />
               {showPoints &&
                 series.data.map((datum, i) => {
+                  if (!datum.defined) {
+                    return null
+                  }
                   const status = Utils.datumStatus(series, datum, hovered, selected)
                   const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 

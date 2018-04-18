@@ -11,6 +11,17 @@ export const NodeGroup = ({ timing, ...rest }) => (
   <RMNodeGroup timing={{ ...defaultTiming, ...timing }} {...rest} />
 )
 
+export const NewAnimate = ({
+  values, render, children, ...rest
+}) =>
+  process.env.NODE_ENV === 'development' ? (
+    render(values)
+  ) : (
+    <Animate start={values} update={values} render={render} {...rest}>
+      {children}
+    </Animate>
+  )
+
 export class Animate extends Component {
   static defaultProps = {
     show: true,

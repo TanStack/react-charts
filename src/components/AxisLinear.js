@@ -81,6 +81,7 @@ class Axis extends Component {
       newProps.hardMax !== oldProps.hardMax
     ) {
       this.updateScale(newProps)
+      this.measure(newProps)
     }
   }
   componentDidMount () {

@@ -29,24 +29,37 @@ class Story extends Component {
         <br />
 
         {_.range(3).map((d, i) => (
-          <ResizableBox key={i} width={500} height={300}>
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              margin: i % 2 ? '0 50px' : '0',
+            }}
+          >
+            <div>
+              <ResizableBox width={500} height={300}>
+                <Chart data={data}>
+                  <Axis primary type="time" position="bottom" />
+                  <Axis type="linear" position="left" stacked cursor={{}} />
+                  <Series type={Area} />
+                  <Cursor primary />
+                  <Cursor />
+                  <Tooltip />
+                </Chart>
+              </ResizableBox>
+            </div>
             <div
               style={{
-                width: '100%',
-                height: '100%',
-                margin: i % 2 ? '50px' : '0',
+                position: 'relative',
+                alignSelf: 'stretch',
+                width: '50px',
+                background: 'white',
+                border: '1px solid black',
               }}
             >
-              <Chart data={data}>
-                <Axis primary type="time" position="bottom" />
-                <Axis type="linear" position="left" stacked cursor={{}} />
-                <Series type={Area} />
-                <Cursor primary />
-                <Cursor />
-                <Tooltip />
-              </Chart>
+              Z-index test
             </div>
-          </ResizableBox>
+          </div>
         ))}
       </div>
     )

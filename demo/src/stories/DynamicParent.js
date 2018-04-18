@@ -4,7 +4,7 @@ import React from 'react'
 
 import ChartConfig from './components/ChartConfig'
 
-import { Chart, Axis, Series, Tooltip, Line } from '../../../src'
+import { Chart, Axis, Series, Tooltip, Line, Cursor } from '../../../src'
 
 export default () => (
   <ChartConfig resizable={false}>
@@ -17,6 +17,7 @@ export default () => (
           padding: '12px',
           border: '2px solid black',
           height: '400px',
+          overflow: 'auto',
         }}
       >
         <div
@@ -42,6 +43,8 @@ export default () => (
             <Axis primary type="time" position="bottom" />
             <Axis type="linear" position="left" />
             <Series type={Line} />
+            <Cursor primary />
+            <Cursor />
             <Tooltip />
           </Chart>
         </div>

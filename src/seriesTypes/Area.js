@@ -9,19 +9,15 @@ import Curves from '../utils/Curves'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
-import Circle from '../primitives/Circle'
+import Line from '../primitives/Line'
 
-const pathDefaultStyle = {
-  strokeWidth: 2,
-}
-
-const circleDefaultStyle = {
-  r: 2,
+const lineDefaultStyle = {
+  strokeWidth: 3,
 }
 
 class Area extends PureComponent {
   static defaultProps = {
-    showPoints: false,
+    showOrphans: true,
     curve: 'monotoneX',
   }
   constructor (props) {
@@ -40,9 +36,9 @@ class Area extends PureComponent {
   static plotDatum = (datum, {
     xScale, yScale, primaryAxis, xAxis, yAxis,
   }) => {
-    console.log(datum.xValue, datum.yValue)
-    datum.x = Utils.isValidPoint(datum.xValue) ? xScale(datum.xValue) : null
-    datum.y = Utils.isValidPoint(datum.yValue) ? yScale(datum.yValue) : null
+    datum.x = xScale(datum.xValue)
+    datum.y = yScale(datum.yValue)
+    datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
@@ -51,8 +47,6 @@ class Area extends PureComponent {
     if (yAxis.type === 'ordinal') {
       datum.y += yAxis.tickOffset
     }
-
-    console.log(datum.x, datum.y)
 
     // Set the default focus point
     datum.focus = {
@@ -93,7 +87,7 @@ class Area extends PureComponent {
     const {
       series,
       visibility,
-      showPoints,
+      showOrphans,
       curve,
       //
       selected,
@@ -105,12 +99,16 @@ class Area extends PureComponent {
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
     const areaFn = area()
-      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .x(d => d.x)
+      .y0(d => d.base)
+      .y1(d => d.y)
+      .defined(d => d.defined)
       .curve(Curves[curve] || curve)
-      .y0(d => d[2])
 
     const lineFn = line()
-      .defined(d => typeof d[0] === 'number' && typeof d[1] === 'number')
+      .x(d => d.x)
+      .y(d => d.y)
+      .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
     const data = series.data.map(d => ({
@@ -118,6 +116,7 @@ class Area extends PureComponent {
       y: d.y,
       r: d.r,
       base: d.base,
+      defined: d.defined,
     }))
 
     return (
@@ -130,16 +129,8 @@ class Area extends PureComponent {
         }}
       >
         {inter => {
-          const areaPath = areaFn(
-            inter.data.map(d => [
-              Number.isNaN(d.x) ? null : d.x,
-              Number.isNaN(d.y) ? null : d.y,
-              Number.isNaN(d.base) ? null : d.base,
-            ])
-          )
-          const linePath = lineFn(
-            inter.data.map(d => [Number.isNaN(d.x) ? null : d.x, Number.isNaN(d.y) ? null : d.y])
-          )
+          const areaPath = areaFn(inter.data)
+          const linePath = lineFn(inter.data)
 
           const interactiveSeries = interaction === 'series'
           const seriesInteractionProps = interactiveSeries
@@ -156,7 +147,6 @@ class Area extends PureComponent {
               <Path
                 d={areaPath}
                 style={{
-                  ...pathDefaultStyle,
                   ...style,
                   ...style.area,
                   stroke: 'transparent',
@@ -168,7 +158,6 @@ class Area extends PureComponent {
               <Path
                 d={linePath}
                 style={{
-                  ...pathDefaultStyle,
                   ...style,
                   ...style.line,
                   fill: 'none',
@@ -177,8 +166,14 @@ class Area extends PureComponent {
                 opacity={visibility}
                 {...seriesInteractionProps}
               />
-              {showPoints &&
-                series.data.map((datum, i) => {
+              {showOrphans &&
+                series.data.map((datum, i, all) => {
+                  // Don't render points on the line, just null data orphans
+                  const prev = all[i - 1] || { defined: true }
+                  const next = all[i + 1] || { defined: true }
+                  if (!datum.defined || (prev.defined && next.defined)) {
+                    return null
+                  }
                   const status = Utils.datumStatus(series, datum, hovered, selected)
                   const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
@@ -193,18 +188,24 @@ class Area extends PureComponent {
                     : {}
 
                   return (
-                    <Circle
-                      key={i}
-                      x={inter.data[i] ? inter.data[i].x : undefined}
-                      y={inter.data[i] ? inter.data[i].y : undefined}
+                    <Line
                       style={{
-                        ...circleDefaultStyle,
+                        ...lineDefaultStyle,
                         ...style,
-                        ...style.circle,
+                        ...style.line,
                         ...dataStyle,
-                        ...dataStyle.circle,
-                        pointerEvents: iteractiveDatum ? 'all' : 'none',
+                        ...dataStyle.line,
+                        pointerEvents: interactiveSeries ? 'all' : 'none',
                       }}
+                      key={i}
+                      x1={!inter.data[i] || Number.isNaN(inter.data[i].x) ? null : inter.data[i].x}
+                      y1={
+                        !inter.data[i] || Number.isNaN(inter.data[i].base)
+                          ? null
+                          : inter.data[i].base
+                      }
+                      x2={!inter.data[i] || Number.isNaN(inter.data[i].x) ? null : inter.data[i].x}
+                      y2={!inter.data[i] || Number.isNaN(inter.data[i].y) ? null : inter.data[i].y}
                       opacity={visibility}
                       {...seriesInteractionProps}
                       {...datumInteractionProps}

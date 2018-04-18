@@ -12,6 +12,7 @@ import Voronoi from '../components/Voronoi'
 
 class Chart extends Component {
   static defaultProps = {
+    getSeries: d => d,
     getData: d => d.data,
     getLabel: (d, i) => d.label || `Series ${i + 1}`,
     getSeriesID: (d, i) => i,
@@ -126,6 +127,7 @@ class Chart extends Component {
       nextProps.data !== this.props.data ||
       nextProps.width !== this.props.width ||
       nextProps.height !== this.props.height ||
+      nextProps.getSeries !== this.props.getSeries ||
       nextProps.getData !== this.props.getData ||
       nextProps.getSeriesID !== this.props.getSeriesID ||
       nextProps.getLabel !== this.props.getLabel ||
@@ -155,10 +157,11 @@ class Chart extends Component {
   updateDataModel = props => {
     const { data } = props
     let {
-      getData, getLabel, getSeriesID, getPrimary, getSecondary, getR,
+      getSeries, getData, getLabel, getSeriesID, getPrimary, getSecondary, getR,
     } = props
 
     // Normalize getters
+    getSeries = Utils.normalizePathGetter(getSeries)
     getData = Utils.normalizePathGetter(getData)
     getLabel = Utils.normalizePathGetter(getLabel)
     getSeriesID = Utils.normalizePathGetter(getSeriesID)
@@ -167,7 +170,7 @@ class Chart extends Component {
     getR = Utils.normalizePathGetter(getR)
 
     // First access the data, and provide it to the context
-    const preMaterializedData = data.map((s, seriesIndex) => {
+    const preMaterializedData = getSeries(data).map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {

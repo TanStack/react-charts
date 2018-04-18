@@ -9,6 +9,8 @@ class Cursor extends PureComponent {
   static defaultProps = {
     children: ({ label }) => <span>{label}</span>,
     snap: true,
+    showLine: true,
+    showLabel: true,
   }
   static isHtml = true
   constructor () {
@@ -20,6 +22,8 @@ class Cursor extends PureComponent {
     const {
       primary,
       snap,
+      showLine,
+      showLabel,
       //
       stackData,
       primaryAxis,
@@ -189,47 +193,51 @@ class Cursor extends PureComponent {
             }}
           >
             {/* Render the cursor line */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                transform: `translate3d(${animated ? inter.lineStartX : lineStartX}px, ${
-                  animated ? inter.lineStartY : lineStartY
-                }px, 0px)`,
-                width: `${animated ? inter.lineWidth : lineWidth}px`,
-                height: `${animated ? inter.lineHeight : lineHeight}px`,
-                background: 'rgba(0,0,0,.3)',
-                WebkitBackfaceVisibility: 'hidden',
-              }}
-            />
-            {/* Render the cursor bubble */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                transform: `translate3d(${animated ? inter.bubbleX : bubbleX}px, ${
-                  animated ? inter.bubbleY : bubbleY
-                }px, 0px)`,
-              }}
-            >
-              {/* Render the cursor label */}
+            {showLine ? (
               <div
                 style={{
-                  padding: '5px',
-                  fontSize: '10px',
-                  background: 'rgba(0,0,0,.6)',
-                  color: 'white',
-                  borderRadius: '3px',
-                  position: 'relative',
-                  transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
-                  whiteSpace: !axis.vertical && 'nowrap',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  transform: `translate3d(${animated ? inter.lineStartX : lineStartX}px, ${
+                    animated ? inter.lineStartY : lineStartY
+                  }px, 0px)`,
+                  width: `${animated ? inter.lineWidth : lineWidth}px`,
+                  height: `${animated ? inter.lineHeight : lineHeight}px`,
+                  background: 'rgba(0,0,0,.3)',
+                  WebkitBackfaceVisibility: 'hidden',
+                }}
+              />
+            ) : null}
+            {/* Render the cursor bubble */}
+            {showLabel ? (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  transform: `translate3d(${animated ? inter.bubbleX : bubbleX}px, ${
+                    animated ? inter.bubbleY : bubbleY
+                  }px, 0px)`,
                 }}
               >
-                {renderedChildren}
+                {/* Render the cursor label */}
+                <div
+                  style={{
+                    padding: '5px',
+                    fontSize: '10px',
+                    background: 'rgba(0,0,0,.6)',
+                    color: 'white',
+                    borderRadius: '3px',
+                    position: 'relative',
+                    transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
+                    whiteSpace: !axis.vertical && 'nowrap',
+                  }}
+                >
+                  {renderedChildren}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         )}
       </Animate>

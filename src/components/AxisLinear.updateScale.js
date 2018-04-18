@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog, scaleTime, scaleBand } from 'd3-scale'
+import { scaleLinear, scaleLog, scaleTime, scaleUtc, scaleBand } from 'd3-scale'
 //
 import { positionTop, positionLeft, positionRight, positionBottom } from './AxisLinear'
 
@@ -6,6 +6,7 @@ const scales = {
   linear: scaleLinear,
   log: scaleLog,
   time: scaleTime,
+  utc: scaleUtc,
   ordinal: scaleBand,
 }
 
@@ -78,7 +79,7 @@ export default function updateScale (props) {
       })
     })
     domain = uniqueVals
-  } else if (type === 'time') {
+  } else if (type === 'time' || type === 'utc') {
     materializedData.forEach(series => {
       const seriesValues = series.data.map(d => +d[valueKey])
       seriesValues.forEach((d, i) => {

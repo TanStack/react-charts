@@ -33,6 +33,7 @@ class Line extends PureComponent {
   }) => {
     datum.x = xScale(datum.xValue)
     datum.y = yScale(datum.yValue)
+    datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
@@ -86,6 +87,7 @@ class Line extends PureComponent {
       y: d.y,
       r: d.r,
       base: d.base,
+      defined: d.defined,
     }))
 
     return (
@@ -110,6 +112,9 @@ class Line extends PureComponent {
           return (
             <g>
               {series.data.map((datum, i) => {
+                if (!datum.defined) {
+                  return null
+                }
                 const status = Utils.datumStatus(series, datum, hovered, selected)
                 const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
