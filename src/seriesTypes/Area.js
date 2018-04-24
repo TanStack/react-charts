@@ -33,11 +33,9 @@ class Area extends PureComponent {
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
-  static plotDatum = (datum, {
-    xScale, yScale, primaryAxis, xAxis, yAxis,
-  }) => {
-    datum.x = xScale(datum.xValue)
-    datum.y = yScale(datum.yValue)
+  static plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+    datum.x = xAxis.scale(datum.xValue)
+    datum.y = yAxis.scale(datum.yValue)
     datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
@@ -59,10 +57,14 @@ class Area extends PureComponent {
       datum.focus,
       {
         x: primaryAxis.vertical
-          ? primaryAxis.position === 'left' ? datum.base - 1 : datum.base
+          ? primaryAxis.position === 'left'
+            ? datum.base - 1
+            : datum.base
           : datum.focus.x,
         y: !primaryAxis.vertical
-          ? primaryAxis.position === 'bottom' ? datum.base - 1 : datum.base
+          ? primaryAxis.position === 'bottom'
+            ? datum.base - 1
+            : datum.base
           : datum.focus.y,
       },
     ]

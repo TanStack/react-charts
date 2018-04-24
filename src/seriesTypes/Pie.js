@@ -74,7 +74,6 @@ class Pie extends PureComponent {
   render () {
     const {
       series,
-      visibility,
       stackData, // we need this to figure out which level we're on
       //
       selected,

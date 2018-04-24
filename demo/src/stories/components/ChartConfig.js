@@ -170,6 +170,7 @@ function makeSeries (i, dataType) {
   const max = 100
   const rMin = 2
   const rMax = 30
+  const nullChance = 0
   return {
     label: `Series ${i + 1}`,
     data: _.map(_.range(length), d => {
@@ -179,7 +180,7 @@ function makeSeries (i, dataType) {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * d)
       }
       const distribution = 1.1
-      const y = Math.random() > 0.7 ? null : min + Math.round(Math.random() * (max - min))
+      const y = Math.random() < nullChance ? null : min + Math.round(Math.random() * (max - min))
       const r =
         rMax -
         Math.floor(

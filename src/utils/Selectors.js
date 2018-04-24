@@ -1,52 +1,35 @@
 import Memoize from './Memoize'
 
 export default {
-  primaryAxis: () =>
+  primaryAxes: () =>
     Memoize(
       state => [state.axes],
       axes => {
-        if (!axes) return
-        let found
-        Object.keys(axes).forEach(key => {
-          if (!found && axes[key].primary) {
-            found = axes[key]
-          }
-        })
-        return found
+        if (!axes) return []
+        return Object.keys(axes)
+          .map(key => {
+            if (axes[key].primary) {
+              return axes[key]
+            }
+            return null
+          })
+          .filter(Boolean)
       }
     ),
 
-  secondaryAxis: () =>
+  secondaryAxes: () =>
     Memoize(
       state => [state.axes],
       axes => {
-        if (!axes) return
-        let found
-        Object.keys(axes).forEach(key => {
-          if (!found && !axes[key].primary) {
-            found = axes[key]
-          }
-        })
-        return found
-      }
-    ),
-
-  secondaryAxis2: () =>
-    Memoize(
-      state => [state.axes],
-      axes => {
-        if (!axes) return
-        let foundFirst
-        let found
-        Object.keys(axes).forEach(key => {
-          if (!foundFirst && !axes[key].primary) {
-            foundFirst = axes[key]
-          }
-          if (foundFirst && !axes[key].primary) {
-            found = axes[key]
-          }
-        })
-        return found
+        if (!axes) return []
+        return Object.keys(axes)
+          .map(key => {
+            if (!axes[key].primary) {
+              return axes[key]
+            }
+            return null
+          })
+          .filter(Boolean)
       }
     ),
 

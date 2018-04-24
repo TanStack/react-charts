@@ -35,11 +35,12 @@ export default function updateScale (props) {
     max: defaultMax,
     hardMin,
     hardMax,
+    primaryScaleID,
     // Context
     materializedData,
     width,
     height,
-    primaryAxis,
+    primaryAxes,
   } = props
 
   // We need the data to proceed
@@ -47,14 +48,15 @@ export default function updateScale (props) {
     return
   }
 
-  // If this axis is secondary, we need the primaryAxis to proceed
-  if (!primary && !primaryAxis) {
+  // If this axis is secondary, we need the primaryAxes to proceed
+  if (!primary && !primaryAxes.length) {
     return
   }
 
   // Detect some settings
   const valueKey = primary ? 'primary' : 'secondary'
   const groupKey = !primary && 'primary'
+  const scaleIDKey = `${valueKey}ScaleID`
   const vertical = detectVertical(position)
   const RTL = primary && detectRTL(position) // Right to left OR top to bottom
 
@@ -71,6 +73,9 @@ export default function updateScale (props) {
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {
+      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+        return
+      }
       const seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach(d => {
         if (uniqueVals.indexOf(d) === -1) {
@@ -81,6 +86,9 @@ export default function updateScale (props) {
     domain = uniqueVals
   } else if (type === 'time' || type === 'utc') {
     materializedData.forEach(series => {
+      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+        return
+      }
       const seriesValues = series.data.map(d => +d[valueKey])
       seriesValues.forEach((d, i) => {
         const key = groupKey ? series.data[i][groupKey] : i
@@ -93,6 +101,9 @@ export default function updateScale (props) {
   } else {
     // Linear scale
     materializedData.forEach(series => {
+      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+        return
+      }
       let seriesValues = series.data.map(d => d[valueKey])
       seriesValues.forEach((d, i) => {
         const key = groupKey ? series.data[i][groupKey] : i
@@ -133,6 +144,7 @@ export default function updateScale (props) {
     // Secondary axes are usually dependent on primary axes for orientation, so if the
     // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
     // to match the origin of the primary axis
+    const primaryAxis = primaryScaleID ? primaryAxes[primaryScaleID] : primaryAxes[0]
     if (primaryAxis.RTL) {
       range = [...range].reverse()
     }
@@ -224,6 +236,7 @@ export default function updateScale (props) {
 
   // Pass down the axis config (including the scale itself) for posterity
   const axis = {
+    id,
     type,
     scale,
     uniqueVals,
@@ -242,14 +255,22 @@ export default function updateScale (props) {
     max:
       position === positionBottom
         ? -height
-        : position === positionLeft ? width : position === positionTop ? height : -width,
+        : position === positionLeft
+          ? width
+          : position === positionTop
+            ? height
+            : -width,
     directionMultiplier: position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? translateX : translateY,
     ticks: (this.ticks = !tickValues
-      ? scale.ticks ? scale.ticks(...tickArguments) : scale.domain()
+      ? scale.ticks
+        ? scale.ticks(...tickArguments)
+        : scale.domain()
       : tickValues),
     format: !tickFormat
-      ? scale.tickFormat ? scale.tickFormat(...tickArguments) : identity
+      ? scale.tickFormat
+        ? scale.tickFormat(...tickArguments)
+        : identity
       : tickFormat,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }

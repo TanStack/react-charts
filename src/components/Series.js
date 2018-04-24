@@ -60,8 +60,8 @@ class Series extends Component {
       newProps.materializedData !== oldProps.materializedData ||
       newProps.axes !== oldProps.axes ||
       newProps.seriesKey !== oldProps.seriesKey ||
-      newProps.primaryAxis !== oldProps.primaryAxis ||
-      newProps.secondaryAxis !== oldProps.secondaryAxis ||
+      newProps.primaryAxes !== oldProps.primaryAxes ||
+      newProps.secondaryAxes !== oldProps.secondaryAxes ||
       newProps.groupMode !== oldProps.groupMode
     ) {
       this.updateStackData(newProps)
@@ -118,86 +118,88 @@ class Series extends Component {
       getDataStyles,
       //
       materializedData,
-      primaryAxis,
-      secondaryAxis,
-      secondaryAxis2,
+      primaryAxes,
+      secondaryAxes,
       groupMode,
     } = props
 
     // We need materializedData and both axes to continue
-    if (!materializedData || !primaryAxis || !secondaryAxis) {
+    if (!materializedData || !primaryAxes.length || !secondaryAxes.length) {
       return
     }
 
     // If the axes are ready, let's decorate the materializedData for visual plotting
-    const secondaryStacked = secondaryAxis.stacked
+    // const secondaryStacked = secondaryAxes.stacked
 
     // Make sure we're mapping x and y to the correct axes
-    const xKey = primaryAxis.vertical ? 'secondary' : 'primary'
-    const yKey = primaryAxis.vertical ? 'primary' : 'secondary'
-    const xAxis = primaryAxis.vertical ? secondaryAxis : primaryAxis
-    const yAxis = primaryAxis.vertical ? primaryAxis : secondaryAxis
-    const xScale = xAxis.scale
-    const yScale = yAxis.scale
+    const xKey = primaryAxes.find(d => d.vertical) ? 'secondary' : 'primary'
+    const yKey = primaryAxes.find(d => d.vertical) ? 'primary' : 'secondary'
+    const xAxes = primaryAxes.find(d => d.vertical) ? secondaryAxes : primaryAxes
+    const yAxes = primaryAxes.find(d => d.vertical) ? primaryAxes : secondaryAxes
 
-    // "totals" are kept and used for bases if secondaryAxis stacking is enabled
-    const totals = {}
-    if (secondaryStacked) {
-      materializedData.forEach(series => {
-        series.data.forEach(datum => {
-          totals[datum.primary] = {
-            negative: 0,
-            positive: 0,
-          }
-        })
+    // "totals" are kept per secondaryAxis and used for bases if secondaryAxis stacking is enabled
+    const scaleTotals = secondaryAxes.map(() => ({}))
+    materializedData.forEach(series => {
+      const axisIndex = Utils.getAxisIndexByScaleID(secondaryAxes, series.secondaryScaleID)
+      series.data.forEach(datum => {
+        scaleTotals[axisIndex][datum.primary] = {
+          negative: 0,
+          positive: 0,
+        }
       })
-    }
+    })
 
     // Determine the correct primary and secondary values for each axis
     // Also calculate bases and totals if either axis is stacked
-    let stackData = materializedData.map(series => ({
-      ...series,
-      data: series.data.map(d => {
-        const datum = {
-          ...d,
-          xValue: d[xKey],
-          yValue: d[yKey],
-          baseValue: 0,
-        }
-        if (secondaryStacked) {
-          const start = totals[d.primary]
-          // Stack the x or y values (according to axis positioning)
-          if (primaryAxis.vertical) {
-            // Is this a valid point?
-            const validPoint = Utils.isValidPoint(datum.xValue)
-            // Should we use positive or negative base?
-            const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
-            // Assign the base
-            datum.baseValue = start[totalKey]
-            // Add the value for a total
-            datum.totalValue = datum.baseValue + (validPoint ? datum.xValue : 0)
-            // Update the totals
-            totals[d.primary][totalKey] = datum.totalValue
-            // Make the total the new value
-            datum.xValue = validPoint ? datum.totalValue : null
-          } else {
-            // Is this a valid point?
-            const validPoint = Utils.isValidPoint(datum.yValue)
-            // Should we use positive or negative base?
-            const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
-            // Assign the base
-            datum.baseValue = start[totalKey]
-            // Add the value to the base
-            datum.totalValue = datum.baseValue + (validPoint ? datum.yValue : 0)
-            // Update the totals
-            totals[d.primary][totalKey] = datum.totalValue
-            // Make the total the new value
-            datum.yValue = validPoint ? datum.totalValue : null
+    let stackData = materializedData.map(series => {
+      const primaryAxisIndex = Utils.getAxisIndexByScaleID(primaryAxes, series.primaryScaleID)
+      const primaryAxis = primaryAxes[primaryAxisIndex]
+      const secondaryAxisIndex = Utils.getAxisIndexByScaleID(secondaryAxes, series.secondaryScaleID)
+      const secondaryAxis = secondaryAxes[secondaryAxisIndex]
+      return {
+        ...series,
+        data: series.data.map(d => {
+          const datum = {
+            ...d,
+            xValue: d[xKey],
+            yValue: d[yKey],
+            baseValue: 0,
           }
-        }
-        return datum
-      }),
-    }))
+          if (secondaryAxis.stacked) {
+            const start = scaleTotals[secondaryAxisIndex][d.primary]
+            // Stack the x or y values (according to axis positioning)
+            if (primaryAxis.vertical) {
+              // Is this a valid point?
+              const validPoint = Utils.isValidPoint(datum.xValue)
+              // Should we use positive or negative base?
+              const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
+              // Assign the base
+              datum.baseValue = start[totalKey]
+              // Add the value for a total
+              datum.totalValue = datum.baseValue + (validPoint ? datum.xValue : 0)
+              // Update the totals
+              scaleTotals[secondaryAxisIndex][d.primary][totalKey] = datum.totalValue
+              // Make the total the new value
+              datum.xValue = validPoint ? datum.totalValue : null
+            } else {
+              // Is this a valid point?
+              const validPoint = Utils.isValidPoint(datum.yValue)
+              // Should we use positive or negative base?
+              const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
+              // Assign the base
+              datum.baseValue = start[totalKey]
+              // Add the value to the base
+              datum.totalValue = datum.baseValue + (validPoint ? datum.yValue : 0)
+              // Update the totals
+              scaleTotals[secondaryAxisIndex][d.primary][totalKey] = datum.totalValue
+              // Make the total the new value
+              datum.yValue = validPoint ? datum.totalValue : null
+            }
+          }
+          return datum
+        }),
+      }
+    })
 
     stackData.forEach(series => {
       series.data.forEach(datum => {
@@ -209,16 +211,25 @@ class Series extends Component {
     // (mutation is okay here, since we have already made a materialized copy)
     stackData.forEach((series, i) => {
       if (debug && !series.Component.plotDatum) {
-        console.log(series)
         throw new Error(
           `Could not find a [SeriesType].plotDatum() static method for the series Component above (index: ${i})`
         )
       }
       series.data = series.data.map(d => {
+        const primaryAxisIndex = Utils.getAxisIndexByScaleID(primaryAxes, series.primaryScaleID)
+        const primaryAxis = primaryAxes[primaryAxisIndex]
+        const secondaryAxisIndex = Utils.getAxisIndexByScaleID(
+          secondaryAxes,
+          series.secondaryScaleID
+        )
+        const secondaryAxis = secondaryAxes[secondaryAxisIndex]
+        const xAxisIndex = Utils.getAxisIndexByScaleID(xAxes, series[`${xKey}ScaleID`])
+        const xAxis = xAxes[xAxisIndex]
+        const yAxisIndex = Utils.getAxisIndexByScaleID(yAxes, series[`${yKey}ScaleID`])
+        const yAxis = yAxes[yAxisIndex]
+
         // Data for cartesian charts
         const result = series.Component.plotDatum(d, {
-          xScale,
-          yScale,
           primaryAxis,
           secondaryAxis,
           xAxis,
@@ -253,7 +264,7 @@ class Series extends Component {
 
     // Not we need to precalculate all of the possible status styles by
     // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
-    stackData = stackData.map(series => {
+    stackData = stackData.map((series, i) => {
       if (debug && !series.Component.buildStyles) {
         throw new Error(
           `Could not find a SeriesType.plotDatum() static method for the series Component above (index: ${i})`
@@ -310,17 +321,15 @@ class Series extends Component {
 export default Connect(
   () => {
     const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
-      secondaryAxis: Selectors.secondaryAxis(),
-      secondaryAxis2: Selectors.secondaryAxis2(),
+      primaryAxes: Selectors.primaryAxes(),
+      secondaryAxes: Selectors.secondaryAxes(),
     }
     return state => ({
+      primaryAxes: selectors.primaryAxes(state),
+      secondaryAxes: selectors.secondaryAxes(state),
       preMaterializedData: state.preMaterializedData,
       materializedData: state.materializedData,
       stackData: state.stackData,
-      primaryAxis: selectors.primaryAxis(state),
-      secondaryAxis: selectors.secondaryAxis(state),
-      secondaryAxis2: selectors.secondaryAxis2(state),
       hovered: state.hovered,
       selected: state.selected,
       groupMode: state.groupMode,

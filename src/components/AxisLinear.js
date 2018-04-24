@@ -273,7 +273,7 @@ export default Connect(
     const selectors = {
       gridWidth: Selectors.gridWidth(),
       gridHeight: Selectors.gridHeight(),
-      primaryAxis: Selectors.primaryAxis(),
+      primaryAxes: Selectors.primaryAxes(),
     }
     return (state, props) => {
       const { type, position, id: userID } = props
@@ -282,10 +282,10 @@ export default Connect(
 
       return {
         id,
-        materializedData: state.materializedData,
+        primaryAxes: selectors.primaryAxes(state),
         width: selectors.gridWidth(state),
         height: selectors.gridHeight(state),
-        primaryAxis: selectors.primaryAxis(state),
+        materializedData: state.materializedData,
         axis: state.axes && state.axes[id],
       }
     }

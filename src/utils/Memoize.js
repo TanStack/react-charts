@@ -1,27 +1,21 @@
-export default function Memo (...args) {
-  let getParams = (...subArgs) => subArgs
-  let fn = args[0]
-  if (args.length > 1) {
-    getParams = args[0]
-    fn = args[1]
-  }
-  let params = []
+export default function Memo (changeFn, materializer) {
+  let lastParams = []
   let value
 
-  return (...p) => {
-    const newParams = getParams(...p)
+  return state => {
+    const newParams = changeFn(state)
     const recompute = () => {
-      params = newParams
-      value = fn(...params)
+      lastParams = newParams
+      value = materializer(...lastParams)
       return value
     }
 
-    if (newParams.length !== p.length) {
+    if (newParams.length !== lastParams.length) {
       return recompute()
     }
 
     for (let i = 0; i < newParams.length; i++) {
-      if (newParams[i] !== p[i]) {
+      if (newParams[i] !== lastParams[i]) {
         return recompute()
       }
     }

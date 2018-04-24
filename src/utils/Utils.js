@@ -16,6 +16,8 @@ export default {
   normalizePathGetter,
   isArray,
   isValidPoint,
+  getAxisByScaleID,
+  getAxisIndexByScaleID,
 }
 
 function throttle (func) {
@@ -418,4 +420,13 @@ function isValidPoint (d) {
     return false
   }
   return true
+}
+
+function getAxisByScaleID (axes, scaleID) {
+  return axes.find(d => d.id === scaleID) || axes[0]
+}
+
+function getAxisIndexByScaleID (axes, scaleID) {
+  const index = axes.findIndex(d => d.id === scaleID)
+  return index > -1 ? index : 0
 }

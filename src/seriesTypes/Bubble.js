@@ -28,13 +28,11 @@ class Line extends PureComponent {
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
-  static plotDatum = (datum, {
-    xScale, yScale, primaryAxis, xAxis, yAxis,
-  }) => {
-    datum.x = xScale(datum.xValue)
-    datum.y = yScale(datum.yValue)
+  static plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+    datum.x = xAxis.scale(datum.xValue)
+    datum.y = yAxis.scale(datum.yValue)
     datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
-    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+    datum.base = primaryAxis.vertical ? xAxis.scale(datum.baseValue) : yAxis.scale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
       datum.x += xAxis.tickOffset

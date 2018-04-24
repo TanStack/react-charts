@@ -30,8 +30,8 @@ class Tooltip extends PureComponent {
   render () {
     const {
       hovered,
-      primaryAxis,
-      secondaryAxis,
+      primaryAxes,
+      secondaryAxes,
       offset: { left, top },
       gridX,
       gridY,
@@ -55,7 +55,7 @@ class Tooltip extends PureComponent {
     let { arrowPosition } = this.props
     const { alignPriority } = this.props
 
-    if (!primaryAxis || !secondaryAxis) {
+    if (!primaryAxes.length || !secondaryAxes.length) {
       return null
     }
 
@@ -310,6 +310,12 @@ class Tooltip extends PureComponent {
     })
     update.visibility = [visibility]
 
+    const primaryAxis = Utils.getAxisByScaleID(primaryAxes, this.focusDatum.series.primaryScaleID)
+    const secondaryAxis = Utils.getAxisByScaleID(
+      secondaryAxes,
+      this.focusDatum.series.secondaryScaleID
+    )
+
     return (
       <Animate
         show={visibility}
@@ -323,6 +329,8 @@ class Tooltip extends PureComponent {
           let renderedChildren
           const renderProps = {
             datum: this.focusDatum,
+            primaryAxes,
+            secondaryAxes,
             primaryAxis,
             secondaryAxis,
             ...rest,
@@ -523,8 +531,8 @@ function defaultRenderer (props) {
 
 export default Connect(() => {
   const selectors = {
-    primaryAxis: Selectors.primaryAxis(),
-    secondaryAxis: Selectors.secondaryAxis(),
+    primaryAxes: Selectors.primaryAxes(),
+    secondaryAxes: Selectors.secondaryAxes(),
     gridX: Selectors.gridX(),
     gridY: Selectors.gridY(),
     gridWidth: Selectors.gridWidth(),
@@ -532,8 +540,8 @@ export default Connect(() => {
     offset: Selectors.offset(),
   }
   return state => ({
-    primaryAxis: selectors.primaryAxis(state),
-    secondaryAxis: selectors.secondaryAxis(state),
+    primaryAxes: selectors.primaryAxes(state),
+    secondaryAxes: selectors.secondaryAxes(state),
     gridX: selectors.gridX(state),
     gridY: selectors.gridY(state),
     gridWidth: selectors.gridWidth(state),

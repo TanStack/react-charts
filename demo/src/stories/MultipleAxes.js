@@ -4,7 +4,7 @@ import React from 'react'
 
 import ChartConfig from './components/ChartConfig'
 
-import { Chart, Axis, Series, Tooltip, Line, Bar } from '../../../src'
+import { Chart, Axis, Series, Tooltip, Line } from '../../../src'
 
 export default () => (
   <ChartConfig dataType="ordinal">
@@ -12,16 +12,28 @@ export default () => (
       <Chart
         data={data}
         getSeries={data =>
-          data.map((d, i) => ({
-            ...d,
-            scaleID: i % 2,
-          }))
+          data.map(
+            (d, i) =>
+              i % 2 === 0
+                ? {
+                    ...d,
+                    secondaryScaleID: 'First Metric',
+                  }
+                : {
+                    ...d,
+                    data: d.data.map(f => ({
+                      ...f,
+                      y: f.y * 100,
+                    })),
+                    secondaryScaleID: 'Second Metric',
+                  }
+          )
         }
       >
         <Axis primary type="ordinal" />
-        <Axis type="linear" id="0" min={0} position="left" />
-        <Axis type="linear" id="1" min={0} position="right" />
-        <Series type={(s, i) => (i % 2 ? Bar : Line)} />
+        <Axis type="linear" id="First Metric" min={0} position="left" />
+        <Axis type="linear" id="Second Metric" min={0} position="right" />
+        <Series type={Line} />
         <Tooltip />
       </Chart>
     )}

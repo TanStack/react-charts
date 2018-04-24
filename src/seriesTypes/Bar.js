@@ -30,10 +30,10 @@ class Bar extends PureComponent {
     this.hoverDatum = hoverDatum.bind(this)
   }
   static plotDatum = (datum, {
-    xScale, yScale, primaryAxis, secondaryAxis,
+    xAxis, yAxis, primaryAxis, secondaryAxis,
   }) => {
-    datum.x = xScale(datum.xValue)
-    datum.y = yScale(datum.yValue)
+    datum.x = xAxis.scale(datum.xValue)
+    datum.y = yAxis.scale(datum.yValue)
     datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
     datum.base = secondaryAxis.scale(datum.baseValue)
     datum.size = primaryAxis.barSize
@@ -69,10 +69,14 @@ class Bar extends PureComponent {
       // Start of bar
       {
         x: primaryAxis.vertical
-          ? primaryAxis.position === 'left' ? datum.base - 1 : datum.base
+          ? primaryAxis.position === 'left'
+            ? datum.base - 1
+            : datum.base
           : datum.focus.x,
         y: !primaryAxis.vertical
-          ? primaryAxis.position === 'bottom' ? datum.base - 1 : datum.base
+          ? primaryAxis.position === 'bottom'
+            ? datum.base - 1
+            : datum.base
           : datum.focus.y,
       },
     ]
@@ -98,7 +102,7 @@ class Bar extends PureComponent {
       series,
       visibility,
       //
-      primaryAxis,
+      primaryAxes,
       selected,
       hovered,
       interaction,
@@ -107,7 +111,9 @@ class Bar extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const { barOffset } = primaryAxis
+    const { barOffset } = series.primaryScaleID
+      ? primaryAxes.find(d => d.id === series.primaryScaleID)
+      : primaryAxes[0]
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -182,10 +188,10 @@ class Bar extends PureComponent {
 export default Connect(
   () => {
     const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
+      primaryAxes: Selectors.primaryAxes(),
     }
     return state => ({
-      primaryAxis: selectors.primaryAxis(state),
+      primaryAxes: selectors.primaryAxes(state),
       hovered: state.hovered,
       selected: state.selected,
       interaction: state.interaction,

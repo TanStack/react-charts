@@ -5,6 +5,7 @@ import { line } from 'd3-shape'
 //
 import Path from '../primitives/Path'
 import Selectors from '../utils/Selectors'
+import Utils from '../utils/Utils'
 
 const noop = () => null
 
@@ -26,22 +27,24 @@ class Voronoi extends PureComponent {
       hoverMode,
       //
       stackData,
-      primaryAxis,
-      secondaryAxis,
+      primaryAxes,
+      secondaryAxes,
       showVoronoi,
     } = this.props
 
     // Don't render until we have all dependencies
-    if (!stackData || !primaryAxis || !secondaryAxis) {
+    if (!stackData || !primaryAxes.length || !secondaryAxes.length) {
       return null
     }
 
-    const xScale = primaryAxis.vertical ? secondaryAxis : primaryAxis
-    const yScale = primaryAxis.vertical ? primaryAxis : secondaryAxis
+    const primaryVertical = primaryAxes.find(d => d.vertical)
+
+    const xScales = primaryVertical ? secondaryAxes : primaryAxes
+    const yScales = primaryVertical ? primaryAxes : secondaryAxes
 
     const extent = [
-      [xScale.scale.range()[0], yScale.scale.range()[1]],
-      [xScale.scale.range()[1], yScale.scale.range()[0]],
+      [xScales[0].scale.range()[0], yScales[0].scale.range()[1]],
+      [xScales[0].scale.range()[1], yScales[0].scale.range()[0]],
     ]
     const lineFn = line()
 
@@ -75,7 +78,9 @@ class Voronoi extends PureComponent {
 
       stackData.forEach(series => {
         series.data.filter(d => d.defined).forEach(datum => {
-          const axis = modePrimary ? primaryAxis : secondaryAxis
+          const axis = modePrimary
+            ? Utils.getAxisByScaleID(primaryAxes, series.primaryScaleID)
+            : Utils.getAxisByScaleID(secondaryAxes, series.secondaryScaleID)
           const axisKey = String(axis.vertical ? datum.y : datum.x)
 
           datumsByAxis[axisKey] = datumsByAxis[axisKey] || []
@@ -98,8 +103,8 @@ class Voronoi extends PureComponent {
       })
 
       vor = voronoi()
-        .x(d => (primaryAxis.vertical ? 0 : d.x))
-        .y(d => (primaryAxis.vertical ? d.y : 0))
+        .x(d => (primaryVertical ? 0 : d.x))
+        .y(d => (primaryVertical ? d.y : 0))
         .extent(extent)(voronoiData)
     } else {
       return null
@@ -163,13 +168,13 @@ class Voronoi extends PureComponent {
 export default Connect(
   () => {
     const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
-      secondaryAxis: Selectors.secondaryAxis(),
+      primaryAxes: Selectors.primaryAxes(),
+      secondaryAxes: Selectors.secondaryAxes(),
     }
     return state => ({
+      primaryAxes: selectors.primaryAxes(state),
+      secondaryAxes: selectors.secondaryAxes(state),
       stackData: state.stackData,
-      primaryAxis: selectors.primaryAxis(state),
-      secondaryAxis: selectors.secondaryAxis(state),
       hoverMode: state.hoverMode,
       showVoronoi: state.showVoronoi,
     })

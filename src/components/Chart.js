@@ -22,6 +22,8 @@ class Chart extends Component {
     getPrimary: d => (Utils.isArray(d) ? d[0] : d.x),
     getSecondary: d => (Utils.isArray(d) ? d[1] : d.y),
     getR: d => (Utils.isArray(d) ? d[2] : d.r),
+    getPrimaryScaleID: s => s.primaryScaleID,
+    getSecondaryScaleID: s => s.secondaryScaleID,
     interaction: null,
     hoverMode: 'primary',
     groupMode: 'primary',
@@ -136,7 +138,9 @@ class Chart extends Component {
       nextProps.getLabel !== this.props.getLabel ||
       nextProps.getPrimary !== this.props.getPrimary ||
       nextProps.getSecondary !== this.props.getSecondary ||
-      nextProps.getR !== this.props.getR
+      nextProps.getR !== this.props.getR ||
+      nextProps.getPrimaryScaleID !== this.props.getPrimaryScaleID ||
+      nextProps.getSecondaryScaleID !== this.props.getSecondaryScaleID
     ) {
       this.updateDataModel(nextProps)
     }
@@ -160,7 +164,15 @@ class Chart extends Component {
   updateDataModel = props => {
     const { data } = props
     let {
-      getSeries, getData, getLabel, getSeriesID, getPrimary, getSecondary, getR,
+      getSeries,
+      getData,
+      getLabel,
+      getSeriesID,
+      getPrimary,
+      getSecondary,
+      getR,
+      getPrimaryScaleID,
+      getSecondaryScaleID,
     } = props
 
     // Normalize getters
@@ -171,6 +183,8 @@ class Chart extends Component {
     getPrimary = Utils.normalizePathGetter(getPrimary)
     getSecondary = Utils.normalizePathGetter(getSecondary)
     getR = Utils.normalizePathGetter(getR)
+    getPrimaryScaleID = Utils.normalizePathGetter(getPrimaryScaleID)
+    getSecondaryScaleID = Utils.normalizePathGetter(getSecondaryScaleID)
 
     // Check for data
     if (!data) {
@@ -191,11 +205,15 @@ class Chart extends Component {
     const preMaterializedData = series.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
+      const primaryScaleID = getPrimaryScaleID(s, seriesIndex)
+      const secondaryScaleID = getSecondaryScaleID(s, seriesIndex)
       const series = {
         original: s,
         index: seriesIndex,
         id: seriesID,
         label: seriesLabel,
+        primaryScaleID,
+        secondaryScaleID,
         data: getData(s, seriesIndex).map((d, index) => ({
           originalSeries: s,
           seriesIndex,
@@ -394,7 +412,6 @@ class Chart extends Component {
 const ReactChart = Connect(
   () => {
     const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
       gridWidth: Selectors.gridWidth(),
       gridHeight: Selectors.gridHeight(),
       gridX: Selectors.gridX(),
@@ -405,13 +422,13 @@ const ReactChart = Connect(
       data: state.data,
       width: state.width,
       height: state.height,
+      active: state.active,
+      selected: state.selected,
       gridWidth: selectors.gridWidth(state),
       gridHeight: selectors.gridHeight(state),
       gridX: selectors.gridX(state),
       gridY: selectors.gridY(state),
-      active: state.active,
       offset: selectors.offset(state),
-      selected: state.selected,
     })
   },
   {
