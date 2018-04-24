@@ -120,6 +120,7 @@ class Series extends Component {
       materializedData,
       primaryAxis,
       secondaryAxis,
+      secondaryAxis2,
       groupMode,
     } = props
 
@@ -311,6 +312,7 @@ export default Connect(
     const selectors = {
       primaryAxis: Selectors.primaryAxis(),
       secondaryAxis: Selectors.secondaryAxis(),
+      secondaryAxis2: Selectors.secondaryAxis2(),
     }
     return state => ({
       preMaterializedData: state.preMaterializedData,
@@ -318,6 +320,7 @@ export default Connect(
       stackData: state.stackData,
       primaryAxis: selectors.primaryAxis(state),
       secondaryAxis: selectors.secondaryAxis(state),
+      secondaryAxis2: selectors.secondaryAxis2(state),
       hovered: state.hovered,
       selected: state.selected,
       groupMode: state.groupMode,

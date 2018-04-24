@@ -31,6 +31,25 @@ export default {
       }
     ),
 
+  secondaryAxis2: () =>
+    Memoize(
+      state => [state.axes],
+      axes => {
+        if (!axes) return
+        let foundFirst
+        let found
+        Object.keys(axes).forEach(key => {
+          if (!foundFirst && !axes[key].primary) {
+            foundFirst = axes[key]
+          }
+          if (foundFirst && !axes[key].primary) {
+            found = axes[key]
+          }
+        })
+        return found
+      }
+    ),
+
   offset: () =>
     Memoize(
       state => [

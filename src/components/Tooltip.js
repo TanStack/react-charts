@@ -12,9 +12,19 @@ class Tooltip extends PureComponent {
   static defaultProps = {
     focus: 'closest',
     align: 'auto',
-    alignPriority: ['right', 'top', 'left', 'bottom'],
+    alignPriority: [
+      'right',
+      'top',
+      'left',
+      'bottom',
+      'topRight',
+      'topLeft',
+      'bottomLeft',
+      'bottomRight',
+    ],
     children: defaultRenderer,
     padding: 1,
+    tooltipArrowPadding: 7,
   }
   static isHtml = true
   render () {
@@ -35,6 +45,7 @@ class Tooltip extends PureComponent {
       align,
       autoAlign,
       padding,
+      tooltipArrowPadding,
       children,
       render,
       Component: Comp,
@@ -130,41 +141,72 @@ class Tooltip extends PureComponent {
           }
         }
 
-        // console.log(space)
-
-        const comparisons = {
-          left: {
-            sizeCompare: 'width',
-            splitCompare: 'height',
-          },
-          top: {
-            sizeCompare: 'height',
-            splitCompare: 'width',
-          },
-          right: {
-            sizeCompare: 'width',
-            splitCompare: 'height',
-          },
-          bottom: {
-            sizeCompare: 'height',
-            splitCompare: 'width',
-          },
-        }
-
         resolvedAlign = null
 
         alignPriority.forEach(priority => {
-          const { sizeCompare, splitCompare } = comparisons[priority]
           if (resolvedAlign) {
             return
           }
-          if (
-            space[priority] - 7 - padding > tooltipDims[sizeCompare] &&
-            (splitCompare === 'height'
-              ? space.top > tooltipDims.height / 2 && space.bottom > tooltipDims.height / 2
-              : space.left > tooltipDims.width / 2 && space.right > tooltipDims.width / 2)
-          ) {
-            resolvedAlign = priority
+          if (priority === 'left') {
+            if (
+              space.left - tooltipArrowPadding - padding > tooltipDims.width &&
+              space.top > tooltipDims.height / 2 &&
+              space.bottom > tooltipDims.height / 2
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'right') {
+            if (
+              space.right - tooltipArrowPadding - padding > tooltipDims.width &&
+              space.top > tooltipDims.height / 2 &&
+              space.bottom > tooltipDims.height / 2
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'top') {
+            if (
+              space.top - tooltipArrowPadding - padding > tooltipDims.height &&
+              space.left > tooltipDims.width / 2 &&
+              space.right > tooltipDims.width / 2
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'bottom') {
+            if (
+              space.bottom - tooltipArrowPadding - padding > tooltipDims.height &&
+              space.left > tooltipDims.width / 2 &&
+              space.right > tooltipDims.width / 2
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'topLeft') {
+            if (
+              space.top - tooltipArrowPadding > tooltipDims.height &&
+              space.left - tooltipArrowPadding > tooltipDims.width
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'topRight') {
+            if (
+              space.top - tooltipArrowPadding > tooltipDims.height &&
+              space.right - tooltipArrowPadding > tooltipDims.width
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'bottomLeft') {
+            if (
+              space.bottom - tooltipArrowPadding > tooltipDims.height &&
+              space.left - tooltipArrowPadding > tooltipDims.width
+            ) {
+              resolvedAlign = priority
+            }
+          } else if (priority === 'bottomRight') {
+            if (
+              space.bottom - tooltipArrowPadding > tooltipDims.height &&
+              space.right - tooltipArrowPadding > tooltipDims.width
+            ) {
+              resolvedAlign = priority
+            }
           }
         })
       }
@@ -321,7 +363,7 @@ class Tooltip extends PureComponent {
                 <div
                   style={{
                     transform: `translate3d(${alignX}, ${alignY}, 0)`,
-                    padding: `${7 + padding}px`,
+                    padding: `${tooltipArrowPadding + padding}px`,
                     width: 'auto',
                   }}
                 >

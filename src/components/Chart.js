@@ -6,9 +6,12 @@ import { Animate } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
+import * as Debug from '../utils/Debug'
 
 import Rectangle from '../primitives/Rectangle'
 import Voronoi from '../components/Voronoi'
+
+const debug = process.env.NODE_ENV === 'development'
 
 class Chart extends Component {
   static defaultProps = {
@@ -169,8 +172,23 @@ class Chart extends Component {
     getSecondary = Utils.normalizePathGetter(getSecondary)
     getR = Utils.normalizePathGetter(getR)
 
+    // Check for data
+    if (!data) {
+      if (debug) Debug.noData(this)
+      return
+    }
+
+    // getSeries
+    const series = getSeries(data)
+
+    // Check for data
+    if (!series) {
+      if (debug) Debug.noData(this)
+      return
+    }
+
     // First access the data, and provide it to the context
-    const preMaterializedData = getSeries(data).map((s, seriesIndex) => {
+    const preMaterializedData = series.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex)
       const seriesLabel = getLabel(s, seriesIndex)
       const series = {

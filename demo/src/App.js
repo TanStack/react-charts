@@ -20,6 +20,7 @@ import InteractionModes from './stories/InteractionModes.js'
 import DynamicParent from './stories/DynamicParent.js'
 import Sparklines from './stories/Sparklines.js'
 import MixedTypes from './stories/MixedTypes.js'
+import MultipleAxes from './stories/MultipleAxes.js'
 import DoughnutChart from './stories/DoughnutChart.js'
 
 const stories = [
@@ -38,6 +39,7 @@ const stories = [
   { name: 'Dynamic Parent', slug: 'dynamic-parent', component: DynamicParent },
   { name: 'Sparkline', slug: 'sparkline', component: Sparklines },
   { name: 'Mixed Element Types', slug: 'mixed-element-types', component: MixedTypes },
+  { name: 'Multiple Axes', slug: 'multiple-axes', component: MultipleAxes },
   { name: 'Doughnut Chart', slug: 'doughnut', component: DoughnutChart },
 ]
 

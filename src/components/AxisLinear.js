@@ -186,7 +186,9 @@ class Axis extends Component {
         transform={
           position === positionRight
             ? translateX(width)
-            : position === positionBottom ? translateY(height) : undefined
+            : position === positionBottom
+              ? translateY(height)
+              : undefined
         }
         style={{
           pointerEvents: 'none',
@@ -199,7 +201,7 @@ class Axis extends Component {
             this.el = el
           }}
         >
-          {ticks.map(tick => (
+          {ticks.map((tick, i) => (
             <g key={tick} className="tick" transform={transform(scale(tick) || 0)}>
               {/* Render the tick line  */}
               {showTicks ? (
@@ -241,17 +243,21 @@ class Axis extends Component {
                       ? 'central'
                       : position === positionBottom
                         ? 'hanging'
-                        : position === positionTop ? 'alphabetic' : 'central'
+                        : position === positionTop
+                          ? 'alphabetic'
+                          : 'central'
                   }
                   textAnchor={
                     rotation
                       ? 'end'
                       : position === positionRight
                         ? 'start'
-                        : position === positionLeft ? 'end' : 'middle'
+                        : position === positionLeft
+                          ? 'end'
+                          : 'middle'
                   }
                 >
-                  {String(format(tick))}
+                  {String(format(tick, i))}
                 </Text>
               ) : null}
             </g>
@@ -270,9 +276,9 @@ export default Connect(
       primaryAxis: Selectors.primaryAxis(),
     }
     return (state, props) => {
-      const { type, position } = props
+      const { type, position, id: userID } = props
 
-      const id = `${type}_${position}`
+      const id = userID || `${type}_${position}`
 
       return {
         id,
