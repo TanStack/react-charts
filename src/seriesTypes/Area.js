@@ -78,7 +78,7 @@ class Area extends PureComponent {
     series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
     // We also need to decorate each datum in the same fashion
-    series.data.forEach(datum => {
+    series.datums.forEach(datum => {
       datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
         ...series.statusStyles.default,
         ...defaults,
@@ -113,8 +113,8 @@ class Area extends PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    const areaPath = areaFn(series.data)
-    const linePath = lineFn(series.data)
+    const areaPath = areaFn(series.datums)
+    const linePath = lineFn(series.datums)
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -151,7 +151,7 @@ class Area extends PureComponent {
           {...seriesInteractionProps}
         />
         {showOrphans &&
-          series.data.map((datum, i, all) => {
+          series.datums.map((datum, i, all) => {
             // Don't render points on the line, just null data orphans
             const prev = all[i - 1] || { defined: true }
             const next = all[i + 1] || { defined: true }

@@ -86,7 +86,7 @@ class AxisPie extends Component {
     const data = materializedData.map(series => {
       const seriesInnerRadius = innerRadius + seriesRadius * series.index
       const seriesOuterRadius = seriesRadius + seriesInnerRadius
-      const preData = series.data.map(d => ({
+      const preData = series.datums.map(d => ({
         x: d.primary,
         y: d.secondary,
       }))

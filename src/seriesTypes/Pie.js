@@ -63,7 +63,7 @@ class Pie extends PureComponent {
     series.statusStyles = Utils.getStatusStyles(series, getStyles)
 
     // Datum styles
-    series.data.forEach(datum => {
+    series.datums.forEach(datum => {
       datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
         ...series.statusStyles.default,
         // Default color each slice
@@ -104,7 +104,7 @@ class Pie extends PureComponent {
       .padAngle(0.01)
       .value(d => d.primary)
 
-    const pieData = pie(series.data)
+    const pieData = pie(series.datums)
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -118,7 +118,7 @@ class Pie extends PureComponent {
 
     return (
       <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
-        {series.data.map((datum, i) => {
+        {series.datums.map((datum, i) => {
           const status = Utils.datumStatus(series, datum, hovered, selected)
           const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 

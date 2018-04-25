@@ -104,7 +104,7 @@ class Series extends Component {
           return {
             ...series,
             seriesTypeIndex,
-            data: series.data.map(datum => ({
+            data: series.datums.map(datum => ({
               ...datum,
               seriesTypeIndex,
             })),
@@ -141,7 +141,7 @@ class Series extends Component {
     const scaleTotals = secondaryAxes.map(() => ({}))
     materializedData.forEach(series => {
       const axisIndex = Utils.getAxisIndexByScaleID(secondaryAxes, series.secondaryScaleID)
-      series.data.forEach(datum => {
+      series.datums.forEach(datum => {
         scaleTotals[axisIndex][datum.primary] = {
           negative: 0,
           positive: 0,
@@ -158,7 +158,7 @@ class Series extends Component {
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
       return {
         ...series,
-        data: series.data.map(d => {
+        data: series.datums.map(d => {
           const datum = {
             ...d,
             xValue: d[xKey],
@@ -202,7 +202,7 @@ class Series extends Component {
     })
 
     stackData.forEach(series => {
-      series.data.forEach(datum => {
+      series.datums.forEach(datum => {
         datum.series = series
       })
     })
@@ -215,7 +215,7 @@ class Series extends Component {
           `Could not find a [SeriesType].plotDatum() static method for the series Component above (index: ${i})`
         )
       }
-      series.data = series.data.map(d => {
+      series.datums = series.datums.map(d => {
         const primaryAxisIndex = Utils.getAxisIndexByScaleID(primaryAxes, series.primaryScaleID)
         const primaryAxis = primaryAxes[primaryAxisIndex]
         const secondaryAxisIndex = Utils.getAxisIndexByScaleID(
@@ -245,7 +245,7 @@ class Series extends Component {
       const datumsByGrouping = {}
 
       stackData.forEach(series => {
-        series.data.filter(d => d.defined).forEach(datum => {
+        series.datums.filter(d => d.defined).forEach(datum => {
           const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
 
           datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
@@ -254,7 +254,7 @@ class Series extends Component {
       })
 
       stackData.forEach(series => {
-        series.data.forEach(datum => {
+        series.datums.forEach(datum => {
           const axisKey = String(groupMode === modePrimary ? datum.primary : datum.secondary)
 
           datum.group = datumsByGrouping[axisKey]

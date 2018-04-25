@@ -60,7 +60,7 @@ class Line extends PureComponent {
     series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
     // We also need to decorate each datum in the same fashion
-    series.data.forEach(datum => {
+    series.datums.forEach(datum => {
       datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
         ...series.statusStyles.default,
         ...defaults,
@@ -91,7 +91,7 @@ class Line extends PureComponent {
       : {}
     return (
       <g>
-        {series.data.map((datum, i) => {
+        {series.datums.map((datum, i) => {
           if (!datum.defined) {
             return null
           }

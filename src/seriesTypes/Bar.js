@@ -90,7 +90,7 @@ class Bar extends PureComponent {
     series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
     // We also need to decorate each datum in the same fashion
-    series.data.forEach(datum => {
+    series.datums.forEach(datum => {
       datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
         ...series.statusStyles.default,
         ...defaults,
@@ -126,7 +126,7 @@ class Bar extends PureComponent {
       : {}
     return (
       <g className="series bar">
-        {series.data.map((datum, i) => {
+        {series.datums.map((datum, i) => {
           const x = datum ? datum.x : 0
           const y = datum ? datum.y : 0
           const base = datum ? datum.base : 0

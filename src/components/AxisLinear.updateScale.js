@@ -76,7 +76,7 @@ export default function updateScale (props) {
       if (series[scaleIDKey] && series[scaleIDKey] !== id) {
         return
       }
-      const seriesValues = series.data.map(d => d[valueKey])
+      const seriesValues = series.datums.map(d => d[valueKey])
       seriesValues.forEach(d => {
         if (uniqueVals.indexOf(d) === -1) {
           uniqueVals.push(d)
@@ -89,9 +89,9 @@ export default function updateScale (props) {
       if (series[scaleIDKey] && series[scaleIDKey] !== id) {
         return
       }
-      const seriesValues = series.data.map(d => +d[valueKey])
+      const seriesValues = series.datums.map(d => +d[valueKey])
       seriesValues.forEach((d, i) => {
-        const key = groupKey ? series.data[i][groupKey] : i
+        const key = groupKey ? series.datums[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
       })
       min = Math.min(...(typeof min !== 'undefined' ? [min] : []), ...seriesValues)
@@ -104,9 +104,9 @@ export default function updateScale (props) {
       if (series[scaleIDKey] && series[scaleIDKey] !== id) {
         return
       }
-      let seriesValues = series.data.map(d => d[valueKey])
+      let seriesValues = series.datums.map(d => d[valueKey])
       seriesValues.forEach((d, i) => {
-        const key = groupKey ? series.data[i][groupKey] : i
+        const key = groupKey ? series.datums[i][groupKey] : i
         datumValues[key] = [...(datumValues[key] || []), d]
       })
       seriesValues = seriesValues.filter(d => typeof d === 'number')

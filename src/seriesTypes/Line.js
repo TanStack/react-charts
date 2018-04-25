@@ -71,7 +71,7 @@ class Line extends PureComponent {
     series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
 
     // We also need to decorate each datum in the same fashion
-    series.data.forEach(datum => {
+    series.datums.forEach(datum => {
       datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
         ...series.statusStyles.default,
         ...defaults,
@@ -99,7 +99,7 @@ class Line extends PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    const path = lineFn(series.data)
+    const path = lineFn(series.datums)
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -126,7 +126,7 @@ class Line extends PureComponent {
           {...seriesInteractionProps}
         />
         {showPoints &&
-          series.data.map((datum, i) => {
+          series.datums.map((datum, i) => {
             if (!datum.defined) {
               return null
             }
