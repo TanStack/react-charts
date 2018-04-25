@@ -135,7 +135,7 @@ class Bar extends PureComponent {
           let y1
           let x2
           let y2
-          if (primaryAxis.vertical) {
+          if (primaryAxes.find(d => d.vertical)) {
             x1 = base
             x2 = x
             y1 = y + barOffset
