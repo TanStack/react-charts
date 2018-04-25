@@ -21,7 +21,7 @@ export default () => (
                   }
                 : {
                     ...d,
-                    data: d.datums.map(f => ({
+                    datums: d.datums.map(f => ({
                       ...f,
                       y: f.y * 100,
                     })),

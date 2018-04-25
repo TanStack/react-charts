@@ -79,7 +79,7 @@ function makeSeries (i) {
   // const multiplier = Math.round((Math.random() * 10) + Math.round(Math.random() * 50))
   return {
     label: `Series ${i + 1}`,
-    data: _.map(_.range(length), d => {
+    datums: _.map(_.range(length), d => {
       // x: d * multiplier,
       const date = new Date()
       date.setMinutes(startDate.getMinutes() + 30 * d)

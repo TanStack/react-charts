@@ -104,7 +104,7 @@ class Series extends Component {
           return {
             ...series,
             seriesTypeIndex,
-            data: series.datums.map(datum => ({
+            datums: series.datums.map(datum => ({
               ...datum,
               seriesTypeIndex,
             })),
@@ -158,7 +158,7 @@ class Series extends Component {
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
       return {
         ...series,
-        data: series.datums.map(d => {
+        datums: series.datums.map(d => {
           const datum = {
             ...d,
             xValue: d[xKey],
@@ -282,7 +282,7 @@ class Series extends Component {
     const allPoints = []
 
     stackData.forEach(s => {
-      s.data.forEach(d => {
+      s.datums.forEach(d => {
         d.cursorPoints.forEach(p => {
           allPoints.push(p)
         })

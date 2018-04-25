@@ -167,7 +167,10 @@ export default function updateScale (props) {
     bandScale = scaleBand()
       .domain(
         materializedData
-          .reduce((prev, current) => (current.data.length > prev.length ? current.data : prev), [])
+          .reduce(
+            (prev, current) => (current.datums.length > prev.length ? current.datums : prev),
+            []
+          )
           .map(d => d.primary)
       )
       .rangeRound(range, 0.1)

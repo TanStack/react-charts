@@ -37,7 +37,7 @@ class Area extends PureComponent {
     datum.x = xAxis.scale(datum.xValue)
     datum.y = yAxis.scale(datum.yValue)
     datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
-    datum.base = primaryAxis.vertical ? xScale(datum.baseValue) : yScale(datum.baseValue)
+    datum.base = primaryAxis.vertical ? xAxis.scale(datum.baseValue) : yAxis.scale(datum.baseValue)
     // Adjust non-bar elements for ordinal scales
     if (xAxis.type === 'ordinal') {
       datum.x += xAxis.tickOffset

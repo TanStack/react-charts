@@ -173,7 +173,7 @@ function makeSeries (i, dataType) {
   const nullChance = 0
   return {
     label: `Series ${i + 1}`,
-    data: _.map(_.range(length), d => {
+    datums: _.map(_.range(length), d => {
       // x: d * multiplier,
       let x = start + d
       if (dataType === 'time') {

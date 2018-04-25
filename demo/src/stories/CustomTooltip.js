@@ -59,9 +59,10 @@ class Story extends Component {
                         }}
                       >
                         <Chart
-                          data={[
+                          data={datum.group}
+                          getSeries={data => [
                             {
-                              data: datum.group.map(d => ({
+                              datums: data.map(d => ({
                                 x: d.seriesLabel,
                                 y: d.secondary,
                                 color: d.statusStyles.default.fill,

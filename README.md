@@ -201,6 +201,8 @@ For more information on usage and API, see the [`<Axis>` component](#axis)
 
 ## Series Types
 
+React Charts
+
 ## Curve Types
 
 All series types that support lines or curves can be configured to use any [curve function from `d3-shape`](https://github.com/d3/d3-shape#curves) by passing one of the following strings as the `curve` prop to a series component. You may also pass your own curve function directly from d3 or if you're feeling powerful, even create your own!

@@ -16,7 +16,7 @@ const debug = process.env.NODE_ENV === 'development'
 class Chart extends Component {
   static defaultProps = {
     getSeries: d => d,
-    getDatums: d => d.data,
+    getDatums: d => (Utils.isArray(d) ? d : d.datums || d.data),
     getLabel: (d, i) => d.label || `Series ${i + 1}`,
     getSeriesID: (d, i) => i,
     getPrimary: d => (Utils.isArray(d) ? d[0] : d.primary || d.x),
@@ -214,7 +214,7 @@ class Chart extends Component {
         label: seriesLabel,
         primaryScaleID,
         secondaryScaleID,
-        data: getDatums(s, seriesIndex, data).map((d, index) => ({
+        datums: getDatums(s, seriesIndex, data).map((d, index) => ({
           originalSeries: s,
           seriesIndex,
           seriesID,
