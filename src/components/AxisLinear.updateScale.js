@@ -35,7 +35,7 @@ export default function updateScale (props) {
     max: defaultMax,
     hardMin,
     hardMax,
-    primaryScaleID,
+    primaryAxisID,
     // Context
     materializedData,
     width,
@@ -56,7 +56,7 @@ export default function updateScale (props) {
   // Detect some settings
   const valueKey = primary ? 'primary' : 'secondary'
   const groupKey = !primary && 'primary'
-  const scaleIDKey = `${valueKey}ScaleID`
+  const AxisIDKey = `${valueKey}AxisID`
   const vertical = detectVertical(position)
   const RTL = primary && detectRTL(position) // Right to left OR top to bottom
 
@@ -73,7 +73,7 @@ export default function updateScale (props) {
 
   if (type === 'ordinal') {
     materializedData.forEach(series => {
-      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
         return
       }
       const seriesValues = series.datums.map(d => d[valueKey])
@@ -86,7 +86,7 @@ export default function updateScale (props) {
     domain = uniqueVals
   } else if (type === 'time' || type === 'utc') {
     materializedData.forEach(series => {
-      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
         return
       }
       const seriesValues = series.datums.map(d => +d[valueKey])
@@ -101,7 +101,7 @@ export default function updateScale (props) {
   } else {
     // Linear scale
     materializedData.forEach(series => {
-      if (series[scaleIDKey] && series[scaleIDKey] !== id) {
+      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
         return
       }
       let seriesValues = series.datums.map(d => d[valueKey])
@@ -144,7 +144,7 @@ export default function updateScale (props) {
     // Secondary axes are usually dependent on primary axes for orientation, so if the
     // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
     // to match the origin of the primary axis
-    const primaryAxis = primaryScaleID ? primaryAxes[primaryScaleID] : primaryAxes[0]
+    const primaryAxis = primaryAxisID ? primaryAxes[primaryAxisID] : primaryAxes[0]
     if (primaryAxis.RTL) {
       range = [...range].reverse()
     }

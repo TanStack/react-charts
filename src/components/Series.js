@@ -140,7 +140,7 @@ class Series extends Component {
     // "totals" are kept per secondaryAxis and used for bases if secondaryAxis stacking is enabled
     const scaleTotals = secondaryAxes.map(() => ({}))
     materializedData.forEach(series => {
-      const axisIndex = Utils.getAxisIndexByScaleID(secondaryAxes, series.secondaryScaleID)
+      const axisIndex = Utils.getAxisIndexByAxisID(secondaryAxes, series.secondaryAxisID)
       series.datums.forEach(datum => {
         scaleTotals[axisIndex][datum.primary] = {
           negative: 0,
@@ -152,9 +152,9 @@ class Series extends Component {
     // Determine the correct primary and secondary values for each axis
     // Also calculate bases and totals if either axis is stacked
     let stackData = materializedData.map(series => {
-      const primaryAxisIndex = Utils.getAxisIndexByScaleID(primaryAxes, series.primaryScaleID)
+      const primaryAxisIndex = Utils.getAxisIndexByAxisID(primaryAxes, series.primaryAxisID)
       const primaryAxis = primaryAxes[primaryAxisIndex]
-      const secondaryAxisIndex = Utils.getAxisIndexByScaleID(secondaryAxes, series.secondaryScaleID)
+      const secondaryAxisIndex = Utils.getAxisIndexByAxisID(secondaryAxes, series.secondaryAxisID)
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
       return {
         ...series,
@@ -216,16 +216,16 @@ class Series extends Component {
         )
       }
       series.datums = series.datums.map(d => {
-        const primaryAxisIndex = Utils.getAxisIndexByScaleID(primaryAxes, series.primaryScaleID)
+        const primaryAxisIndex = Utils.getAxisIndexByAxisID(primaryAxes, series.primaryAxisID)
         const primaryAxis = primaryAxes[primaryAxisIndex]
-        const secondaryAxisIndex = Utils.getAxisIndexByScaleID(
+        const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
           secondaryAxes,
-          series.secondaryScaleID
+          series.secondaryAxisID
         )
         const secondaryAxis = secondaryAxes[secondaryAxisIndex]
-        const xAxisIndex = Utils.getAxisIndexByScaleID(xAxes, series[`${xKey}ScaleID`])
+        const xAxisIndex = Utils.getAxisIndexByAxisID(xAxes, series[`${xKey}AxisID`])
         const xAxis = xAxes[xAxisIndex]
-        const yAxisIndex = Utils.getAxisIndexByScaleID(yAxes, series[`${yKey}ScaleID`])
+        const yAxisIndex = Utils.getAxisIndexByAxisID(yAxes, series[`${yKey}AxisID`])
         const yAxis = yAxes[yAxisIndex]
 
         // Data for cartesian charts

@@ -310,10 +310,10 @@ class Tooltip extends PureComponent {
     })
     update.visibility = [visibility]
 
-    const primaryAxis = Utils.getAxisByScaleID(primaryAxes, this.focusDatum.series.primaryScaleID)
-    const secondaryAxis = Utils.getAxisByScaleID(
+    const primaryAxis = Utils.getAxisByAxisID(primaryAxes, this.focusDatum.series.primaryAxisID)
+    const secondaryAxis = Utils.getAxisByAxisID(
       secondaryAxes,
-      this.focusDatum.series.secondaryScaleID
+      this.focusDatum.series.secondaryAxisID
     )
 
     return (

@@ -79,8 +79,8 @@ class Voronoi extends PureComponent {
       stackData.forEach(series => {
         series.datums.filter(d => d.defined).forEach(datum => {
           const axis = modePrimary
-            ? Utils.getAxisByScaleID(primaryAxes, series.primaryScaleID)
-            : Utils.getAxisByScaleID(secondaryAxes, series.secondaryScaleID)
+            ? Utils.getAxisByAxisID(primaryAxes, series.primaryAxisID)
+            : Utils.getAxisByAxisID(secondaryAxes, series.secondaryAxisID)
           const axisKey = String(axis.vertical ? datum.y : datum.x)
 
           datumsByAxis[axisKey] = datumsByAxis[axisKey] || []

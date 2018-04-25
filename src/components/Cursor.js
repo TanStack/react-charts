@@ -5,12 +5,16 @@ import { Animate } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 
+const lineBackgroundColor = 'rgba(38, 38, 38, 0.3)'
+const backgroundColor = 'rgba(38, 38, 38, 0.9)'
+
 class Cursor extends PureComponent {
   static defaultProps = {
     children: ({ label }) => <span>{label}</span>,
     snap: true,
     showLine: true,
     showLabel: true,
+    axisID: undefined,
   }
   static isHtml = true
   constructor () {
@@ -24,10 +28,11 @@ class Cursor extends PureComponent {
       snap,
       showLine,
       showLabel,
+      axisID,
       //
       stackData,
-      primaryAxis,
-      secondaryAxis,
+      primaryAxes,
+      secondaryAxes,
       cursor,
       offset: { left, top },
       gridHeight,
@@ -41,7 +46,7 @@ class Cursor extends PureComponent {
     } = this.props
 
     // Don't render until we have all dependencies
-    if (!stackData || !cursor || !primaryAxis || !secondaryAxis) {
+    if (!stackData || !cursor || !primaryAxes.length || !secondaryAxes.length) {
       return null
     }
 
@@ -59,10 +64,10 @@ class Cursor extends PureComponent {
     }
 
     // Determine the axis to use
-    const axis = primary ? primaryAxis : secondaryAxis
+    const axis = Utils.getAxisByAxisID(primary ? primaryAxes : secondaryAxes, axisID)
     const axisKey = primary ? 'primary' : 'secondary'
-    // Determine the sibling axis to use
-    const siblingAxis = primary ? secondaryAxis : primaryAxis
+    // Determine a sibling axis to use for the range
+    const siblingAxis = primary ? secondaryAxes[0] : primaryAxes[0]
     // Get the sibling range
     const siblingRange = siblingAxis.scale.range()
 
@@ -204,7 +209,7 @@ class Cursor extends PureComponent {
                   }px, 0px)`,
                   width: `${animated ? inter.lineWidth : lineWidth}px`,
                   height: `${animated ? inter.lineHeight : lineHeight}px`,
-                  background: 'rgba(0,0,0,.3)',
+                  background: lineBackgroundColor,
                   WebkitBackfaceVisibility: 'hidden',
                 }}
               />
@@ -226,7 +231,7 @@ class Cursor extends PureComponent {
                   style={{
                     padding: '5px',
                     fontSize: '10px',
-                    background: 'rgba(0,0,0,.6)',
+                    background: backgroundColor,
                     color: 'white',
                     borderRadius: '3px',
                     position: 'relative',
@@ -281,8 +286,8 @@ class Cursor extends PureComponent {
 
 export default Connect(() => {
   const selectors = {
-    primaryAxis: Selectors.primaryAxis(),
-    secondaryAxis: Selectors.secondaryAxis(),
+    primaryAxes: Selectors.primaryAxes(),
+    secondaryAxes: Selectors.secondaryAxes(),
     offset: Selectors.offset(),
     gridHeight: Selectors.gridHeight(),
     gridWidth: Selectors.gridWidth(),
@@ -291,8 +296,8 @@ export default Connect(() => {
   }
   return state => ({
     stackData: state.stackData,
-    primaryAxis: selectors.primaryAxis(state),
-    secondaryAxis: selectors.secondaryAxis(state),
+    primaryAxes: selectors.primaryAxes(state),
+    secondaryAxes: selectors.secondaryAxes(state),
     cursor: state.cursor,
     hovered: state.hovered,
     offset: selectors.offset(state),

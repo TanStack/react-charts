@@ -39,6 +39,8 @@ Simple, immersive &amp; interactive charts for React
 
 ```bash
 $ yarn add react-charts
+# or
+$ npm i react-charts --save
 ```
 
 ## Quick Example

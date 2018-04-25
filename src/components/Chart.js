@@ -22,8 +22,8 @@ class Chart extends Component {
     getPrimary: d => (Utils.isArray(d) ? d[0] : d.primary || d.x),
     getSecondary: d => (Utils.isArray(d) ? d[1] : d.secondary || d.y),
     getR: d => (Utils.isArray(d) ? d[2] : d.radius || d.r),
-    getPrimaryScaleID: s => s.primaryScaleID,
-    getSecondaryScaleID: s => s.secondaryScaleID,
+    getPrimaryAxisID: s => s.primaryAxisID,
+    getSecondaryAxisID: s => s.secondaryAxisID,
     interaction: null,
     hoverMode: 'primary',
     groupMode: 'primary',
@@ -139,8 +139,8 @@ class Chart extends Component {
       nextProps.getPrimary !== this.props.getPrimary ||
       nextProps.getSecondary !== this.props.getSecondary ||
       nextProps.getR !== this.props.getR ||
-      nextProps.getPrimaryScaleID !== this.props.getPrimaryScaleID ||
-      nextProps.getSecondaryScaleID !== this.props.getSecondaryScaleID
+      nextProps.getPrimaryAxisID !== this.props.getPrimaryAxisID ||
+      nextProps.getSecondaryAxisID !== this.props.getSecondaryAxisID
     ) {
       this.updateDataModel(nextProps)
     }
@@ -171,8 +171,8 @@ class Chart extends Component {
       getPrimary,
       getSecondary,
       getR,
-      getPrimaryScaleID,
-      getSecondaryScaleID,
+      getPrimaryAxisID,
+      getSecondaryAxisID,
     } = props
 
     // Normalize getters
@@ -183,8 +183,8 @@ class Chart extends Component {
     getPrimary = Utils.normalizePathGetter(getPrimary)
     getSecondary = Utils.normalizePathGetter(getSecondary)
     getR = Utils.normalizePathGetter(getR)
-    getPrimaryScaleID = Utils.normalizePathGetter(getPrimaryScaleID)
-    getSecondaryScaleID = Utils.normalizePathGetter(getSecondaryScaleID)
+    getPrimaryAxisID = Utils.normalizePathGetter(getPrimaryAxisID)
+    getSecondaryAxisID = Utils.normalizePathGetter(getSecondaryAxisID)
 
     // Check for data
     if (!data) {
@@ -205,15 +205,15 @@ class Chart extends Component {
     const preMaterializedData = series.map((s, seriesIndex) => {
       const seriesID = getSeriesID(s, seriesIndex, data)
       const seriesLabel = getLabel(s, seriesIndex, data)
-      const primaryScaleID = getPrimaryScaleID(s, seriesIndex, data)
-      const secondaryScaleID = getSecondaryScaleID(s, seriesIndex, data)
+      const primaryAxisID = getPrimaryAxisID(s, seriesIndex, data)
+      const secondaryAxisID = getSecondaryAxisID(s, seriesIndex, data)
       const series = {
         original: s,
         index: seriesIndex,
         id: seriesID,
         label: seriesLabel,
-        primaryScaleID,
-        secondaryScaleID,
+        primaryAxisID,
+        secondaryAxisID,
         datums: getDatums(s, seriesIndex, data).map((d, index) => ({
           originalSeries: s,
           seriesIndex,
@@ -286,6 +286,7 @@ class Chart extends Component {
           style={{
             width,
             height,
+            overflow: 'hidden',
             ...style,
           }}
         >

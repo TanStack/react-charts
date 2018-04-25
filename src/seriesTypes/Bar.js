@@ -111,8 +111,8 @@ class Bar extends PureComponent {
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const { barOffset } = series.primaryScaleID
-      ? primaryAxes.find(d => d.id === series.primaryScaleID)
+    const { barOffset } = series.primaryAxisID
+      ? primaryAxes.find(d => d.id === series.primaryAxisID)
       : primaryAxes[0]
 
     const interactiveSeries = interaction === 'series'

@@ -28,7 +28,7 @@ class Story extends Component {
         <br />
         <br />
 
-        {_.range(3).map((d, i) => (
+        {_.range(2).map((d, i) => (
           <div
             key={i}
             style={{
@@ -36,29 +36,16 @@ class Story extends Component {
               margin: i % 2 ? '0 50px' : '0',
             }}
           >
-            <div>
-              <ResizableBox width={500} height={300}>
-                <Chart data={data}>
-                  <Axis primary type="time" position="bottom" />
-                  <Axis type="linear" position="left" stacked cursor={{}} />
-                  <Series type={Area} />
-                  <Cursor primary />
-                  <Cursor />
-                  <Tooltip />
-                </Chart>
-              </ResizableBox>
-            </div>
-            <div
-              style={{
-                position: 'relative',
-                alignSelf: 'stretch',
-                width: '50px',
-                background: 'white',
-                border: '1px solid black',
-              }}
-            >
-              Z-index test
-            </div>
+            <ResizableBox width={500} height={300}>
+              <Chart data={data}>
+                <Axis primary type="time" position="bottom" />
+                <Axis type="linear" position="left" stacked cursor={{}} />
+                <Series type={Area} />
+                <Cursor primary />
+                <Cursor />
+                <Tooltip />
+              </Chart>
+            </ResizableBox>
           </div>
         ))}
       </div>
