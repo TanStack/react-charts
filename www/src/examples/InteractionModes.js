@@ -1,0 +1,30 @@
+import React, { Component } from 'react'
+//
+import Sidebar from 'components/Sidebar'
+import ChartConfig from './components/ChartConfig'
+import { Chart, Axis, Series, Tooltip } from '../../../src'
+
+class Story extends Component {
+  render () {
+    return (
+      <Sidebar>
+        <div>
+          <ChartConfig show={['elementType', 'interaction', 'tooltipPosition']}>
+            {({
+ elementType, interaction, tooltipPosition, data,
+}) => (
+  <Chart data={data} interaction={interaction}>
+    <Axis primary type="time" position="bottom" />
+    <Axis type="linear" position="left" stacked />
+    <Series type={elementType} />
+    <Tooltip focus={tooltipPosition} />
+  </Chart>
+            )}
+          </ChartConfig>
+        </div>
+      </Sidebar>
+    )
+  }
+}
+
+export default () => <Story />

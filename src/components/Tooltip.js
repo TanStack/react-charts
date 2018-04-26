@@ -332,6 +332,8 @@ class Tooltip extends PureComponent {
           let renderedChildren
           const renderProps = {
             datum: this.focusDatum,
+            getStyle: datum =>
+              datum.getStatusStyle(Utils.getStatus(datum, rest.hovered, rest.selected)),
             primaryAxes,
             secondaryAxes,
             primaryAxis,
@@ -413,7 +415,7 @@ class Tooltip extends PureComponent {
 
 function defaultRenderer (props) {
   const {
-    datum, primaryAxis, secondaryAxis, formatSecondary,
+    datum, primaryAxis, secondaryAxis, formatSecondary, getStyle,
   } = props
 
   if (!datum) {
@@ -457,11 +459,11 @@ function defaultRenderer (props) {
         }}
       >
         <tbody>
-          {sortedGroupDatums.map((d, i) => (
+          {sortedGroupDatums.map((sortedDatum, i) => (
             <tr
               key={i}
               style={{
-                opacity: d === datum ? 1 : 0.8,
+                opacity: sortedDatum === datum ? 1 : 0.8,
               }}
             >
               <td
@@ -476,22 +478,22 @@ function defaultRenderer (props) {
                   style={{
                     width: '12px',
                     height: '12px',
-                    backgroundColor: d.statusStyles.hovered.fill,
+                    backgroundColor: getStyle(sortedDatum).fill,
                     borderRadius: '50px',
                     boxShadow:
-                      d === datum
+                      sortedDatum === datum
                         ? '0 0 0 2px white, 0 0 8px rgba(0,0,0,.5)'
                         : '0 0 0 1px white, 0 0 8px rgba(0,0,0,.5)',
                   }}
                 />
               </td>
-              <td>{d.seriesLabel}: &nbsp;</td>
+              <td>{sortedDatum.seriesLabel}: &nbsp;</td>
               <td
                 style={{
                   textAlign: 'right',
                 }}
               >
-                {resolvedFormatSecondary(d.secondary)}
+                {resolvedFormatSecondary(sortedDatum.secondary)}
               </td>
             </tr>
           ))}

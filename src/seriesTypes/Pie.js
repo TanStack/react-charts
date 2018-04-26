@@ -48,16 +48,19 @@ class Pie extends PureComponent {
     return datum
   }
   static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
-    // Series styles
-    series.statusStyles = Utils.getStatusStyles(series, getStyles)
+    series.getStatusStyle = status => {
+      series.style = Utils.getStatusStyle(series, status, getStyles)
+      return series.style
+    }
 
-    // Datum styles
+    // We also need to decorate each datum in the same fashion
     series.datums.forEach(datum => {
-      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
-        ...series.statusStyles.default,
-        // Default color each slice
-        color: defaultColors[datum.index % (defaultColors.length - 1)],
-      })
+      datum.getStatusStyle = status => {
+        datum.style = Utils.getStatusStyle(datum, status, getDataStyles, {
+          color: defaultColors[datum.index % (defaultColors.length - 1)],
+        })
+        return datum.style
+      }
     })
   }
   render () {
@@ -74,8 +77,7 @@ class Pie extends PureComponent {
       return
     }
 
-    const status = Utils.seriesStatus(series, hovered, selected)
-    const style = Utils.getStatusStyle(status, series.statusStyles)
+    const style = series.getStatusStyle(Utils.getStatus(series, hovered, selected))
 
     const primaryAxis = primaryAxes[0]
 
@@ -92,8 +94,7 @@ class Pie extends PureComponent {
     return (
       <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
         {series.datums.map((datum, i) => {
-          const status = Utils.datumStatus(series, datum, hovered, selected)
-          const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
+          const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
 
           const interactiveDatum = interaction === 'element'
           const datumInteractionProps = interactiveDatum

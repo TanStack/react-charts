@@ -293,7 +293,7 @@ class Series extends Component {
     stackData = stackData.map((series, i) => {
       if (debug && !series.Component.buildStyles) {
         throw new Error(
-          `Could not find a SeriesType.plotDatum() static method for the series Component above (index: ${i})`
+          `Could not find a SeriesType.buildStyles() static method for the series Component above (index: ${i})`
         )
       }
       const result = series.Component.buildStyles(series, {
@@ -303,16 +303,6 @@ class Series extends Component {
       })
 
       return result || series
-    })
-
-    const allPoints = []
-
-    stackData.forEach(s => {
-      s.datums.forEach(d => {
-        d.cursorPoints.forEach(p => {
-          allPoints.push(p)
-        })
-      })
     })
 
     this.props.dispatch(

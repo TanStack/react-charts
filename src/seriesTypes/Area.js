@@ -75,14 +75,17 @@ class Area extends PureComponent {
       color: defaultColors[series.index % (defaultColors.length - 1)],
     }
 
-    series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
+    series.getStatusStyle = status => {
+      series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
+      return series.style
+    }
 
     // We also need to decorate each datum in the same fashion
     series.datums.forEach(datum => {
-      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
-        ...series.statusStyles.default,
-        ...defaults,
-      })
+      datum.getStatusStyle = status => {
+        datum.style = Utils.getStatusStyle(datum, status, getDataStyles, defaults)
+        return datum.style
+      }
     })
   }
   render () {
@@ -97,8 +100,8 @@ class Area extends PureComponent {
       interaction,
     } = this.props
 
-    const status = Utils.seriesStatus(series, hovered, selected)
-    const style = Utils.getStatusStyle(status, series.statusStyles)
+    const status = Utils.getStatus(series, hovered, selected)
+    const style = series.getStatusStyle(status)
 
     const areaFn = area()
       .x(d => d.x)
@@ -150,48 +153,51 @@ class Area extends PureComponent {
           opacity={visibility}
           {...seriesInteractionProps}
         />
-        {showOrphans &&
-          series.datums.map((datum, i, all) => {
-            // Don't render points on the line, just null data orphans
-            const prev = all[i - 1] || { defined: true }
-            const next = all[i + 1] || { defined: true }
-            if (!datum.defined || (prev.defined && next.defined)) {
-              return null
-            }
-            const status = Utils.datumStatus(series, datum, hovered, selected)
-            const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
+        {series.datums.map((datum, i, all) => {
+          // Don't render points on the line, just null data orphans
+          const prev = all[i - 1] || { defined: true }
+          const next = all[i + 1] || { defined: true }
+          if (!datum.defined || (prev.defined && next.defined)) {
+            return null
+          }
 
-            const interactiveDatum = interaction === 'element'
-            const datumInteractionProps = interactiveDatum
-              ? {
-                  onClick: () => this.selectDatum(datum),
-                  onMouseEnter: () => this.hoverDatum(datum),
-                  onMouseMove: () => this.hoverDatum(datum),
-                  onMouseLeave: () => this.hoverDatum(null),
-                }
-              : {}
+          const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
 
-            return (
-              <Line
-                style={{
-                  ...lineDefaultStyle,
-                  ...style,
-                  ...style.line,
-                  ...dataStyle,
-                  ...dataStyle.line,
-                  pointerEvents: interactiveSeries ? 'all' : 'none',
-                }}
-                key={i}
-                x1={!datum || Number.isNaN(datum.x) ? null : datum.x}
-                y1={!datum || Number.isNaN(datum.base) ? null : datum.base}
-                x2={!datum || Number.isNaN(datum.x) ? null : datum.x}
-                y2={!datum || Number.isNaN(datum.y) ? null : datum.y}
-                opacity={visibility}
-                {...seriesInteractionProps}
-                {...datumInteractionProps}
-              />
-            )
-          })}
+          if (!showOrphans) {
+            return null
+          }
+
+          const interactiveDatum = interaction === 'element'
+          const datumInteractionProps = interactiveDatum
+            ? {
+                onClick: () => this.selectDatum(datum),
+                onMouseEnter: () => this.hoverDatum(datum),
+                onMouseMove: () => this.hoverDatum(datum),
+                onMouseLeave: () => this.hoverDatum(null),
+              }
+            : {}
+
+          return (
+            <Line
+              style={{
+                ...lineDefaultStyle,
+                ...style,
+                ...style.line,
+                ...dataStyle,
+                ...dataStyle.line,
+                pointerEvents: interactiveSeries ? 'all' : 'none',
+              }}
+              key={i}
+              x1={!datum || Number.isNaN(datum.x) ? null : datum.x}
+              y1={!datum || Number.isNaN(datum.base) ? null : datum.base}
+              x2={!datum || Number.isNaN(datum.x) ? null : datum.x}
+              y2={!datum || Number.isNaN(datum.y) ? null : datum.y}
+              opacity={visibility}
+              {...seriesInteractionProps}
+              {...datumInteractionProps}
+            />
+          )
+        })}
       </g>
     )
   }

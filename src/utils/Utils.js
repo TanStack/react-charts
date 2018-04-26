@@ -4,9 +4,7 @@ import RAF from 'raf'
 export default {
   requestAnimationFrame: RAF,
   throttle,
-  seriesStatus,
-  datumStatus,
-  getStatusStyles,
+  getStatus,
   getStatusStyle,
   getMultiFocus,
   getClosestPoint,
@@ -31,26 +29,7 @@ function throttle (func) {
   }
 }
 
-function seriesStatus (series, hovered, selected) {
-  const status = {
-    selected: false,
-    hovered: false,
-    otherSelected: false,
-    otherHovered: false,
-  }
-  if (selected && selected.active && selected.series) {
-    status.selected = selected.series.id === series.id
-    status.otherSelected = !status.selected
-  }
-  if (hovered && hovered.active && hovered.series) {
-    status.hovered = hovered.series.id === series.id
-    status.otherHovered = !status.hovered
-  }
-
-  return status
-}
-
-function datumStatus (series, datum, hovered, selected) {
+function getStatus (item, hovered, selected) {
   const status = {
     selected: false,
     hovered: false,
@@ -58,88 +37,78 @@ function datumStatus (series, datum, hovered, selected) {
     otherHovered: false,
   }
 
-  let d
-  if (selected && selected.active && selected.datums) {
-    for (let i = 0; i < selected.datums.length; i++) {
-      d = selected.datums[i]
-      if (d.seriesID === series.id && d.index === datum.index) {
-        status.selected = true
-        break
+  if (item.series) {
+    let d
+    if (selected && selected.active && selected.datums) {
+      for (let i = 0; i < selected.datums.length; i++) {
+        d = selected.datums[i]
+        if (d.seriesID === item.series.id && d.index === item.index) {
+          status.selected = true
+          break
+        }
       }
+      status.otherSelected = !status.selected
     }
-    status.otherSelected = !status.selected
-  }
-  if (hovered && hovered.active && hovered.datums) {
-    for (let i = 0; i < hovered.datums.length; i++) {
-      d = hovered.datums[i]
-      if (d.seriesID === series.id && d.index === datum.index) {
-        status.hovered = true
-        break
+    if (hovered && hovered.active && hovered.datums) {
+      for (let i = 0; i < hovered.datums.length; i++) {
+        d = hovered.datums[i]
+        if (d.seriesID === item.series.id && d.index === item.index) {
+          status.hovered = true
+          break
+        }
       }
+      status.otherHovered = !status.hovered
     }
-    status.otherHovered = !status.hovered
+  } else {
+    if (selected && selected.active && selected.series) {
+      status.selected = selected.series.id === item.id
+      status.otherSelected = !status.selected
+    }
+    if (hovered && hovered.active && hovered.series) {
+      status.hovered = hovered.series.id === item.id
+      status.otherHovered = !status.hovered
+    }
   }
 
   return status
 }
 
-function getStatusStyles (item, decorator, defaults = {}) {
-  const styles = {
-    default: decorator(item),
-    selected: decorator({
-      ...item,
-      selected: true,
-    }),
-    selectedHovered: decorator({
-      ...item,
-      selected: true,
-      hovered: true,
-    }),
-    selectedOtherHovered: decorator({
-      ...item,
-      selected: true,
-      otherHovered: true,
-    }),
-    otherSelected: decorator({
-      ...item,
-      otherSelected: true,
-    }),
-    otherSelectedHovered: decorator({
-      ...item,
-      otherSelected: true,
-      hovered: true,
-    }),
-    otherSelectedOtherHovered: decorator({
-      ...item,
-      otherHovered: true,
-      otherSelected: true,
-    }),
-    hovered: decorator({
-      ...item,
-      hovered: true,
-    }),
-    otherHovered: decorator({
-      ...item,
-      otherHovered: true,
-    }),
+function getStatusStyle (item, status, decorator, defaults) {
+  if (item.series) {
+    defaults = {
+      ...defaults,
+      ...item.series.style,
+    }
   }
-  Object.keys(styles).forEach(key => {
-    styles[key] = materializeStyles(styles[key], defaults)
-  })
-  return styles
-}
-
-function getStatusStyle (status, styles) {
   if (status.selected) {
     if (status.hovered) {
-      return styles.selectedHovered
+      return materializeStyles(
+        decorator({
+          ...item,
+          selected: true,
+          hovered: true,
+        }),
+        defaults
+      )
     }
-    return styles.selected
+    return materializeStyles(
+      decorator({
+        ...item,
+        selected: true,
+      }),
+      defaults
+    )
   }
   if (status.hovered) {
-    return styles.hovered
+    return materializeStyles(
+      decorator({
+        ...item,
+        hovered: true,
+      }),
+      defaults
+    )
   }
-  return styles.default
+  return materializeStyles(decorator(item), defaults)
 }
 
 function getMultiFocus ({

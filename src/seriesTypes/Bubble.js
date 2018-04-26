@@ -57,14 +57,17 @@ class Line extends PureComponent {
       color: defaultColors[series.index % (defaultColors.length - 1)],
     }
 
-    series.statusStyles = Utils.getStatusStyles(series, getStyles, defaults)
+    series.getStatusStyle = status => {
+      series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
+      return series.style
+    }
 
     // We also need to decorate each datum in the same fashion
     series.datums.forEach(datum => {
-      datum.statusStyles = Utils.getStatusStyles(datum, getDataStyles, {
-        ...series.statusStyles.default,
-        ...defaults,
-      })
+      datum.getStatusStyle = status => {
+        datum.style = Utils.getStatusStyle(datum, status, getDataStyles, defaults)
+        return datum.style
+      }
     })
   }
   render () {
@@ -77,8 +80,7 @@ class Line extends PureComponent {
       interaction,
     } = this.props
 
-    const status = Utils.seriesStatus(series, hovered, selected)
-    const style = Utils.getStatusStyle(status, series.statusStyles)
+    const style = series.getStatusStyle(Utils.getStatus(series, hovered, selected))
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -95,8 +97,7 @@ class Line extends PureComponent {
           if (!datum.defined) {
             return null
           }
-          const status = Utils.datumStatus(series, datum, hovered, selected)
-          const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
+          const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
 
           const interactiveDatum = interaction === 'element'
           const datumInteractionProps = interactiveDatum
