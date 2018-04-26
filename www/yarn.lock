@@ -2609,8 +2609,8 @@ ejs@^2.5.7:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.9.tgz#7ba254582a560d267437109a68354112475b0ce5"
 
 electron-to-chromium@^1.2.7, electron-to-chromium@^1.3.30:
-  version "1.3.42"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.42.tgz#95c33bf01d0cc405556aec899fe61fd4d76ea0f9"
+  version "1.3.43"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.43.tgz#8902e524625a231b33b5093268c4d3e18b5656a7"
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -5701,8 +5701,8 @@ preact-transition-group@^1.1.0:
   resolved "https://registry.yarnpkg.com/preact-transition-group/-/preact-transition-group-1.1.1.tgz#f0a49327ea515ece34ea2be864c4a7d29e5d6e10"
 
 preact@^8.2.7:
-  version "8.2.7"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-8.2.7.tgz#316249fb678cd5e93e7cee63cea7bfb62dbd6814"
+  version "8.2.8"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-8.2.8.tgz#cf6cfa1d746541e31875f39dfadd9c76e932d29c"
 
 prelude-ls@~1.1.2:
   version "1.1.2"
@@ -6033,9 +6033,9 @@ react-smackdown@^0.8.8:
     react-syntax-highlighter "^7.0.0"
     showdown "^1.8.6"
 
-react-static@^5.8.2:
-  version "5.8.3"
-  resolved "https://registry.yarnpkg.com/react-static/-/react-static-5.8.3.tgz#9de1d219612ffaa7420ec1fae892f204cb747dda"
+react-static@^3.8.5:
+  version "3.8.5"
+  resolved "https://registry.yarnpkg.com/react-static/-/react-static-3.8.5.tgz#643cf9e308886bfb1b2d954bc25c18662efd647e"
   dependencies:
     "@types/react" "^16.0.18"
     "@types/react-helmet" "^5.0.3"

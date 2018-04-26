@@ -17,7 +17,7 @@
     "react-resizable": "^1.7.5",
     "react-router": "^4.2.0",
     "react-smackdown": "^0.8.8",
-    "react-static": "^5.8.2",
+    "react-static": "^3.8.5",
     "styled-components": "^3"
   },
   "devDependencies": {
