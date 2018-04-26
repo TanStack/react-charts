@@ -310,10 +310,13 @@ class Tooltip extends PureComponent {
     })
     update.visibility = [visibility]
 
-    const primaryAxis = Utils.getAxisByAxisID(primaryAxes, this.focusDatum.series.primaryAxisID)
+    const primaryAxis = Utils.getAxisByAxisID(
+      primaryAxes,
+      this.focusDatum ? this.focusDatum.series.primaryAxisID : null
+    )
     const secondaryAxis = Utils.getAxisByAxisID(
       secondaryAxes,
-      this.focusDatum.series.secondaryAxisID
+      this.focusDatum ? this.focusDatum.series.secondaryAxisID : null
     )
 
     return (
@@ -424,18 +427,19 @@ function defaultRenderer (props) {
         ? secondaryAxis.format(Math.round(val * 100) / 100)
         : secondaryAxis.format(val))
 
-  const sortedGroupDatums = secondaryAxis.stacked
-    ? [...datum.group].reverse()
-    : [...datum.group]
-      .sort((a, b) => {
-        if (a.secondary < b.secondary) {
-          return -1
-        } else if (a.secondary > b.secondary) {
-          return 1
-        }
-        return 0
-      })
-      .reverse()
+  const sortedGroupDatums =
+    secondaryAxis && secondaryAxis.stacked
+      ? [...datum.group].reverse()
+      : [...datum.group]
+        .sort((a, b) => {
+          if (a.secondary < b.secondary) {
+            return -1
+          } else if (a.secondary > b.secondary) {
+            return 1
+          }
+          return 0
+        })
+        .reverse()
 
   return (
     <div>
@@ -491,7 +495,7 @@ function defaultRenderer (props) {
               </td>
             </tr>
           ))}
-          {secondaryAxis.stacked && datum.group.length > 1 ? (
+          {secondaryAxis && secondaryAxis.stacked && datum.group.length > 1 ? (
             <tr>
               <td
                 style={{

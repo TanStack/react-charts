@@ -10,15 +10,15 @@ class Brush extends PureComponent {
   }
   static isHtml = true
   componentWillReceiveProps (nextProps) {
-    const { onSelect, cursor, primaryAxis } = this.props
+    const { onSelect, cursor, primaryAxes } = this.props
     if (this.props.cursor && nextProps.cursor.released !== this.props.cursor.released) {
       if (Math.abs(cursor.sourceX - cursor.x) < 20) {
         return
       }
       onSelect({
         cursor: nextProps.cursor.released,
-        start: primaryAxis.scale.invert(cursor.sourceX),
-        end: primaryAxis.scale.invert(cursor.x),
+        start: primaryAxes[0].scale.invert(cursor.sourceX),
+        end: primaryAxes[0].scale.invert(cursor.x),
       })
     }
   }
@@ -55,16 +55,14 @@ class Brush extends PureComponent {
 
 export default Connect(() => {
   const selectors = {
-    primaryAxis: Selectors.primaryAxis(),
-    secondaryAxis: Selectors.secondaryAxis(),
+    primaryAxes: Selectors.primaryAxes(),
     offset: Selectors.offset(),
     gridHeight: Selectors.gridHeight(),
     gridX: Selectors.gridX(),
     gridY: Selectors.gridY(),
   }
   return state => ({
-    primaryAxis: selectors.primaryAxis(state),
-    secondaryAxis: selectors.secondaryAxis(state),
+    primaryAxes: selectors.primaryAxes(state),
     cursor: state.cursor,
     offset: selectors.offset(state),
     gridHeight: selectors.gridHeight(state),

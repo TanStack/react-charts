@@ -6974,8 +6974,8 @@ react-router@^4.2.0:
     warning "^3.0.0"
 
 react-state@^2.0.1:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/react-state/-/react-state-2.1.2.tgz#459ba75d8130ab4d86e68a5e191e211f07987590"
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-state/-/react-state-2.2.0.tgz#be43f7030d713f74757672e04439080b6d9d6bfc"
   dependencies:
     hoist-non-react-statics "^2.5.0"
 

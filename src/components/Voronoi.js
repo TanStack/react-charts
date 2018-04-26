@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
 import { voronoi } from 'd3-voronoi'
-import { line } from 'd3-shape'
+import { line, arc as makeArc } from 'd3-shape'
 //
 import Path from '../primitives/Path'
 import Selectors from '../utils/Selectors'
@@ -12,6 +12,7 @@ const noop = () => null
 const modeClosestPoint = 'closestPoint'
 const modePrimary = 'primary'
 const modeSecondary = 'secondary'
+const modeRadial = 'radial'
 
 class Voronoi extends PureComponent {
   static defaultProps = {
@@ -47,6 +48,59 @@ class Voronoi extends PureComponent {
       [xScales[0].scale.range()[1], yScales[0].scale.range()[0]],
     ]
     const lineFn = line()
+
+    const VoronoiElement = ({ children, ...rest }) => (
+      <g className="Voronoi" onMouseLeave={() => this.onHover(null)} {...rest}>
+        {children}
+      </g>
+    )
+
+    if (hoverMode === modeRadial) {
+      const primaryAxis = primaryAxes[0]
+
+      return (
+        <VoronoiElement
+          transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}
+        >
+          {stackData.map(series => (
+            <React.Fragment key={series.index}>
+              {series.datums.map((datum, i) => {
+                const arc = makeArc()
+                  .startAngle(datum.arcData.startAngle)
+                  .endAngle(datum.arcData.endAngle)
+                  .padAngle(0)
+                  .padRadius(0)
+                  .innerRadius(
+                    !series.index
+                      ? 0
+                      : datum.arcData.innerRadius - datum.arcData.seriesPaddingRadius / 2
+                  )
+                  .outerRadius(
+                    series.index === stackData.length - 1
+                      ? Math.max(primaryAxis.width, primaryAxis.height)
+                      : datum.arcData.outerRadius + datum.arcData.seriesPaddingRadius / 2
+                  )
+                  .cornerRadius(0)
+
+                return (
+                  <Path
+                    key={i}
+                    d={arc()}
+                    className="action-voronoi"
+                    onMouseEnter={() => this.onHover([datum])}
+                    style={{
+                      fill: 'rgba(0,0,0,.2)',
+                      stroke: 'rgba(255,255,255,.5)',
+                      opacity: showVoronoi ? 1 : 0,
+                    }}
+                  />
+                )
+              })}
+            </React.Fragment>
+          ))}
+        </VoronoiElement>
+      )
+    }
 
     let vor
     let polygons = null
@@ -113,7 +167,7 @@ class Voronoi extends PureComponent {
     polygons = vor.polygons()
 
     return (
-      <g className="Voronoi" onMouseLeave={() => this.onHover(null)}>
+      <VoronoiElement>
         {polygons.map((points, i) => {
           const path = lineFn(points)
           return (
@@ -130,7 +184,7 @@ class Voronoi extends PureComponent {
             />
           )
         })}
-      </g>
+      </VoronoiElement>
     )
   }
   onHover (datums) {

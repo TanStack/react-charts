@@ -145,19 +145,6 @@ class Chart extends Component {
       this.updateDataModel(nextProps)
     }
   }
-  shouldComponentUpdate (nextProps) {
-    if (
-      nextProps.style !== this.props.style ||
-      nextProps.width !== this.props.width ||
-      nextProps.height !== this.props.height ||
-      nextProps.gridX !== this.props.gridX ||
-      nextProps.gridY !== this.props.gridY ||
-      nextProps.children !== this.props.children
-    ) {
-      return true
-    }
-    return false
-  }
   componentDidUpdate (prevProps) {
     RAF(() => this.measure(prevProps))
   }
@@ -433,6 +420,7 @@ const ReactChart = Connect(
     })
   },
   {
+    pure: false,
     filter: (oldState, newState, meta) => meta.type !== 'cursor',
   }
 )(Chart)

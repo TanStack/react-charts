@@ -133,8 +133,8 @@ class Line extends PureComponent {
             const status = Utils.datumStatus(series, datum, hovered, selected)
             const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-            const iteractiveDatum = interaction === 'element'
-            const datumInteractionProps = iteractiveDatum
+            const interactiveDatum = interaction === 'element'
+            const datumInteractionProps = interactiveDatum
               ? {
                   onClick: () => this.selectDatum(datum),
                   onMouseEnter: () => this.hoverDatum(datum),
@@ -154,7 +154,7 @@ class Line extends PureComponent {
                   ...style.circle,
                   ...dataStyle,
                   ...dataStyle.circle,
-                  pointerEvents: iteractiveDatum ? 'all' : 'none',
+                  pointerEvents: interactiveDatum ? 'all' : 'none',
                 }}
                 opacity={visibility}
                 {...seriesInteractionProps}

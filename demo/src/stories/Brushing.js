@@ -16,6 +16,7 @@ export default class extends Component {
   }
   render () {
     const { min, max } = this.state
+
     return (
       <div>
         <button

@@ -209,25 +209,50 @@ class Series extends Component {
 
     // Now, scale the datapoints to their axis coordinates
     // (mutation is okay here, since we have already made a materialized copy)
+    // const plotSeriesSeries = stackData.find(
+    //   series => series.Component && series.Component.plotSeries
+    // )
+    // if (plotSeriesSeries) {
+    //   const primaryAxisIndex = Utils.getAxisIndexByAxisID(
+    //     primaryAxes,
+    //     plotSeriesSeries.primaryAxisID
+    //   )
+    //   const primaryAxis = primaryAxes[primaryAxisIndex]
+    //   const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
+    //     secondaryAxes,
+    //     plotSeriesSeries.secondaryAxisID
+    //   )
+    //   const secondaryAxis = secondaryAxes[secondaryAxisIndex]
+    //   const xAxisIndex = Utils.getAxisIndexByAxisID(xAxes, plotSeriesSeries[`${xKey}AxisID`])
+    //   const xAxis = xAxes[xAxisIndex]
+    //   const yAxisIndex = Utils.getAxisIndexByAxisID(yAxes, plotSeriesSeries[`${yKey}AxisID`])
+    //   const yAxis = yAxes[yAxisIndex]
+    //   stackData = plotSeriesSeries.plotSeries(stackData, {
+    //     primaryAxis,
+    //     secondaryAxis,
+    //     xAxis,
+    //     yAxis,
+    //   })
+    //   // If a series type defines a plotSeries method, then use that
+    // } else {
+    // Otherwise, use the plotDatum method on each series
     stackData.forEach((series, i) => {
       if (debug && !series.Component.plotDatum) {
         throw new Error(
           `Could not find a [SeriesType].plotDatum() static method for the series Component above (index: ${i})`
         )
       }
-      series.datums = series.datums.map(d => {
-        const primaryAxisIndex = Utils.getAxisIndexByAxisID(primaryAxes, series.primaryAxisID)
-        const primaryAxis = primaryAxes[primaryAxisIndex]
-        const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
-          secondaryAxes,
-          series.secondaryAxisID
-        )
-        const secondaryAxis = secondaryAxes[secondaryAxisIndex]
-        const xAxisIndex = Utils.getAxisIndexByAxisID(xAxes, series[`${xKey}AxisID`])
-        const xAxis = xAxes[xAxisIndex]
-        const yAxisIndex = Utils.getAxisIndexByAxisID(yAxes, series[`${yKey}AxisID`])
-        const yAxis = yAxes[yAxisIndex]
 
+      const primaryAxisIndex = Utils.getAxisIndexByAxisID(primaryAxes, series.primaryAxisID)
+      const primaryAxis = primaryAxes[primaryAxisIndex]
+      const secondaryAxisIndex = Utils.getAxisIndexByAxisID(secondaryAxes, series.secondaryAxisID)
+      const secondaryAxis = secondaryAxes[secondaryAxisIndex]
+      const xAxisIndex = Utils.getAxisIndexByAxisID(xAxes, series[`${xKey}AxisID`])
+      const xAxis = xAxes[xAxisIndex]
+      const yAxisIndex = Utils.getAxisIndexByAxisID(yAxes, series[`${yKey}AxisID`])
+      const yAxis = yAxes[yAxisIndex]
+
+      series.datums = series.datums.map(d => {
         // Data for cartesian charts
         const result = series.Component.plotDatum(d, {
           primaryAxis,
@@ -239,6 +264,7 @@ class Series extends Component {
         return result || d
       })
     })
+    // }
 
     // Do any data grouping ahead of time
     if ([modePrimary, modeSecondary].includes(groupMode)) {

@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { pie as makePie, arc as makeArc } from 'd3-shape'
 
 import { Animate } from '../components/ReactMove'
 import Selectors from '../utils/Selectors'
@@ -9,12 +8,6 @@ import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/int
 
 //
 import Path from '../primitives/Path'
-
-const Arc = makeArc
-
-const arcDefaultStyle = {
-  r: 2,
-}
 
 class Pie extends PureComponent {
   static defaultProps = {
@@ -28,29 +21,25 @@ class Pie extends PureComponent {
         interaction: 'element',
       }))
     }
-    if (!props.hoverMode) {
-      this.props.dispatch(state => ({
-        ...state,
-        hoverMode: 'primary',
-      }))
-    }
+    this.props.dispatch(state => ({
+      ...state,
+      hoverMode: 'radial',
+    }))
     this.selectSeries = selectSeries.bind(this)
     this.hoverSeries = hoverSeries.bind(this)
     this.selectDatum = selectDatum.bind(this)
     this.hoverDatum = hoverDatum.bind(this)
   }
   static plotDatum = (datum, { primaryAxis }) => {
-    // Set the focus point
-    const coords = primaryAxis.scale(datum)
-
-    // Add the x and y coords to the datum
+    // Decorate the datum with the scale info
     datum = {
       ...datum,
-      ...coords,
+      ...primaryAxis.scale(datum),
+      defined: Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue),
     }
 
     // Set the focus point
-    datum.focus = coords
+    datum.focus = { x: datum.x, y: datum.y }
 
     // Set the cursor points (used in voronoi)
     datum.cursorPoints = [datum.focus]
@@ -74,37 +63,21 @@ class Pie extends PureComponent {
   render () {
     const {
       series,
-      stackData, // we need this to figure out which level we're on
       //
       selected,
       hovered,
       interaction,
-      primaryAxis,
+      primaryAxes,
     } = this.props
+
+    if (!primaryAxes.length) {
+      return
+    }
 
     const status = Utils.seriesStatus(series, hovered, selected)
     const style = Utils.getStatusStyle(status, series.statusStyles)
 
-    const {
-      radius, cutoutPercentage, cornerRadius, arcPadding, seriesPadding,
-    } = primaryAxis
-
-    const outerRadius = radius
-    const innerRadius = radius * cutoutPercentage
-    const totalRadius = outerRadius - innerRadius
-    const seriesRadius = totalRadius / stackData.length
-    const seriesInnerRadius = innerRadius + seriesRadius * series.index
-    const seriesOuterRadius = seriesInnerRadius + seriesRadius
-
-    const arcPaddingRadius = outerRadius * arcPadding * 20
-    const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
-
-    const pie = makePie()
-      .sort(null)
-      .padAngle(0.01)
-      .value(d => d.primary)
-
-    const pieData = pie(series.datums)
+    const primaryAxis = primaryAxes[0]
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -122,8 +95,8 @@ class Pie extends PureComponent {
           const status = Utils.datumStatus(series, datum, hovered, selected)
           const dataStyle = Utils.getStatusStyle(status, datum.statusStyles)
 
-          const iteractiveDatum = interaction === 'element'
-          const datumInteractionProps = iteractiveDatum
+          const interactiveDatum = interaction === 'element'
+          const datumInteractionProps = interactiveDatum
             ? {
                 onClick: () => this.selectDatum(datum),
                 onMouseEnter: () => this.hoverDatum(datum),
@@ -132,26 +105,16 @@ class Pie extends PureComponent {
               }
             : {}
 
-          const arc = Arc()
-            .startAngle(pieData[i].startAngle)
-            .endAngle(pieData[i].endAngle)
-            .padAngle(pieData[i].padAngle)
-            .padRadius(arcPaddingRadius)
-            .innerRadius(seriesInnerRadius + seriesPaddingRadius)
-            .outerRadius(seriesOuterRadius)
-            .cornerRadius(cornerRadius)
-
           return (
             <Path
               key={i}
-              d={arc()}
+              d={datum.arc()}
               style={{
-                ...arcDefaultStyle,
                 ...style,
                 ...style.arc,
                 ...dataStyle,
                 ...dataStyle.arc,
-                pointerEvents: iteractiveDatum ? 'all' : 'none',
+                pointerEvents: interactiveDatum ? 'all' : 'none',
               }}
               {...seriesInteractionProps}
               {...datumInteractionProps}
@@ -166,10 +129,10 @@ class Pie extends PureComponent {
 export default Connect(
   () => {
     const selectors = {
-      primaryAxis: Selectors.primaryAxis(),
+      primaryAxes: Selectors.primaryAxes(),
     }
     return state => ({
-      primaryAxis: selectors.primaryAxis(state),
+      primaryAxes: selectors.primaryAxes(state),
       hovered: state.hovered,
       selected: state.selected,
       interaction: state.interaction,

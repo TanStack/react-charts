@@ -35,7 +35,8 @@ class Story extends Component {
               <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Cursor primary />
-              <Tooltip align="bottom" focus={['center', 'chartBottom']}>
+              <Cursor />
+              <Tooltip>
                 {({ datum, primaryAxis, secondaryAxis }) =>
                   datum ? (
                     <div
@@ -70,8 +71,8 @@ class Story extends Component {
                             },
                           ]}
                         >
-                          <Axis primary type="ordinal" position="bottom" />
-                          <Axis type="linear" position="left" stacked />
+                          <Axis type="ordinal" primary />
+                          <Axis type="linear" stacked />
                           <Series
                             type={Bar}
                             getDataStyles={datum => ({

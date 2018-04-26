@@ -23,7 +23,7 @@ export default () => (
                     ...d,
                     datums: d.datums.map(f => ({
                       ...f,
-                      y: f.y * 100,
+                      y: f.y * 5,
                     })),
                     secondaryScaleID: 'Second Metric',
                   }
