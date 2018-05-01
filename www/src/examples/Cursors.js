@@ -5,7 +5,7 @@ import { ResizableBox } from 'react-resizable'
 import Sidebar from 'components/Sidebar'
 import Code from 'components/Code'
 
-import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../../../src'
+import { Chart, Axis, Series, Tooltip, Cursor, Area } from 'react-charts'
 
 let sourceCode
 

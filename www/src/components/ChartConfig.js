@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 //
-import { Line, Area, Bar, Bubble } from '../../../src'
+import { Line, Area, Bar, Bubble } from 'react-charts'
 
 const types = {
   line: Line,

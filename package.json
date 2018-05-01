@@ -12,7 +12,8 @@
     "build": "nwb build-react-component",
     "serve": "serve demo/dist -p 3000 -s",
     "startDocs": "cd www && yarn start",
-    "buildDocsProd": "yarn link && cd www && yarn && yarn link react-charts && yarn build",
+    "buildDocsProd":
+      "yarn build && yarn link && cd www && yarn && yarn link react-charts && yarn build",
     "serveDocs": "cd www && yarn serve"
   },
   "dependencies": {
