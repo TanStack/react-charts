@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 //
@@ -128,7 +127,7 @@ export default class ChartConfig extends Component {
           </div>
         )}
 
-        {_.range(count).map(
+        {[...new Array(count)].map(
           (d, i) =>
             resizable && true ? (
               <ResizableBox key={i} width={width} height={height}>
@@ -152,7 +151,9 @@ export default class ChartConfig extends Component {
 }
 
 function makeData (dataType) {
-  return _.map(_.range(Math.max(Math.round(Math.random() * 5), 1)), d => makeSeries(d, dataType))
+  return [...new Array(Math.max(Math.round(Math.random() * 5), 1))].map(d =>
+    makeSeries(d, dataType)
+  )
 }
 
 function makeSeries (i, dataType) {
@@ -168,7 +169,7 @@ function makeSeries (i, dataType) {
   const nullChance = 0
   return {
     label: `Series ${i + 1}`,
-    datums: _.map(_.range(length), d => {
+    datums: [...new Array(length)].map(d => {
       // x: d * multiplier,
       let x = start + d
       if (dataType === 'time') {

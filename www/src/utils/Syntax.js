@@ -1,15 +1,15 @@
 const syntax = JSON.parse(process.env.SMACKDOWN_SYNTAX)
 
-let theme
+let theme = {}
 const languages = []
 
 if (syntax.theme) {
   if (syntax.highlighter === 'prism') {
     // eslint-disable-next-line
-    theme = require(`react-syntax-highlighter/dist/styles/prism/${syntax.theme}`).default
+    theme = require(`react-syntax-highlighter/styles/prism/${syntax.theme}`).default
   } else {
     // eslint-disable-next-line
-    theme = require(`react-syntax-highlighter/dist/styles/hljs/${syntax.theme}`).default
+    theme = require(`react-syntax-highlighter/styles/hljs/${syntax.theme}`).default
   }
 }
 
@@ -18,8 +18,7 @@ if (syntax.languages) {
     languages.push({
       name,
       // eslint-disable-next-line
-      syntax: require(`react-syntax-highlighter/dist/languages/${syntax.highlighter}/${name}`)
-        .default,
+      syntax: require(`react-syntax-highlighter/languages/${syntax.highlighter}/${name}`).default,
     })
   )
 }

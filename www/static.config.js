@@ -141,6 +141,7 @@ process.env.REPO_VERSION = require(nodePath.resolve(packagePath)).version
 
 export default {
   disableDuplicateRoutesWarning: true,
+  // bundleAnalyzer: true,
   getSiteData: () => ({
     // This is the sidebar menu on docs pages
     pages: menuToRoutes(menu),
