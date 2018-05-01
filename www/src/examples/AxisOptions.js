@@ -15,7 +15,7 @@ export default () => (
     <ChartConfig show={['primaryAxisShow', 'secondaryAxisShow']}>
       {({ data, primaryAxisShow, secondaryAxisShow }) => (
         // @source sourceCode
-        <Chart data={data} getPrimary={d => new Date(d.x)}>
+        <Chart data={data}>
           <Axis primary type="time" position="bottom" show={primaryAxisShow} />
           <Axis type="linear" position="left" show={secondaryAxisShow} />
           <Series type={Line} />

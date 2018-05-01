@@ -161,6 +161,7 @@ function makeSeries (i, dataType) {
   const startDate = new Date()
   startDate.setSeconds(0)
   startDate.setMilliseconds(0)
+  console.log(startDate)
   const length = 5 + Math.round(Math.random() * 15)
   const min = 0
   const max = 100
@@ -169,11 +170,11 @@ function makeSeries (i, dataType) {
   const nullChance = 0
   return {
     label: `Series ${i + 1}`,
-    datums: [...new Array(length)].map(d => {
+    datums: [...new Array(length)].map((d, i) => {
       // x: d * multiplier,
       let x = start + d
       if (dataType === 'time') {
-        x = new Date(startDate.getTime() + 60 * 1000 * 30 * d)
+        x = new Date(startDate.getTime() + 60 * 1000 * 30 * i)
       }
       const distribution = 1.1
       const y = Math.random() < nullChance ? null : min + Math.round(Math.random() * (max - min))

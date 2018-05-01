@@ -20,9 +20,9 @@ const docsPath = '../docs' // will probably be '../docs'
 // TODO: Choose your smackdown settings for syntax highlighting
 
 process.env.SMACKDOWN_SYNTAX = JSON.stringify({
-  showLineNumbers: true,
+  showLineNumbers: false,
   highlighter: 'hljs',
-  theme: 'atom-one-light',
+  theme: 'atom-one-dark',
   languages: ['javascript'],
 })
 

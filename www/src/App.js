@@ -8,6 +8,8 @@ import Routes from 'react-static-routes'
 import 'react-resizable/css/styles.css'
 
 injectGlobal`
+  @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
   body {
     font-family: 'Roboto', sans-serif;
     font-weight: normal;
@@ -40,6 +42,20 @@ injectGlobal`
   .react-resizable-handle {
     bottom: -10px;
     right: -10px;
+  }
+
+  pre, code {
+    font-family: 'Roboto Mono', monospace;
+    user-select: text;
+  }
+
+  pre {
+    font-size: 13px;
+    border-radius: 5px;
+  }
+
+  .react-syntax-highlighter-line-number {
+    pointer-events: none;
   }
 `
 
