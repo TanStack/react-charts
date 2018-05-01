@@ -1,4 +1,4 @@
 {
-  "extends": "react-static/.babelrc",
-  "plugins": ["babel-plugin-styled-components"]
+  "presets": ["./node_modules/react-static/babel-preset-react-static.js"],
+  "plugins": ["source", "babel-plugin-styled-components"]
 }

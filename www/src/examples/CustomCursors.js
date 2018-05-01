@@ -3,7 +3,11 @@ import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 import Sidebar from 'components/Sidebar'
+import Code from 'components/Code'
+
 import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../../../src'
+
+let sourceCode
 
 class Story extends Component {
   constructor () {
@@ -30,8 +34,9 @@ class Story extends Component {
           <br />
           <br />
 
-          {_.range(1).map((d, i) => (
-            <ResizableBox key={i} width={500} height={300}>
+          <ResizableBox width={500} height={300}>
+            {
+              // @source sourceCode
               <Chart data={data}>
                 <Axis primary type="time" position="bottom" />
                 <Axis type="linear" position="left" stacked />
@@ -58,8 +63,10 @@ class Story extends Component {
                 </Cursor>
                 <Tooltip />
               </Chart>
-            </ResizableBox>
-          ))}
+              // @source sourceCode
+            }
+          </ResizableBox>
+          <Code source={sourceCode} />
         </div>
       </Sidebar>
     )

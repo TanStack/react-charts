@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 //
-import { Line, Area, Bar, Bubble } from '../../../../src'
+import { Line, Area, Bar, Bubble } from '../../../src'
 
 const types = {
   line: Line,
@@ -90,31 +90,26 @@ export default class ChartConfig extends Component {
     } = this.props
     return (
       <div>
-        {optionKeys.map(
-          option =>
-            show.indexOf(option) > -1 ? (
-              <div key={option}>
-                {option}: &nbsp;
-                <select
-                  value={this.state[option]}
-                  onChange={({ target: { value } }) =>
-                    this.setState(() => ({
-                      [option]: typeof options[option][0] === 'boolean' ? value === 'true' : value,
-                    }))
-                  }
-                >
-                  {options[option].map(d => (
-                    <option value={d} key={d.toString()}>
-                      {d.toString()}
-                    </option>
-                  ))}
-                </select>
-                <br />
-              </div>
-            ) : (
-              <div key={option} />
-            )
-        )}
+        {optionKeys.filter(option => show.indexOf(option) > -1).map(option => (
+          <div key={option}>
+            {option}: &nbsp;
+            <select
+              value={this.state[option]}
+              onChange={({ target: { value } }) =>
+                this.setState(() => ({
+                  [option]: typeof options[option][0] === 'boolean' ? value === 'true' : value,
+                }))
+              }
+            >
+              {options[option].map(d => (
+                <option value={d} key={d.toString()}>
+                  {d.toString()}
+                </option>
+              ))}
+            </select>
+            <br />
+          </div>
+        ))}
 
         {canRandomize && (
           <div>
@@ -135,7 +130,7 @@ export default class ChartConfig extends Component {
 
         {_.range(count).map(
           (d, i) =>
-            resizable ? (
+            resizable && true ? (
               <ResizableBox key={i} width={width} height={height}>
                 {(render || children)({
                   ...this.state,

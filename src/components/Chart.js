@@ -261,8 +261,6 @@ class Chart extends Component {
         ref={handleRef}
         className="ReactChart"
         style={{
-          width: 0,
-          height: 0,
           position: 'relative',
         }}
       >

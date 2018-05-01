@@ -3,14 +3,18 @@ import React from 'react'
 //
 
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
 
 import { Chart, Axis, Series, Tooltip, Line } from '../../../src'
+
+let sourceCode
 
 export default () => (
   <Sidebar>
     <ChartConfig dataType="ordinal">
       {({ data }) => (
+        // @source sourceCode
         <Chart
           data={data}
           getSeries={data =>
@@ -19,7 +23,7 @@ export default () => (
                 i % 2 === 0
                   ? {
                       ...d,
-                      secondaryScaleID: 'First Metric',
+                      secondaryAxisID: 'First Metric',
                     }
                   : {
                       ...d,
@@ -27,7 +31,7 @@ export default () => (
                         ...f,
                         y: f.y * 5,
                       })),
-                      secondaryScaleID: 'Second Metric',
+                      secondaryAxisID: 'Second Metric',
                     }
             )
           }
@@ -38,7 +42,9 @@ export default () => (
           <Series type={Line} />
           <Tooltip />
         </Chart>
+        // @source sourceCode
       )}
     </ChartConfig>
+    <Code source={sourceCode} />
   </Sidebar>
 )

@@ -1,27 +1,32 @@
 import React, { Component } from 'react'
 //
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
+
 import { Chart, Axis, Series, Tooltip } from '../../../src'
+
+let sourceCode
 
 class Story extends Component {
   render () {
     return (
       <Sidebar>
-        <div>
-          <ChartConfig show={['elementType', 'interaction', 'tooltipPosition']}>
-            {({
+        <ChartConfig show={['elementType', 'interaction', 'tooltipPosition']}>
+          {({
  elementType, interaction, tooltipPosition, data,
 }) => (
+            // @source sourceCode
   <Chart data={data} interaction={interaction}>
     <Axis primary type="time" position="bottom" />
     <Axis type="linear" position="left" stacked />
     <Series type={elementType} />
     <Tooltip focus={tooltipPosition} />
   </Chart>
-            )}
-          </ChartConfig>
-        </div>
+            // @source sourceCode
+          )}
+        </ChartConfig>
+        <Code source={sourceCode} />
       </Sidebar>
     )
   }

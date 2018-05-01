@@ -3,9 +3,12 @@ import React, { Component } from 'react'
 //
 
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
 
 import { Chart, Axis, Series, Line, Brush, Tooltip, Cursor } from '../../../src'
+
+let sourceCode
 
 export default class extends Component {
   constructor () {
@@ -36,6 +39,7 @@ export default class extends Component {
           <br />
           <ChartConfig dataType="time">
             {({ data }) => (
+              // @source sourceCode
               <Chart data={data}>
                 <Axis primary type="time" position="bottom" hardMin={min} hardMax={max} />
                 <Axis type="linear" position="left" />
@@ -52,9 +56,11 @@ export default class extends Component {
                 />
                 <Tooltip />
               </Chart>
+              // @source sourceCode
             )}
           </ChartConfig>
         </div>
+        <Code source={sourceCode} />
       </Sidebar>
     )
   }

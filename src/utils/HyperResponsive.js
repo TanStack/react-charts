@@ -1,12 +1,9 @@
-import React, { Component } from 'react'
+import React from 'react'
 //
 import Utils from '../utils/Utils'
+import onResize from './detectElementResize'
 
-if (typeof document !== 'undefined') {
-  require('javascript-detect-element-resize')
-}
-
-export default class HyperResponsive extends Component {
+export default class HyperResponsive extends React.Component {
   constructor () {
     super()
     this.state = {
@@ -15,14 +12,14 @@ export default class HyperResponsive extends Component {
     }
   }
   componentDidMount () {
-    if (!this.resizeListener && this.el) {
-      this.resizeListener = window.addResizeListener(this.el.parentElement, this.resize)
+    if (!this.resizeListener && this.el && this.el.parentElement) {
+      this.resizeListener = onResize(this.el.parentElement, this.resize)
     }
     this.resize()
   }
   componentWillUnmount () {
     if (this.resizeListener) {
-      window.removeResizeListener(this.el.parentElement, this.resize)
+      this.resizeListener()
     }
   }
   resize = Utils.throttle(() => {

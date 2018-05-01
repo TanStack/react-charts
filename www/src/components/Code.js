@@ -6,17 +6,17 @@ import Smackdown from 'react-smackdown'
 
 import Syntax from 'utils/Syntax'
 
-const renderers = {
-  a: ({ href = '', ...rest }) => {
-    const to = href.startsWith('/') ? href.replace('.md', '') : href
-    return <Link to={to} {...rest} />
-  },
-}
-
 class Markdown extends PureComponent {
   render () {
     const { source } = this.props
-    return <Smackdown source={source} syntax={Syntax} renderers={renderers} />
+    if (!source) {
+      return null
+    }
+    const mdSource = `\`\`\`javascript
+${source || ''}
+\`\`\``
+    console.log(mdSource)
+    return <Smackdown source={mdSource} syntax={Syntax} />
   }
 }
 

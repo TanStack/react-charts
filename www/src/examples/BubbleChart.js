@@ -3,14 +3,18 @@ import React from 'react'
 //
 
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
 
 import { Chart, Axis, Series, Tooltip, Bubble, Cursor } from '../../../src'
+
+let sourceCode
 
 export default () => (
   <Sidebar>
     <ChartConfig>
       {({ data }) => (
+        // @source sourceCode
         <Chart data={data}>
           <Axis primary type="time" position="bottom" />
           <Axis type="linear" position="left" />
@@ -19,7 +23,9 @@ export default () => (
           <Cursor />
           <Tooltip />
         </Chart>
+        // @source sourceCode
       )}
     </ChartConfig>
+    <Code source={sourceCode} />
   </Sidebar>
 )

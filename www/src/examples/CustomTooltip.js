@@ -3,7 +3,11 @@ import _ from 'lodash'
 import { ResizableBox } from 'react-resizable'
 //
 import Sidebar from 'components/Sidebar'
+import Code from 'components/Code'
+
 import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from '../../../src'
+
+let sourceCode
 
 class Story extends Component {
   constructor () {
@@ -26,12 +30,12 @@ class Story extends Component {
           >
             Randomize Data
           </button>
-
           <br />
           <br />
+          <ResizableBox width={900} height={300}>
+            {
+              // @source sourceCode
 
-          {_.range(1).map((d, i) => (
-            <ResizableBox key={i} width={900} height={300}>
               <Chart data={data}>
                 <Axis primary type="time" position="bottom" />
                 <Axis type="linear" position="left" stacked />
@@ -39,9 +43,7 @@ class Story extends Component {
                 <Cursor primary />
                 <Cursor />
                 <Tooltip>
-                  {({
- datum, primaryAxis, secondaryAxis, getStyle,
-}) =>
+                  {({ datum, primaryAxis, getStyle }) =>
                     datum ? (
                       <div
                         style={{
@@ -101,7 +103,10 @@ class Story extends Component {
                   }
                 </Tooltip>
               </Chart>
-            </ResizableBox>
+              // @source sourceCode
+            }
+          </ResizableBox>
+          <Code source={sourceCode} />
           ))}
         </div>
       </Sidebar>

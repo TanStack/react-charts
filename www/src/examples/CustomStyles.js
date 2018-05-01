@@ -1,9 +1,12 @@
 import React, { Component } from 'react'
 //
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
 
 import { Chart, Axis, Series, Tooltip } from '../../../src'
+
+let sourceCode
 
 class Story extends Component {
   render () {
@@ -12,6 +15,7 @@ class Story extends Component {
         <div>
           <ChartConfig interaction="axis" show={['elementType', 'interaction']}>
             {({ elementType, interaction, data }) => (
+              // @source sourceCode
               <Chart data={data} interaction={interaction}>
                 <Axis primary type="time" position="bottom" />
                 <Axis type="linear" position="left" stacked />
@@ -41,8 +45,10 @@ class Story extends Component {
                 />
                 <Tooltip />
               </Chart>
+              // @source sourceCode
             )}
           </ChartConfig>
+          <Code source={sourceCode} />
         </div>
       </Sidebar>
     )

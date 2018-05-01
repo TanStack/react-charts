@@ -3,14 +3,18 @@ import React from 'react'
 //
 
 import Sidebar from 'components/Sidebar'
-import ChartConfig from './components/ChartConfig'
+import ChartConfig from 'components/ChartConfig'
+import Code from 'components/Code'
 
 import { Chart, Axis, Series, Tooltip, Line, Cursor } from '../../../src'
+
+let sourceCode
 
 export default () => (
   <Sidebar>
     <ChartConfig resizable={false}>
       {({ data }) => (
+        // @source sourceCode
         <div
           style={{
             width: '500px',
@@ -51,7 +55,9 @@ export default () => (
             </Chart>
           </div>
         </div>
+        // @source sourceCode
       )}
     </ChartConfig>
+    <Code source={sourceCode} />
   </Sidebar>
 )

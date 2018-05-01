@@ -5,6 +5,8 @@ import { hot } from 'react-hot-loader'
 //
 import Routes from 'react-static-routes'
 
+import 'react-resizable/css/styles.css'
+
 injectGlobal`
   body {
     font-family: 'Roboto', sans-serif;
@@ -28,6 +30,10 @@ injectGlobal`
   }
 
   img {
+    max-width: 100%;
+  }
+
+  .react-resizable {
     max-width: 100%;
   }
 `
