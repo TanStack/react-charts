@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react'
-import { Link } from 'react-static'
 import Smackdown from 'react-smackdown'
 
 //
@@ -15,7 +14,6 @@ class Markdown extends PureComponent {
     const mdSource = `\`\`\`javascript
 ${source || ''}
 \`\`\``
-    console.log(mdSource)
     return <Smackdown source={mdSource} syntax={Syntax} />
   }
 }

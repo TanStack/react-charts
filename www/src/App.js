@@ -36,6 +36,11 @@ injectGlobal`
   .react-resizable {
     max-width: 100%;
   }
+
+  .react-resizable-handle {
+    bottom: -10px;
+    right: -10px;
+  }
 `
 
 const AppStyles = styled.div`
