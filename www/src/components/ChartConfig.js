@@ -151,8 +151,8 @@ export default class ChartConfig extends Component {
 }
 
 function makeData (dataType) {
-  return [...new Array(Math.max(Math.round(Math.random() * 5), 1))].map(d =>
-    makeSeries(d, dataType)
+  return [...new Array(Math.max(Math.round(Math.random() * 5), 1))].map((d, i) =>
+    makeSeries(i, dataType)
   )
 }
 
@@ -170,7 +170,6 @@ function makeSeries (i, dataType) {
   return {
     label: `Series ${i + 1}`,
     datums: [...new Array(length)].map((d, i) => {
-      // x: d * multiplier,
       let x = start + d
       if (dataType === 'time') {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * i)
