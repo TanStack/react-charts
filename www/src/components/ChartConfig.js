@@ -169,8 +169,8 @@ function makeSeries (i, dataType) {
   const nullChance = 0
   return {
     label: `Series ${i + 1}`,
-    datums: [...new Array(length)].map((d, i) => {
-      let x = start + d
+    datums: [...new Array(length)].map((_, i) => {
+      let x = start + i
       if (dataType === 'time') {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * i)
       }
