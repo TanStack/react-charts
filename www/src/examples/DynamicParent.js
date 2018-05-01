@@ -17,13 +17,11 @@ export default () => (
         // @source sourceCode
         <div
           style={{
-            width: '500px',
             display: 'flex',
             flexDirection: 'column',
             padding: '12px',
             border: '2px solid black',
             height: '400px',
-            overflow: 'auto',
           }}
         >
           <div
@@ -39,10 +37,8 @@ export default () => (
             style={{
               flex: 2,
               border: '5px solid blue',
-              padding: '20px',
               maxHeight: '400px',
               margin: '10px',
-              boxSizing: 'border-box',
             }}
           >
             <Chart data={data}>

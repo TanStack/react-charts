@@ -33,6 +33,8 @@ export default class HyperResponsive extends React.Component {
       boxSizing,
       borderTopWidth,
       borderLeftWidth,
+      borderRightWidth,
+      borderBottomWidth,
     } = computed
 
     let { width, height } = computed
@@ -43,12 +45,13 @@ export default class HyperResponsive extends React.Component {
     if (boxSizing === 'border-box') {
       width -= parseInt(paddingLeft)
       width -= parseInt(paddingRight)
-
       height -= parseInt(paddingTop)
       height -= parseInt(paddingBottom)
 
       width -= parseInt(borderLeftWidth)
+      width -= parseInt(borderRightWidth)
       height -= parseInt(borderTopWidth)
+      height -= parseInt(borderBottomWidth)
     }
 
     this.setState({
