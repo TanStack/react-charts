@@ -161,7 +161,6 @@ function makeSeries (i, dataType) {
   const startDate = new Date()
   startDate.setSeconds(0)
   startDate.setMilliseconds(0)
-  console.log(startDate)
   const length = 5 + Math.round(Math.random() * 15)
   const min = 0
   const max = 100
