@@ -4,7 +4,7 @@ import ChartConfig from 'components/ChartConfig'
 import Sidebar from 'components/Sidebar'
 import Code from 'components/Code'
 
-import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from 'react-charts'
+import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from '../../../src'
 
 let sourceCode
 
@@ -61,7 +61,7 @@ class Story extends Component {
                           <Axis type="linear" stacked />
                           <Series
                             type={Bar}
-                            getDataStyles={datum => ({
+                            getDatumStyles={datum => ({
                               color: datum.original.color,
                             })}
                           />

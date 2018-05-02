@@ -80,35 +80,14 @@ function getStatusStyle (item, status, decorator, defaults) {
       ...item.series.style,
     }
   }
-  if (status.selected) {
-    if (status.hovered) {
-      return materializeStyles(
-        decorator({
-          ...item,
-          selected: true,
-          hovered: true,
-        }),
-        defaults
-      )
-    }
-    return materializeStyles(
-      decorator({
-        ...item,
-        selected: true,
-      }),
-      defaults
-    )
-  }
-  if (status.hovered) {
-    return materializeStyles(
-      decorator({
-        ...item,
-        hovered: true,
-      }),
-      defaults
-    )
-  }
-  return materializeStyles(decorator(item), defaults)
+
+  return materializeStyles(
+    decorator({
+      ...item,
+      ...status,
+    }),
+    defaults
+  )
 }
 
 function getMultiFocus ({

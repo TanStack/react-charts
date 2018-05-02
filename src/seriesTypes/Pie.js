@@ -47,7 +47,7 @@ class Pie extends PureComponent {
     // Return the new datum
     return datum
   }
-  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+  static buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
     series.getStatusStyle = status => {
       series.style = Utils.getStatusStyle(series, status, getStyles)
       return series.style
@@ -56,7 +56,7 @@ class Pie extends PureComponent {
     // We also need to decorate each datum in the same fashion
     series.datums.forEach(datum => {
       datum.getStatusStyle = status => {
-        datum.style = Utils.getStatusStyle(datum, status, getDataStyles, {
+        datum.style = Utils.getStatusStyle(datum, status, getDatumStyles, {
           color: defaultColors[datum.index % (defaultColors.length - 1)],
         })
         return datum.style

@@ -474,18 +474,18 @@ function defaultRenderer (props) {
                   marginRight: '5px',
                 }}
               >
-                <div
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    backgroundColor: getStyle(sortedDatum).fill,
-                    borderRadius: '50px',
-                    boxShadow:
-                      sortedDatum === datum
-                        ? '0 0 0 2px white, 0 0 8px rgba(0,0,0,.5)'
-                        : '0 0 0 1px white, 0 0 8px rgba(0,0,0,.5)',
-                  }}
-                />
+                <svg width="16" height="16">
+                  <circle
+                    cx="8"
+                    cy="8"
+                    style={{
+                      ...getStyle(sortedDatum),
+                      r: 7,
+                      stroke: 'white',
+                      strokeWidth: sortedDatum === datum ? 2 : 1,
+                    }}
+                  />
+                </svg>
               </td>
               <td>{sortedDatum.seriesLabel}: &nbsp;</td>
               <td

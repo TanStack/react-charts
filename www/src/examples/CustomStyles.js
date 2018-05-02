@@ -4,7 +4,7 @@ import Sidebar from 'components/Sidebar'
 import ChartConfig from 'components/ChartConfig'
 import Code from 'components/Code'
 
-import { Chart, Axis, Series, Tooltip } from 'react-charts'
+import { Chart, Axis, Series, Tooltip, Defs } from '../../../src'
 
 let sourceCode
 
@@ -13,34 +13,34 @@ class Story extends Component {
     return (
       <Sidebar>
         <div>
-          <ChartConfig interaction="axis" show={['elementType', 'interaction']}>
+          <ChartConfig interaction="axis" elementType="line" show={['elementType', 'interaction']}>
             {({ elementType, interaction, data }) => (
               // @source sourceCode
               <Chart data={data} interaction={interaction}>
+                <Defs>
+                  <linearGradient id="0" x1="0" x2="0" y1="1" y2="0">
+                    <stop offset="0%" stopColor="#FCE38A" />
+                    <stop offset="100%" stopColor="#F38181" />
+                  </linearGradient>
+                  <linearGradient id="1" x1="0" x2="0" y1="1" y2="0">
+                    <stop offset="0%" stopColor="#17EAD9" />
+                    <stop offset="100%" stopColor="#6078EA" />
+                  </linearGradient>
+                  <linearGradient id="2" x1="0" x2="0" y1="1" y2="0">
+                    <stop offset="0%" stopColor="#42E695" />
+                    <stop offset="100%" stopColor="#3BB2B8" />
+                  </linearGradient>
+                </Defs>
                 <Axis primary type="time" position="bottom" />
                 <Axis type="linear" position="left" stacked />
                 <Series
                   type={elementType}
                   getStyles={series => ({
-                    color: series.otherHovered && 'grey',
-                    opacity: series.otherHovered ? 0.2 : 1,
-                    line: {
-                      strokeDasharray: '5, 5',
-                    },
+                    color: `url(#${series.index % 3})`,
+                    opacity: series.otherHovered ? 0.5 : 1,
                   })}
-                  getDataStyles={d => ({
-                    r: d.hovered ? 5 : d.selected ? 4 : d.otherHovered ? 2 : 3,
-                    strokeWidth: 2,
-                    strokeDasharray: '5, 5',
-                    opacity: d.hovered
-                      ? 1
-                      : d.selected
-                        ? 1
-                        : d.otherHovered
-                          ? 0.5
-                          : d.otherSelected
-                            ? 0.75
-                            : 1,
+                  getDatumStyles={d => ({
+                    r: d.hovered ? 5 : d.otherHovered ? 3 : 0,
                   })}
                 />
                 <Tooltip />

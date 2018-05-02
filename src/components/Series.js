@@ -36,7 +36,7 @@ const getType = (type, data, i) => {
 class Series extends Component {
   static defaultProps = {
     getStyles: () => ({}),
-    getDataStyles: () => ({}),
+    getDatumStyles: () => ({}),
   }
   componentDidMount () {
     this.updateMaterializedData(this.props)
@@ -115,7 +115,7 @@ class Series extends Component {
   updateStackData (props) {
     const {
       getStyles,
-      getDataStyles,
+      getDatumStyles,
       //
       materializedData,
       primaryAxes,
@@ -289,7 +289,7 @@ class Series extends Component {
     }
 
     // Not we need to precalculate all of the possible status styles by
-    // calling the seemingly 'live' getStyles, and getDataStyles callbacks ;)
+    // calling the seemingly 'live' getStyles, and getDatumStyles callbacks ;)
     stackData = stackData.map((series, i) => {
       if (debug && !series.Component.buildStyles) {
         throw new Error(
@@ -298,7 +298,7 @@ class Series extends Component {
       }
       const result = series.Component.buildStyles(series, {
         getStyles,
-        getDataStyles,
+        getDatumStyles,
         defaultColors,
       })
 
@@ -316,7 +316,7 @@ class Series extends Component {
     )
   }
   render () {
-    const { type, getDataStyles, ...rest } = this.props
+    const { type, getDatumStyles, ...rest } = this.props
     const { stackData } = this
 
     if (!stackData) {

@@ -4,7 +4,7 @@ import ChartConfig from 'components/ChartConfig'
 import Sidebar from 'components/Sidebar'
 import Code from 'components/Code'
 
-import { Chart, Axis, Series, Tooltip, Cursor, Area } from 'react-charts'
+import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../../../src'
 
 let sourceCode
 

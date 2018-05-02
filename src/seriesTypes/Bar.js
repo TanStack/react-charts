@@ -81,7 +81,7 @@ class Bar extends PureComponent {
       },
     ]
   }
-  static buildStyles = (series, { getStyles, getDataStyles, defaultColors }) => {
+  static buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
     const defaults = {
       // Pass some sane defaults
       color: defaultColors[series.index % (defaultColors.length - 1)],
@@ -95,7 +95,7 @@ class Bar extends PureComponent {
     // We also need to decorate each datum in the same fashion
     series.datums.forEach(datum => {
       datum.getStatusStyle = status => {
-        datum.style = Utils.getStatusStyle(datum, status, getDataStyles, defaults)
+        datum.style = Utils.getStatusStyle(datum, status, getDatumStyles, defaults)
         return datum.style
       }
     })

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { ResizableBox } from 'react-resizable'
 //
 //
-import { Line, Area, Bar, Bubble } from 'react-charts'
+import { Line, Area, Bar, Bubble } from '../../../src'
 
 const types = {
   line: Line,
@@ -159,9 +159,11 @@ function makeData (dataType) {
 function makeSeries (i, dataType) {
   const start = 0
   const startDate = new Date()
+  startDate.setMinutes(0)
   startDate.setSeconds(0)
   startDate.setMilliseconds(0)
-  const length = 5 + Math.round(Math.random() * 15)
+  // const length = 5 + Math.round(Math.random() * 15)
+  const length = 10
   const min = 0
   const max = 100
   const rMin = 2

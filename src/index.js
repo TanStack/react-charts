@@ -5,6 +5,7 @@ import Series from './components/Series'
 import Tooltip from './components/Tooltip'
 import Cursor from './components/Cursor'
 import Brush from './components/Brush'
+import Defs from './components/Defs'
 // types
 import Line from './seriesTypes/Line'
 import Area from './seriesTypes/Area'
@@ -22,6 +23,7 @@ export {
   Tooltip,
   Cursor,
   Brush,
+  Defs,
   // Types
   Line,
   Area,
