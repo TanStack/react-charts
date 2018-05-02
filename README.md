@@ -211,33 +211,33 @@ Example
 **Props**
 
 * `getSeries()` - Responsible for returning an array of series.
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * `data` - The original
   * Returns an `Object`
 * `getLabel()`
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * Thing
   * Returns an `Object`
 * `getSeriesID()`
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * Thing
   * Returns an `Object`
 * `getDatums()`
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * Thing
   * Returns an `Object`
 * `getPrimary()`
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * Thing
   * Returns an `Object`
 * `getSecondary()`
-  * Default:
-  * Arguments
+  * Default - `() => null`
+  * Arguments:
     * Thing
   * Returns an `Object`
 
