@@ -5,16 +5,14 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "jsnext:main": "dist/index.es.js",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
     "build": "nwb build-react-component",
     "serve": "serve demo/dist -p 3000 -s",
     "startDocs": "cd www && yarn start",
-    "buildDocsProd": "yarn build && yarn link && cd www && yarn && yarn link react-charts && yarn build",
+    "buildDocs": "cd www && yarn && yarn build",
     "serveDocs": "cd www && yarn serve"
   },
   "dependencies": {
@@ -46,7 +44,5 @@
   "homepage": "",
   "license": "MIT",
   "repository": "",
-  "keywords": [
-    "react-component"
-  ]
+  "keywords": ["react-component"]
 }
