@@ -62,8 +62,8 @@ class Bar extends PureComponent {
       datum.focus.y += datum.size / 2
     }
 
-    // Set the cursor points (used in voronoi)
-    datum.cursorPoints = [
+    // Set the pointer points (used in voronoi)
+    datum.pointerPoints = [
       // End of bar
       datum.focus,
       // Start of bar
@@ -199,6 +199,6 @@ export default Connect(
     })
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Bar)

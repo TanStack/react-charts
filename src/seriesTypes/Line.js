@@ -59,8 +59,8 @@ class Line extends PureComponent {
       y: datum.y,
     }
 
-    // Set the cursor points (used in voronoi)
-    datum.cursorPoints = [datum.focus]
+    // Set the pointer points (used in voronoi)
+    datum.pointerPoints = [datum.focus]
   }
   static buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
     const defaults = {
@@ -176,6 +176,6 @@ export default Connect(
     interaction: state.interaction,
   }),
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Line)

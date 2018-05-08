@@ -87,6 +87,11 @@ const menu = [
         component: 'src/examples/Cursors',
       },
       {
+        path: 'synced-cursors',
+        title: 'Synced Cursors',
+        component: 'src/examples/SyncedCursors',
+      },
+      {
         path: 'brushing',
         title: 'Brushing',
         component: 'src/examples/Brushing',

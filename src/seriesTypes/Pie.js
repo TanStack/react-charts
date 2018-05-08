@@ -41,8 +41,8 @@ class Pie extends PureComponent {
     // Set the focus point
     datum.focus = { x: datum.x, y: datum.y }
 
-    // Set the cursor points (used in voronoi)
-    datum.cursorPoints = [datum.focus]
+    // Set the pointer points (used in voronoi)
+    datum.pointerPoints = [datum.focus]
 
     // Return the new datum
     return datum
@@ -140,6 +140,6 @@ export default Connect(
     })
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Pie)

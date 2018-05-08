@@ -24,6 +24,7 @@ class Chart extends Component {
     getR: d => (Utils.isArray(d) ? d[2] : d.radius || d.r),
     getPrimaryAxisID: s => s.primaryAxisID,
     getSecondaryAxisID: s => s.secondaryAxisID,
+    onHover: () => {},
     interaction: null,
     hoverMode: 'primary',
     groupMode: 'primary',
@@ -291,7 +292,7 @@ class Chart extends Component {
             onMouseDown={this.onMouseDown}
           >
             <Rectangle
-              // This is to ensure the cursor always has something to hit
+              // This is to ensure the pointer always has something to hit
               x1={-gridX}
               x2={width - gridX}
               y1={-gridY}
@@ -315,29 +316,33 @@ class Chart extends Component {
 
     dispatch(
       state => {
-        const cursor = {
-          ...state.cursor,
+        const x = clientX - this.dims.left - gridX
+        const y = clientY - this.dims.top - gridY
+
+        const pointer = {
+          ...state.pointer,
           active: true,
-          x: clientX - this.dims.left - gridX,
-          y: clientY - this.dims.top - gridY,
-          dragging: state.cursor && state.cursor.down,
+          x,
+          y,
+          dragging: state.pointer && state.pointer.down,
         }
         return {
           ...state,
-          cursor,
+          pointer,
         }
       },
       {
-        type: 'cursor',
+        type: 'pointer',
       }
     )
   })
   onMouseLeave = () => {
-    this.props.dispatch(
+    const { dispatch } = this.props
+    dispatch(
       state => ({
         ...state,
-        cursor: {
-          ...state.cursor,
+        pointer: {
+          ...state.pointer,
           active: false,
         },
         hovered: {
@@ -346,7 +351,7 @@ class Chart extends Component {
         },
       }),
       {
-        type: 'cursor_hovered',
+        type: 'pointer',
       }
     )
   }
@@ -359,15 +364,15 @@ class Chart extends Component {
     dispatch(
       state => ({
         ...state,
-        cursor: {
-          ...state.cursor,
-          sourceX: state.cursor.x,
-          sourceY: state.cursor.y,
+        pointer: {
+          ...state.pointer,
+          sourceX: state.pointer.x,
+          sourceY: state.pointer.y,
           down: true,
         },
       }),
       {
-        type: 'cursor',
+        type: 'pointer',
       }
     )
   }
@@ -380,18 +385,18 @@ class Chart extends Component {
     dispatch(
       state => ({
         ...state,
-        cursor: {
-          ...state.cursor,
+        pointer: {
+          ...state.pointer,
           down: false,
           dragging: false,
           released: {
-            x: state.cursor.x,
-            y: state.cursor.y,
+            x: state.pointer.x,
+            y: state.pointer.y,
           },
         },
       }),
       {
-        type: 'cursor',
+        type: 'pointer',
       }
     )
   }
@@ -421,7 +426,7 @@ const ReactChart = Connect(
   },
   {
     pure: false,
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Chart)
 
@@ -432,6 +437,9 @@ const ProvidedChart = Provider(ReactChart, {
       series: null,
       datums: [],
     },
+    cursors: {},
+    axes: {},
+    pointer: {},
   },
 })
 

@@ -110,13 +110,13 @@ class Voronoi extends PureComponent {
       const voronoiData = []
       stackData.forEach(series => {
         series.datums.filter(d => d.defined).forEach(datum => {
-          datum.cursorPoints.forEach(cursorPoint => {
+          datum.pointerPoints.forEach(pointerPoint => {
             if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
               return
             }
             voronoiData.push({
-              x: cursorPoint.x,
-              y: cursorPoint.y,
+              x: pointerPoint.x,
+              y: pointerPoint.y,
               datums: [datum],
             })
           })
@@ -147,10 +147,10 @@ class Voronoi extends PureComponent {
 
       Object.values(datumsByAxis).forEach(datums => {
         datums.forEach(datum => {
-          datum.cursorPoints.forEach(cursorPoint => {
+          datum.pointerPoints.forEach(pointerPoint => {
             voronoiData.push({
-              x: cursorPoint.x,
-              y: cursorPoint.y,
+              x: pointerPoint.x,
+              y: pointerPoint.y,
               datums,
             })
           })
@@ -236,6 +236,6 @@ export default Connect(
     })
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Voronoi)

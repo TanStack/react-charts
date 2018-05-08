@@ -52,8 +52,8 @@ class Area extends PureComponent {
       y: datum.y,
     }
 
-    // Set the cursor points (used in voronoi)
-    datum.cursorPoints = [
+    // Set the pointer points (used in voronoi)
+    datum.pointerPoints = [
       datum.focus,
       {
         x: primaryAxis.vertical
@@ -210,6 +210,6 @@ export default Connect(
     interaction: state.interaction,
   }),
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Area)

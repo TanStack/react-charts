@@ -16,6 +16,7 @@ export default {
   isValidPoint,
   getAxisByAxisID,
   getAxisIndexByAxisID,
+  shallowCompare,
 }
 
 function throttle (func) {
@@ -219,9 +220,9 @@ function getClosestPoint (position, datums) {
   let closestDistance = Infinity
   let closestDatum = datums[0]
   datums.forEach(datum => {
-    datum.cursorPoints.forEach(cursorPoint => {
+    datum.pointerPoints.forEach(pointerPoint => {
       const distance = Math.sqrt(
-        (cursorPoint.x - position.x) ** 2 + (cursorPoint.y - position.y) ** 2
+        (pointerPoint.x - position.x) ** 2 + (pointerPoint.y - position.y) ** 2
       )
       if (distance < closestDistance) {
         closestDistance = distance
@@ -377,4 +378,25 @@ function getAxisByAxisID (axes, AxisID) {
 function getAxisIndexByAxisID (axes, AxisID) {
   const index = axes.findIndex(d => d.id === AxisID)
   return index > -1 ? index : 0
+}
+
+function shallowCompare (old = {}, _new = {}, props, ignore = []) {
+  if (!props) {
+    props = {}
+    Object.keys(old).forEach(key => {
+      props[key] = true
+    })
+    Object.keys(_new).forEach(key => {
+      props[key] = true
+    })
+    props = Object.keys(props)
+  }
+  for (let i = 0; i < props.length; i++) {
+    if (!ignore.includes(props[i])) {
+      if (old[props[i]] !== _new[props[i]]) {
+        return true
+      }
+    }
+  }
+  return false
 }

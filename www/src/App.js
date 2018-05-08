@@ -3,11 +3,19 @@ import { Router, onLoading } from 'react-static'
 import styled, { injectGlobal } from 'styled-components'
 import { hot } from 'react-hot-loader'
 import nprogress from 'nprogress'
+import { loadLanguages } from 'reprism'
+
 //
 import Routes from 'react-static-routes'
 
 import 'nprogress/nprogress.css'
 import 'react-resizable/css/styles.css'
+import 'react-smackdown/themes/smackdown-light.css'
+
+import jsx from 'reprism/languages/jsx'
+import bash from 'reprism/languages/bash'
+
+loadLanguages(jsx, bash)
 
 injectGlobal`
   @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
@@ -56,18 +64,16 @@ injectGlobal`
     border-radius: 5px;
   }
 
-  code.code-inline {
+  ${
+  '' /* code.code-inline {
     background: rgba(0,0,0,.05);
     padding: 2px 5px;
     border-radius: 5px;
     border: 1px solid rgba(0,0,0,.05);
     font-size: .8em;
     line-height: 1.5;
-  }
-
-  .react-syntax-highlighter-line-number {
-    pointer-events: none;
-  }
+  } */
+}
 `
 
 const AppStyles = styled.div`

@@ -202,7 +202,7 @@ class Axis extends Component {
           }}
         >
           {ticks.map((tick, i) => (
-            <g key={tick} className="tick" transform={transform(scale(tick) || 0)}>
+            <g key={tick + i} className="tick" transform={transform(scale(tick) || 0)}>
               {/* Render the tick line  */}
               {showTicks ? (
                 <Line
@@ -291,7 +291,7 @@ export default Connect(
     }
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Axis)
 

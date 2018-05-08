@@ -10,21 +10,21 @@ class Brush extends PureComponent {
   }
   static isHtml = true
   componentWillReceiveProps (nextProps) {
-    const { onSelect, cursor, primaryAxes } = this.props
-    if (this.props.cursor && nextProps.cursor.released !== this.props.cursor.released) {
-      if (Math.abs(cursor.sourceX - cursor.x) < 20) {
+    const { onSelect, pointer, primaryAxes } = this.props
+    if (this.props.pointer && nextProps.pointer.released !== this.props.pointer.released) {
+      if (Math.abs(pointer.sourceX - pointer.x) < 20) {
         return
       }
       onSelect({
-        cursor: nextProps.cursor.released,
-        start: primaryAxes[0].scale.invert(cursor.sourceX),
-        end: primaryAxes[0].scale.invert(cursor.x),
+        pointer: nextProps.pointer.released,
+        start: primaryAxes[0].scale.invert(pointer.sourceX),
+        end: primaryAxes[0].scale.invert(pointer.x),
       })
     }
   }
   render () {
     const {
-      cursor = {}, offset, gridX, gridY, gridHeight, style = {},
+      pointer = {}, offset, gridX, gridY, gridHeight, style = {},
     } = this.props
 
     return (
@@ -35,14 +35,14 @@ class Brush extends PureComponent {
           position: 'absolute',
           left: `${offset.left + gridX}px`,
           top: `${offset.top + gridY}px`,
-          opacity: cursor.dragging ? (Math.abs(cursor.sourceX - cursor.x) < 20 ? 0.5 : 1) : 0,
+          opacity: pointer.dragging ? (Math.abs(pointer.sourceX - pointer.x) < 20 ? 0.5 : 1) : 0,
         }}
       >
         <div
           style={{
             position: 'absolute',
-            left: `${Math.min(cursor.x, cursor.sourceX)}px`,
-            width: `${Math.abs(cursor.x - cursor.sourceX)}px`,
+            left: `${Math.min(pointer.x, pointer.sourceX)}px`,
+            width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
             height: `${gridHeight}px`,
             background: 'rgba(0,0,0,.3)',
             ...style,
@@ -63,7 +63,7 @@ export default Connect(() => {
   }
   return state => ({
     primaryAxes: selectors.primaryAxes(state),
-    cursor: state.cursor,
+    pointer: state.pointer,
     offset: selectors.offset(state),
     gridHeight: selectors.gridHeight(state),
     gridX: selectors.gridX(state),

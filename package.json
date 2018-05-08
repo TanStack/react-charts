@@ -5,7 +5,9 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "jsnext:main": "dist/index.es.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
@@ -44,5 +46,7 @@
   "homepage": "",
   "license": "MIT",
   "repository": "",
-  "keywords": ["react-component"]
+  "keywords": [
+    "react-component"
+  ]
 }

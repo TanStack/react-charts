@@ -76,6 +76,6 @@ export default Connect(
     })
   },
   {
-    filter: (oldState, newState, meta) => meta.type !== 'cursor',
+    filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(AxisPie)

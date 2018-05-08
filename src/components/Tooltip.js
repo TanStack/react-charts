@@ -39,7 +39,7 @@ class Tooltip extends PureComponent {
       gridHeight,
       width,
       height,
-      cursor,
+      pointer,
       //
       focus,
       align,
@@ -62,7 +62,7 @@ class Tooltip extends PureComponent {
     const hoveredDatums = hovered.datums && hovered.datums.length ? hovered.datums : []
 
     // Get the closest focus datum out of the hoveredDatums
-    this.focusDatum = Utils.getClosestPoint(cursor, hoveredDatums)
+    this.focusDatum = Utils.getClosestPoint(pointer, hoveredDatums)
 
     // If there is a focusDatum, default the focus to its x and y
     if (this.focusDatum) {
@@ -71,16 +71,16 @@ class Tooltip extends PureComponent {
 
     if (typeof focus === 'function') {
       // Support functional override for focus
-      if (cursor) {
+      if (pointer) {
         this.focus = focus({
           hoveredDatums,
-          cursor,
+          pointer,
           focusDatum: this.focusDatum,
         })
       }
-    } else if (focus === 'cursor') {
-      // Support cursor-bound focus
-      this.focus = cursor
+    } else if (focus === 'pointer') {
+      // Support pointer-bound focus
+      this.focus = pointer
     } else if (focus === 'closest') {
       // Do nothing, this is already calculated
     } else if (hoveredDatums && hoveredDatums.length) {
@@ -555,7 +555,7 @@ export default Connect(() => {
     width: state.width,
     height: state.height,
     hovered: state.hovered,
-    cursor: state.cursor,
+    pointer: state.pointer,
     offset: selectors.offset(state),
   })
 })(Tooltip)

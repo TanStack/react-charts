@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 import { Connect } from 'react-state'
 import { Animate } from './ReactMove'
 //
@@ -8,72 +8,192 @@ import Utils from '../utils/Utils'
 const lineBackgroundColor = 'rgba(38, 38, 38, 0.3)'
 const backgroundColor = 'rgba(38, 38, 38, 0.9)'
 
-class Cursor extends PureComponent {
+class Cursor extends Component {
   static defaultProps = {
-    children: ({ label }) => <span>{label}</span>,
+    render: ({
+      axis, value, datum, primary,
+    }) => (
+      <span>
+        {axis.vertical
+          ? typeof value !== 'undefined'
+            ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
+            : ''
+          : typeof value !== 'undefined'
+            ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
+            : ''}
+      </span>
+    ),
     snap: true,
     showLine: true,
     showLabel: true,
     axisID: undefined,
+    onChange: () => {},
   }
   static isHtml = true
-  constructor () {
-    super()
-    this.onHover = this.onHover.bind(this)
-    this.onActivate = this.onActivate.bind(this)
+  prevValue = null
+  componentDidMount () {
+    this.updateCursor()
   }
-  render () {
+  componentDidUpdate (prev) {
+    if (
+      Utils.shallowCompare(prev, this.props, [
+        'pointer',
+        'stackData',
+        'primaryAxes',
+        'secondaryAxes',
+      ])
+    ) {
+      this.updateCursor()
+    }
+  }
+  updateCursor = () => {
     const {
       primary,
       snap,
-      showLine,
-      showLabel,
       axisID,
+      onChange,
       //
+      cursor,
       stackData,
       primaryAxes,
       secondaryAxes,
+      pointer,
+      hovered,
+      gridWidth,
+      gridHeight,
+      dispatch,
+    } = this.props
+
+    // Don't render until we have all dependencies
+    if (!stackData || !primaryAxes.length || !secondaryAxes.length) {
+      return null
+    }
+
+    // Determine the axis to use
+    const axis = Utils.getAxisByAxisID(primary ? primaryAxes : secondaryAxes, axisID)
+    const siblingAxis = primary ? secondaryAxes[0] : primaryAxes[0]
+
+    let { value = null, datum } = cursor || {}
+    let x
+    let y
+    let show = false
+
+    // Resolve the invert function
+    const invert = axis.scale.invert || (d => d)
+
+    // If the cursor isn't in the grid, don't display
+    if (pointer.active) {
+      // Default to cursor x and y
+      show = true
+      x = pointer.x
+      y = pointer.y
+
+      if (
+        pointer.x < -1 ||
+        pointer.x > gridWidth + 1 ||
+        pointer.y < -1 ||
+        pointer.y > gridHeight + 1
+      ) {
+        show = false
+      }
+
+      // Implement snapping
+      if (axis.type === 'ordinal' || snap) {
+        // For snapping we need the hovered datums
+        if (!hovered || !hovered.datums || !hovered.datums.length) {
+          return
+        }
+
+        datum = Utils.getClosestPoint(pointer, hovered.datums)
+
+        if (axis.vertical) {
+          // Vertical snapping
+          y = datum.focus.y
+        } else {
+          // Horizontal snapping
+          x = datum.focus.x
+        }
+      }
+
+      // Get value and label
+      if (axis.vertical) {
+        value = invert(y)
+      } else {
+        value = invert(x)
+      }
+    } else {
+      show = false
+      datum = {}
+    }
+
+    const newCursor = {
+      axis,
+      siblingAxis,
+      value: show ? value : null,
+      datum,
+    }
+
+    onChange(newCursor)
+
+    dispatch(state => ({
+      ...state,
+      cursors: {
+        ...state.cursors,
+        [primary ? 'primary' : 'secondary']: newCursor,
+      },
+    }))
+  }
+  render () {
+    const {
+      showLine,
+      showLabel,
+      value: manualValue,
+      primary,
+      snap,
+      id,
+      //
       cursor,
       offset: { left, top },
-      gridHeight,
-      gridWidth,
       gridX,
       gridY,
-      hovered,
+      gridWidth,
+      gridHeight,
       render,
       children,
       Component: Comp,
     } = this.props
 
-    // Don't render until we have all dependencies
-    if (!stackData || !cursor || !primaryAxes.length || !secondaryAxes.length) {
+    if (!cursor) {
       return null
     }
 
-    // Get the cursor information
-    let { x, y } = cursor
-    let animated = false
-    let coordinate
-    let value
-    let label
-    let visibility = snap ? (hovered.active ? 1 : 0) : cursor.active ? 1 : 0
+    const {
+      axis, siblingAxis, value, datum,
+    } = cursor
 
-    // If the cursor isn't in the grid, don't display
-    if (x < -1 || x > gridWidth + 1 || y < -1 || y > gridHeight + 1) {
-      visibility = 0
-    }
+    // Is the value manually set via the value prop?
+    const isManual = typeof manualValue !== 'undefined'
+    // Resolve the value from manual or the cursor info
+    let resolvedValue = isManual ? manualValue : value
+    // Should we animate?
+    const animated = snap || axis.type === 'ordinal'
 
-    // Determine the axis to use
-    const axis = Utils.getAxisByAxisID(primary ? primaryAxes : secondaryAxes, axisID)
-    const axisKey = primary ? 'primary' : 'secondary'
-    // Determine a sibling axis to use for the range
-    const siblingAxis = primary ? secondaryAxes[0] : primaryAxes[0]
     // Get the sibling range
     const siblingRange = siblingAxis.scale.range()
 
-    // Resolve the invert function
-    const invert = axis.scale.invert || (d => d)
+    // Set the opacity
+    let opacity = Utils.isValidPoint(resolvedValue) ? 1 : 0
 
+    // Fall back to the last value for coordinates
+    resolvedValue = Utils.isValidPoint(resolvedValue) ? resolvedValue : this.prevValue
+
+    // Store the latest valid resolvedValue
+    if (Utils.isValidPoint(resolvedValue)) {
+      this.prevValue = resolvedValue
+    }
+
+    let x
+    let y
     let x1
     let x2
     let y1
@@ -81,43 +201,13 @@ class Cursor extends PureComponent {
     let alignPctX
     let alignPctY
 
-    if (axis.type === 'ordinal' || snap) {
-      // For snapping we need the hovered datums
-      if (!hovered || !hovered.datums || !hovered.datums.length) {
-        return null
-      }
-      // Must be ordinal axis or snap is on, so turn animation on
-      animated = true
-
-      // Vertical snapping
-      const datum = Utils.getClosestPoint(cursor, hovered.datums)
-
-      if (axis.vertical) {
-        y = datum.focus.y
-        label =
-          typeof datum[axisKey] !== 'undefined'
-            ? axis.format(axis.stacked && !primary ? datum.totalValue : datum[axisKey])
-            : undefined
-      } else {
-        // Horizontal snapping
-        x = datum.focus.x
-        label =
-          typeof datum[axisKey] !== 'undefined'
-            ? axis.format(axis.stacked && !primary ? datum.totalValue : datum[axisKey])
-            : undefined
-      }
-    }
-
     // Vertical alignment
     if (axis.vertical) {
-      y = Math.max(0, Math.min(gridHeight, y)) // Limit within grid size
-      coordinate = y
+      y = axis.scale(resolvedValue)
       x1 = siblingRange[0]
       x2 = siblingRange[1]
       y1 = y - 1
       y2 = y + 1
-      value = invert(y)
-      label = typeof label !== 'undefined' ? label : axis.format(value)
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -126,14 +216,11 @@ class Cursor extends PureComponent {
         alignPctY = -50
       }
     } else {
-      x = Math.max(0, Math.min(gridWidth, x)) // Limit within grid size
-      coordinate = x
+      x = axis.scale(resolvedValue)
       x1 = x - 1
       x2 = x + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
-      value = invert(x)
-      label = typeof label !== 'undefined' ? label : axis.format(value)
       if (axis.position === 'top') {
         alignPctX = -500
         alignPctY = -100
@@ -141,6 +228,18 @@ class Cursor extends PureComponent {
         alignPctX = -50
         alignPctY = 0
       }
+    }
+
+    // If the cursor isn't in the grid, don't display
+    if (x < -1 || x > gridWidth + 1 || y < -1 || y > gridHeight + 1) {
+      opacity = 0
+    }
+
+    const renderProps = {
+      axis,
+      datum,
+      value: resolvedValue,
+      primary,
     }
 
     const lineStartX = Math.min(x1, x2)
@@ -153,20 +252,6 @@ class Cursor extends PureComponent {
     const lineHeight = Math.max(lineEndY - lineStartY, 0)
     const lineWidth = Math.max(lineEndX - lineStartX, 0)
 
-    let renderedChildren
-
-    const renderProps = {
-      coordinate,
-      value,
-      label,
-    }
-
-    if (Comp) {
-      renderedChildren = React.createElement(Comp, null, renderProps)
-    } else {
-      renderedChildren = (render || children)(renderProps)
-    }
-
     const start = {
       lineStartX,
       lineStartY,
@@ -174,29 +259,38 @@ class Cursor extends PureComponent {
       lineHeight,
       bubbleX,
       bubbleY,
-      visibility: 0,
+      opacity: 0,
     }
 
     const update = {}
     Object.keys(start).forEach(key => {
       update[key] = [start[key]]
     })
-    update.visibility = [visibility]
+    update.opacity = [opacity]
+
+    let renderedChildren
+
+    if (Comp) {
+      renderedChildren = React.createElement(Comp, null, renderProps)
+    } else {
+      renderedChildren = (render || children)(renderProps)
+    }
 
     return (
-      <Animate show={visibility} start={start} enter={update} update={update} leave={update}>
+      <Animate show={opacity} start={start} enter={update} update={update} leave={update}>
         {inter => (
           <div
             className="Cursor"
-            onMouseLeave={e => this.onHover(null, e)}
             style={{
               pointerEvents: 'none',
               position: 'absolute',
               left: `${left + gridX}px`,
               top: `${top + gridY}px`,
-              opacity: inter.visibility,
+              opacity: inter.opacity,
             }}
           >
+            {primary && String(isManual)}
+            {primary && String(resolvedValue)}
             {/* Render the cursor line */}
             {showLine ? (
               <div
@@ -248,40 +342,6 @@ class Cursor extends PureComponent {
       </Animate>
     )
   }
-  onHover (hovered) {
-    return this.props.dispatch(
-      state => ({
-        ...state,
-        hovered,
-      }),
-      {
-        type: 'hovered',
-      }
-    )
-  }
-  onActivate (newActive) {
-    const { active, dispatch } = this.props
-    if (active === newActive) {
-      return dispatch(
-        state => ({
-          ...state,
-          active: null,
-        }),
-        {
-          type: 'active',
-        }
-      )
-    }
-    dispatch(
-      state => ({
-        ...state,
-        active: newActive,
-      }),
-      {
-        type: 'active',
-      }
-    )
-  }
 }
 
 export default Connect(() => {
@@ -294,12 +354,13 @@ export default Connect(() => {
     gridX: Selectors.gridX(),
     gridY: Selectors.gridY(),
   }
-  return state => ({
+  return (state, props) => ({
     stackData: state.stackData,
+    pointer: state.pointer,
+    cursor: state.cursors[props.primary ? 'primary' : 'secondary'],
+    hovered: state.hovered,
     primaryAxes: selectors.primaryAxes(state),
     secondaryAxes: selectors.secondaryAxes(state),
-    cursor: state.cursor,
-    hovered: state.hovered,
     offset: selectors.offset(state),
     gridHeight: selectors.gridHeight(state),
     gridWidth: selectors.gridWidth(state),
