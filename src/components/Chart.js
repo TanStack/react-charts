@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Provider, Connect } from 'react-state'
 import RAF from 'raf'
 //
-import { Animate } from './ReactMove'
 import Selectors from '../utils/Selectors'
 import HyperResponsive from '../utils/HyperResponsive'
 import Utils from '../utils/Utils'
@@ -79,7 +78,7 @@ class Chart extends Component {
       )
     }
     this.updateDataModel(this.props)
-    this.componentDidUpdate(this.props)
+    this.componentDidUpdate()
   }
   componentWillReceiveProps (nextProps) {
     // If anything related to the data model changes, update it
@@ -129,20 +128,7 @@ class Chart extends Component {
       )
     }
 
-    if (
-      nextProps.data !== this.props.data ||
-      nextProps.width !== this.props.width ||
-      nextProps.height !== this.props.height ||
-      nextProps.getSeries !== this.props.getSeries ||
-      nextProps.getDatums !== this.props.getDatums ||
-      nextProps.getSeriesID !== this.props.getSeriesID ||
-      nextProps.getLabel !== this.props.getLabel ||
-      nextProps.getPrimary !== this.props.getPrimary ||
-      nextProps.getSecondary !== this.props.getSecondary ||
-      nextProps.getR !== this.props.getR ||
-      nextProps.getPrimaryAxisID !== this.props.getPrimaryAxisID ||
-      nextProps.getSecondaryAxisID !== this.props.getSecondaryAxisID
-    ) {
+    if (Utils.shallowCompare(this.props, nextProps, ['data', 'width', 'height'])) {
       this.updateDataModel(nextProps)
     }
   }
@@ -229,6 +215,11 @@ class Chart extends Component {
     )
   }
   measure = prevProps => {
+    if (!this.el) {
+      return
+    }
+    this.dims = this.el.getBoundingClientRect()
+
     if (
       prevProps &&
       (this.props.offset.left !== prevProps.offset.left ||
@@ -311,7 +302,6 @@ class Chart extends Component {
   }
   onMouseMove = Utils.throttle(e => {
     const { clientX, clientY } = e
-    this.dims = this.el.getBoundingClientRect()
     const { gridX, gridY, dispatch } = this.props
 
     dispatch(
@@ -426,7 +416,7 @@ const ReactChart = Connect(
   },
   {
     pure: false,
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+    // filter: (oldState, newState, meta) => meta.type !== 'pointer',
   }
 )(Chart)
 
@@ -440,6 +430,8 @@ const ProvidedChart = Provider(ReactChart, {
     cursors: {},
     axes: {},
     pointer: {},
+    tooltip: {},
+    axisDimensions: {},
   },
 })
 

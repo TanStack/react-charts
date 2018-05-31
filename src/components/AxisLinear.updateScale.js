@@ -58,7 +58,7 @@ export default function updateScale (props) {
   const groupKey = !primary && 'primary'
   const AxisIDKey = `${valueKey}AxisID`
   const vertical = detectVertical(position)
-  const RTL = primary && detectRTL(position) // Right to left OR top to bottom
+  const RTL = detectRTL(position) // Right to left OR top to bottom
 
   // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
 
@@ -155,7 +155,7 @@ export default function updateScale (props) {
 
   // If this is an ordinal or other primary axis, it needs to be able to display bars.
   let bandScale
-  let barSize = 1
+  let barSize = 0
   let stepSize = 0
 
   let seriesBandScale = d => d
@@ -181,7 +181,7 @@ export default function updateScale (props) {
       barSize = bandScale.bandwidth()
     }
 
-    barSize = bandScale.bandwidth()
+    // barSize = bandScale.bandwidth()
     stepSize = bandScale.step()
 
     // Create a seriesBandScale in case this axis isn't stacked

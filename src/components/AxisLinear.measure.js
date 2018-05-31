@@ -20,6 +20,7 @@ export default function measure () {
     maxLabelRotation,
     position,
     dispatch,
+    id,
   } = this.props
 
   const { rotation } = this.state
@@ -29,13 +30,17 @@ export default function measure () {
   if (!this.el) {
     // If the entire axis is hidden, then we need to remove the axis dimensions
     dispatch(
-      state => ({
-        ...state,
-        axisDimensions: {
-          ...state.axisDimensions,
-          [position]: undefined,
-        },
-      }),
+      state => {
+        const newAxes = state.axisDimensions[position] || {}
+        delete newAxes[id]
+        return {
+          ...state,
+          axisDimensions: {
+            ...state.axisDimensions,
+            [position]: newAxes,
+          },
+        }
+      },
       {
         type: 'axisDimensions',
       }
@@ -131,20 +136,27 @@ export default function measure () {
   }
 
   dispatch(
-    state => ({
-      ...state,
-      axisDimensions: {
-        ...state.axisDimensions,
-        [position]: {
-          width,
-          height,
-          top,
-          bottom,
-          left,
-          right,
+    state => {
+      const newAxes = state.axisDimensions[position] || {}
+      delete newAxes[id]
+      return {
+        ...state,
+        axisDimensions: {
+          ...state.axisDimensions,
+          [position]: {
+            ...newAxes,
+            [id]: {
+              width,
+              height,
+              top,
+              bottom,
+              left,
+              right,
+            },
+          },
         },
-      },
-    }),
+      }
+    },
     {
       type: 'axisDimensions',
     }

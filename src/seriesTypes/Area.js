@@ -1,9 +1,8 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 import { Connect } from 'react-state'
 
 import { area, line } from 'd3-shape'
 //
-import { Animate } from '../components/ReactMove'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -15,7 +14,7 @@ const lineDefaultStyle = {
   strokeWidth: 3,
 }
 
-class Area extends PureComponent {
+class Area extends React.PureComponent {
   static defaultProps = {
     showOrphans: true,
     curve: 'monotoneX',
@@ -88,21 +87,13 @@ class Area extends PureComponent {
       }
     })
   }
-  render () {
-    const {
-      series,
-      visibility,
-      showOrphans,
-      curve,
-      //
-      selected,
-      hovered,
-      interaction,
-    } = this.props
-
-    const status = Utils.getStatus(series, hovered, selected)
-    const style = series.getStatusStyle(status)
-
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.series !== this.props.series) {
+      this.updatePath(nextProps)
+    }
+  }
+  updatePath = props => {
+    const { curve, series } = props
     const areaFn = area()
       .x(d => d.x)
       .y0(d => d.base)
@@ -116,8 +107,22 @@ class Area extends PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    const areaPath = areaFn(series.datums)
-    const linePath = lineFn(series.datums)
+    this.areaPath = areaFn(series.datums)
+    this.linePath = lineFn(series.datums)
+  }
+  render () {
+    const {
+      series,
+      visibility,
+      showOrphans,
+      //
+      selected,
+      hovered,
+      interaction,
+    } = this.props
+
+    const status = Utils.getStatus(series, hovered, selected)
+    const style = series.getStatusStyle(status)
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -132,7 +137,7 @@ class Area extends PureComponent {
     return (
       <g>
         <Path
-          d={areaPath}
+          d={this.areaPath}
           style={{
             ...style,
             ...style.area,
@@ -143,7 +148,7 @@ class Area extends PureComponent {
           {...seriesInteractionProps}
         />
         <Path
-          d={linePath}
+          d={this.linePath}
           style={{
             ...style,
             ...style.line,

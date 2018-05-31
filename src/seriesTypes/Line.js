@@ -1,10 +1,8 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 import { Connect } from 'react-state'
 import { line } from 'd3-shape'
 
 //
-
-import { Animate } from '../components/ReactMove'
 
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
@@ -21,7 +19,7 @@ const circleDefaultStyle = {
   r: 2,
 }
 
-class Line extends PureComponent {
+class Line extends React.PureComponent {
   static defaultProps = {
     showPoints: true,
     curve: 'monotoneX',
@@ -81,12 +79,29 @@ class Line extends PureComponent {
       }
     })
   }
+  componentWillMount () {
+    this.updatePath(this.props)
+  }
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.series !== this.props.series) {
+      this.updatePath(nextProps)
+    }
+  }
+  updatePath = props => {
+    const { curve, series } = props
+    const lineFn = line()
+      .x(d => d.x)
+      .y(d => d.y)
+      .defined(d => d.defined)
+      .curve(Curves[curve] || curve)
+
+    this.path = lineFn(series.datums)
+  }
   render () {
     const {
       series,
       visibility,
       showPoints,
-      curve,
       //
       selected,
       hovered,
@@ -95,14 +110,6 @@ class Line extends PureComponent {
 
     const status = Utils.getStatus(series, hovered, selected)
     const style = series.getStatusStyle(status)
-
-    const lineFn = line()
-      .x(d => d.x)
-      .y(d => d.y)
-      .defined(d => d.defined)
-      .curve(Curves[curve] || curve)
-
-    const path = lineFn(series.datums)
 
     const interactiveSeries = interaction === 'series'
     const seriesInteractionProps = interactiveSeries
@@ -114,16 +121,18 @@ class Line extends PureComponent {
       }
       : {}
 
+    const pointerEvents = interactiveSeries ? 'all' : 'none'
+
     return (
       <g>
         <Path
-          d={path}
+          d={this.path}
           style={{
             ...pathDefaultStyle,
             ...style,
             ...style.line,
             fill: 'none',
-            pointerEvents: interactiveSeries ? 'all' : 'none',
+            pointerEvents,
           }}
           opacity={visibility}
           {...seriesInteractionProps}
@@ -133,6 +142,7 @@ class Line extends PureComponent {
             if (!datum.defined) {
               return null
             }
+
             const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
 
             const interactiveDatum = interaction === 'element'

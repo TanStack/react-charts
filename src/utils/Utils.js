@@ -245,12 +245,16 @@ function normalizeComponent (Comp, params = {}, fallback = Comp) {
   )
 }
 
-function materializeStyles (style = {}, defaults = {}) {
-  style = {
+function normalizeColor (style, defaults) {
+  return {
     ...style,
     stroke: style.stroke || style.color || defaults.stroke || defaults.color,
     fill: style.fill || style.color || defaults.fill || defaults.color,
-  };
+  }
+}
+
+function materializeStyles (style = {}, defaults = {}) {
+  style = normalizeColor(style, defaults);
   ['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
   })
@@ -293,46 +297,6 @@ function get (obj, path, def) {
     // do nothing
   }
   return typeof val !== 'undefined' ? val : def
-}
-
-function mapValues (obj, cb) {
-  const newObj = {}
-  Object.keys(obj).forEach(key => {
-    newObj[key] = cb(obj[key], key, obj)
-  })
-  return newObj
-}
-
-function uniq (arr) {
-  return arr.filter(d => arr.filter(dd => dd === d).length === 1)
-}
-
-function groupBy (xs, key) {
-  return xs.reduce((rv, x, i) => {
-    const resKey = typeof key === 'function' ? key(x, i) : x[key]
-    rv[resKey] = isArray(rv[resKey]) ? rv[resKey] : []
-    rv[resKey].push(x)
-    return rv
-  }, {})
-}
-
-function orderBy (arr, funcs, dirs = []) {
-  funcs = isArray(funcs) ? funcs : [funcs]
-  return arr.sort((a, b) => {
-    for (let i = 0; i < funcs.length; i++) {
-      const comp = funcs[i]
-      const ca = comp(a)
-      const cb = comp(b)
-      const desc = dirs[i] === false || dirs[i] === 'desc'
-      if (ca > cb) {
-        return desc ? -1 : 1
-      }
-      if (ca < cb) {
-        return desc ? 1 : -1
-      }
-    }
-    return dirs[0] ? a.__index - b.__index : b.__index - b.__index
-  })
 }
 
 function isArray (a) {
@@ -380,7 +344,7 @@ function getAxisIndexByAxisID (axes, AxisID) {
   return index > -1 ? index : 0
 }
 
-function shallowCompare (old = {}, _new = {}, props, ignore = []) {
+function shallowCompare (old = {}, _new = {}, props, ignore) {
   if (!props) {
     props = {}
     Object.keys(old).forEach(key => {
@@ -391,10 +355,18 @@ function shallowCompare (old = {}, _new = {}, props, ignore = []) {
     })
     props = Object.keys(props)
   }
-  for (let i = 0; i < props.length; i++) {
-    if (!ignore.includes(props[i])) {
+  if (ignore) {
+    for (let i = 0; i < props.length; i++) {
+      if (!ignore.includes(props[i])) {
+        if (old[props[i]] !== _new[props[i]]) {
+          return props[i] || true
+        }
+      }
+    }
+  } else {
+    for (let i = 0; i < props.length; i++) {
       if (old[props[i]] !== _new[props[i]]) {
-        return true
+        return props[i] || true
       }
     }
   }

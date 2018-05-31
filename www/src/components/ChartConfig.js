@@ -77,11 +77,15 @@ export default class ChartConfig extends Component {
     snapCursor: true,
   }
   constructor (props) {
-    super()
+    super(props)
     this.state = {
       ...props,
-      data: makeData(props.dataType),
+      data: this.makeData(),
     }
+  }
+  makeData = () => {
+    const { dataType, series } = this.props
+    return makeData(dataType, series)
   }
   render () {
     const {
@@ -115,7 +119,7 @@ export default class ChartConfig extends Component {
             <button
               onClick={() =>
                 this.setState({
-                  data: makeData(this.props.dataType),
+                  data: this.makeData(),
                 })
               }
             >
@@ -150,8 +154,8 @@ export default class ChartConfig extends Component {
   }
 }
 
-function makeData (dataType) {
-  return [...new Array(Math.max(Math.round(Math.random() * 5), 1))].map((d, i) =>
+function makeData (dataType, series) {
+  return [...new Array(series || Math.max(Math.round(Math.random() * 5), 1))].map((d, i) =>
     makeSeries(i, dataType)
   )
 }

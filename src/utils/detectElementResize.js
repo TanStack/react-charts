@@ -5,7 +5,7 @@
 
 // eslint-disable-next-line
 let onResize = () => {
-  console.log('onResize is not available without the DOM!')
+  console.warn('onResize is not available without the DOM!')
 }
 
 export default function detectElemenResize (...args) {

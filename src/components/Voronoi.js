@@ -88,11 +88,11 @@ class Voronoi extends PureComponent {
                     d={arc()}
                     className="action-voronoi"
                     onMouseEnter={() => this.onHover([datum])}
-                    onMouseMove={() => this.onHover([datum])}
                     style={{
                       fill: 'rgba(0,0,0,.2)',
                       stroke: 'rgba(255,255,255,.5)',
                       opacity: showVoronoi ? 1 : 0,
+                      transition: 'none',
                     }}
                   />
                 )
@@ -177,11 +177,11 @@ class Voronoi extends PureComponent {
               d={path}
               className="action-voronoi"
               onMouseEnter={() => this.onHover(points.data.datums)}
-              onMouseMove={() => this.onHover(points.data.datums)}
               style={{
                 fill: 'rgba(0,0,0,.2)',
                 stroke: 'rgba(255,255,255,.5)',
                 opacity: showVoronoi ? 1 : 0,
+                transition: 'none',
               }}
             />
           )

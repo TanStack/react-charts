@@ -252,9 +252,9 @@ class Axis extends Component {
                 <Text
                   style={{ ...axisStyles.tick, transition: 'none' }}
                   transform={`
-                  translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${
+                  translate3d(${vertical ? directionMultiplier * spacing : tickOffset}, ${
                     vertical ? tickOffset : directionMultiplier * spacing
-                  })
+                  }, 0)
                   rotate(${-rotation})
                 `}
                   dominantBaseline={

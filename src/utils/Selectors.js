@@ -52,17 +52,17 @@ export default {
         (state &&
           state.axisDimensions &&
           state.axisDimensions.left &&
-          state.axisDimensions.left.width) ||
+          sumObjBy(state.axisDimensions.left, 'width')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.top &&
-          state.axisDimensions.top.left) ||
+          sumObjBy(state.axisDimensions.top, 'left')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.bottom &&
-          state.axisDimensions.bottom.left) ||
+          sumObjBy(state.axisDimensions.bottom, 'left')) ||
           0,
       ],
       (paddingLeft, axesLeftWidth, axesTopLeft, axesBottomLeft) =>
@@ -76,17 +76,17 @@ export default {
         (state &&
           state.axisDimensions &&
           state.axisDimensions.top &&
-          state.axisDimensions.top.height) ||
+          sumObjBy(state.axisDimensions.top, 'height')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.left &&
-          state.axisDimensions.left.top) ||
+          sumObjBy(state.axisDimensions.left, 'top')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.right &&
-          state.axisDimensions.right.top) ||
+          sumObjBy(state.axisDimensions.right, 'top')) ||
           0,
       ],
       (paddingTop, axesTopHeight, axesLeftTop, axesRightTop) =>
@@ -102,32 +102,32 @@ export default {
         (state &&
           state.axisDimensions &&
           state.axisDimensions.left &&
-          state.axisDimensions.left.width) ||
+          sumObjBy(state.axisDimensions.left, 'width')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.right &&
-          state.axisDimensions.right.width) ||
+          sumObjBy(state.axisDimensions.right, 'width')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.top &&
-          state.axisDimensions.top.left) ||
+          sumObjBy(state.axisDimensions.top, 'left')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.top &&
-          state.axisDimensions.top.right) ||
+          sumObjBy(state.axisDimensions.top, 'right')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.bottom &&
-          state.axisDimensions.bottom.left) ||
+          sumObjBy(state.axisDimensions.bottom, 'left')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.bottom &&
-          state.axisDimensions.bottom.right) ||
+          sumObjBy(state.axisDimensions.bottom, 'right')) ||
           0,
       ],
       (
@@ -157,32 +157,32 @@ export default {
         (state &&
           state.axisDimensions &&
           state.axisDimensions.top &&
-          state.axisDimensions.top.height) ||
+          sumObjBy(state.axisDimensions.top, 'height')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.bottom &&
-          state.axisDimensions.bottom.height) ||
+          sumObjBy(state.axisDimensions.bottom, 'height')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.left &&
-          state.axisDimensions.left.top) ||
+          sumObjBy(state.axisDimensions.left, 'top')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.left &&
-          state.axisDimensions.left.bottom) ||
+          sumObjBy(state.axisDimensions.left, 'bottom')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.right &&
-          state.axisDimensions.right.top) ||
+          sumObjBy(state.axisDimensions.right, 'top')) ||
           0,
         (state &&
           state.axisDimensions &&
           state.axisDimensions.right &&
-          state.axisDimensions.right.bottom) ||
+          sumObjBy(state.axisDimensions.right, 'bottom')) ||
           0,
       ],
       (
@@ -202,4 +202,10 @@ export default {
         Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
         Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
     ),
+}
+
+function sumObjBy (obj, str) {
+  return Object.keys(obj)
+    .map(key => obj[key])
+    .reduce((prev, curr) => prev + curr[str] || 0, 0)
 }

@@ -3,8 +3,6 @@ import { Connect } from 'react-state'
 
 //
 
-import { NodeGroup } from './ReactMove'
-
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 
@@ -47,33 +45,32 @@ class Series extends Component {
 
     // If any of the following change,
     // we need to update the materializedData
-    if (
-      newProps.type !== oldProps.type ||
-      newProps.preMaterializedData !== oldProps.preMaterializedData
-    ) {
-      this.updateMaterializedData(newProps)
+    if (Utils.shallowCompare(oldProps, newProps, ['type', 'preMaterializedData'])) {
+      return this.updateMaterializedData(newProps)
     }
 
     // If any of the following change,
     // we need to update the stack
     if (
-      newProps.materializedData !== oldProps.materializedData ||
-      newProps.axes !== oldProps.axes ||
-      newProps.seriesKey !== oldProps.seriesKey ||
-      newProps.primaryAxes !== oldProps.primaryAxes ||
-      newProps.secondaryAxes !== oldProps.secondaryAxes ||
-      newProps.groupMode !== oldProps.groupMode
+      Utils.shallowCompare(oldProps, newProps, [
+        'materializedData',
+        'axes',
+        'seriesKey',
+        'primaryAxes',
+        'secondaryAxes',
+        'groupMode',
+      ])
     ) {
       this.updateStackData(newProps)
     }
   }
-  shouldComponentUpdate (nextProps) {
-    if (nextProps.stackData !== this.props.stackData) {
-      this.stackData = [...nextProps.stackData].reverse() // For proper svg stacking
-      return true
-    }
-    return false
-  }
+  // shouldComponentUpdate (nextProps) {
+  //   if (nextProps.stackData !== this.props.stackData) {
+  //     this.stackData = [...nextProps.stackData].reverse() // For proper svg stacking
+  //     return true
+  //   }
+  //   return false
+  // }
   updateMaterializedData (props) {
     const { preMaterializedData, type, dispatch } = props
 
@@ -88,7 +85,7 @@ class Series extends Component {
         .map((series, index) => {
           const SeriesComponent = getType(type, series, index)
           if (debug && !SeriesComponent) {
-            console.log(series)
+            console.error(series)
             throw new Error(
               `An invalid series component was passed for the series above (index: ${index}.`
             )
@@ -114,13 +111,7 @@ class Series extends Component {
   }
   updateStackData (props) {
     const {
-      getStyles,
-      getDatumStyles,
-      //
-      materializedData,
-      primaryAxes,
-      secondaryAxes,
-      groupMode,
+      materializedData, primaryAxes, secondaryAxes, groupMode,
     } = props
 
     // We need materializedData and both axes to continue
@@ -207,35 +198,7 @@ class Series extends Component {
       })
     })
 
-    // Now, scale the datapoints to their axis coordinates
-    // (mutation is okay here, since we have already made a materialized copy)
-    // const plotSeriesSeries = stackData.find(
-    //   series => series.Component && series.Component.plotSeries
-    // )
-    // if (plotSeriesSeries) {
-    //   const primaryAxisIndex = Utils.getAxisIndexByAxisID(
-    //     primaryAxes,
-    //     plotSeriesSeries.primaryAxisID
-    //   )
-    //   const primaryAxis = primaryAxes[primaryAxisIndex]
-    //   const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
-    //     secondaryAxes,
-    //     plotSeriesSeries.secondaryAxisID
-    //   )
-    //   const secondaryAxis = secondaryAxes[secondaryAxisIndex]
-    //   const xAxisIndex = Utils.getAxisIndexByAxisID(xAxes, plotSeriesSeries[`${xKey}AxisID`])
-    //   const xAxis = xAxes[xAxisIndex]
-    //   const yAxisIndex = Utils.getAxisIndexByAxisID(yAxes, plotSeriesSeries[`${yKey}AxisID`])
-    //   const yAxis = yAxes[yAxisIndex]
-    //   stackData = plotSeriesSeries.plotSeries(stackData, {
-    //     primaryAxis,
-    //     secondaryAxis,
-    //     xAxis,
-    //     yAxis,
-    //   })
-    //   // If a series type defines a plotSeries method, then use that
-    // } else {
-    // Otherwise, use the plotDatum method on each series
+    // Use the plotDatum method on each series
     stackData.forEach((series, i) => {
       if (debug && !series.Component.plotDatum) {
         throw new Error(
@@ -264,7 +227,6 @@ class Series extends Component {
         return result || d
       })
     })
-    // }
 
     // Do any data grouping ahead of time
     if ([modePrimary, modeSecondary].includes(groupMode)) {
@@ -297,8 +259,9 @@ class Series extends Component {
         )
       }
       const result = series.Component.buildStyles(series, {
-        getStyles,
-        getDatumStyles,
+        // Make sure we are using a thunk to get the most recent getStyles and getDatumStyles
+        getStyles: (...args) => this.props.getStyles(...args),
+        getDatumStyles: (...args) => this.props.getDatumStyles(...args),
         defaultColors,
       })
 
@@ -316,16 +279,19 @@ class Series extends Component {
     )
   }
   render () {
-    const { type, getDatumStyles, ...rest } = this.props
-    const { stackData } = this
+    const {
+      type, getStyles, getDatumStyles, stackData, ...rest
+    } = this.props
 
     if (!stackData) {
       return null
     }
 
+    const reversedStackData = [...stackData].reverse() // For proper svg stacking
+
     return (
       <g className="Series">
-        {stackData.map(stack => {
+        {reversedStackData.map(stack => {
           const StackCmp = getType(type, stack, stack.id)
           return <StackCmp {...rest} key={stack.id} series={stack} stackData={stackData} />
         })}
@@ -346,6 +312,7 @@ export default Connect(
       preMaterializedData: state.preMaterializedData,
       materializedData: state.materializedData,
       stackData: state.stackData,
+      tooltip: state.tooltip,
       hovered: state.hovered,
       selected: state.selected,
       groupMode: state.groupMode,

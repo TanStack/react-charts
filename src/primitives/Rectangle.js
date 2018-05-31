@@ -1,6 +1,5 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 //
-import { Animate } from '../components/ReactMove'
 
 const defaultStyle = {
   strokeWidth: 0,
@@ -8,9 +7,10 @@ const defaultStyle = {
   opacity: 1,
   rx: 0,
   ry: 0,
+  transition: 'all .3s ease-out',
 }
 
-export default class Rectangle extends PureComponent {
+export default class Rectangle extends React.Component {
   static defaultProps = {
     opacity: 1,
   }

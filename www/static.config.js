@@ -17,14 +17,6 @@ const packagePath = '../package.json' // will probably be '../package.json'
 const readmePath = '../README.md' // will probably be '../README.md'
 // TODO: Point this to your docs folder
 const docsPath = '../docs' // will probably be '../docs'
-// TODO: Choose your smackdown settings for syntax highlighting
-
-process.env.SMACKDOWN_SYNTAX = JSON.stringify({
-  showLineNumbers: false,
-  highlighter: 'hljs',
-  theme: 'atom-one-dark',
-  languages: ['javascript'],
-})
 
 const menu = [
   {
@@ -201,6 +193,8 @@ function menuToRoutes (items) {
     force404: false,
     disableDuplicateRoutesWarning: true,
   })
+
+  // console.log(normalizedRoutes)
 
   // Now we need to use the title, markdown and component info to set up the right
   // components and routeData

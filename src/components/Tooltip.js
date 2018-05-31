@@ -25,14 +25,25 @@ class Tooltip extends PureComponent {
     children: defaultRenderer,
     padding: 1,
     tooltipArrowPadding: 7,
+    onChange: () => {},
   }
   static isHtml = true
-  render () {
+  componentDidUpdate (oldProps) {
+    if (oldProps.pointer !== this.props.pointer) {
+      this.updateTooltip()
+    }
+  }
+  updateTooltip = () => {
     const {
+      focus,
+      align,
+      padding,
+      tooltipArrowPadding,
+      onChange,
+      //
       hovered,
       primaryAxes,
       secondaryAxes,
-      offset: { left, top },
       gridX,
       gridY,
       gridWidth,
@@ -40,16 +51,6 @@ class Tooltip extends PureComponent {
       width,
       height,
       pointer,
-      //
-      focus,
-      align,
-      autoAlign,
-      padding,
-      tooltipArrowPadding,
-      children,
-      render,
-      Component: Comp,
-      ...rest
     } = this.props
 
     let { arrowPosition } = this.props
@@ -62,7 +63,15 @@ class Tooltip extends PureComponent {
     const hoveredDatums = hovered.datums && hovered.datums.length ? hovered.datums : []
 
     // Get the closest focus datum out of the hoveredDatums
-    this.focusDatum = Utils.getClosestPoint(pointer, hoveredDatums)
+    const focusDatum = Utils.getClosestPoint(pointer, hoveredDatums)
+    const active = hovered.active
+
+    if (this.focusDatum === focusDatum && this.active === active) {
+      return
+    }
+
+    this.focusDatum = focusDatum
+    this.active = active
 
     // If there is a focusDatum, default the focus to its x and y
     if (this.focusDatum) {
@@ -292,23 +301,7 @@ class Tooltip extends PureComponent {
       }
     }
 
-    const visibility = hovered.active ? 1 : 0
-
-    const start = {
-      x,
-      y,
-      padding: padding + focusPadding,
-      alignX,
-      alignY,
-      triangleStyles,
-      visibility: 0,
-    }
-
-    const update = {}
-    Object.keys(start).forEach(key => {
-      update[key] = [start[key]]
-    })
-    update.visibility = [visibility]
+    const opacity = hovered.active ? 1 : 0
 
     const primaryAxis = Utils.getAxisByAxisID(
       primaryAxes,
@@ -319,96 +312,150 @@ class Tooltip extends PureComponent {
       this.focusDatum ? this.focusDatum.series.secondaryAxisID : null
     )
 
+    const tooltip = {
+      x,
+      y,
+      focusPadding,
+      alignX,
+      alignY,
+      triangleStyles,
+      opacity,
+      primaryAxis,
+      secondaryAxis,
+      focusDatum: this.focusDatum,
+    }
+
+    onChange(tooltip)
+
+    this.props.dispatch(state => ({
+      ...state,
+      tooltip,
+    }))
+  }
+  render () {
+    const {
+      offset: { left, top },
+      gridX,
+      gridY,
+      gridWidth,
+      gridHeight,
+      tooltip,
+      padding,
+      primaryAxes,
+      secondaryAxes,
+      tooltipArrowPadding,
+      children,
+      render,
+      Component: Comp,
+      ...rest
+    } = this.props
+
+    const {
+      x,
+      y,
+      focusPadding,
+      alignX,
+      alignY,
+      triangleStyles,
+      opacity = 0,
+      primaryAxis,
+      secondaryAxis,
+    } = tooltip
+
+    const resolvedPadding = padding + focusPadding
+
+    const start = {
+      opacity: 0,
+    }
+
+    const update = {
+      opacity,
+      left: `${left + gridX}px`,
+      top: `${top + gridY}px`,
+      width: `${gridWidth}px`,
+      height: `${gridHeight}px`,
+    }
+
+    let renderedChildren
+    const renderProps = {
+      datum: this.focusDatum,
+      getStyle: datum => datum.getStatusStyle(Utils.getStatus(datum, rest.hovered, rest.selected)),
+      primaryAxes,
+      secondaryAxes,
+      primaryAxis,
+      secondaryAxis,
+      ...rest,
+    }
+    if (Comp) {
+      renderedChildren = React.createElement(Comp, null, {
+        ...rest,
+        ...renderProps,
+      })
+    } else {
+      renderedChildren = (render || children)(renderProps)
+    }
+
     return (
       <Animate
-        show={visibility}
+        show={!!opacity}
         start={start}
         enter={update}
         update={update}
         leave={update}
-        render={({
- x, y, alignX, alignY, triangleStyles, padding, visibility,
-}) => {
-          let renderedChildren
-          const renderProps = {
-            datum: this.focusDatum,
-            getStyle: datum =>
-              datum.getStatusStyle(Utils.getStatus(datum, rest.hovered, rest.selected)),
-            primaryAxes,
-            secondaryAxes,
-            primaryAxis,
-            secondaryAxis,
-            ...rest,
-          }
-          if (Comp) {
-            renderedChildren = React.createElement(Comp, null, {
-              ...rest,
-              ...renderProps,
-            })
-          } else {
-            renderedChildren = (render || children)(renderProps)
-          }
-
-          return (
+        className="tooltip-wrap"
+        style={{
+          pointerEvents: 'none',
+          position: 'absolute',
+        }}
+        innerRef={el => {
+          this.el = el
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            transform: `translate3d(${x}px, ${y}px, 0px)`,
+            transition: 'all .2s ease-out',
+          }}
+        >
+          <div
+            style={{
+              transform: `translate3d(${alignX}, ${alignY}, 0)`,
+              padding: `${tooltipArrowPadding + resolvedPadding}px`,
+              width: 'auto',
+              transition: 'all .2s ease-out',
+            }}
+          >
             <div
-              className="tooltip-wrap"
               ref={el => {
-                this.el = el
+                this.tooltipEl = el
               }}
               style={{
-                pointerEvents: 'none',
-                position: 'absolute',
-                left: `${left + gridX}px`,
-                top: `${top + gridY}px`,
-                width: `${gridWidth}px`,
-                height: `${gridHeight}px`,
-                opacity: visibility,
+                fontSize: '12px',
+                padding: '5px',
+                background: backgroundColor,
+                color: 'white',
+                borderRadius: '3px',
+                position: 'relative',
+                transition: 'all .2s ease-out',
               }}
             >
               <div
                 style={{
                   position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  transform: `translate3d(${x}px, ${y}px, 0px)`,
+                  width: 0,
+                  height: 0,
+                  ...triangleStyles,
+                  transition: 'all .2s ease-out',
                 }}
-              >
-                <div
-                  style={{
-                    transform: `translate3d(${alignX}, ${alignY}, 0)`,
-                    padding: `${tooltipArrowPadding + padding}px`,
-                    width: 'auto',
-                  }}
-                >
-                  <div
-                    ref={el => {
-                      this.tooltipEl = el
-                    }}
-                    style={{
-                      fontSize: '12px',
-                      padding: '5px',
-                      background: backgroundColor,
-                      color: 'white',
-                      borderRadius: '3px',
-                      position: 'relative',
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: 'absolute',
-                        width: 0,
-                        height: 0,
-                        ...triangleStyles,
-                      }}
-                    />
-                    {renderedChildren}
-                  </div>
-                </div>
-              </div>
+              />
+              {renderedChildren}
             </div>
-          )
-        }}
-      />
+          </div>
+        </div>
+      </Animate>
     )
   }
 }
@@ -556,6 +603,7 @@ export default Connect(() => {
     height: state.height,
     hovered: state.hovered,
     pointer: state.pointer,
+    tooltip: state.tooltip,
     offset: selectors.offset(state),
   })
 })(Tooltip)

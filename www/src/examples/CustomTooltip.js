@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Tree from 'react-json-tree'
 //
 import ChartConfig from 'components/ChartConfig'
 import Sidebar from 'components/Sidebar'
@@ -9,9 +10,15 @@ import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from '../../../src'
 let sourceCode
 
 class Story extends Component {
+  state = {
+    tooltipInfo: {},
+  }
   render () {
+    const { tooltipInfo } = this.state
+    console.log(tooltipInfo)
     return (
       <Sidebar>
+        <Tree hideRoot data={tooltipInfo} />
         <ChartConfig>
           {({ data }) => (
             // @source sourceCode
@@ -21,7 +28,13 @@ class Story extends Component {
               <Series type={Area} />
               <Cursor primary />
               <Cursor />
-              <Tooltip>
+              <Tooltip
+                onChange={tooltipInfo =>
+                  this.setState({
+                    tooltipInfo,
+                  })
+                }
+              >
                 {({ datum, primaryAxis, getStyle }) =>
                   datum ? (
                     <div

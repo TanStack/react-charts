@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 //
 import { Animate } from '../components/ReactMove'
 
@@ -8,9 +8,10 @@ const defaultStyle = {
   fill: 'black',
   fontSize: 10,
   opacity: 1,
+  transition: 'all .3s ease-out',
 }
 
-export default class Text extends PureComponent {
+export default class Text extends React.Component {
   static defaultProps = {
     opacity: 1,
   }

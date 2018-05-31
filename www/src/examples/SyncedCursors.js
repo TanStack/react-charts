@@ -17,16 +17,17 @@ class Story extends Component {
     const { cursorValue } = this.state
     return (
       <Sidebar>
-        <Code source={JSON.stringify(cursorValue, null, 2)} />
-        <ChartConfig>
+        <Code source={JSON.stringify({ cursorValue }, null, 2)} />
+        <ChartConfig width={600}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
-              <Axis type="linear" position="left" stacked cursor={{}} />
+              <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Cursor
                 primary
-                value={console.log(1, cursorValue) || cursorValue}
+                value={cursorValue}
+                id="1"
                 onChange={state => {
                   this.setState({
                     cursorValue: state.value,
@@ -39,15 +40,16 @@ class Story extends Component {
           )}
         </ChartConfig>
         <br />
-        <ChartConfig>
+        <ChartConfig width={200}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
-              <Axis type="linear" position="left" stacked cursor={{}} />
+              <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Cursor
                 primary
-                value={console.log(2, cursorValue) || cursorValue}
+                value={cursorValue}
+                id="2"
                 onChange={state => {
                   this.setState({
                     cursorValue: state.value,
@@ -59,16 +61,16 @@ class Story extends Component {
             </Chart>
           )}
         </ChartConfig>
-        <br />
-        <ChartConfig>
+        <ChartConfig width={400}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
-              <Axis type="linear" position="left" stacked cursor={{}} />
+              <Axis type="linear" position="left" stacked />
               <Series type={Area} />
               <Cursor
                 primary
-                value={console.log(3, cursorValue) || cursorValue}
+                value={cursorValue}
+                id="2"
                 onChange={state => {
                   this.setState({
                     cursorValue: state.value,
