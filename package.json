@@ -1,13 +1,10 @@
 {
   "name": "react-charts",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "react-charts React component",
   "main": "lib/index.js",
   "module": "es/index.js",
   "jsnext:main": "dist/index.es.js",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
