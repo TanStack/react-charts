@@ -182,16 +182,15 @@ class Axis extends Component {
     return (
       <Group
         className="Axis"
-        transform={
-          position === positionRight
-            ? translateX(width)
-            : position === positionBottom
-              ? translateY(height)
-              : undefined
-        }
         style={{
           pointerEvents: 'none',
           transition: 'none',
+          transform:
+            position === positionRight
+              ? translateX(width)
+              : position === positionBottom
+                ? translateY(height)
+                : undefined,
         }}
       >
         <Path
@@ -215,9 +214,9 @@ class Axis extends Component {
             <Group
               key={tick}
               className="tick"
-              transform={transform(scale(tick) || 0)}
               style={{
                 transition: 'none',
+                transform: transform(scale(tick) || 0),
               }}
             >
               {/* Render the tick line  */}
@@ -250,13 +249,15 @@ class Axis extends Component {
               )}
               {showTicks ? (
                 <Text
-                  style={{ ...axisStyles.tick, transition: 'none' }}
-                  transform={`
-                  translate(${vertical ? directionMultiplier * spacing : tickOffset}, ${
-                    vertical ? tickOffset : directionMultiplier * spacing
-                  })
-                  rotate(${-rotation})
-                `}
+                  style={{
+                    ...axisStyles.tick,
+                    transition: 'none',
+                    transform: `translate3d(${
+                      vertical ? directionMultiplier * spacing : tickOffset
+                    }px, ${
+                      vertical ? tickOffset : directionMultiplier * spacing
+                    }px, 0) rotate(${-rotation})`,
+                  }}
                   dominantBaseline={
                     rotation
                       ? 'central'
@@ -315,9 +316,9 @@ export default Connect(
 )(Axis)
 
 function translateX (x) {
-  return `translate(${x}, 0)`
+  return `translate3d(${x}px, 0, 0)`
 }
 
 function translateY (y) {
-  return `translate(0, ${y})`
+  return `translate3d(0, ${y}px, 0)`
 }

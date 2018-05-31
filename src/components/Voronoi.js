@@ -60,7 +60,9 @@ class Voronoi extends PureComponent {
 
       return (
         <VoronoiElement
-          transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}
+          style={{
+            transform: `translate3d(${primaryAxis.width / 2}px, ${primaryAxis.height / 2}px, 0)`,
+          }}
         >
           {stackData.map(series => (
             <React.Fragment key={series.index}>

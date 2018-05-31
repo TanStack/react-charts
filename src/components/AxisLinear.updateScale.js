@@ -309,9 +309,9 @@ function identity (x) {
 }
 
 function translateX (x) {
-  return `translate(${x}, 0)`
+  return `translate3d(${x}px, 0, 0)`
 }
 
 function translateY (y) {
-  return `translate(0, ${y})`
+  return `translate3d(0, ${y}px, 0)`
 }

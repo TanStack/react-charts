@@ -33,16 +33,16 @@ class Brush extends PureComponent {
         style={{
           pointerEvents: 'none',
           position: 'absolute',
-          left: `${offset.left + gridX}px`,
-          top: `${offset.top + gridY}px`,
+          transform: `translate3d(${offset.left + gridX}px, ${offset.top + gridY}px, 0)`,
           opacity: pointer.dragging ? (Math.abs(pointer.sourceX - pointer.x) < 20 ? 0.5 : 1) : 0,
         }}
       >
         <div
           style={{
             position: 'absolute',
-            left: `${Math.min(pointer.x, pointer.sourceX)}px`,
-            width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
+            transform: `${Math.min(pointer.x, pointer.sourceX)}px, ${Math.abs(
+              pointer.x - pointer.sourceX
+            )}px, 0)`,
             height: `${gridHeight}px`,
             background: 'rgba(0,0,0,.3)',
             ...style,

@@ -17,8 +17,8 @@ build
 .env.local
 .env.development.local
 .env
+.history
 .DS_Store
-
 
 
 

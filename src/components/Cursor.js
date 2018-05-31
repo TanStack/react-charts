@@ -256,14 +256,12 @@ class Cursor extends React.PureComponent {
     const lineWidth = Math.max(lineEndX - lineStartX, 0)
 
     const start = {
-      left: `${left + gridX}px`,
-      top: `${top + gridY}px`,
+      transform: `translate3d(${left + gridX}px, ${top + gridY}px, 0)`,
       opacity: 0,
     }
 
     const update = {
-      left: `${left + gridX}px`,
-      top: `${top + gridY}px`,
+      transform: `translate3d(${left + gridX}px, ${top + gridY}px, 0)`,
       opacity,
     }
 
@@ -285,6 +283,8 @@ class Cursor extends React.PureComponent {
         style={{
           pointerEvents: 'none',
           position: 'absolute',
+          top: 0,
+          left: 0,
         }}
         className="Cursor"
       >

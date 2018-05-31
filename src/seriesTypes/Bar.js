@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { Connect } from 'react-state'
-import { Animate } from '../components/ReactMove'
 //
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
@@ -53,6 +52,8 @@ class Bar extends PureComponent {
     datum.focus = {
       x: datum.x,
       y: datum.y,
+      horizontalPadding: secondaryAxis.vertical ? datum.size / 2 : 0,
+      verticalPadding: secondaryAxis.vertical ? 0 : datum.size / 2,
     }
 
     // Adjust the focus point for bars

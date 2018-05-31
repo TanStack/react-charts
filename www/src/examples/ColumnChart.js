@@ -17,7 +17,7 @@ export default () => (
         // @source sourceCode
         <Chart data={data}>
           <Axis primary type="ordinal" />
-          <Axis type="linear" min={0} max={0} />
+          <Axis type="linear" min={0} max={0} stacked />
           <Series type={Bar} />
           <Cursor primary />
           <Cursor />

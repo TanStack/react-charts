@@ -270,7 +270,6 @@ class Chart extends Component {
           }}
         >
           <g
-            transform={`translate(${gridX || 0}, ${gridY || 0})`}
             onMouseEnter={e => {
               e.persist()
               this.onMouseMove(e)
@@ -281,6 +280,9 @@ class Chart extends Component {
             }}
             onMouseLeave={this.onMouseLeave}
             onMouseDown={this.onMouseDown}
+            style={{
+              transform: `translate3d(${gridX || 0}px, ${gridY || 0}px, 0)`,
+            }}
           >
             <Rectangle
               // This is to ensure the pointer always has something to hit

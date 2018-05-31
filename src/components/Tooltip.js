@@ -7,6 +7,7 @@ import Selectors from '../utils/Selectors'
 //
 
 const backgroundColor = 'rgba(38, 38, 38, 0.9)'
+const triangleSize = 7
 
 class Tooltip extends PureComponent {
   static defaultProps = {
@@ -111,7 +112,9 @@ class Tooltip extends PureComponent {
       return null
     }
 
-    const { x, y, padding: focusPadding = 0 } = this.focus
+    const {
+      x, y, horizontalPadding = 0, verticalPadding = 0,
+    } = this.focus
 
     let alignX
     let alignY
@@ -158,7 +161,7 @@ class Tooltip extends PureComponent {
           }
           if (priority === 'left') {
             if (
-              space.left - tooltipArrowPadding - padding > tooltipDims.width &&
+              space.left - tooltipArrowPadding - padding - horizontalPadding > tooltipDims.width &&
               space.top > tooltipDims.height / 2 &&
               space.bottom > tooltipDims.height / 2
             ) {
@@ -166,7 +169,7 @@ class Tooltip extends PureComponent {
             }
           } else if (priority === 'right') {
             if (
-              space.right - tooltipArrowPadding - padding > tooltipDims.width &&
+              space.right - tooltipArrowPadding - padding - horizontalPadding > tooltipDims.width &&
               space.top > tooltipDims.height / 2 &&
               space.bottom > tooltipDims.height / 2
             ) {
@@ -174,7 +177,7 @@ class Tooltip extends PureComponent {
             }
           } else if (priority === 'top') {
             if (
-              space.top - tooltipArrowPadding - padding > tooltipDims.height &&
+              space.top - tooltipArrowPadding - padding - verticalPadding > tooltipDims.height &&
               space.left > tooltipDims.width / 2 &&
               space.right > tooltipDims.width / 2
             ) {
@@ -182,7 +185,7 @@ class Tooltip extends PureComponent {
             }
           } else if (priority === 'bottom') {
             if (
-              space.bottom - tooltipArrowPadding - padding > tooltipDims.height &&
+              space.bottom - tooltipArrowPadding - padding - verticalPadding > tooltipDims.height &&
               space.left > tooltipDims.width / 2 &&
               space.right > tooltipDims.width / 2
             ) {
@@ -263,37 +266,37 @@ class Tooltip extends PureComponent {
       triangleStyles = {
         top: '100%',
         left: '50%',
-        transform: 'translate(-50%, 0%)',
-        borderLeft: '5px solid transparent',
-        borderRight: '5px solid transparent',
-        borderTop: `5px solid ${backgroundColor}`,
+        transform: 'translate3d(-50%, 0%, 0)',
+        borderLeft: `${triangleSize * 0.8}px solid transparent`,
+        borderRight: `${triangleSize * 0.8}px solid transparent`,
+        borderTop: `${triangleSize}px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'top') {
       triangleStyles = {
         top: '0%',
         left: '50%',
-        transform: 'translate(-50%, -100%)',
-        borderLeft: '5px solid transparent',
-        borderRight: '5px solid transparent',
-        borderBottom: `5px solid ${backgroundColor}`,
+        transform: 'translate3d(-50%, -100%, 0)',
+        borderLeft: `${triangleSize * 0.8}px solid transparent`,
+        borderRight: `${triangleSize * 0.8}px solid transparent`,
+        borderBottom: `${triangleSize}px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'right') {
       triangleStyles = {
         top: '50%',
         left: '100%',
-        transform: 'translate(0%, -50%)',
-        borderTop: '5px solid transparent',
-        borderBottom: '5px solid transparent',
-        borderLeft: `5px solid ${backgroundColor}`,
+        transform: 'translate3d(0%, -50%, 0)',
+        borderTop: `${triangleSize * 0.8}px solid transparent`,
+        borderBottom: `${triangleSize * 0.8}px solid transparent`,
+        borderLeft: `${triangleSize}px solid ${backgroundColor}`,
       }
     } else if (arrowPosition === 'left') {
       triangleStyles = {
         top: '50%',
         left: '0%',
-        transform: 'translate(-100%, -50%)',
-        borderTop: '5px solid transparent',
-        borderBottom: '5px solid transparent',
-        borderRight: `5px solid ${backgroundColor}`,
+        transform: 'translate3d(-100%, -50%, 0)',
+        borderTop: `${triangleSize * 0.8}px solid transparent`,
+        borderBottom: `${triangleSize * 0.8}px solid transparent`,
+        borderRight: `${triangleSize}px solid ${backgroundColor}`,
       }
     } else {
       triangleStyles = {
@@ -315,7 +318,8 @@ class Tooltip extends PureComponent {
     const tooltip = {
       x,
       y,
-      focusPadding,
+      horizontalPadding,
+      verticalPadding,
       alignX,
       alignY,
       triangleStyles,
@@ -353,7 +357,8 @@ class Tooltip extends PureComponent {
     const {
       x,
       y,
-      focusPadding,
+      horizontalPadding,
+      verticalPadding,
       alignX,
       alignY,
       triangleStyles,
@@ -362,7 +367,8 @@ class Tooltip extends PureComponent {
       secondaryAxis,
     } = tooltip
 
-    const resolvedPadding = padding + focusPadding
+    const resolvedHorizontalPadding = padding + horizontalPadding
+    const resolvedVerticalPadding = padding + verticalPadding
 
     const start = {
       opacity: 0,
@@ -423,7 +429,8 @@ class Tooltip extends PureComponent {
           <div
             style={{
               transform: `translate3d(${alignX}, ${alignY}, 0)`,
-              padding: `${tooltipArrowPadding + resolvedPadding}px`,
+              padding: `${tooltipArrowPadding + resolvedVerticalPadding}px ${tooltipArrowPadding +
+                resolvedHorizontalPadding}px`,
               width: 'auto',
               transition: 'all .2s ease-out',
             }}

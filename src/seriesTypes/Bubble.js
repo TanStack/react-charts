@@ -45,7 +45,8 @@ class Line extends PureComponent {
     datum.focus = {
       x: datum.x,
       y: datum.y,
-      padding: datum.r,
+      verticalPadding: datum.r,
+      horizontalPadding: datum.r,
     }
 
     // Set the pointer points (used in voronoi)

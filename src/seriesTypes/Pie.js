@@ -92,7 +92,11 @@ class Pie extends PureComponent {
       : {}
 
     return (
-      <g transform={`translate(${primaryAxis.width / 2}, ${primaryAxis.height / 2})`}>
+      <g
+        style={{
+          transform: `translate3d(${primaryAxis.width / 2}px, ${primaryAxis.height / 2}px, 0)`,
+        }}
+      >
         {series.datums.map((datum, i) => {
           const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
 
