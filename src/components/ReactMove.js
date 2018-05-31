@@ -1,5 +1,3 @@
-import ReactShow from 'react-show'
-
-const Animate = ReactShow
+import { Animate } from 'react-show'
 
 export { Animate }

@@ -1,6 +1,6 @@
 {
   "name": "react-charts",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "react-charts React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -23,6 +23,7 @@
     "javascript-detect-element-resize": "^0.5.3",
     "nprogress": "^0.2.0",
     "raf": "^3.4.0",
+    "react-show": "^3.0.0",
     "react-state": "^2.0.1"
   },
   "peerDependencies": {
