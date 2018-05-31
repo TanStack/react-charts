@@ -1,6 +1,6 @@
 {
   "name": "react-charts",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "react-charts React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -15,7 +15,8 @@
     "serve": "serve demo/dist -p 3000 -s",
     "startDocs": "cd www && yarn start",
     "buildDocs": "cd www && yarn && yarn build",
-    "serveDocs": "cd www && yarn serve"
+    "serveDocs": "cd www && yarn serve",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "d3-delaunay": "^2.0.1",
