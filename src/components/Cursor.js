@@ -131,7 +131,9 @@ class Cursor extends React.PureComponent {
       datum,
     }
 
-    onChange(newCursor)
+    if ((cursor && cursor.value) !== newCursor.value) {
+      onChange(newCursor)
+    }
 
     dispatch(state => ({
       ...state,
@@ -204,7 +206,7 @@ class Cursor extends React.PureComponent {
       x1 = siblingRange[0]
       x2 = siblingRange[1]
       y1 = y - 1
-      y2 = y + axis.barSize + 1
+      y2 = y + axis.cursorSize + 1
       if (axis.position === 'left') {
         alignPctX = -100
         alignPctY = -50
@@ -215,7 +217,7 @@ class Cursor extends React.PureComponent {
     } else {
       x = axis.scale(resolvedValue)
       x1 = x - 1
-      x2 = x + axis.barSize + 1
+      x2 = x + axis.cursorSize + 1
       y1 = siblingRange[0]
       y2 = siblingRange[1]
       if (axis.position === 'top') {

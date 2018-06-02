@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Connect } from 'react-state'
 //
 import Utils from '../utils/Utils'
@@ -31,7 +31,7 @@ const defaultStyles = {
   },
 }
 
-class Axis extends Component {
+class Axis extends React.Component {
   static defaultProps = {
     min: undefined,
     max: undefined,

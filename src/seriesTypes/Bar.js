@@ -58,9 +58,9 @@ class Bar extends PureComponent {
 
     // Adjust the focus point for bars
     if (!primaryAxis.vertical) {
-      datum.focus.x += datum.size / 2
+      datum.focus.x += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
     } else {
-      datum.focus.y += datum.size / 2
+      datum.focus.y += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
     }
 
     // Set the pointer points (used in voronoi)

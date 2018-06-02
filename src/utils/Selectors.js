@@ -49,158 +49,109 @@ export default {
     Memoize(
       state => [
         (state && state.padding && state.padding.left) || 0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.left &&
-          sumObjBy(state.axisDimensions.left, 'width')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.top &&
-          sumObjBy(state.axisDimensions.top, 'left')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.bottom &&
-          sumObjBy(state.axisDimensions.bottom, 'left')) ||
-          0,
+        state && state.axisDimensions && state.axisDimensions.left,
+        state && state.axisDimensions && state.axisDimensions.top,
+        state && state.axisDimensions && state.axisDimensions.bottom,
       ],
-      (paddingLeft, axesLeftWidth, axesTopLeft, axesBottomLeft) =>
-        paddingLeft + Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
+      (paddingLeft, axisDimensionsLeft, axisDimensionsTop, axisDimensionsBottom) => {
+        const axesLeftWidth = (axisDimensionsLeft && sumObjBy(axisDimensionsLeft, 'width')) || 0
+        const axesTopLeft = (axisDimensionsTop && sumObjBy(axisDimensionsTop, 'left')) || 0
+        const axesBottomLeft = (axisDimensionsBottom && sumObjBy(axisDimensionsBottom, 'left')) || 0
+        return paddingLeft + Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
+      }
     ),
 
   gridY: () =>
     Memoize(
       state => [
         (state && state.padding && state.padding.top) || 0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.top &&
-          sumObjBy(state.axisDimensions.top, 'height')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.left &&
-          sumObjBy(state.axisDimensions.left, 'top')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.right &&
-          sumObjBy(state.axisDimensions.right, 'top')) ||
-          0,
+        state && state.axisDimensions && state.axisDimensions.top,
+        state && state.axisDimensions && state.axisDimensions.left,
+        state && state.axisDimensions && state.axisDimensions.right,
       ],
-      (paddingTop, axesTopHeight, axesLeftTop, axesRightTop) =>
-        paddingTop + Math.max(axesTopHeight, axesLeftTop, axesRightTop)
+      (paddingTop, axisDimensionsTop, axisDimensionsLeft, axisDimensionsRight) => {
+        const axesTopHeight = (axisDimensionsTop && sumObjBy(axisDimensionsTop, 'height')) || 0
+        const axesLeftTop = (axisDimensionsLeft && sumObjBy(axisDimensionsLeft, 'top')) || 0
+        const axesRightTop = (axisDimensionsRight && sumObjBy(axisDimensionsRight, 'top')) || 0
+        return paddingTop + Math.max(axesTopHeight, axesLeftTop, axesRightTop)
+      }
     ),
 
   gridWidth: () =>
     Memoize(
       state => [
-        (state && state.width && state.width) || 0,
-        (state && state.padding && state.padding.left) || 0,
-        (state && state.padding && state.padding.right) || 0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.left &&
-          sumObjBy(state.axisDimensions.left, 'width')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.right &&
-          sumObjBy(state.axisDimensions.right, 'width')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.top &&
-          sumObjBy(state.axisDimensions.top, 'left')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.top &&
-          sumObjBy(state.axisDimensions.top, 'right')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.bottom &&
-          sumObjBy(state.axisDimensions.bottom, 'left')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.bottom &&
-          sumObjBy(state.axisDimensions.bottom, 'right')) ||
-          0,
+        state && state.width,
+        state && state.padding,
+        state && state.axisDimensions && state.axisDimensions.top,
+        state && state.axisDimensions && state.axisDimensions.bottom,
+        state && state.axisDimensions && state.axisDimensions.left,
+        state && state.axisDimensions && state.axisDimensions.right,
       ],
       (
         width,
-        paddingLeft,
-        paddingRight,
-        axesLeftWidth,
-        axesRightWidth,
-        axesTopLeft,
-        axesTopRight,
-        axesBottomLeft,
-        axesBottomRight
-      ) =>
-        width -
-        paddingLeft -
-        paddingRight -
-        Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
-        Math.max(axesRightWidth, axesTopRight, axesBottomRight)
+        padding,
+        axisDimensionsTop,
+        axisDimensionsBottom,
+        axisDimensionsLeft,
+        axisDimensionsRight
+      ) => {
+        const paddingLeft = (padding && padding.left) || 0
+        const paddingRight = (padding && padding.right) || 0
+        const axesLeftWidth = (axisDimensionsLeft && sumObjBy(axisDimensionsLeft, 'width')) || 0
+        const axesRightWidth = (axisDimensionsRight && sumObjBy(axisDimensionsRight, 'width')) || 0
+        const axesTopLeft = (axisDimensionsTop && sumObjBy(axisDimensionsTop, 'left')) || 0
+        const axesTopRight = (axisDimensionsTop && sumObjBy(axisDimensionsTop, 'right')) || 0
+        const axesBottomLeft = (axisDimensionsBottom && sumObjBy(axisDimensionsBottom, 'left')) || 0
+        const axesBottomRight =
+          (axisDimensionsBottom && sumObjBy(axisDimensionsBottom, 'right')) || 0
+
+        return (
+          (width || 0) -
+          paddingLeft -
+          paddingRight -
+          Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
+          Math.max(axesRightWidth, axesTopRight, axesBottomRight)
+        )
+      }
     ),
 
   gridHeight: () =>
     Memoize(
       state => [
-        (state && state.height) || 0,
-        (state && state.padding && state.padding.top) || 0,
-        (state && state.padding && state.padding.bottom) || 0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.top &&
-          sumObjBy(state.axisDimensions.top, 'height')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.bottom &&
-          sumObjBy(state.axisDimensions.bottom, 'height')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.left &&
-          sumObjBy(state.axisDimensions.left, 'top')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.left &&
-          sumObjBy(state.axisDimensions.left, 'bottom')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.right &&
-          sumObjBy(state.axisDimensions.right, 'top')) ||
-          0,
-        (state &&
-          state.axisDimensions &&
-          state.axisDimensions.right &&
-          sumObjBy(state.axisDimensions.right, 'bottom')) ||
-          0,
+        state && state.height,
+        state && state.padding,
+        state && state.axisDimensions && state.axisDimensions.top,
+        state && state.axisDimensions && state.axisDimensions.bottom,
+        state && state.axisDimensions && state.axisDimensions.left,
+        state && state.axisDimensions && state.axisDimensions.right,
       ],
       (
         height,
-        paddingTop,
-        paddingBottom,
-        axesTopHeight,
-        axesBottomHeight,
-        axesLeftTop,
-        axesLeftBottom,
-        axesRightTop,
-        axesRightBottom
-      ) =>
-        height -
-        paddingTop -
-        paddingBottom -
-        Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
-        Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
+        padding,
+        axisDimensionsTop,
+        axisDimensionsBottom,
+        axisDimensionsLeft,
+        axisDimensionsRight
+      ) => {
+        const paddingTop = (padding && padding.top) || 0
+        const paddingBottom = (padding && padding.right) || 0
+        const axesTopHeight = (axisDimensionsTop && sumObjBy(axisDimensionsTop, 'height')) || 0
+        const axesBottomHeight =
+          (axisDimensionsBottom && sumObjBy(axisDimensionsBottom, 'height')) || 0
+        const axesLeftTop = (axisDimensionsLeft && sumObjBy(axisDimensionsLeft, 'top')) || 0
+        const axesLeftBottom = (axisDimensionsLeft && sumObjBy(axisDimensionsLeft, 'bottom')) || 0
+        const axesRightTop = (axisDimensionsRight && sumObjBy(axisDimensionsRight, 'top')) || 0
+        const axesRightBottom =
+          (axisDimensionsRight && sumObjBy(axisDimensionsRight, 'bottom')) || 0
+
+        return (
+          (height || 0) -
+          paddingTop -
+          paddingBottom -
+          Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
+          Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
+        )
+      }
     ),
 }
 

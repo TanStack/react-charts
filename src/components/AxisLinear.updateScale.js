@@ -156,6 +156,7 @@ export default function updateScale (props) {
   // If this is an ordinal or other primary axis, it needs to be able to display bars.
   let bandScale
   let barSize = 0
+  let cursorSize = 0
   let stepSize = 0
 
   let seriesBandScale = d => d
@@ -176,9 +177,11 @@ export default function updateScale (props) {
       .rangeRound(range, 0.1)
       .padding(0)
 
+    bandScale.paddingOuter(outerPadding).paddingInner(innerPadding)
+    barSize = bandScale.bandwidth()
+
     if (type === 'ordinal') {
-      bandScale.paddingOuter(outerPadding).paddingInner(innerPadding)
-      barSize = bandScale.bandwidth()
+      cursorSize = barSize
     }
 
     // barSize = bandScale.bandwidth()
@@ -250,6 +253,7 @@ export default function updateScale (props) {
     position,
     stacked,
     barSize,
+    cursorSize,
     stepSize,
     seriesBandScale,
     seriesBarSize,

@@ -289,6 +289,8 @@ class Series extends Component {
 
     const reversedStackData = [...stackData].reverse() // For proper svg stacking
 
+    console.log('series')
+
     return (
       <g className="Series">
         {reversedStackData.map(stack => {

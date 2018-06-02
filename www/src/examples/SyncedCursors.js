@@ -4,7 +4,7 @@ import ChartConfig from 'components/ChartConfig'
 import Sidebar from 'components/Sidebar'
 import Code from 'components/Code'
 
-import { Chart, Axis, Series, Tooltip, Cursor, Area } from '../../../src'
+import { Chart, Axis, Series, Tooltip, Cursor, Line } from '../../../src'
 
 let sourceCode
 
@@ -18,12 +18,12 @@ class Story extends Component {
     return (
       <Sidebar>
         <Code source={JSON.stringify({ cursorValue }, null, 2)} />
-        <ChartConfig width={600}>
+        <ChartConfig width={600} height={200}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
-              <Series type={Area} />
+              <Series type={Line} />
               <Cursor
                 primary
                 value={cursorValue}
@@ -40,12 +40,12 @@ class Story extends Component {
           )}
         </ChartConfig>
         <br />
-        <ChartConfig width={200}>
+        <ChartConfig width={200} height={100}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
-              <Series type={Area} />
+              <Series type={Line} />
               <Cursor
                 primary
                 value={cursorValue}
@@ -61,12 +61,12 @@ class Story extends Component {
             </Chart>
           )}
         </ChartConfig>
-        <ChartConfig width={400}>
+        <ChartConfig width={400} height={40}>
           {({ data }) => (
             <Chart data={data}>
               <Axis primary type="time" position="bottom" />
               <Axis type="linear" position="left" stacked />
-              <Series type={Area} />
+              <Series type={Line} />
               <Cursor
                 primary
                 value={cursorValue}

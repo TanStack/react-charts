@@ -136,7 +136,7 @@ class Chart extends Component {
     RAF(() => this.measure(prevProps))
   }
   updateDataModel = props => {
-    const { data } = props
+    const { data, width, height } = props
     let {
       getSeries,
       getDatums,
@@ -208,6 +208,8 @@ class Chart extends Component {
       state => ({
         ...state,
         preMaterializedData,
+        width,
+        height,
       }),
       {
         type: 'preMaterializedData',
@@ -404,9 +406,6 @@ const ReactChart = Connect(
       offset: Selectors.offset(),
     }
     return state => ({
-      data: state.data,
-      width: state.width,
-      height: state.height,
       active: state.active,
       selected: state.selected,
       gridWidth: selectors.gridWidth(state),
