@@ -1,9 +1,9 @@
-import React, { PureComponent } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 import { voronoi } from 'd3-voronoi'
 import { line, arc as makeArc } from 'd3-shape'
 //
 import Path from '../primitives/Path'
+import { ChartConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 
@@ -14,14 +14,14 @@ const modePrimary = 'primary'
 const modeSecondary = 'secondary'
 const modeRadial = 'radial'
 
-class Voronoi extends PureComponent {
+class Voronoi extends React.PureComponent {
   static defaultProps = {
     onHover: noop,
     onActivate: noop,
   }
   constructor () {
     super()
-    this.onHover = Utils.throttle(this.onHover.bind(this))
+    this.onHover = this.onHover.bind(this)
   }
   render () {
     const {
@@ -194,50 +194,35 @@ class Voronoi extends PureComponent {
   onHover (datums) {
     // activate the hover with any series or datums
     if (datums) {
-      return this.props.dispatch(
-        state => ({
-          ...state,
-          hovered: {
-            active: true,
-            datums,
-          },
-        }),
-        {
-          type: 'hovered',
-        }
-      )
-    }
-    // If we just left the area, deactive the hover
-    return this.props.dispatch(
-      state => ({
+      return this.props.dispatch(state => ({
         ...state,
         hovered: {
-          ...state.hovered,
-          active: false,
+          active: true,
+          datums,
         },
-      }),
-      {
-        type: 'hovered',
-      }
-    )
+      }))
+    }
+    // If we just left the area, deactive the hover
+    return this.props.dispatch(state => ({
+      ...state,
+      hovered: {
+        ...state.hovered,
+        active: false,
+      },
+    }))
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxes: Selectors.primaryAxes(),
-      secondaryAxes: Selectors.secondaryAxes(),
-    }
-    return state => ({
-      primaryAxes: selectors.primaryAxes(state),
-      secondaryAxes: selectors.secondaryAxes(state),
-      stackData: state.stackData,
-      hoverMode: state.hoverMode,
-      showVoronoi: state.showVoronoi,
-    })
-  },
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+export default ChartConnect(() => {
+  const selectors = {
+    primaryAxes: Selectors.primaryAxes(),
+    secondaryAxes: Selectors.secondaryAxes(),
   }
-)(Voronoi)
+  return state => ({
+    primaryAxes: selectors.primaryAxes(state),
+    secondaryAxes: selectors.secondaryAxes(state),
+    stackData: state.stackData,
+    hoverMode: state.hoverMode,
+    showVoronoi: state.showVoronoi,
+  })
+})(Voronoi)

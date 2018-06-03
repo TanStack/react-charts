@@ -1,7 +1,7 @@
 import React from 'react'
-import { Connect } from 'react-state'
 import { Animate } from './ReactMove'
 //
+import { ChartConnect, PointerConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 
@@ -339,27 +339,30 @@ class Cursor extends React.PureComponent {
   }
 }
 
-export default Connect(() => {
-  const selectors = {
-    primaryAxes: Selectors.primaryAxes(),
-    secondaryAxes: Selectors.secondaryAxes(),
-    offset: Selectors.offset(),
-    gridHeight: Selectors.gridHeight(),
-    gridWidth: Selectors.gridWidth(),
-    gridX: Selectors.gridX(),
-    gridY: Selectors.gridY(),
-  }
-  return (state, props) => ({
-    stackData: state.stackData,
-    pointer: state.pointer,
-    cursor: state.cursors[props.primary ? 'primary' : 'secondary'],
-    hovered: state.hovered,
-    primaryAxes: selectors.primaryAxes(state),
-    secondaryAxes: selectors.secondaryAxes(state),
-    offset: selectors.offset(state),
-    gridHeight: selectors.gridHeight(state),
-    gridWidth: selectors.gridWidth(state),
-    gridX: selectors.gridX(state),
-    gridY: selectors.gridY(state),
-  })
-})(Cursor)
+export default PointerConnect(state => ({
+  pointer: state.pointer,
+}))(
+  ChartConnect(() => {
+    const selectors = {
+      primaryAxes: Selectors.primaryAxes(),
+      secondaryAxes: Selectors.secondaryAxes(),
+      offset: Selectors.offset(),
+      gridHeight: Selectors.gridHeight(),
+      gridWidth: Selectors.gridWidth(),
+      gridX: Selectors.gridX(),
+      gridY: Selectors.gridY(),
+    }
+    return (state, props) => ({
+      stackData: state.stackData,
+      cursor: state.cursors[props.primary ? 'primary' : 'secondary'],
+      hovered: state.hovered,
+      primaryAxes: selectors.primaryAxes(state),
+      secondaryAxes: selectors.secondaryAxes(state),
+      offset: selectors.offset(state),
+      gridHeight: selectors.gridHeight(state),
+      gridWidth: selectors.gridWidth(state),
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+    })
+  })(Cursor)
+)

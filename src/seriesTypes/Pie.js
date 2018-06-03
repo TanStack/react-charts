@@ -1,7 +1,6 @@
-import React, { PureComponent } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 
-import { Animate } from '../components/ReactMove'
+import { ChartConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -9,7 +8,7 @@ import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/int
 //
 import Path from '../primitives/Path'
 
-class Pie extends PureComponent {
+class Pie extends React.PureComponent {
   static defaultProps = {
     showPoints: true,
   }
@@ -131,19 +130,14 @@ class Pie extends PureComponent {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxes: Selectors.primaryAxes(),
-    }
-    return state => ({
-      primaryAxes: selectors.primaryAxes(state),
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
-    })
-  },
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+export default ChartConnect(() => {
+  const selectors = {
+    primaryAxes: Selectors.primaryAxes(),
   }
-)(Pie)
+  return state => ({
+    primaryAxes: selectors.primaryAxes(state),
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction,
+  })
+})(Pie)

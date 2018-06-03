@@ -1,7 +1,7 @@
-import React, { PureComponent } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 //
 import { Animate } from './ReactMove'
+import { ChartConnect, PointerConnect } from '../utils/Context'
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
@@ -9,7 +9,7 @@ import Selectors from '../utils/Selectors'
 const backgroundColor = 'rgba(38, 38, 38, 0.9)'
 const triangleSize = 7
 
-class Tooltip extends PureComponent {
+class Tooltip extends React.PureComponent {
   static defaultProps = {
     focus: 'closest',
     align: 'auto',
@@ -589,28 +589,31 @@ function defaultRenderer (props) {
   )
 }
 
-export default Connect(() => {
-  const selectors = {
-    primaryAxes: Selectors.primaryAxes(),
-    secondaryAxes: Selectors.secondaryAxes(),
-    gridX: Selectors.gridX(),
-    gridY: Selectors.gridY(),
-    gridWidth: Selectors.gridWidth(),
-    gridHeight: Selectors.gridHeight(),
-    offset: Selectors.offset(),
-  }
-  return state => ({
-    primaryAxes: selectors.primaryAxes(state),
-    secondaryAxes: selectors.secondaryAxes(state),
-    gridX: selectors.gridX(state),
-    gridY: selectors.gridY(state),
-    gridWidth: selectors.gridWidth(state),
-    gridHeight: selectors.gridHeight(state),
-    width: state.width,
-    height: state.height,
-    hovered: state.hovered,
-    pointer: state.pointer,
-    tooltip: state.tooltip,
-    offset: selectors.offset(state),
-  })
-})(Tooltip)
+export default PointerConnect(state => ({
+  pointer: state.pointer,
+}))(
+  ChartConnect(() => {
+    const selectors = {
+      primaryAxes: Selectors.primaryAxes(),
+      secondaryAxes: Selectors.secondaryAxes(),
+      gridX: Selectors.gridX(),
+      gridY: Selectors.gridY(),
+      gridWidth: Selectors.gridWidth(),
+      gridHeight: Selectors.gridHeight(),
+      offset: Selectors.offset(),
+    }
+    return state => ({
+      primaryAxes: selectors.primaryAxes(state),
+      secondaryAxes: selectors.secondaryAxes(state),
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+      gridWidth: selectors.gridWidth(state),
+      gridHeight: selectors.gridHeight(state),
+      width: state.width,
+      height: state.height,
+      hovered: state.hovered,
+      tooltip: state.tooltip,
+      offset: selectors.offset(state),
+    })
+  })(Tooltip)
+)

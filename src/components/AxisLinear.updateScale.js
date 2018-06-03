@@ -294,18 +294,13 @@ export default function updateScale (props) {
   // Make sure we start with a prevAxis
   this.prevAxis = this.prevAxis || axis
 
-  this.props.dispatch(
-    state => ({
-      ...state,
-      axes: {
-        ...state.axes,
-        [id]: axis,
-      },
-    }),
-    {
-      type: 'axisUpdateScale',
-    }
-  )
+  this.props.dispatch(state => ({
+    ...state,
+    axes: {
+      ...state.axes,
+      [id]: axis,
+    },
+  }))
 }
 
 function identity (x) {

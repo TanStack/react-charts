@@ -1,10 +1,10 @@
-import React, { PureComponent } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 //
+import { ChartConnect, PointerConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 // import Rectangle from '../primitives/Rectangle'
 
-class Brush extends PureComponent {
+class Brush extends React.PureComponent {
   static defaultProps = {
     onSelect: () => {},
   }
@@ -33,6 +33,8 @@ class Brush extends PureComponent {
         style={{
           pointerEvents: 'none',
           position: 'absolute',
+          left: 0,
+          top: 0,
           transform: `translate3d(${offset.left + gridX}px, ${offset.top + gridY}px, 0)`,
           opacity: pointer.dragging ? (Math.abs(pointer.sourceX - pointer.x) < 20 ? 0.5 : 1) : 0,
         }}
@@ -40,9 +42,8 @@ class Brush extends PureComponent {
         <div
           style={{
             position: 'absolute',
-            transform: `${Math.min(pointer.x, pointer.sourceX)}px, ${Math.abs(
-              pointer.x - pointer.sourceX
-            )}px, 0)`,
+            transform: `translate3d(${Math.min(pointer.x, pointer.sourceX)}px, 0px, 0)`,
+            width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
             height: `${gridHeight}px`,
             background: 'rgba(0,0,0,.3)',
             ...style,
@@ -53,20 +54,23 @@ class Brush extends PureComponent {
   }
 }
 
-export default Connect(() => {
-  const selectors = {
-    primaryAxes: Selectors.primaryAxes(),
-    offset: Selectors.offset(),
-    gridHeight: Selectors.gridHeight(),
-    gridX: Selectors.gridX(),
-    gridY: Selectors.gridY(),
-  }
-  return state => ({
-    primaryAxes: selectors.primaryAxes(state),
-    pointer: state.pointer,
-    offset: selectors.offset(state),
-    gridHeight: selectors.gridHeight(state),
-    gridX: selectors.gridX(state),
-    gridY: selectors.gridY(state),
-  })
-})(Brush)
+export default PointerConnect(state => ({
+  pointer: state.pointer,
+}))(
+  ChartConnect(() => {
+    const selectors = {
+      primaryAxes: Selectors.primaryAxes(),
+      offset: Selectors.offset(),
+      gridHeight: Selectors.gridHeight(),
+      gridX: Selectors.gridX(),
+      gridY: Selectors.gridY(),
+    }
+    return state => ({
+      primaryAxes: selectors.primaryAxes(state),
+      offset: selectors.offset(state),
+      gridHeight: selectors.gridHeight(state),
+      gridX: selectors.gridX(state),
+      gridY: selectors.gridY(state),
+    })
+  })(Brush)
+)

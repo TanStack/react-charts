@@ -7088,12 +7088,6 @@ react-show@^3.0.0:
     babel-preset-env "^1.7.0"
     raf "^3.4.0"
 
-react-state@^2.0.1:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/react-state/-/react-state-2.2.2.tgz#d57515acc97d5dc01a2232a8f8c98b8e2a3daaa2"
-  dependencies:
-    hoist-non-react-statics "^2.5.0"
-
 react-transform-catch-errors@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/react-transform-catch-errors/-/react-transform-catch-errors-1.0.2.tgz#1b4d4a76e97271896fc16fe3086c793ec88a9eeb"

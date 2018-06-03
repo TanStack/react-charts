@@ -1,13 +1,13 @@
-import React, { PureComponent } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 //
+import { ChartConnect } from '../utils/Context'
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 import { selectSeries, hoverSeries, selectDatum, hoverDatum } from '../utils/interactionMethods'
 
 import Rectangle from '../primitives/Rectangle'
 
-class Bar extends PureComponent {
+class Bar extends React.PureComponent {
   static isBar = true
   constructor (props) {
     super(props)
@@ -187,19 +187,14 @@ class Bar extends PureComponent {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxes: Selectors.primaryAxes(),
-    }
-    return state => ({
-      primaryAxes: selectors.primaryAxes(state),
-      hovered: state.hovered,
-      selected: state.selected,
-      interaction: state.interaction,
-    })
-  },
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+export default ChartConnect(() => {
+  const selectors = {
+    primaryAxes: Selectors.primaryAxes(),
   }
-)(Bar)
+  return state => ({
+    primaryAxes: selectors.primaryAxes(state),
+    hovered: state.hovered,
+    selected: state.selected,
+    interaction: state.interaction,
+  })
+})(Bar)

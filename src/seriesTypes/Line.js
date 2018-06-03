@@ -1,9 +1,9 @@
 import React from 'react'
-import { Connect } from 'react-state'
 import { line } from 'd3-shape'
 
 //
 
+import { ChartConnect } from '../utils/Context'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
@@ -179,13 +179,8 @@ class Line extends React.PureComponent {
   }
 }
 
-export default Connect(
-  state => ({
-    hovered: state.hovered,
-    selected: state.selected,
-    interaction: state.interaction,
-  }),
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
-  }
-)(Line)
+export default ChartConnect(state => ({
+  hovered: state.hovered,
+  selected: state.selected,
+  interaction: state.interaction,
+}))(Line)

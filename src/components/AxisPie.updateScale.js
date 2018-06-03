@@ -110,16 +110,11 @@ export default function updateScale (props) {
     type,
   }
 
-  dispatch(
-    state => ({
-      ...state,
-      axes: {
-        pie_primary: primaryAxis,
-        pie_secondary: secondaryAxis,
-      },
-    }),
-    {
-      type: 'axisUpdateScale',
-    }
-  )
+  dispatch(state => ({
+    ...state,
+    axes: {
+      pie_primary: primaryAxis,
+      pie_secondary: secondaryAxis,
+    },
+  }))
 }

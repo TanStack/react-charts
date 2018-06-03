@@ -23,6 +23,9 @@ export default class HyperResponsive extends React.Component {
     }
   }
   resize = Utils.throttle(() => {
+    if (!this.el) {
+      return
+    }
     const computed = window.getComputedStyle(this.el.parentElement)
 
     const {

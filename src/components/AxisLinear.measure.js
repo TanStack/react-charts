@@ -29,22 +29,17 @@ export default function measure () {
 
   if (!this.el) {
     // If the entire axis is hidden, then we need to remove the axis dimensions
-    dispatch(
-      state => {
-        const newAxes = state.axisDimensions[position] || {}
-        delete newAxes[id]
-        return {
-          ...state,
-          axisDimensions: {
-            ...state.axisDimensions,
-            [position]: newAxes,
-          },
-        }
-      },
-      {
-        type: 'axisDimensions',
+    dispatch(state => {
+      const newAxes = state.axisDimensions[position] || {}
+      delete newAxes[id]
+      return {
+        ...state,
+        axisDimensions: {
+          ...state.axisDimensions,
+          [position]: newAxes,
+        },
       }
-    )
+    })
     return
   }
 
@@ -135,32 +130,27 @@ export default function measure () {
       Math.max(...labelDims.map(d => Math.ceil(getPixel(d.width))))
   }
 
-  dispatch(
-    state => {
-      const newAxes = state.axisDimensions[position] || {}
-      delete newAxes[id]
-      return {
-        ...state,
-        axisDimensions: {
-          ...state.axisDimensions,
-          [position]: {
-            ...newAxes,
-            [id]: {
-              width,
-              height,
-              top,
-              bottom,
-              left,
-              right,
-            },
+  dispatch(state => {
+    const newAxes = state.axisDimensions[position] || {}
+    delete newAxes[id]
+    return {
+      ...state,
+      axisDimensions: {
+        ...state.axisDimensions,
+        [position]: {
+          ...newAxes,
+          [id]: {
+            width,
+            height,
+            top,
+            bottom,
+            left,
+            right,
           },
         },
-      }
-    },
-    {
-      type: 'axisDimensions',
+      },
     }
-  )
+  })
 
   return true
 }

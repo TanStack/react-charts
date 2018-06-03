@@ -1,6 +1,5 @@
 import React from 'react'
 //
-import { Animate } from '../components/ReactMove'
 
 const defaultStyle = {
   strokeWidth: 1,

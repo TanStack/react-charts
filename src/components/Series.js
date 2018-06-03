@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 
 //
 
+import { ChartConnect } from '../utils/Context'
 import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 
@@ -31,7 +31,7 @@ const getType = (type, data, i) => {
   return typeGetter(data, i)
 }
 
-class Series extends Component {
+class Series extends React.Component {
   static defaultProps = {
     getStyles: () => ({}),
     getDatumStyles: () => ({}),
@@ -268,15 +268,10 @@ class Series extends Component {
       return result || series
     })
 
-    this.props.dispatch(
-      state => ({
-        ...state,
-        stackData,
-      }),
-      {
-        type: 'stackData',
-      }
-    )
+    this.props.dispatch(state => ({
+      ...state,
+      stackData,
+    }))
   }
   render () {
     const {
@@ -289,8 +284,6 @@ class Series extends Component {
 
     const reversedStackData = [...stackData].reverse() // For proper svg stacking
 
-    console.log('series')
-
     return (
       <g className="Series">
         {reversedStackData.map(stack => {
@@ -302,25 +295,20 @@ class Series extends Component {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      primaryAxes: Selectors.primaryAxes(),
-      secondaryAxes: Selectors.secondaryAxes(),
-    }
-    return state => ({
-      primaryAxes: selectors.primaryAxes(state),
-      secondaryAxes: selectors.secondaryAxes(state),
-      preMaterializedData: state.preMaterializedData,
-      materializedData: state.materializedData,
-      stackData: state.stackData,
-      tooltip: state.tooltip,
-      hovered: state.hovered,
-      selected: state.selected,
-      groupMode: state.groupMode,
-    })
-  },
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+export default ChartConnect(() => {
+  const selectors = {
+    primaryAxes: Selectors.primaryAxes(),
+    secondaryAxes: Selectors.secondaryAxes(),
   }
-)(Series)
+  return state => ({
+    primaryAxes: selectors.primaryAxes(state),
+    secondaryAxes: selectors.secondaryAxes(state),
+    preMaterializedData: state.preMaterializedData,
+    materializedData: state.materializedData,
+    stackData: state.stackData,
+    tooltip: state.tooltip,
+    hovered: state.hovered,
+    selected: state.selected,
+    groupMode: state.groupMode,
+  })
+})(Series)

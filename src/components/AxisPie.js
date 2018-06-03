@@ -1,6 +1,6 @@
-import { Component } from 'react'
-import { Connect } from 'react-state'
+import React from 'react'
 //
+import { ChartConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 
 import updateScale from './AxisPie.updateScale'
@@ -12,7 +12,7 @@ export const positionRight = 'right'
 export const positionBottom = 'bottom'
 export const positionLeft = 'left'
 
-class AxisPie extends Component {
+class AxisPie extends React.Component {
   static defaultProps = {
     tickArguments: [],
     tickValues: null,
@@ -63,19 +63,14 @@ class AxisPie extends Component {
   }
 }
 
-export default Connect(
-  () => {
-    const selectors = {
-      gridWidth: Selectors.gridWidth(),
-      gridHeight: Selectors.gridHeight(),
-    }
-    return state => ({
-      materializedData: state.materializedData,
-      width: selectors.gridWidth(state),
-      height: selectors.gridHeight(state),
-    })
-  },
-  {
-    filter: (oldState, newState, meta) => meta.type !== 'pointer',
+export default ChartConnect(() => {
+  const selectors = {
+    gridWidth: Selectors.gridWidth(),
+    gridHeight: Selectors.gridHeight(),
   }
-)(AxisPie)
+  return state => ({
+    materializedData: state.materializedData,
+    width: selectors.gridWidth(state),
+    height: selectors.gridHeight(state),
+  })
+})(AxisPie)
