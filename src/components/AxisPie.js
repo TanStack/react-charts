@@ -31,31 +31,23 @@ class AxisPie extends React.Component {
     super()
     this.updateScale = updateScale.bind(this)
   }
-  componentWillReceiveProps (newProps) {
-    const oldProps = this.props
-
-    // If any of the following change,
-    // we need to update the axis
-    if (
-      newProps.materializedData !== oldProps.materializedData ||
-      newProps.height !== oldProps.height ||
-      newProps.width !== oldProps.width
-    ) {
-      this.updateScale(newProps)
-    }
-
-    if (newProps.stackData !== oldProps.stackData) {
-      this.updateStackData(newProps)
-    }
-  }
   componentDidMount () {
     this.updateScale(this.props)
   }
-  shouldComponentUpdate (newProps) {
-    if (newProps.axis !== this.props.axis) {
-      return true
+  componentDidUpdate (oldProps) {
+    // If any of the following change,
+    // we need to update the axis
+    if (
+      this.props.materializedData !== oldProps.materializedData ||
+      this.props.height !== oldProps.height ||
+      this.props.width !== oldProps.width
+    ) {
+      this.updateScale(this.props)
     }
-    return false
+
+    if (this.props.stackData !== oldProps.stackData) {
+      this.updateStackData(this.props)
+    }
   }
   render () {
     // TODO: This is where permanent labels and lines will be drawn

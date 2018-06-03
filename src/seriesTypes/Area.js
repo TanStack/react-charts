@@ -19,6 +19,7 @@ class Area extends React.PureComponent {
     showOrphans: true,
     curve: 'monotoneX',
   }
+  state = {}
   constructor (props) {
     super(props)
     if (!props.hoverMode) {
@@ -87,9 +88,9 @@ class Area extends React.PureComponent {
       }
     })
   }
-  componentWillReceiveProps (nextProps) {
-    if (nextProps.series !== this.props.series) {
-      this.updatePath(nextProps)
+  componentDidUpdate (oldProps) {
+    if (this.props.series !== oldProps.series) {
+      this.updatePath(this.props)
     }
   }
   updatePath = props => {
@@ -107,8 +108,10 @@ class Area extends React.PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    this.areaPath = areaFn(series.datums)
-    this.linePath = lineFn(series.datums)
+    this.setState({
+      areaPath: areaFn(series.datums),
+      linePath: lineFn(series.datums),
+    })
   }
   render () {
     const {
@@ -120,6 +123,8 @@ class Area extends React.PureComponent {
       hovered,
       interaction,
     } = this.props
+
+    const { areaPath, linePath } = this.state
 
     const status = Utils.getStatus(series, hovered, selected)
     const style = series.getStatusStyle(status)
@@ -137,7 +142,7 @@ class Area extends React.PureComponent {
     return (
       <g>
         <Path
-          d={this.areaPath}
+          d={areaPath}
           style={{
             ...style,
             ...style.area,
@@ -148,7 +153,7 @@ class Area extends React.PureComponent {
           {...seriesInteractionProps}
         />
         <Path
-          d={this.linePath}
+          d={linePath}
           style={{
             ...style,
             ...style.line,

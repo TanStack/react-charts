@@ -9,14 +9,14 @@ class Brush extends React.PureComponent {
     onSelect: () => {},
   }
   static isHtml = true
-  componentWillReceiveProps (nextProps) {
-    const { onSelect, pointer, primaryAxes } = this.props
-    if (this.props.pointer && nextProps.pointer.released !== this.props.pointer.released) {
+  componentDidUpdate (oldProps) {
+    const { onSelect, pointer, primaryAxes } = oldProps
+    if (oldProps.pointer && this.props.pointer.released !== oldProps.pointer.released) {
       if (Math.abs(pointer.sourceX - pointer.x) < 20) {
         return
       }
       onSelect({
-        pointer: nextProps.pointer.released,
+        pointer: this.props.pointer.released,
         start: primaryAxes[0].scale.invert(pointer.sourceX),
         end: primaryAxes[0].scale.invert(pointer.x),
       })

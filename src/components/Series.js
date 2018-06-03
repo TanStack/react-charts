@@ -40,19 +40,17 @@ class Series extends React.Component {
     this.updateMaterializedData(this.props)
     this.updateStackData(this.props)
   }
-  componentWillReceiveProps (newProps) {
-    const oldProps = this.props
-
+  componentDidUpdate (oldProps) {
     // If any of the following change,
     // we need to update the materializedData
-    if (Utils.shallowCompare(oldProps, newProps, ['type', 'preMaterializedData'])) {
-      return this.updateMaterializedData(newProps)
+    if (Utils.shallowCompare(oldProps, this.props, ['type', 'preMaterializedData'])) {
+      return this.updateMaterializedData(this.props)
     }
 
     // If any of the following change,
     // we need to update the stack
     if (
-      Utils.shallowCompare(oldProps, newProps, [
+      Utils.shallowCompare(oldProps, this.props, [
         'materializedData',
         'axes',
         'seriesKey',
@@ -61,16 +59,9 @@ class Series extends React.Component {
         'groupMode',
       ])
     ) {
-      this.updateStackData(newProps)
+      this.updateStackData(this.props)
     }
   }
-  // shouldComponentUpdate (nextProps) {
-  //   if (nextProps.stackData !== this.props.stackData) {
-  //     this.stackData = [...nextProps.stackData].reverse() // For proper svg stacking
-  //     return true
-  //   }
-  //   return false
-  // }
   updateMaterializedData (props) {
     const { preMaterializedData, type, dispatch } = props
 

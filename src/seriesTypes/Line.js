@@ -24,6 +24,7 @@ class Line extends React.PureComponent {
     showPoints: true,
     curve: 'monotoneX',
   }
+  state = {}
   constructor (props) {
     super(props)
     if (!props.hoverMode) {
@@ -79,12 +80,12 @@ class Line extends React.PureComponent {
       }
     })
   }
-  componentWillMount () {
+  componentDidMount () {
     this.updatePath(this.props)
   }
-  componentWillReceiveProps (nextProps) {
-    if (nextProps.series !== this.props.series) {
-      this.updatePath(nextProps)
+  componentDidUpdate (oldProps) {
+    if (this.props.series !== oldProps.series) {
+      this.updatePath(this.props)
     }
   }
   updatePath = props => {
@@ -95,7 +96,9 @@ class Line extends React.PureComponent {
       .defined(d => d.defined)
       .curve(Curves[curve] || curve)
 
-    this.path = lineFn(series.datums)
+    this.setState({
+      path: lineFn(series.datums),
+    })
   }
   render () {
     const {
@@ -107,6 +110,8 @@ class Line extends React.PureComponent {
       hovered,
       interaction,
     } = this.props
+
+    const { path } = this.state
 
     const status = Utils.getStatus(series, hovered, selected)
     const style = series.getStatusStyle(status)
@@ -126,7 +131,7 @@ class Line extends React.PureComponent {
     return (
       <g>
         <Path
-          d={this.path}
+          d={path}
           style={{
             ...pathDefaultStyle,
             ...style,
