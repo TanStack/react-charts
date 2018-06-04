@@ -3,8 +3,6 @@ import React from 'react'
 
 const defaultStyle = {
   fontFamily: 'Helvetica',
-  stroke: 'none',
-  fill: 'black',
   fontSize: 10,
   opacity: 1,
   transition: 'all .3s ease-out',

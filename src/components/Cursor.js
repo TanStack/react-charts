@@ -5,8 +5,8 @@ import { ChartConnect, PointerConnect } from '../utils/Context'
 import Selectors from '../utils/Selectors'
 import Utils from '../utils/Utils'
 
-const lineBackgroundColor = 'rgba(38, 38, 38, 0.3)'
-const backgroundColor = 'rgba(38, 38, 38, 0.9)'
+const getLineBackgroundColor = dark => (dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)')
+const getBackgroundColor = dark => (dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)')
 
 class Cursor extends React.PureComponent {
   static defaultProps = {
@@ -70,7 +70,9 @@ class Cursor extends React.PureComponent {
       return null
     }
 
-    let { value = null, datum } = cursor || {}
+    const resolvedCursor = cursor || { value: null }
+
+    let { value = null, datum } = resolvedCursor
     let x
     let y
     let show = false
@@ -131,7 +133,7 @@ class Cursor extends React.PureComponent {
       datum,
     }
 
-    if ((cursor && cursor.value) !== newCursor.value) {
+    if ((resolvedCursor && resolvedCursor.value) !== newCursor.value) {
       onChange(newCursor)
     }
 
@@ -157,6 +159,7 @@ class Cursor extends React.PureComponent {
       gridY,
       gridWidth,
       gridHeight,
+      dark,
       render,
       children,
       Component: Comp,
@@ -300,7 +303,7 @@ class Cursor extends React.PureComponent {
               transform: `translate3d(${lineStartX}px, ${lineStartY}px, 0px)`,
               width: `${lineWidth}px`,
               height: `${lineHeight}px`,
-              background: lineBackgroundColor,
+              background: getLineBackgroundColor(dark),
               WebkitBackfaceVisibility: 'hidden',
               transition: animated ? '.2s all ease-out' : 'none',
             }}
@@ -322,8 +325,8 @@ class Cursor extends React.PureComponent {
               style={{
                 padding: '5px',
                 fontSize: '10px',
-                background: backgroundColor,
-                color: 'white',
+                background: getBackgroundColor(dark),
+                color: dark ? 'black' : 'white',
                 borderRadius: '3px',
                 position: 'relative',
                 transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
@@ -363,6 +366,7 @@ export default PointerConnect(state => ({
       gridWidth: selectors.gridWidth(state),
       gridX: selectors.gridX(state),
       gridY: selectors.gridY(state),
+      dark: state.dark,
     })
   })(Cursor)
 )

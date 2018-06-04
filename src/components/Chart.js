@@ -30,7 +30,7 @@ class Chart extends React.Component {
     showVoronoi: false,
   }
   constructor ({
-    interaction, hoverMode, groupMode, showVoronoi,
+    interaction, hoverMode, groupMode, showVoronoi, dark,
   }) {
     super()
     this.state = {
@@ -48,6 +48,7 @@ class Chart extends React.Component {
         hoverMode,
         groupMode,
         showVoronoi,
+        dark,
         dispatch: fn =>
           this.setState(state => ({
             chartState: fn(state.chartState),
@@ -207,7 +208,7 @@ class Chart extends React.Component {
   }
   render () {
     const {
-      style, width, height, handleRef, children,
+      width, height, handleRef, children,
     } = this.props
 
     const { gridX, gridY } = this.getSelectedState(this.state.chartState)
@@ -236,7 +237,6 @@ class Chart extends React.Component {
                 width,
                 height,
                 overflow: 'hidden',
-                ...style,
               }}
             >
               <g

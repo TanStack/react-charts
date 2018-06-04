@@ -88,10 +88,11 @@ class Area extends React.PureComponent {
       }
     })
   }
-  componentDidUpdate (oldProps) {
-    if (this.props.series !== oldProps.series) {
-      this.updatePath(this.props)
-    }
+  componentDidMount () {
+    this.updatePath(this.props)
+  }
+  componentDidUpdate () {
+    this.updatePath(this.props)
   }
   updatePath = props => {
     const { curve, series } = props

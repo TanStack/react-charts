@@ -89,7 +89,16 @@ export default class ChartConfig extends Component {
   }
   render () {
     const {
-      render, children, show, count, resizable, width, height, canRandomize,
+      render,
+      children,
+      show,
+      count,
+      resizable,
+      width,
+      height,
+      canRandomize,
+      style,
+      className,
     } = this.props
     return (
       <div>
@@ -135,10 +144,19 @@ export default class ChartConfig extends Component {
           (d, i) =>
             resizable && true ? (
               <ResizableBox key={i} width={width} height={height}>
-                {(render || children)({
-                  ...this.state,
-                  elementType: types[this.state.elementType],
-                })}
+                <div
+                  style={{
+                    ...style,
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  className={className}
+                >
+                  {(render || children)({
+                    ...this.state,
+                    elementType: types[this.state.elementType],
+                  })}
+                </div>
               </ResizableBox>
             ) : (
               <div key={i}>

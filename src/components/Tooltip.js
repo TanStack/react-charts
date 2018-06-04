@@ -6,8 +6,9 @@ import Utils from '../utils/Utils'
 import Selectors from '../utils/Selectors'
 //
 
-const backgroundColor = 'rgba(38, 38, 38, 0.9)'
 const triangleSize = 7
+
+const getBackgroundColor = dark => (dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)')
 
 class Tooltip extends React.PureComponent {
   static defaultProps = {
@@ -52,6 +53,7 @@ class Tooltip extends React.PureComponent {
       width,
       height,
       pointer,
+      dark,
     } = this.props
 
     let { arrowPosition } = this.props
@@ -120,6 +122,8 @@ class Tooltip extends React.PureComponent {
     let alignY
     let triangleStyles = {}
     let resolvedAlign = align || 'auto'
+
+    const backgroundColor = getBackgroundColor(dark)
 
     if (align === 'auto') {
       if (this.el) {
@@ -350,6 +354,7 @@ class Tooltip extends React.PureComponent {
       tooltipArrowPadding,
       children,
       render,
+      dark,
       Component: Comp,
       ...rest
     } = this.props
@@ -442,8 +447,8 @@ class Tooltip extends React.PureComponent {
               style={{
                 fontSize: '12px',
                 padding: '5px',
-                background: backgroundColor,
-                color: 'white',
+                background: getBackgroundColor(dark),
+                color: dark ? 'black' : 'white',
                 borderRadius: '3px',
                 position: 'relative',
                 transition: 'all .2s ease-out',
@@ -469,7 +474,7 @@ class Tooltip extends React.PureComponent {
 
 function defaultRenderer (props) {
   const {
-    datum, primaryAxis, secondaryAxis, formatSecondary, getStyle,
+    datum, primaryAxis, secondaryAxis, formatSecondary, getStyle, dark,
   } = props
 
   if (!datum) {
@@ -535,7 +540,7 @@ function defaultRenderer (props) {
                     style={{
                       ...getStyle(sortedDatum),
                       r: 7,
-                      stroke: 'white',
+                      stroke: dark ? 'black' : 'white',
                       strokeWidth: sortedDatum === datum ? 2 : 1,
                     }}
                   />
@@ -562,7 +567,7 @@ function defaultRenderer (props) {
                   style={{
                     width: '12px',
                     height: '12px',
-                    backgroundColor: 'rgba(255,255,255,.2)',
+                    backgroundColor: dark ? 'rgba(0, 26, 39, 0.3)' : 'rgba(255,255,255,.2)',
                     borderRadius: '50px',
                   }}
                 />
@@ -614,6 +619,7 @@ export default PointerConnect(state => ({
       hovered: state.hovered,
       tooltip: state.tooltip,
       offset: selectors.offset(state),
+      dark: state.dark,
     })
   })(Tooltip)
 )

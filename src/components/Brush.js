@@ -24,7 +24,7 @@ class Brush extends React.PureComponent {
   }
   render () {
     const {
-      pointer = {}, offset, gridX, gridY, gridHeight, style = {},
+      pointer = {}, offset, gridX, gridY, gridHeight, dark, style = {},
     } = this.props
 
     return (
@@ -45,7 +45,7 @@ class Brush extends React.PureComponent {
             transform: `translate3d(${Math.min(pointer.x, pointer.sourceX)}px, 0px, 0)`,
             width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
             height: `${gridHeight}px`,
-            background: 'rgba(0,0,0,.3)',
+            background: dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)',
             ...style,
           }}
         />
@@ -71,6 +71,7 @@ export default PointerConnect(state => ({
       gridHeight: selectors.gridHeight(state),
       gridX: selectors.gridX(state),
       gridY: selectors.gridY(state),
+      dark: state.dark,
     })
   })(Brush)
 )

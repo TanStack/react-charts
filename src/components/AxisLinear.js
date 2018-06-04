@@ -20,13 +20,11 @@ export const positionLeft = 'left'
 
 const defaultStyles = {
   line: {
-    stroke: 'rgba(0,0,0,.1)',
     strokeWidth: '1',
     fill: 'transparent',
   },
   tick: {
     fontSize: 10,
-    color: '#000',
     fontFamily: 'sans-serif',
   },
 }
@@ -102,6 +100,7 @@ class Axis extends React.Component {
       showGrid,
       showTicks,
       styles,
+      dark,
     } = this.props
 
     const { rotation } = this.state
@@ -190,6 +189,7 @@ class Axis extends React.Component {
           className="domain"
           d={axisPath}
           style={{
+            stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
             ...axisStyles.line,
             transition: 'none',
           }}
@@ -220,6 +220,7 @@ class Axis extends React.Component {
                   y1={vertical ? tickOffset : 0}
                   y2={vertical ? tickOffset : directionMultiplier * tickSizeInner}
                   style={{
+                    stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
                     strokeWidth: 1,
                     ...axisStyles.line,
                     transition: 'none',
@@ -234,6 +235,7 @@ class Axis extends React.Component {
                   y1={vertical ? gridOffset : 0}
                   y2={vertical ? gridOffset : max}
                   style={{
+                    stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
                     strokeWidth: 1,
                     ...axisStyles.line,
                     transition: 'none',
@@ -243,6 +245,7 @@ class Axis extends React.Component {
               {showTicks ? (
                 <Text
                   style={{
+                    fill: dark ? 'white' : 'black',
                     ...axisStyles.tick,
                     transition: 'none',
                     transform: `translate3d(${
@@ -298,6 +301,7 @@ export default ChartConnect(() => {
       height: selectors.gridHeight(state),
       materializedData: state.materializedData,
       axis: state.axes && state.axes[id],
+      dark: state.dark,
     }
   }
 })(Axis)

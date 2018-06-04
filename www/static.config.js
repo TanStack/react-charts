@@ -123,6 +123,11 @@ const menu = [
         title: 'Doughnut Chart',
         component: 'src/examples/DoughnutChart',
       },
+      {
+        path: 'dark',
+        title: 'Dark Mode',
+        component: 'src/examples/DarkMode',
+      },
     ],
   },
 ]

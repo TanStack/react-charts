@@ -3,7 +3,6 @@ import React from 'react'
 
 const defaultStyle = {
   strokeWidth: 1,
-  stroke: 'black',
   fill: 'transparent',
   opacity: 1,
   transition: 'all .3s ease-out',
