@@ -1,6 +1,6 @@
 {
   "name": "react-charts",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "react-charts React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -22,9 +22,8 @@
     "d3-voronoi": "^1.1.2",
     "hoist-non-react-statics": "^2.5.0",
     "javascript-detect-element-resize": "^0.5.3",
-    "nprogress": "^0.2.0",
     "raf": "^3.4.0",
-    "react-show": "^3.0.0"
+    "react-show": "^3.0.1"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",
@@ -33,6 +32,7 @@
   },
   "devDependencies": {
     "eslint-config-react-tools": "^1.2.5",
+    "nprogress": "^0.2.0",
     "nwb": "^0.21.5",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
