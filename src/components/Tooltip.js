@@ -1,4 +1,5 @@
-import React, { useContext, useRef } from 'react'
+import React from 'react'
+import withHooks, { useContext, useEffect, useRef } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -9,7 +10,7 @@ const triangleSize = 7
 const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
-export default function Tooltip() {
+function Tooltip() {
   const [
     {
       hovered,
@@ -314,6 +315,16 @@ export default function Tooltip() {
 
   const renderedChildren = render(renderProps)
 
+  const previousShowRef = useRef()
+  useEffect(() => {
+    previousShowRef.current = show
+  })
+
+  let animateCoords
+  if (previousShowRef.current === show) {
+    animateCoords = true
+  }
+
   return (
     <div
       className='tooltip-wrap'
@@ -337,7 +348,7 @@ export default function Tooltip() {
           left: 0,
           top: 0,
           transform: `translate3d(${focused.x}px, ${focused.y}px, 0px)`,
-          transition: 'all .2s ease'
+          transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease'
         }}
       >
         <div
@@ -378,3 +389,5 @@ export default function Tooltip() {
     </div>
   )
 }
+
+export default withHooks(Tooltip)

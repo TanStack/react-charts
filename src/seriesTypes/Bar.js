@@ -1,4 +1,5 @@
-import React, { useMemo, useContext } from 'react'
+import React from 'react'
+import withHooks, { useMemo, useContext } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -11,14 +12,16 @@ import {
 
 import Rectangle from '../primitives/Rectangle'
 
-export default function Bar({ series }) {
+function Bar({ series }) {
   const [
     { hovered, selected, interaction, primaryAxes },
     setChartState
   ] = useContext(ChartContext)
 
-  const status = Utils.getStatus(series, hovered, selected)
-  const style = series.getStatusStyle(status)
+  const style = useMemo(
+    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
+    [series, hovered, selected]
+  )
 
   const { barOffset } = series.primaryAxisID
     ? primaryAxes.find(d => d.id === series.primaryAxisID)
@@ -141,7 +144,7 @@ Bar.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
   })
 }
 
-function BarPiece({
+const BarPiece = withHooks(function BarPiece({
   datum,
   primaryAxes,
   barOffset,
@@ -174,8 +177,9 @@ function BarPiece({
     y2 = base
   }
 
-  const dataStyle = datum.getStatusStyle(
-    Utils.getStatus(datum, hovered, selected)
+  const dataStyle = useMemo(
+    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
+    [datum, hovered, selected]
   )
 
   const interactiveDatum = interaction === 'element'
@@ -212,4 +216,6 @@ function BarPiece({
     ),
     [JSON.stringify(rectangleProps)]
   )
-}
+})
+
+export default withHooks(Bar)

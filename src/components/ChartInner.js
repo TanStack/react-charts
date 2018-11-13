@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useRef } from 'react'
+import React from 'react'
+import withHooks, { useContext, useEffect, useRef } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 
@@ -10,12 +11,7 @@ import Tooltip from './Tooltip'
 import Cursor from './Cursor'
 import Brush from './Brush'
 
-export default function ChartInner({
-  handleRef,
-  className,
-  style = {},
-  ...rest
-}) {
+function ChartInner({ handleRef, className, style = {}, ...rest }) {
   const [chartState] = useContext(ChartContext)
   const [
     {
@@ -203,3 +199,5 @@ export default function ChartInner({
     </div>
   )
 }
+
+export default withHooks(ChartInner)

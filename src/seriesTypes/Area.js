@@ -1,4 +1,5 @@
-import React, { useMemo, useContext } from 'react'
+import React from 'react'
+import withHooks, { useMemo, useContext } from '../utils/hooks'
 
 import { area, line } from 'd3-shape'
 //
@@ -18,7 +19,7 @@ const lineDefaultStyle = {
   strokeWidth: 3
 }
 
-export default function Area({ series, showOrphans, curve }) {
+function Area({ series, showOrphans, curve }) {
   const [{ hovered, selected, interaction }, setChartState] = useContext(
     ChartContext
   )
@@ -42,8 +43,10 @@ export default function Area({ series, showOrphans, curve }) {
   const areaPath = useMemo(() => areaFn(series.datums), [series])
   const linePath = useMemo(() => lineFn(series.datums), [series])
 
-  const status = Utils.getStatus(series, hovered, selected)
-  const style = series.getStatusStyle(status)
+  const style = useMemo(
+    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
+    [series, hovered, selected]
+  )
 
   const interactiveSeries = interaction === 'series'
   const seriesInteractionProps = interactiveSeries
@@ -183,7 +186,7 @@ Area.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
   })
 }
 
-function OrphanLine({
+const OrphanLine = withHooks(function OrphanLine({
   datum,
   hovered,
   selected,
@@ -199,8 +202,9 @@ function OrphanLine({
     return null
   }
 
-  const dataStyle = datum.getStatusStyle(
-    Utils.getStatus(datum, hovered, selected)
+  const dataStyle = useMemo(
+    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
+    [datum, hovered, selected]
   )
 
   const lineProps = {
@@ -221,4 +225,6 @@ function OrphanLine({
   return useMemo(() => <Line {...lineProps} {...seriesInteractionProps} />, [
     JSON.stringify(lineProps)
   ])
-}
+})
+
+export default withHooks(Area)

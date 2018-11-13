@@ -1,4 +1,5 @@
-import React, { useContext, useMemo } from 'react'
+import React from 'react'
+import withHooks, { useContext, useMemo } from '../utils/hooks'
 import { voronoi } from 'd3-voronoi'
 import { line, arc as makeArc } from 'd3-shape'
 //
@@ -14,7 +15,7 @@ const modeRadial = 'radial'
 
 const lineFn = line()
 
-export default function Voronoi() {
+function Voronoi() {
   const [
     { hoverMode, stackData, primaryAxes, secondaryAxes, showVoronoi },
     setChartState
@@ -210,3 +211,5 @@ Voronoi.defaultProps = {
   onHover: noop,
   onActivate: noop
 }
+
+export default withHooks(Voronoi)

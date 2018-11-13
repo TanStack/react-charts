@@ -3,8 +3,7 @@ import React from 'react'
 //
 
 import ChartConfig from 'components/ChartConfig'
-
-import { Chart } from 'react-charts'
+import { Chart } from '../../../dist'
 
 export default () => (
   <div>

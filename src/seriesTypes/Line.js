@@ -1,4 +1,5 @@
-import React, { useContext, useMemo } from 'react'
+import React from 'react'
+import withHooks, { useContext, useMemo } from '../utils/hooks'
 import { line } from 'd3-shape'
 
 //
@@ -24,7 +25,7 @@ const circleDefaultStyle = {
   r: 2
 }
 
-export default function Line({ series, showPoints, curve }) {
+function Line({ series, showPoints, curve }) {
   const [{ hovered, selected, interaction }, setChartState] = useContext(
     ChartContext
   )
@@ -40,8 +41,10 @@ export default function Line({ series, showPoints, curve }) {
   )
   const path = useMemo(() => lineFn(series.datums), [series])
 
-  const status = Utils.getStatus(series, hovered, selected)
-  const style = series.getStatusStyle(status)
+  const style = useMemo(
+    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
+    [series, hovered, selected]
+  )
 
   const interactiveSeries = interaction === 'series'
   const seriesInteractionProps = interactiveSeries
@@ -74,6 +77,7 @@ export default function Line({ series, showPoints, curve }) {
     <g>
       {renderedPath}
       {showPoints &&
+        false &&
         series.datums.map((datum, i) => {
           return (
             <Point
@@ -150,7 +154,7 @@ Line.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
   })
 }
 
-function Point({
+const Point = withHooks(function Point({
   datum,
   hovered,
   selected,
@@ -164,8 +168,9 @@ function Point({
 
   const [_, setChartState] = useContext(ChartContext)
 
-  const dataStyle = datum.getStatusStyle(
-    Utils.getStatus(datum, hovered, selected)
+  const dataStyle = useMemo(
+    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
+    [datum, hovered, selected]
   )
 
   const interactiveDatum = interaction === 'element'
@@ -202,4 +207,6 @@ function Point({
     ),
     [JSON.stringify(circleProps)]
   )
-}
+})
+
+export default withHooks(Line)

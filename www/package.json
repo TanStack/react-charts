@@ -11,6 +11,7 @@
     "prettier": "prettier src/**/*.js --write"
   },
   "dependencies": {
+    "@reach/router": "^1.2.1",
     "axios": "^0.16.2",
     "emotion": "^9.2.12",
     "react": "^16.6.3",
@@ -20,7 +21,7 @@
     "react-hot-loader": "^4.3.12",
     "react-json-tree": "^0.11.0",
     "react-resizable": "^1.7.5",
-    "react-static": "^6.0.0-beta.30",
+    "react-static": "^5.9.12",
     "react-static-plugin-emotion": "^1.0.6",
     "styled-components": "^3"
   },

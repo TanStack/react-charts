@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useRef, useState, useMemo } from 'react'
+import React from 'react'
+import withHooks, { useEffect, useRef, useState, useMemo } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -50,7 +51,7 @@ const defaultCursorProps = {
   onChange: () => {}
 }
 
-const Chart = forwardRef(function Chart(
+function Chart(
   {
     data,
     interaction,
@@ -755,9 +756,6 @@ const Chart = forwardRef(function Chart(
           end: primaryAxes[0].scale.invert(pointer.x)
         })
       }
-      return {
-        ...brush
-      }
     },
     [pointer.released]
   )
@@ -796,16 +794,10 @@ const Chart = forwardRef(function Chart(
 
   return (
     <ChartContext.Provider value={chartStateContextValue}>
-      <ChartInner
-        {...rest}
-        handleRef={el => {
-          handleRef(el)
-          if (ref) ref(el)
-        }}
-      />
+      <ChartInner {...rest} handleRef={handleRef} />
     </ChartContext.Provider>
   )
-})
+}
 
 Chart.defaultProps = {
   getSeries: d => d,
@@ -826,4 +818,4 @@ Chart.defaultProps = {
   showVoronoi: false
 }
 
-export default Chart
+export default withHooks(Chart)

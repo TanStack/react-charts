@@ -1,4 +1,10 @@
-import React, { useContext, useLayoutEffect, useState, useRef } from 'react'
+import React from 'react'
+import withHooks, {
+  useContext,
+  useLayoutEffect,
+  useState,
+  useRef
+} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -31,7 +37,7 @@ const fontSize = 10
 const identity = d => d
 const radiansToDegrees = r => r * (180 / Math.PI)
 
-export default function AxisLinear({
+function AxisLinear({
   id,
   type,
   position,
@@ -370,3 +376,5 @@ export default function AxisLinear({
     </Group>
   )
 }
+
+export default withHooks(AxisLinear)

@@ -1,8 +1,9 @@
-import React, { useContext } from 'react'
+import React from 'react'
+import withHooks, { useContext } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 
-export default function Brush() {
+function Brush() {
   const [{ pointer, brush, gridX, gridY, gridHeight, dark }] = useContext(
     ChartContext
   )
@@ -47,3 +48,5 @@ export default function Brush() {
 Brush.defaultProps = {
   onSelect: () => {}
 }
+
+export default withHooks(Brush)

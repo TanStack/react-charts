@@ -1,4 +1,5 @@
-import React, { useContext } from 'react'
+import React from 'react'
+import withHooks, { useContext, useRef, useEffect } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 
@@ -7,7 +8,7 @@ const getLineBackgroundColor = dark =>
 const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
-export default function Cursor({ primary }) {
+function Cursor({ primary }) {
   const [{ primaryCursor, secondaryCursor, gridX, gridY, dark }] = useContext(
     ChartContext
   )
@@ -100,6 +101,16 @@ export default function Cursor({ primary }) {
   const lineHeight = Math.max(lineEndY - lineStartY, 0)
   const lineWidth = Math.max(lineEndX - lineStartX, 0)
 
+  const previousShowRef = useRef()
+  useEffect(() => {
+    previousShowRef.current = show
+  })
+
+  let animateCoords
+  if (previousShowRef.current === show) {
+    animateCoords = true
+  }
+
   let renderedChildren = render(renderProps)
 
   return (
@@ -127,7 +138,8 @@ export default function Cursor({ primary }) {
             height: `${lineHeight}px`,
             background: getLineBackgroundColor(dark),
             WebkitBackfaceVisibility: 'hidden',
-            transition: animated ? 'all .2s ease' : 'none'
+            transition:
+              animated && animateCoords ? 'all .2s ease' : 'opacity .2s ease'
           }}
         />
       ) : null}
@@ -139,7 +151,8 @@ export default function Cursor({ primary }) {
             top: 0,
             left: 0,
             transform: `translate3d(${bubbleX}px, ${bubbleY}px, 0px)`,
-            transition: animated ? 'all .2s ease' : 'none'
+            transition:
+              animated && animateCoords ? 'all .2s ease' : 'opacity .2s ease'
           }}
         >
           {/* Render the cursor label */}
@@ -162,3 +175,5 @@ export default function Cursor({ primary }) {
     </div>
   )
 }
+
+export default withHooks(Cursor)
