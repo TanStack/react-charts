@@ -1,41 +1,30 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import RAF from 'raf'
 
 export default {
   requestAnimationFrame: RAF,
-  throttle,
   getStatus,
   getStatusStyle,
   getMultiFocus,
   getClosestPoint,
-  normalizeComponent,
-  materializeStyles,
   normalizeGetter,
-  normalizePathGetter,
-  isArray,
   isValidPoint,
   getAxisByAxisID,
   getAxisIndexByAxisID,
-  shallowCompare,
+  sumObjBy,
+  translateX,
+  translateY,
+  identity
+  // usePrevious,
+  // useDidChange,
 }
 
-function throttle (func) {
-  let running
-  return (...args) => {
-    if (running) return
-    running = RAF(() => {
-      func(...args)
-      running = false
-    })
-  }
-}
-
-function getStatus (item, hovered, selected) {
+function getStatus(item, hovered, selected) {
   const status = {
     selected: false,
     hovered: false,
     otherSelected: false,
-    otherHovered: false,
+    otherHovered: false
   }
 
   if (item.series) {
@@ -74,25 +63,32 @@ function getStatus (item, hovered, selected) {
   return status
 }
 
-function getStatusStyle (item, status, decorator, defaults) {
+function getStatusStyle(item, status, decorator, defaults) {
   if (item.series) {
     defaults = {
       ...defaults,
-      ...item.series.style,
+      ...item.series.style
     }
   }
 
   return materializeStyles(
     decorator({
       ...item,
-      ...status,
+      ...status
     }),
     defaults
   )
 }
 
-function getMultiFocus ({
-  focus, points, gridX, gridY, gridWidth, gridHeight, width, height,
+function getMultiFocus({
+  focus,
+  points,
+  gridX,
+  gridY,
+  gridWidth,
+  gridHeight,
+  width,
+  height
 }) {
   const invalid = () => {
     throw new Error(
@@ -121,13 +117,24 @@ function getMultiFocus ({
     return invalid()
   }
 
-  focus = focus.sort(a => (a.includes('center') || a.includes('Center') ? 1 : -1))
+  focus = focus.sort(
+    a => (a.includes('center') || a.includes('Center') ? 1 : -1)
+  )
 
   for (let i = 0; i < focus.length; i++) {
     const focusPart = focus[i]
 
     // Horizontal Positioning
-    if (['left', 'right', 'gridLeft', 'gridRight', 'chartLeft', 'chartRight'].includes(focusPart)) {
+    if (
+      [
+        'left',
+        'right',
+        'gridLeft',
+        'gridRight',
+        'chartLeft',
+        'chartRight'
+      ].includes(focusPart)
+    ) {
       if (typeof x !== 'undefined') {
         invalid()
       }
@@ -149,7 +156,16 @@ function getMultiFocus ({
     }
 
     // Vertical Positioning
-    if (['top', 'bottom', 'gridTop', 'gridBottom', 'chartTop', 'chartBottom'].includes(focusPart)) {
+    if (
+      [
+        'top',
+        'bottom',
+        'gridTop',
+        'gridBottom',
+        'chartTop',
+        'chartBottom'
+      ].includes(focusPart)
+    ) {
       if (typeof y !== 'undefined') {
         invalid()
       }
@@ -213,7 +229,7 @@ function getMultiFocus ({
   return { x, y }
 }
 
-function getClosestPoint (position, datums) {
+function getClosestPoint(position, datums) {
   if (!datums || !position || !datums.length) {
     return
   }
@@ -233,52 +249,30 @@ function getClosestPoint (position, datums) {
   return closestDatum
 }
 
-function normalizeComponent (Comp, params = {}, fallback = Comp) {
-  return typeof Comp === 'function' ? (
-    Object.getPrototypeOf(Comp).isReactComponent ? (
-      <Comp {...params} />
-    ) : (
-      Comp(params)
-    )
-  ) : (
-    fallback
-  )
-}
-
-function normalizeColor (style, defaults) {
+function normalizeColor(style, defaults) {
   return {
     ...style,
     stroke: style.stroke || style.color || defaults.stroke || defaults.color,
-    fill: style.fill || style.color || defaults.fill || defaults.color,
+    fill: style.fill || style.color || defaults.fill || defaults.color
   }
 }
 
-function materializeStyles (style = {}, defaults = {}) {
-  style = normalizeColor(style, defaults);
-  ['area', 'line', 'rectangle', 'circle'].forEach(type => {
+function materializeStyles(style = {}, defaults = {}) {
+  style = normalizeColor(style, defaults)
+  ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
   })
   return style
 }
 
-function normalizeGetter (getter) {
-  if (!getter) {
-    return
-  }
-  if (typeof getter === 'function') {
-    return getter
-  }
-  return () => getter
-}
-
-function normalizePathGetter (getter) {
+function normalizeGetter(getter) {
   if (typeof getter === 'function') {
     return getter
   }
   return d => get(d, getter)
 }
 
-function get (obj, path, def) {
+function get(obj, path, def) {
   if (typeof obj === 'function') {
     try {
       return obj()
@@ -299,11 +293,7 @@ function get (obj, path, def) {
   return typeof val !== 'undefined' ? val : def
 }
 
-function isArray (a) {
-  return Array.isArray(a)
-}
-
-function makePathArray (obj) {
+function makePathArray(obj) {
   return flattenDeep(obj)
     .join('.')
     .replace('[', '.')
@@ -311,7 +301,7 @@ function makePathArray (obj) {
     .split('.')
 }
 
-function flattenDeep (arr, newArr = []) {
+function flattenDeep(arr, newArr = []) {
   if (!isArray(arr)) {
     newArr.push(arr)
   } else {
@@ -322,7 +312,7 @@ function flattenDeep (arr, newArr = []) {
   return newArr
 }
 
-function isValidPoint (d) {
+function isValidPoint(d) {
   if (d === null) {
     return false
   }
@@ -335,40 +325,50 @@ function isValidPoint (d) {
   return true
 }
 
-function getAxisByAxisID (axes, AxisID) {
+function getAxisByAxisID(axes, AxisID) {
   return axes.find(d => d.id === AxisID) || axes[0]
 }
 
-function getAxisIndexByAxisID (axes, AxisID) {
+function getAxisIndexByAxisID(axes, AxisID) {
   const index = axes.findIndex(d => d.id === AxisID)
   return index > -1 ? index : 0
 }
 
-function shallowCompare (old = {}, _new = {}, props, ignore) {
-  if (!props) {
-    props = {}
-    Object.keys(old).forEach(key => {
-      props[key] = true
-    })
-    Object.keys(_new).forEach(key => {
-      props[key] = true
-    })
-    props = Object.keys(props)
-  }
-  if (ignore) {
-    for (let i = 0; i < props.length; i++) {
-      if (!ignore.includes(props[i])) {
-        if (old[props[i]] !== _new[props[i]]) {
-          return props[i] || true
-        }
-      }
-    }
-  } else {
-    for (let i = 0; i < props.length; i++) {
-      if (old[props[i]] !== _new[props[i]]) {
-        return props[i] || true
-      }
-    }
-  }
-  return false
+function sumObjBy(obj, str) {
+  return Object.keys(obj)
+    .map(key => obj[key])
+    .reduce((prev, curr) => prev + curr[str] || 0, 0)
 }
+
+function translateX(x) {
+  return `translate3d(${x}px, 0, 0)`
+}
+
+function translateY(y) {
+  return `translate3d(0, ${y}px, 0)`
+}
+
+function identity(d) {
+  return d
+}
+
+// function usePrevious(item) {
+//   const ref = useRef()
+//   useEffect(() => {
+//     ref.current = item
+//   })
+//   return ref.current
+// }
+
+// function useDidChange(obj) {
+//   const prev = usePrevious(obj)
+//   const changed = {}
+//   Object.keys(obj).forEach(key => {
+//     const prevVal = prev ? prev[key] : undefined
+//     const val = obj ? obj[key] : undefined
+//     if (prevVal !== val) {
+//       changed[key] = [prevVal, val]
+//     }
+//   })
+//   return changed
+// }

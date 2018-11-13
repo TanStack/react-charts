@@ -5,22 +5,14 @@ const defaultStyle = {
   strokeWidth: 2,
   stroke: '#6b6b6b',
   fill: 'transparent',
-  opacity: 1,
-  transition: 'all .3s ease-out',
+  opacity: 1
 }
 
-export default class Path extends React.Component {
-  static defaultProps = {
-    opacity: 1,
+export default function Path({ style, ...rest }) {
+  const resolvedStyle = {
+    ...defaultStyle,
+    ...style
   }
-  render () {
-    const { style, opacity, ...rest } = this.props
 
-    const resolvedStyle = {
-      ...defaultStyle,
-      ...style,
-    }
-
-    return <path {...rest} style={resolvedStyle} />
-  }
+  return <path {...rest} style={resolvedStyle} />
 }

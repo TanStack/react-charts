@@ -4,20 +4,19 @@ import React from 'react'
 const defaultStyle = {
   fontFamily: 'Helvetica',
   fontSize: 10,
-  opacity: 1,
-  transition: 'all .3s ease-out',
+  opacity: 1
 }
 
 export default class Text extends React.Component {
   static defaultProps = {
-    opacity: 1,
+    opacity: 1
   }
-  render () {
+  render() {
     const { style, opacity, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style,
+      ...style
     }
 
     return <text {...rest} style={resolvedStyle} />

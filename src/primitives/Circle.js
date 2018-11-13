@@ -6,28 +6,16 @@ const defaultStyle = {
   strokeWidth: '1',
   stroke: '#000000',
   fill: '#000000',
-  opacity: 1,
-  transition: 'all .3s ease-out',
+  opacity: 1
 }
 
-export default class Circle extends React.Component {
-  static defaultProps = {
-    opacity: 1,
+export default function Circle({ x, y, r, style, ...rest }) {
+  const resolvedStyle = {
+    ...defaultStyle,
+    ...style
   }
-  render () {
-    const {
-      x, y, r, style, opacity, ...rest
-    } = this.props
 
-    if (typeof x !== 'number' || typeof y !== 'number' || Number.isNaN(x) || Number.isNaN(y)) {
-      return null
-    }
-
-    const resolvedStyle = {
-      ...defaultStyle,
-      ...style,
-    }
-
-    return <circle {...rest} cx={x || 0} cy={y || 0} r={1} style={resolvedStyle} />
-  }
+  return (
+    <circle {...rest} cx={x || 0} cy={y || 0} r={1} style={resolvedStyle} />
+  )
 }

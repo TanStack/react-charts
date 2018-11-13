@@ -1,19 +1,18 @@
 import React from 'react'
-import styled, { css } from 'styled-components'
-import { SiteData, Link } from 'react-static'
+import styled, { css } from 'react-emotion'
+import { Link } from '@reach/router'
 //
 import ClickOutside from 'components/ClickOutside'
 
 const breakpoint = 800
 const sidebarBackground = '#f7f7f7'
 
-const SidebarStyles = styled.div`
+const SidebarStyles = styled('div')`
   position: relative;
   width: 100%;
   max-width: 100%;
   padding-left: 300px;
   margin: 0 auto;
-  transition: all 0.2s ease-out;
 
   @media screen and (max-width: ${breakpoint}px) {
     padding-left: 0px;
@@ -32,7 +31,6 @@ const SidebarStyles = styled.div`
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     -webkit-overflow-scrolling: touch;
     background: ${sidebarBackground};
-    transition: all 0.2s ease-out;
 
     @media screen and (max-width: ${breakpoint}px) {
       transform: translateX(-100%);
@@ -148,19 +146,10 @@ const SidebarStyles = styled.div`
 
 const Menu = ({ items }) => (
   <div className="list">
-    {items.map(({
- title, fullPath, component, children,
-}) => (
-  <div key={title + fullPath} className="item">
-    {component ? (
-      <Link to={`/${fullPath.replace(/^\/{1,}/g, '')}`} exact activeClassName="active">
-        {title}
-      </Link>
-        ) : (
-          <div className="title">{title}</div>
-        )}
-    {children ? <Menu items={children} /> : null}
-  </div>
+    {items.map(({ title, link }) => (
+      <div key={link} className="item">
+        <Link to={link}>{title}</Link>
+      </div>
     ))}
   </div>
 )
@@ -174,45 +163,43 @@ class Sidebar extends React.Component {
       isOpen,
     })
   render () {
-    const { children } = this.props
+    const { children, items } = this.props
     const { isOpen } = this.state
     return (
-      <SiteData
-        render={({ pages, repoURL, repoName }) => (
-          <SidebarStyles className="sidebar" isOpen={isOpen}>
-            <ClickOutside
-              onClickOutside={() => {
-                if (isOpen) {
+      <SidebarStyles className="sidebar" isOpen={isOpen}>
+        <ClickOutside
+          onClickOutside={
+            isOpen
+              ? () => {
                   this.setState({
                     isOpen: false,
                   })
                 }
+              : undefined
+          }
+        >
+          <div className="sidebar">
+            <button
+              className="toggle"
+              onClick={() => {
+                this.toggle(!isOpen)
               }}
             >
-              <div className="sidebar">
-                <button
-                  className="toggle"
-                  onClick={() => {
-                    this.toggle(!isOpen)
-                  }}
-                >
-                  ⇤
-                </button>
-                <div className="header">
-                  <span className="link">
-                    {repoURL ? <Link to={repoURL}>{repoName}</Link> : repoName}
-                  </span>
-                  <div className="version">v{process.env.REPO_VERSION}</div>
-                </div>
-                <div className="scroll">
-                  <Menu items={pages} />
-                </div>
-              </div>
-            </ClickOutside>
-            <div className="content">{children}</div>
-          </SidebarStyles>
-        )}
-      />
+              ⇤
+            </button>
+            <div className="header">
+              <span className="link">
+                <a href="https://github.com/react-tools/react-charts">React Charts</a>
+              </span>
+              <div className="version" />
+            </div>
+            <div className="scroll">
+              <Menu items={items} />
+            </div>
+          </div>
+        </ClickOutside>
+        <div className="content">{children}</div>
+      </SidebarStyles>
     )
   }
 }

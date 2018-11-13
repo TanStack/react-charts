@@ -1,21 +1,19 @@
 import React from 'react'
-import { Router, onLoading } from 'react-static'
-import styled, { injectGlobal } from 'styled-components'
-import { hot } from 'react-hot-loader'
-import nprogress from 'nprogress'
-import { loadLanguages } from 'reprism'
-
+// import { hot, setConfig } from 'react-hot-loader'
+import { Root } from 'react-static'
+import styled, { injectGlobal } from 'react-emotion'
+import { Router } from '@reach/router'
 //
-import Routes from 'react-static-routes'
-
-import 'nprogress/nprogress.css'
 import 'react-resizable/css/styles.css'
-import 'react-smackdown/themes/smackdown-light.css'
 
-import jsx from 'reprism/languages/jsx'
-import bash from 'reprism/languages/bash'
+import Home from 'containers/Home'
+import Examples from 'containers/Examples'
 
-loadLanguages(jsx, bash)
+// if (process.env.NODE_ENV === 'development') {
+//   setConfig({
+//     pureSFC: true,
+//   })
+// }
 
 injectGlobal`
   @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
@@ -27,6 +25,7 @@ injectGlobal`
     margin: 0;
     padding: 0;
     line-height: 1.5;
+    overflow-x: hidden;
   }
   * {
     box-sizing: border-box;
@@ -66,29 +65,21 @@ injectGlobal`
 }
 `
 
-const AppStyles = styled.div`
+const AppStyles = styled('div')`
   min-height: 100vh;
 `
 
-class App extends React.Component {
-  componentDidMount () {
-    onLoading(loading => {
-      if (loading) {
-        nprogress.start()
-      } else {
-        nprogress.done()
-      }
-    })
-  }
-  render () {
-    return (
-      <Router>
-        <AppStyles>
-          <Routes />
-        </AppStyles>
-      </Router>
-    )
-  }
+export function App () {
+  return (
+    <Root>
+      <AppStyles>
+        <Router>
+          <Home path="/" />
+          <Examples path="/examples/*" />
+        </Router>
+      </AppStyles>
+    </Root>
+  )
 }
 
-export default hot(module)(App)
+export default App

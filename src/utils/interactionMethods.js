@@ -1,65 +1,65 @@
-export function hoverSeries (series) {
-  this.props.dispatch(state => ({
+export function hoverSeries(series, { setChartState }) {
+  setChartState(state => ({
     ...state,
     hovered: series
       ? {
         active: true,
         series,
         datums: [],
-        single: false,
+        single: false
       }
       : {
         ...state.hovered,
-        active: false,
-      },
+        active: false
+      }
   }))
 }
 
-export function hoverDatum (datum) {
-  this.props.dispatch(state => ({
+export function hoverDatum(datum, { setChartState }) {
+  setChartState(state => ({
     ...state,
     hovered: datum
       ? {
         active: true,
         series: null,
         datums: [datum],
-        single: true,
+        single: true
       }
       : {
         ...state.hovered,
-        active: false,
-      },
+        active: false
+      }
   }))
 }
 
-export function selectSeries (series) {
-  this.props.dispatch(state => ({
+export function selectSeries(series, { setChartState }) {
+  setChartState(state => ({
     ...state,
     selected: series
       ? {
         active: true,
         series,
         datums: [],
-        single: false,
+        single: false
       }
       : {
-        active: false,
-      },
+        active: false
+      }
   }))
 }
 
-export function selectDatum (datum) {
-  this.props.dispatch(state => ({
+export function selectDatum(datum, { setChartState }) {
+  setChartState(state => ({
     ...state,
     selected: datum
       ? {
         active: true,
         series: null,
         datums: [datum],
-        single: true,
+        single: true
       }
       : {
-        active: false,
-      },
+        active: false
+      }
   }))
 }

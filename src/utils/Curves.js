@@ -16,7 +16,7 @@ import {
   curveNatural,
   curveStep,
   curveStepAfter,
-  curveStepBefore,
+  curveStepBefore
 } from 'd3-shape'
 
 export default {
@@ -37,5 +37,5 @@ export default {
   natural: curveNatural,
   step: curveStep,
   stepAfter: curveStepAfter,
-  stepBefore: curveStepBefore,
+  stepBefore: curveStepBefore
 }

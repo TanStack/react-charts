@@ -1,221 +1,224 @@
-import React from 'react'
+import React, { useMemo, useContext } from 'react'
 
 import { area, line } from 'd3-shape'
 //
-import { ChartConnect } from '../utils/Context'
+import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-import { selectSeries, selectDatum, hoverSeries, hoverDatum } from '../utils/interactionMethods'
+import { selectSeries, hoverSeries } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
 
-const lineDefaultStyle = {
-  strokeWidth: 3,
+const defaultAreaStyle = {
+  strokeWidth: 0
 }
 
-class Area extends React.PureComponent {
-  static defaultProps = {
-    showOrphans: true,
-    curve: 'monotoneX',
-  }
-  state = {}
-  constructor (props) {
-    super(props)
-    if (!props.hoverMode) {
-      this.props.dispatch(state => ({
-        ...state,
-        hoverMode: 'primary',
-      }))
+const lineDefaultStyle = {
+  strokeWidth: 3
+}
+
+export default function Area({ series, showOrphans, curve }) {
+  const [{ hovered, selected, interaction }, setChartState] = useContext(
+    ChartContext
+  )
+
+  const areaFn = area()
+    .x(d => d.x)
+    .y0(d => d.base)
+    .y1(d => d.y)
+    .defined(d => d.defined)
+    .curve(Curves[curve] || curve)
+
+  const lineFn = useMemo(
+    () =>
+      line()
+        .x(d => d.x)
+        .y(d => d.y)
+        .defined(d => d.defined)
+        .curve(Curves[curve] || curve),
+    [curve]
+  )
+  const areaPath = useMemo(() => areaFn(series.datums), [series])
+  const linePath = useMemo(() => lineFn(series.datums), [series])
+
+  const status = Utils.getStatus(series, hovered, selected)
+  const style = series.getStatusStyle(status)
+
+  const interactiveSeries = interaction === 'series'
+  const seriesInteractionProps = interactiveSeries
+    ? {
+      onClick: () => selectSeries(series, { setChartState }),
+      onMouseEnter: () => hoverSeries(series, { setChartState }),
+      onMouseMove: () => hoverSeries(series, { setChartState }),
+      onMouseLeave: () => hoverSeries(null, { setChartState })
     }
-    this.selectSeries = selectSeries.bind(this)
-    this.hoverSeries = hoverSeries.bind(this)
-    this.selectDatum = selectDatum.bind(this)
-    this.hoverDatum = hoverDatum.bind(this)
+    : {}
+
+  const pointerEvents = interactiveSeries ? 'all' : 'none'
+
+  const areaPathProps = {
+    d: areaPath,
+    style: {
+      ...defaultAreaStyle,
+      ...style,
+      ...style.line,
+      pointerEvents
+    },
+    ...seriesInteractionProps
   }
-  static plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
-    datum.x = xAxis.scale(datum.xValue)
-    datum.y = yAxis.scale(datum.yValue)
-    datum.defined = Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
-    datum.base = primaryAxis.vertical ? xAxis.scale(datum.baseValue) : yAxis.scale(datum.baseValue)
-    // Adjust non-bar elements for ordinal scales
-    if (xAxis.type === 'ordinal') {
-      datum.x += xAxis.tickOffset
-    }
-    if (yAxis.type === 'ordinal') {
-      datum.y += yAxis.tickOffset
-    }
+  const renderedAreaPath = useMemo(() => <Path {...areaPathProps} />, [
+    JSON.stringify(areaPathProps)
+  ])
 
-    // Set the default focus point
-    datum.focus = {
-      x: datum.x,
-      y: datum.y,
-    }
-
-    // Set the pointer points (used in voronoi)
-    datum.pointerPoints = [
-      datum.focus,
-      {
-        x: primaryAxis.vertical
-          ? primaryAxis.position === 'left'
-            ? datum.base - 1
-            : datum.base
-          : datum.focus.x,
-        y: !primaryAxis.vertical
-          ? primaryAxis.position === 'bottom'
-            ? datum.base - 1
-            : datum.base
-          : datum.focus.y,
-      },
-    ]
+  const linePathProps = {
+    d: linePath,
+    style: {
+      ...defaultAreaStyle,
+      ...style,
+      ...style.line,
+      fill: 'none',
+      pointerEvents
+    },
+    ...seriesInteractionProps
   }
-  static buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
-    const defaults = {
-      // Pass some sane defaults
-      color: defaultColors[series.index % (defaultColors.length - 1)],
-    }
+  const renderedLinePath = useMemo(() => <Path {...linePathProps} />, [
+    JSON.stringify(linePathProps)
+  ])
 
-    series.getStatusStyle = status => {
-      series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
-      return series.style
-    }
-
-    // We also need to decorate each datum in the same fashion
-    series.datums.forEach(datum => {
-      datum.getStatusStyle = status => {
-        datum.style = Utils.getStatusStyle(datum, status, getDatumStyles, defaults)
-        return datum.style
-      }
-    })
-  }
-  componentDidMount () {
-    this.updatePath(this.props)
-  }
-  componentDidUpdate () {
-    this.updatePath(this.props)
-  }
-  updatePath = props => {
-    const { curve, series } = props
-    const areaFn = area()
-      .x(d => d.x)
-      .y0(d => d.base)
-      .y1(d => d.y)
-      .defined(d => d.defined)
-      .curve(Curves[curve] || curve)
-
-    const lineFn = line()
-      .x(d => d.x)
-      .y(d => d.y)
-      .defined(d => d.defined)
-      .curve(Curves[curve] || curve)
-
-    this.setState({
-      areaPath: areaFn(series.datums),
-      linePath: lineFn(series.datums),
-    })
-  }
-  render () {
-    const {
-      series,
-      visibility,
-      showOrphans,
-      //
-      selected,
-      hovered,
-      interaction,
-    } = this.props
-
-    const { areaPath, linePath } = this.state
-
-    const status = Utils.getStatus(series, hovered, selected)
-    const style = series.getStatusStyle(status)
-
-    const interactiveSeries = interaction === 'series'
-    const seriesInteractionProps = interactiveSeries
-      ? {
-        onClick: () => this.selectSeries(series),
-        onMouseEnter: () => this.hoverSeries(series),
-        onMouseMove: () => this.hoverSeries(series),
-        onMouseLeave: () => this.hoverSeries(null),
-      }
-      : {}
-
-    return (
-      <g>
-        <Path
-          d={areaPath}
-          style={{
-            ...style,
-            ...style.area,
-            stroke: 'transparent',
-            pointerEvents: interactiveSeries ? 'all' : 'none',
-          }}
-          opacity={visibility}
-          {...seriesInteractionProps}
-        />
-        <Path
-          d={linePath}
-          style={{
-            ...style,
-            ...style.line,
-            fill: 'none',
-            pointerEvents: interactiveSeries ? 'all' : 'none',
-          }}
-          opacity={visibility}
-          {...seriesInteractionProps}
-        />
-        {series.datums.map((datum, i, all) => {
-          // Don't render points on the line, just null data orphans
-          const prev = all[i - 1] || { defined: true }
-          const next = all[i + 1] || { defined: true }
-          if (!datum.defined || (prev.defined && next.defined)) {
-            return null
-          }
-
-          const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, hovered, selected))
-
-          if (!showOrphans) {
-            return null
-          }
-
-          const interactiveDatum = interaction === 'element'
-          const datumInteractionProps = interactiveDatum
-            ? {
-                onClick: () => this.selectDatum(datum),
-                onMouseEnter: () => this.hoverDatum(datum),
-                onMouseMove: () => this.hoverDatum(datum),
-                onMouseLeave: () => this.hoverDatum(null),
-              }
-            : {}
-
+  return (
+    <g>
+      {renderedAreaPath}
+      {renderedLinePath}
+      {showOrphans &&
+        series.datums.map((datum, index, all) => {
           return (
-            <Line
-              style={{
-                ...lineDefaultStyle,
-                ...style,
-                ...style.line,
-                ...dataStyle,
-                ...dataStyle.line,
-                pointerEvents: interactiveSeries ? 'all' : 'none',
+            <OrphanLine
+              {...{
+                key: index,
+                datum,
+                hovered,
+                selected,
+                interaction,
+                style,
+                seriesInteractionProps,
+                interactiveSeries,
+                all,
+                index
               }}
-              key={i}
-              x1={!datum || Number.isNaN(datum.x) ? null : datum.x}
-              y1={!datum || Number.isNaN(datum.base) ? null : datum.base}
-              x2={!datum || Number.isNaN(datum.x) ? null : datum.x}
-              y2={!datum || Number.isNaN(datum.y) ? null : datum.y}
-              opacity={visibility}
-              {...seriesInteractionProps}
-              {...datumInteractionProps}
             />
           )
         })}
-      </g>
-    )
-  }
+    </g>
+  )
 }
 
-export default ChartConnect(state => ({
-  hovered: state.hovered,
-  selected: state.selected,
-  interaction: state.interaction,
-}))(Area)
+Area.defaultProps = {
+  showOrphans: true,
+  curve: 'linear'
+}
+
+Area.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+  datum.x = xAxis.scale(datum.xValue)
+  datum.y = yAxis.scale(datum.yValue)
+  datum.defined =
+    Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
+  datum.base = primaryAxis.vertical
+    ? xAxis.scale(datum.baseValue)
+    : yAxis.scale(datum.baseValue)
+  // Adjust non-bar elements for ordinal scales
+  if (xAxis.type === 'ordinal') {
+    datum.x += xAxis.tickOffset
+  }
+  if (yAxis.type === 'ordinal') {
+    datum.y += yAxis.tickOffset
+  }
+
+  // Set the default focus point
+  datum.focus = {
+    x: datum.x,
+    y: datum.y
+  }
+
+  // Set the pointer points (used in voronoi)
+  datum.pointerPoints = [
+    datum.focus,
+    {
+      x: primaryAxis.vertical
+        ? primaryAxis.position === 'left'
+          ? datum.base - 1
+          : datum.base
+        : datum.focus.x,
+      y: !primaryAxis.vertical
+        ? primaryAxis.position === 'bottom'
+          ? datum.base - 1
+          : datum.base
+        : datum.focus.y
+    }
+  ]
+}
+
+Area.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+  const defaults = {
+    // Pass some sane defaults
+    color: defaultColors[series.index % (defaultColors.length - 1)]
+  }
+
+  series.getStatusStyle = status => {
+    series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
+    return series.style
+  }
+
+  // We also need to decorate each datum in the same fashion
+  series.datums.forEach(datum => {
+    datum.getStatusStyle = status => {
+      datum.style = Utils.getStatusStyle(
+        datum,
+        status,
+        getDatumStyles,
+        defaults
+      )
+      return datum.style
+    }
+  })
+}
+
+function OrphanLine({
+  datum,
+  hovered,
+  selected,
+  style,
+  seriesInteractionProps,
+  interactiveSeries,
+  all,
+  index
+}) {
+  const prev = all[index - 1] || { defined: false }
+  const next = all[index + 1] || { defined: false }
+  if (!datum.defined || prev.defined || next.defined) {
+    return null
+  }
+
+  const dataStyle = datum.getStatusStyle(
+    Utils.getStatus(datum, hovered, selected)
+  )
+
+  const lineProps = {
+    x1: !datum || Number.isNaN(datum.x) ? null : datum.x,
+    y1: !datum || Number.isNaN(datum.base) ? null : datum.base,
+    x2: !datum || Number.isNaN(datum.x) ? null : datum.x,
+    y2: !datum || Number.isNaN(datum.y) ? null : datum.y,
+    style: {
+      ...lineDefaultStyle,
+      ...style,
+      ...style.line,
+      ...dataStyle,
+      ...dataStyle.line,
+      pointerEvents: interactiveSeries ? 'all' : 'none'
+    }
+  }
+
+  return useMemo(() => <Line {...lineProps} {...seriesInteractionProps} />, [
+    JSON.stringify(lineProps)
+  ])
+}

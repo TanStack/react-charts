@@ -7,24 +7,26 @@
     "start": "react-static start",
     "stage": "react-static build --staging",
     "build": "react-static build",
-    "serve": "serve dist -p 3000"
+    "serve": "serve dist -p 3000",
+    "prettier": "prettier src/**/*.js --write"
   },
   "dependencies": {
     "axios": "^0.16.2",
-    "babel-plugin-source": "^0.0.2",
-    "react": "^16.0.0",
+    "emotion": "^9.2.12",
+    "react": "^16.6.3",
     "react-click-outside": "^3.0.1",
-    "react-dom": "^16.0.0",
+    "react-dom": "^16.6.3",
+    "react-emotion": "^9.2.12",
+    "react-hot-loader": "^4.3.12",
     "react-json-tree": "^0.11.0",
     "react-resizable": "^1.7.5",
-    "react-router": "^4.2.0",
-    "react-smackdown": "^1.0.0-beta.3",
-    "react-static": "^5.8.7",
+    "react-static": "^6.0.0-beta.30",
+    "react-static-plugin-emotion": "^1.0.6",
     "styled-components": "^3"
   },
   "devDependencies": {
-    "babel-plugin-styled-components": "^1.3.0",
     "eslint-config-react-tools": "1.x.x",
+    "prettier": "^1.14.3",
     "serve": "^6.5.8"
   }
 }

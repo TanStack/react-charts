@@ -1,18 +1,11 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { ResizableBox } from 'react-resizable'
 //
 //
-import { Line, Area, Bar, Bubble } from '../../../src'
-
-const types = {
-  line: Line,
-  area: Area,
-  bar: Bar,
-  bubble: Bubble,
-}
+import { Line, Area, Bar, Bubble } from '../../../dist'
 
 const options = {
-  elementType: Object.keys(types),
+  elementType: ['line', 'area', 'bar', 'bubble'],
   primaryAxisType: ['linear', 'time', 'log', 'ordinal'],
   secondaryAxisType: ['linear', 'time', 'log', 'ordinal'],
   primaryAxisPosition: ['top', 'left', 'right', 'bottom'],
@@ -53,7 +46,7 @@ const options = {
 
 const optionKeys = Object.keys(options)
 
-export default class ChartConfig extends Component {
+export default class ChartConfig extends React.Component {
   static defaultProps = {
     count: 1,
     resizable: true,
@@ -84,12 +77,11 @@ export default class ChartConfig extends Component {
     }
   }
   makeData = () => {
-    const { dataType, series } = this.props
-    return makeData(dataType, series)
+    const { dataType, series, useR } = this.props
+    return makeData(dataType, series, useR)
   }
   render () {
     const {
-      render,
       children,
       show,
       count,
@@ -147,22 +139,23 @@ export default class ChartConfig extends Component {
                 <div
                   style={{
                     ...style,
+                    border: '2px solid rgba(0,0,0,.2)',
                     width: '100%',
                     height: '100%',
                   }}
                   className={className}
                 >
-                  {(render || children)({
+                  {children({
                     ...this.state,
-                    elementType: types[this.state.elementType],
+                    elementType: this.state.elementType,
                   })}
                 </div>
               </ResizableBox>
             ) : (
               <div key={i}>
-                {(render || children)({
+                {children({
                   ...this.state,
-                  elementType: types[this.state.elementType],
+                  elementType: this.state.elementType,
                 })}
               </div>
             )
@@ -172,13 +165,13 @@ export default class ChartConfig extends Component {
   }
 }
 
-function makeData (dataType, series) {
+function makeData (dataType, series, useR) {
   return [...new Array(series || Math.max(Math.round(Math.random() * 5), 1))].map((d, i) =>
-    makeSeries(i, dataType)
+    makeSeries(i, dataType, useR)
   )
 }
 
-function makeSeries (i, dataType) {
+function makeSeries (i, dataType, useR) {
   const start = 0
   const startDate = new Date()
   startDate.setMinutes(0)
@@ -195,16 +188,20 @@ function makeSeries (i, dataType) {
     label: `Series ${i + 1}`,
     datums: [...new Array(length)].map((_, i) => {
       let x = start + i
+      if (dataType === 'ordinal') {
+        x = `Ordinal Group ${x}`
+      }
       if (dataType === 'time') {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * i)
       }
       const distribution = 1.1
       const y = Math.random() < nullChance ? null : min + Math.round(Math.random() * (max - min))
-      const r =
-        rMax -
-        Math.floor(
-          Math.log(Math.random() * (distribution ** rMax - rMin) + rMin) / Math.log(distribution)
-        )
+      const r = !useR
+        ? undefined
+        : rMax -
+          Math.floor(
+            Math.log(Math.random() * (distribution ** rMax - rMin) + rMin) / Math.log(distribution)
+          )
       return {
         x,
         y,

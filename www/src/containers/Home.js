@@ -1,11 +1,11 @@
 import React from 'react'
-import { SiteData, Link, Head } from 'react-static'
-import styled from 'styled-components'
+import styled from 'react-emotion'
+import { Link } from '@reach/router'
 //
 
 import logoImg from '../logo.png'
 
-const Styles = styled.div`
+const Styles = styled('div')`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -72,7 +72,7 @@ const Styles = styled.div`
   }
 `
 
-const Cards = styled.div`
+const Cards = styled('div')`
   display: flex;
   flex-align: stretch;
   justify-content: stretch;
@@ -106,40 +106,30 @@ const Card = styled(Link)`
 `
 
 export default () => (
-  <SiteData
-    render={({ repo, repoURL, repoName }) => (
-      <Styles>
-        <Head>
-          <title>Home | {repoName}</title>
-        </Head>
-        <div className="backgrounds">
-          <div className="background1" />
-          <div className="background2" />
-        </div>
-        <img src={logoImg} alt="" />
-        <h1>React Charts</h1>
-        <h2>Simple, immersive &amp; interactive charts for React</h2>
-        {/* <p>
+  <Styles>
+    <div className="backgrounds">
+      <div className="background1" />
+      <div className="background2" />
+    </div>
+    <img src={logoImg} alt="" />
+    <h1>React Charts</h1>
+    <h2>Simple, immersive &amp; interactive charts for React</h2>
+    {/* <p>
           My Awesome Libary was built to help you get stuff done fast. It will change your live by
           being faster, lighter, and easier to use than the next thing.
         </p> */}
-        <Cards>
-          <Card to="/docs" background="#ff6073">
-            Introduction
-          </Card>
-          <Card to="/examples/line" background="#efbb3c">
-            Examples
-          </Card>
-        </Cards>
-        <div className="github">
-          <Link to={repoURL}>
-            <img
-              src={`https://img.shields.io/github/stars/${repo}.svg?style=social&label=Star`}
-              alt="Github Stars"
-            />
-          </Link>
-        </div>
-      </Styles>
-    )}
-  />
+    <Cards>
+      <Card to="/examples/line" background="#efbb3c">
+        Examples
+      </Card>
+    </Cards>
+    <div className="github">
+      <a href="https://github.com/react-tools/react-charts">
+        <img
+          src="https://img.shields.io/github/stars/react-tools/react-charts.svg?style=social&label=Star"
+          alt="Github Stars"
+        />
+      </a>
+    </div>
+  </Styles>
 )

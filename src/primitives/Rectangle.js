@@ -6,22 +6,19 @@ const defaultStyle = {
   fill: '#333',
   opacity: 1,
   rx: 0,
-  ry: 0,
-  transition: 'all .3s ease-out',
+  ry: 0
 }
 
 export default class Rectangle extends React.Component {
   static defaultProps = {
-    opacity: 1,
+    opacity: 1
   }
-  render () {
-    const {
-      style, opacity, x1, y1, x2, y2, ...rest
-    } = this.props
+  render() {
+    const { style, opacity, x1, y1, x2, y2, ...rest } = this.props
 
     const resolvedStyle = {
       ...defaultStyle,
-      ...style,
+      ...style
     }
 
     const xStart = Math.min(x1, x2)
@@ -33,7 +30,14 @@ export default class Rectangle extends React.Component {
     const width = Math.max(xEnd - xStart, 0)
 
     return (
-      <rect {...rest} x={xStart} y={yStart} width={width} height={height} style={resolvedStyle} />
+      <rect
+        {...rest}
+        x={xStart}
+        y={yStart}
+        width={width}
+        height={height}
+        style={resolvedStyle}
+      />
     )
   }
 }

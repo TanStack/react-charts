@@ -1,16 +1,16 @@
-import { PureComponent } from 'react'
-import reactClickOutside from 'react-click-outside'
+import { PureComponent } from "react";
+import reactClickOutside from "react-click-outside";
 //
 
 class ClickOutside extends PureComponent {
-  handleClickOutside () {
+  handleClickOutside() {
     if (this.props.onClickOutside) {
-      this.props.onClickOutside()
+      this.props.onClickOutside();
     }
   }
-  render () {
-    return this.props.children
+  render() {
+    return this.props.children;
   }
 }
 
-export default reactClickOutside(ClickOutside)
+export default reactClickOutside(ClickOutside);
