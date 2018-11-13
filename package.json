@@ -17,7 +17,8 @@
     "test:watch": "react-scripts test --env=jsdom",
     "build": "rollup -c",
     "start": "rollup -c -w",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "buildDocs": "cd www && yarn && yarn build"
   },
   "peerDependencies": {
     "prop-types": "^15.5.4",
