@@ -1,6 +1,6 @@
 {
   "name": "react-charts",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "description": "Charts for React",
   "author": "tannerlinsley",
   "license": "MIT",
@@ -26,7 +26,8 @@
     "d3-delaunay": "^2.0.1",
     "d3-scale": "^2.0.0",
     "d3-shape": "^1.2.0",
-    "d3-voronoi": "^1.1.2"
+    "d3-voronoi": "^1.1.2",
+    "use-react-hooks": "^1.0.6"
   },
   "devDependencies": {
     "@svgr/rollup": "^2.4.1",
@@ -47,6 +48,8 @@
     "eslint-plugin-react": "^7.10.0",
     "eslint-plugin-standard": "^3.1.0",
     "gh-pages": "^1.2.0",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "rollup": "^0.64.1",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-commonjs": "^9.1.3",
