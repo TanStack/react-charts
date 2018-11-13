@@ -1,5 +1,5 @@
 import React from 'react'
-// import { hot, setConfig } from 'react-hot-loader'
+import { hot, setConfig } from 'react-hot-loader'
 import { Root } from 'react-static'
 import styled, { injectGlobal } from 'react-emotion'
 import { Router } from '@reach/router'
@@ -9,11 +9,11 @@ import 'react-resizable/css/styles.css'
 import Home from 'containers/Home'
 import Examples from 'containers/Examples'
 
-// if (process.env.NODE_ENV === 'development') {
-//   setConfig({
-//     pureSFC: true,
-//   })
-// }
+if (process.env.NODE_ENV === 'development') {
+  setConfig({
+    pureSFC: true,
+  })
+}
 
 injectGlobal`
   @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');

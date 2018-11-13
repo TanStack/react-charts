@@ -1,8 +1,6 @@
-import React, { useRef, useEffect } from 'react'
-import RAF from 'raf'
+// import React, { useRef, useEffect } from 'react'
 
 export default {
-  requestAnimationFrame: RAF,
   getStatus,
   getStatusStyle,
   getMultiFocus,
