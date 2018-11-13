@@ -1,5 +1,0 @@
-import * as Hooks from 'use-react-hooks'
-
-export default Hooks.useHooks
-
-export Hooksr
