@@ -77,7 +77,6 @@ function Line({ series, showPoints, curve }) {
     <g>
       {renderedPath}
       {showPoints &&
-        false &&
         series.datums.map((datum, i) => {
           return (
             <Point
