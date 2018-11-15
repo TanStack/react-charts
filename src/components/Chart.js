@@ -851,7 +851,8 @@ Chart.defaultProps = {
   getDatumStyles: () => ({}),
   onHover: () => {},
   groupMode: 'primary',
-  showVoronoi: false
+  showVoronoi: false,
+  showPoints: true
 }
 
 export default withHooks(Chart)

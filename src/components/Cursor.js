@@ -134,7 +134,7 @@ function Cursor({ primary }) {
         position: 'absolute',
         top: 0,
         left: 0,
-        transform: `translate3d(${gridX}px, ${gridY}px, 0)`,
+        transform: Utils.translate(gridX, gridY),
         opacity: resolvedShow ? 1 : 0,
         transition: 'all .3s ease'
       }}
@@ -147,7 +147,7 @@ function Cursor({ primary }) {
             position: 'absolute',
             top: 0,
             left: 0,
-            transform: `translate3d(${lineStartX}px, ${lineStartY}px, 0px)`,
+            transform: Utils.translate(lineStartX, lineStartY),
             width: `${lineWidth}px`,
             height: `${lineHeight}px`,
             background: getLineBackgroundColor(dark),
@@ -164,7 +164,7 @@ function Cursor({ primary }) {
             position: 'absolute',
             top: 0,
             left: 0,
-            transform: `translate3d(${bubbleX}px, ${bubbleY}px, 0px)`,
+            transform: Utils.translate(bubbleX, bubbleY),
             transition:
               animated && animateCoords ? 'all .2s ease' : 'opacity .2s ease'
           }}
@@ -178,7 +178,7 @@ function Cursor({ primary }) {
               color: dark ? 'black' : 'white',
               borderRadius: '3px',
               position: 'relative',
-              transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0px)`,
+              transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0)`,
               whiteSpace: 'nowrap'
             }}
           >

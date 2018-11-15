@@ -69,7 +69,7 @@ class Story extends Component {
                 })}
                 onFocus={focused =>
                   this.setState({
-                    activeSeriesIndex: focused ? focused.datum.series.id : -1,
+                    activeSeriesIndex: focused ? focused.series.id : -1,
                   })
                 }
                 renderSVG={() => defs}

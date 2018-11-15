@@ -42,18 +42,14 @@ function Tooltip() {
 
   const resolvedFocused = focused || lastFocused
 
-  let alignX = '0%'
-  let alignY = '-50%'
+  let alignX = 0
+  let alignY = -50
   let triangleStyles = {}
   let resolvedAlign = align || 'auto'
 
   const backgroundColor = getBackgroundColor(dark)
 
   let resolvedArrowPosition = arrowPosition
-
-  if (!anchor) {
-    return null
-  }
 
   if (resolvedAlign === 'auto' && elRef.current) {
     let container = elRef.current
@@ -170,29 +166,29 @@ function Tooltip() {
   }
 
   if (resolvedAlign === 'top') {
-    alignX = '-50%'
-    alignY = '-100%'
+    alignX = -50
+    alignY = -100
   } else if (resolvedAlign === 'topRight') {
-    alignX = '0%'
-    alignY = '-100%'
+    alignX = 0
+    alignY = -100
   } else if (resolvedAlign === 'right') {
-    alignX = '0%'
-    alignY = '-50%'
+    alignX = 0
+    alignY = -50
   } else if (resolvedAlign === 'bottomRight') {
-    alignX = '0%'
-    alignY = '0%'
+    alignX = 0
+    alignY = 0
   } else if (resolvedAlign === 'bottom') {
-    alignX = '-50%'
-    alignY = '0%'
+    alignX = -50
+    alignY = 0
   } else if (resolvedAlign === 'bottomLeft') {
-    alignX = '-100%'
-    alignY = '0%'
+    alignX = -100
+    alignY = 0
   } else if (resolvedAlign === 'left') {
-    alignX = '-100%'
-    alignY = '-50%'
+    alignX = -100
+    alignY = -50
   } else if (resolvedAlign === 'topLeft') {
-    alignX = '-100%'
-    alignY = '-100%'
+    alignX = -100
+    alignY = -100
   }
 
   if (!resolvedArrowPosition) {
@@ -348,13 +344,13 @@ function Tooltip() {
           position: 'absolute',
           left: 0,
           top: 0,
-          transform: `translate3d(${anchor.x}px, ${anchor.y}px, 0px)`,
+          transform: Utils.translate(anchor.x, anchor.y),
           transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease'
         }}
       >
         <div
           style={{
-            transform: `translate3d(${alignX}, ${alignY}, 0)`,
+            transform: `translate3d(${alignX}%, ${alignY}%, 0)`,
             padding: `${tooltipArrowPadding +
               resolvedVerticalPadding}px ${tooltipArrowPadding +
               resolvedHorizontalPadding}px`,

@@ -1,5 +1,6 @@
 import React from 'react'
 import withHooks, { useContext, useEffect, useRef } from '../utils/hooks'
+import Utils from '../utils/Utils'
 //
 import ChartContext from '../utils/ChartContext'
 
@@ -152,7 +153,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
           onMouseDown={onMouseDown}
           onClick={onClick}
           style={{
-            transform: `translate3d(${gridX || 0}px, ${gridY || 0}px, 0)`
+            transform: Utils.translate(gridX, gridY)
           }}
         >
           <Rectangle

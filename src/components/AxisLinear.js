@@ -342,11 +342,10 @@ function AxisLinear({
                 style={{
                   fill: dark ? 'white' : 'black',
                   ...axisStyles.tick,
-                  transform: `translate3d(${
-                    vertical ? directionMultiplier * spacing : tickOffset
-                  }px, ${
+                  transform: `${Utils.translate(
+                    vertical ? directionMultiplier * spacing : tickOffset,
                     vertical ? tickOffset : directionMultiplier * spacing
-                  }px, 0) rotate(${-rotation}deg)`
+                  )} rotate(${-rotation}deg)`
                 }}
                 dominantBaseline={
                   rotation

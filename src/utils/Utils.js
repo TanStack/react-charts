@@ -14,6 +14,7 @@ export default {
   sumObjBy,
   translateX,
   translateY,
+  translate,
   identity,
   hash,
   useDeepMemo,
@@ -305,6 +306,10 @@ function translateX(x) {
 
 function translateY(y) {
   return `translate3d(0, ${y}px, 0)`
+}
+
+function translate(x, y) {
+  return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
 }
 
 function identity(d) {

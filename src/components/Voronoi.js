@@ -57,8 +57,8 @@ function Voronoi() {
       //   return (
       //     <VoronoiElement
       //       style={{
-      //         transform: `translate3d(${primaryAxis.width /
-      //           2}px, ${primaryAxis.height / 2}px, 0)`
+      //         transform: Utils.translate(primaryAxis.width /
+      //           2, primaryAxis.height / 2)
       //       }}
       //     >
       //       {stackData.map(series => (

@@ -1,5 +1,6 @@
 import React from 'react'
 import withHooks, { useContext } from '../utils/hooks'
+import Utils from '../utils/Utils'
 //
 import ChartContext from '../utils/ChartContext'
 
@@ -20,7 +21,7 @@ function Brush() {
         position: 'absolute',
         left: 0,
         top: 0,
-        transform: `translate3d(${gridX}px, ${gridY}px, 0)`,
+        transform: Utils.translate(gridX, gridY),
         opacity: pointer.dragging
           ? Math.abs(pointer.sourceX - pointer.x) < 20
             ? 0.5
@@ -31,10 +32,7 @@ function Brush() {
       <div
         style={{
           position: 'absolute',
-          transform: `translate3d(${Math.min(
-            pointer.x,
-            pointer.sourceX
-          )}px, 0px, 0)`,
+          transform: Utils.translate(Math.min(pointer.x, pointer.sourceX)),
           width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
           height: `${gridHeight}px`,
           background: dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)',
