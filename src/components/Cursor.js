@@ -83,21 +83,23 @@ function Cursor({ primary }) {
 
   const renderProps = { ...cursor }
 
-  renderProps.formattedValue = axis.vertical
-    ? typeof lastValue !== 'undefined'
-      ? axis.format(
-        axis.stacked && !primary && resolvedFocused
-          ? resolvedFocused.totalValue
-          : lastValue
-      )
-      : ''
-    : typeof lastValue !== 'undefined'
-      ? axis.format(
-        axis.stacked && !primary && resolvedFocused
-          ? resolvedFocused.totalValue
-          : lastValue
-      )
-      : ''
+  renderProps.formattedValue = String(
+    axis.vertical
+      ? typeof lastValue !== 'undefined'
+        ? axis.format(
+          axis.stacked && !primary && resolvedFocused
+            ? resolvedFocused.totalValue
+            : lastValue
+        )
+        : ''
+      : typeof lastValue !== 'undefined'
+        ? axis.format(
+          axis.stacked && !primary && resolvedFocused
+            ? resolvedFocused.totalValue
+            : lastValue
+        )
+        : ''
+  )
 
   const lineStartX = Math.min(x1, x2)
   const lineStartY = Math.min(y1, y2)

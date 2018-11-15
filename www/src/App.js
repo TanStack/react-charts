@@ -67,7 +67,7 @@ export function App () {
     <AppStyles>
       <Router>
         <Home path="/" />
-        <Examples path="/examples/*" />
+        <Examples path="examples/*" />
       </Router>
     </AppStyles>
   )

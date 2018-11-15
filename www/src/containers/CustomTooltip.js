@@ -1,16 +1,11 @@
 import React, { Component } from 'react'
-import Tree from 'react-json-tree'
 //
 import ChartConfig from 'components/ChartConfig'
 
-import { Chart, Axis, Series, Tooltip, Cursor, Area, Bar } from '../../../dist'
+import { Chart } from '../../../dist'
 
 class Story extends Component {
-  state = {
-    tooltipInfo: {},
-  }
   render () {
-    const { tooltipInfo } = this.state
     return (
       <React.Fragment>
         <ChartConfig>
@@ -25,10 +20,6 @@ class Story extends Component {
               primaryCursor
               secondaryCursor
               tooltip={{
-                onChange: tooltipInfo =>
-                  this.setState({
-                    tooltipInfo,
-                  }),
                 render: ({ datum, primaryAxis, getStyle }) =>
                   datum ? (
                     <div
@@ -77,6 +68,9 @@ class Story extends Component {
                             getDatumStyles={datum => ({
                               color: datum.original.color,
                             })}
+                            primaryCursor={{
+                              value: datum.seriesLabel,
+                            }}
                           />
                         </div>
                         <img
@@ -96,7 +90,6 @@ class Story extends Component {
             />
           )}
         </ChartConfig>
-        <Tree hideRoot data={tooltipInfo} />
       </React.Fragment>
     )
   }
