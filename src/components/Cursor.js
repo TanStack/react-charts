@@ -32,7 +32,10 @@ function Cursor({ primary }) {
   } = cursor
 
   const resolvedFocused = focused || lastFocused
-  const lastValue = Utils.useWhen(resolvedValue, resolvedValue)
+  const lastValue = Utils.useWhen(
+    resolvedValue,
+    typeof resolvedValue !== 'undefined'
+  )
 
   // Should we animate?
   const animated = snap || axis.type === 'ordinal'

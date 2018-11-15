@@ -10,18 +10,21 @@ export default () => (
     <ChartConfig series={10}>
       {({ data }) => (
         <Chart
-          data={data}
           type="line"
-          axes={[
-            { primary: true, position: 'bottom', type: 'time' },
-            { position: 'left', type: 'linear' },
+          data={[
+            {
+              label: 'Series 1',
+              data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]],
+            },
+            {
+              label: 'Series 2',
+              data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]],
+            },
           ]}
-          primaryCursor
-          secondaryCursor
-          tooltip
-          onSelect={info => {
-            console.log(info)
-          }}
+          axes={[
+            { primary: true, type: 'linear', position: 'bottom' },
+            { type: 'linear', position: 'left' },
+          ]}
         />
       )}
     </ChartConfig>
