@@ -5,12 +5,6 @@ import withHooks, { useMemo, useContext } from '../utils/hooks'
 
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
-import {
-  selectSeries,
-  hoverSeries,
-  selectDatum,
-  hoverDatum
-} from '../utils/interactionMethods'
 
 //
 import Circle from '../primitives/Circle'
@@ -20,24 +14,12 @@ const circleDefaultStyle = {
 }
 
 function Bubble({ series }) {
-  const [{ hovered, selected, interaction }, setChartState] = useContext(
-    ChartContext
-  )
+  const [{ focused, selected }] = useContext(ChartContext)
 
   const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
-    [series, hovered, selected]
+    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
+    [series, focused, selected]
   )
-
-  const interactiveSeries = interaction === 'series'
-  const seriesInteractionProps = interactiveSeries
-    ? {
-      onClick: () => selectSeries(series, { setChartState }),
-      onMouseEnter: () => hoverSeries(series, { setChartState }),
-      onMouseMove: () => hoverSeries(series, { setChartState }),
-      onMouseLeave: () => hoverSeries(null, { setChartState })
-    }
-    : {}
 
   return (
     <g>
@@ -47,11 +29,9 @@ function Bubble({ series }) {
             {...{
               key: i,
               datum,
-              hovered,
+              focused,
               selected,
-              interaction,
-              style,
-              seriesInteractionProps
+              style
             }}
           />
         )
@@ -76,8 +56,8 @@ Bubble.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
     datum.y += yAxis.tickOffset
   }
 
-  // Set the default focus point
-  datum.focus = {
+  // Set the default anchor point
+  datum.anchor = {
     x: datum.x,
     y: datum.y,
     verticalPadding: datum.r,
@@ -85,7 +65,7 @@ Bubble.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
   }
 
   // Set the pointer points (used in voronoi)
-  datum.pointerPoints = [datum.focus]
+  datum.boundingPoints = [datum.anchor]
 }
 
 Bubble.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
@@ -113,34 +93,15 @@ Bubble.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
   })
 }
 
-const Point = withHooks(function Point({
-  datum,
-  hovered,
-  selected,
-  interaction,
-  style,
-  seriesInteractionProps
-}) {
+const Point = withHooks(function Point({ datum, focused, selected, style }) {
   if (!datum.defined) {
     return null
   }
 
-  const [_, setChartState] = useContext(ChartContext)
-
   const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
-    [datum, hovered, selected]
+    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
+    [datum, focused, selected]
   )
-
-  const interactiveDatum = interaction === 'element'
-  const datumInteractionProps = interactiveDatum
-    ? {
-      onClick: () => selectDatum(datum, { setChartState }),
-      onMouseEnter: () => hoverDatum(datum, { setChartState }),
-      onMouseMove: () => hoverDatum(datum, { setChartState }),
-      onMouseLeave: () => hoverDatum(null, { setChartState })
-    }
-    : {}
 
   const circleProps = {
     x: datum ? datum.x : undefined,
@@ -155,22 +116,10 @@ const Point = withHooks(function Point({
         ? {
           r: datum.r
         }
-        : {}),
-      pointerEvents: interactiveDatum ? 'all' : 'none'
+        : {})
     }
   }
-  return useMemo(
-    () => (
-      <Circle
-        {...circleProps}
-        {...{
-          ...seriesInteractionProps,
-          ...datumInteractionProps
-        }}
-      />
-    ),
-    [JSON.stringify(circleProps)]
-  )
+  return Utils.useDeepMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Bubble)

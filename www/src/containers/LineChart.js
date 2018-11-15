@@ -19,6 +19,9 @@ export default () => (
           primaryCursor
           secondaryCursor
           tooltip
+          onSelect={info => {
+            console.log(info)
+          }}
         />
       )}
     </ChartConfig>

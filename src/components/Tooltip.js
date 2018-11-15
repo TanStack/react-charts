@@ -11,34 +11,36 @@ const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
 function Tooltip() {
-  const [
-    {
-      hovered,
-      primaryAxes,
-      secondaryAxes,
-      gridX,
-      gridY,
-      gridWidth,
-      gridHeight,
-      dark,
-      selected,
-      tooltip: {
-        align,
-        alignPriority,
-        padding,
-        tooltipArrowPadding,
-        //
-        arrowPosition,
-        render,
-        focused,
-        focusedDatum,
-        show
-      }
+  const [chartState] = useContext(ChartContext)
+
+  const {
+    primaryAxes,
+    secondaryAxes,
+    gridX,
+    gridY,
+    gridWidth,
+    gridHeight,
+    dark,
+    selected,
+    focused,
+    lastFocused,
+    tooltip: {
+      align,
+      alignPriority,
+      padding,
+      tooltipArrowPadding,
+      //
+      arrowPosition,
+      render,
+      anchor,
+      show
     }
-  ] = useContext(ChartContext)
+  } = chartState
 
   const elRef = useRef()
   const tooltipElRef = useRef()
+
+  const resolvedFocused = focused || lastFocused
 
   let alignX = '0%'
   let alignY = '-50%'
@@ -49,7 +51,7 @@ function Tooltip() {
 
   let resolvedArrowPosition = arrowPosition
 
-  if (!focused) {
+  if (!anchor) {
     return null
   }
 
@@ -72,8 +74,8 @@ function Tooltip() {
         [overflowX, overflowY].find(d => ['auto', 'hidden'].includes(d))
       ) {
         const containerDims = container.getBoundingClientRect()
-        const left = gridDims.left - containerDims.left + focused.x
-        const top = gridDims.top - containerDims.top + focused.y
+        const left = gridDims.left - containerDims.left + anchor.x
+        const top = gridDims.top - containerDims.top + anchor.y
         const right = containerDims.width - left
         const bottom = containerDims.height - top
 
@@ -95,7 +97,7 @@ function Tooltip() {
           space.left -
             tooltipArrowPadding -
             padding -
-            focused.horizontalPadding >
+            anchor.horizontalPadding >
             tooltipDims.width &&
           space.top > tooltipDims.height / 2 &&
           space.bottom > tooltipDims.height / 2
@@ -107,7 +109,7 @@ function Tooltip() {
           space.right -
             tooltipArrowPadding -
             padding -
-            focused.horizontalPadding >
+            anchor.horizontalPadding >
             tooltipDims.width &&
           space.top > tooltipDims.height / 2 &&
           space.bottom > tooltipDims.height / 2
@@ -116,7 +118,7 @@ function Tooltip() {
         }
       } else if (priority === 'top') {
         if (
-          space.top - tooltipArrowPadding - padding - focused.verticalPadding >
+          space.top - tooltipArrowPadding - padding - anchor.verticalPadding >
             tooltipDims.height &&
           space.left > tooltipDims.width / 2 &&
           space.right > tooltipDims.width / 2
@@ -128,7 +130,7 @@ function Tooltip() {
           space.bottom -
             tooltipArrowPadding -
             padding -
-            focused.verticalPadding >
+            anchor.verticalPadding >
             tooltipDims.height &&
           space.left > tooltipDims.width / 2 &&
           space.right > tooltipDims.width / 2
@@ -293,22 +295,21 @@ function Tooltip() {
 
   const primaryAxis = Utils.getAxisByAxisID(
     primaryAxes,
-    focusedDatum ? focusedDatum.series.primaryAxisID : null
+    resolvedFocused ? resolvedFocused.series.primaryAxisID : null
   )
   const secondaryAxis = Utils.getAxisByAxisID(
     secondaryAxes,
-    focusedDatum ? focusedDatum.series.secondaryAxisID : null
+    resolvedFocused ? resolvedFocused.series.secondaryAxisID : null
   )
 
-  const resolvedHorizontalPadding = padding + focused.horizontalPadding
-  const resolvedVerticalPadding = padding + focused.verticalPadding
+  const resolvedHorizontalPadding = padding + anchor.horizontalPadding
+  const resolvedVerticalPadding = padding + anchor.verticalPadding
 
   const renderProps = {
-    datum: focusedDatum,
+    ...chartState,
+    datum: resolvedFocused,
     getStyle: datum =>
-      datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
-    primaryAxes,
-    secondaryAxes,
+      datum.getStatusStyle(Utils.getStatus(datum, resolvedFocused, selected)),
     primaryAxis,
     secondaryAxis
   }
@@ -347,7 +348,7 @@ function Tooltip() {
           position: 'absolute',
           left: 0,
           top: 0,
-          transform: `translate3d(${focused.x}px, ${focused.y}px, 0px)`,
+          transform: `translate3d(${anchor.x}px, ${anchor.y}px, 0px)`,
           transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease'
         }}
       >
@@ -379,7 +380,8 @@ function Tooltip() {
                 position: 'absolute',
                 width: 0,
                 height: 0,
-                ...triangleStyles
+                ...triangleStyles,
+                transition: animateCoords ? 'all .2s ease' : 'none'
               }}
             />
             {renderedChildren}

@@ -6,7 +6,6 @@ import { area, line } from 'd3-shape'
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-import { selectSeries, hoverSeries } from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
@@ -20,9 +19,7 @@ const lineDefaultStyle = {
 }
 
 function Area({ series, showOrphans, curve }) {
-  const [{ hovered, selected, interaction }, setChartState] = useContext(
-    ChartContext
-  )
+  const [{ focused, selected }] = useContext(ChartContext)
 
   const areaFn = area()
     .x(d => d.x)
@@ -44,35 +41,22 @@ function Area({ series, showOrphans, curve }) {
   const linePath = useMemo(() => lineFn(series.datums), [series])
 
   const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
-    [series, hovered, selected]
+    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
+    [series, focused, selected]
   )
-
-  const interactiveSeries = interaction === 'series'
-  const seriesInteractionProps = interactiveSeries
-    ? {
-      onClick: () => selectSeries(series, { setChartState }),
-      onMouseEnter: () => hoverSeries(series, { setChartState }),
-      onMouseMove: () => hoverSeries(series, { setChartState }),
-      onMouseLeave: () => hoverSeries(null, { setChartState })
-    }
-    : {}
-
-  const pointerEvents = interactiveSeries ? 'all' : 'none'
 
   const areaPathProps = {
     d: areaPath,
     style: {
       ...defaultAreaStyle,
       ...style,
-      ...style.line,
-      pointerEvents
-    },
-    ...seriesInteractionProps
+      ...style.line
+    }
   }
-  const renderedAreaPath = useMemo(() => <Path {...areaPathProps} />, [
-    JSON.stringify(areaPathProps)
-  ])
+  const renderedAreaPath = Utils.useDeepMemo(
+    () => <Path {...areaPathProps} />,
+    areaPathProps
+  )
 
   const linePathProps = {
     d: linePath,
@@ -80,14 +64,13 @@ function Area({ series, showOrphans, curve }) {
       ...defaultAreaStyle,
       ...style,
       ...style.line,
-      fill: 'none',
-      pointerEvents
-    },
-    ...seriesInteractionProps
+      fill: 'none'
+    }
   }
-  const renderedLinePath = useMemo(() => <Path {...linePathProps} />, [
-    JSON.stringify(linePathProps)
-  ])
+  const renderedLinePath = Utils.useDeepMemo(
+    () => <Path {...linePathProps} />,
+    linePathProps
+  )
 
   return (
     <g>
@@ -100,12 +83,9 @@ function Area({ series, showOrphans, curve }) {
               {...{
                 key: index,
                 datum,
-                hovered,
+                focused,
                 selected,
-                interaction,
                 style,
-                seriesInteractionProps,
-                interactiveSeries,
                 all,
                 index
               }}
@@ -137,26 +117,26 @@ Area.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
     datum.y += yAxis.tickOffset
   }
 
-  // Set the default focus point
-  datum.focus = {
+  // Set the default anchor point
+  datum.anchor = {
     x: datum.x,
     y: datum.y
   }
 
   // Set the pointer points (used in voronoi)
-  datum.pointerPoints = [
-    datum.focus,
+  datum.boundingPoints = [
+    datum.anchor,
     {
       x: primaryAxis.vertical
         ? primaryAxis.position === 'left'
           ? datum.base - 1
           : datum.base
-        : datum.focus.x,
+        : datum.anchor.x,
       y: !primaryAxis.vertical
         ? primaryAxis.position === 'bottom'
           ? datum.base - 1
           : datum.base
-        : datum.focus.y
+        : datum.anchor.y
     }
   ]
 }
@@ -188,11 +168,9 @@ Area.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
 
 const OrphanLine = withHooks(function OrphanLine({
   datum,
-  hovered,
+  focused,
   selected,
   style,
-  seriesInteractionProps,
-  interactiveSeries,
   all,
   index
 }) {
@@ -203,8 +181,8 @@ const OrphanLine = withHooks(function OrphanLine({
   }
 
   const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
-    [datum, hovered, selected]
+    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
+    [datum, focused, selected]
   )
 
   const lineProps = {
@@ -217,14 +195,11 @@ const OrphanLine = withHooks(function OrphanLine({
       ...style,
       ...style.line,
       ...dataStyle,
-      ...dataStyle.line,
-      pointerEvents: interactiveSeries ? 'all' : 'none'
+      ...dataStyle.line
     }
   }
 
-  return useMemo(() => <Line {...lineProps} {...seriesInteractionProps} />, [
-    JSON.stringify(lineProps)
-  ])
+  return Utils.useDeepMemo(() => <Line {...lineProps} />, lineProps)
 })
 
 export default withHooks(Area)

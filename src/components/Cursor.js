@@ -2,6 +2,7 @@ import React from 'react'
 import withHooks, { useContext, useRef, useEffect } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
+import Utils from '../utils/Utils'
 
 const getLineBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)'
@@ -9,9 +10,9 @@ const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
 function Cursor({ primary }) {
-  const [{ primaryCursor, secondaryCursor, gridX, gridY, dark }] = useContext(
-    ChartContext
-  )
+  const [
+    { primaryCursor, secondaryCursor, focused, lastFocused, gridX, gridY, dark }
+  ] = useContext(ChartContext)
 
   const cursor = primary ? primaryCursor : secondaryCursor
 
@@ -22,14 +23,16 @@ function Cursor({ primary }) {
   const {
     showLine,
     showLabel,
-    value,
+    resolvedValue,
     snap,
     render,
     axis,
     siblingAxis,
-    datum,
-    show
+    resolvedShow
   } = cursor
+
+  const resolvedFocused = focused || lastFocused
+  const lastValue = Utils.useWhen(resolvedValue, resolvedValue)
 
   // Should we animate?
   const animated = snap || axis.type === 'ordinal'
@@ -48,7 +51,7 @@ function Cursor({ primary }) {
 
   // Vertical alignment
   if (axis.vertical) {
-    y = axis.scale(value)
+    y = axis.scale(lastValue)
     x1 = siblingRange[0]
     x2 = siblingRange[1]
     y1 = y - 1
@@ -61,7 +64,7 @@ function Cursor({ primary }) {
       alignPctY = -50
     }
   } else {
-    x = axis.scale(value)
+    x = axis.scale(lastValue)
     x1 = x - 1
     x2 = x + axis.cursorSize + 1
     y1 = siblingRange[0]
@@ -78,11 +81,19 @@ function Cursor({ primary }) {
   const renderProps = { ...cursor }
 
   renderProps.formattedValue = axis.vertical
-    ? typeof value !== 'undefined'
-      ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
+    ? typeof lastValue !== 'undefined'
+      ? axis.format(
+        axis.stacked && !primary && resolvedFocused
+          ? resolvedFocused.totalValue
+          : lastValue
+      )
       : ''
-    : typeof value !== 'undefined'
-      ? axis.format(axis.stacked && !primary ? datum.totalValue : value)
+    : typeof lastValue !== 'undefined'
+      ? axis.format(
+        axis.stacked && !primary && resolvedFocused
+          ? resolvedFocused.totalValue
+          : lastValue
+      )
       : ''
 
   const lineStartX = Math.min(x1, x2)
@@ -103,11 +114,11 @@ function Cursor({ primary }) {
 
   const previousShowRef = useRef()
   useEffect(() => {
-    previousShowRef.current = show
+    previousShowRef.current = resolvedShow
   })
 
   let animateCoords
-  if (previousShowRef.current === show) {
+  if (previousShowRef.current === resolvedShow) {
     animateCoords = true
   }
 
@@ -121,7 +132,7 @@ function Cursor({ primary }) {
         top: 0,
         left: 0,
         transform: `translate3d(${gridX}px, ${gridY}px, 0)`,
-        opacity: show ? 1 : 0,
+        opacity: resolvedShow ? 1 : 0,
         transition: 'all .3s ease'
       }}
       className='Cursor'

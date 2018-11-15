@@ -6,13 +6,40 @@ import { Chart } from '../../../dist'
 
 class Story extends Component {
   state = {
-    cursorValue: null,
+    primaryCursorValue: null,
+    secondaryCursorValue: null,
   }
   render () {
-    const { cursorValue } = this.state
+    const { primaryCursorValue, secondaryCursorValue } = this.state
+    const onFocus = datum => {
+      this.setState({
+        primaryCursorValue: datum ? datum.primary : null,
+        secondaryCursorValue: datum ? datum.secondary : null,
+      })
+    }
     return (
       <React.Fragment>
-        {JSON.stringify({ cursorValue }, null, 2)}
+        <pre>{JSON.stringify({ primaryCursorValue, secondaryCursorValue }, null, 2)}</pre>
+        <ChartConfig width={500} height={250}>
+          {({ data }) => (
+            <Chart
+              data={data}
+              type="line"
+              axes={[
+                { primary: true, position: 'bottom', type: 'time' },
+                { position: 'left', type: 'linear' },
+              ]}
+              onFocus={onFocus}
+              primaryCursor={{
+                value: primaryCursorValue,
+              }}
+              secondaryCursor={{
+                value: secondaryCursorValue,
+              }}
+            />
+          )}
+        </ChartConfig>
+        <br />
         <ChartConfig width={600} height={200}>
           {({ data }) => (
             <Chart
@@ -22,19 +49,18 @@ class Story extends Component {
                 { primary: true, position: 'bottom', type: 'time' },
                 { position: 'left', type: 'linear' },
               ]}
+              onFocus={onFocus}
               primaryCursor={{
-                value: cursorValue,
-                onChange: cursor => {
-                  this.setState({
-                    cursorValue: cursor.show ? cursor.computedValue : null,
-                  })
-                },
+                value: primaryCursorValue,
+              }}
+              secondaryCursor={{
+                value: secondaryCursorValue,
               }}
             />
           )}
         </ChartConfig>
         <br />
-        <ChartConfig width={200} height={100}>
+        <ChartConfig width={700} height={150}>
           {({ data }) => (
             <Chart
               data={data}
@@ -43,33 +69,12 @@ class Story extends Component {
                 { primary: true, position: 'bottom', type: 'time' },
                 { position: 'left', type: 'linear' },
               ]}
+              onFocus={onFocus}
               primaryCursor={{
-                value: cursorValue,
-                onChange: cursor => {
-                  this.setState({
-                    cursorValue: cursor.show ? cursor.computedValue : null,
-                  })
-                },
+                value: primaryCursorValue,
               }}
-            />
-          )}
-        </ChartConfig>
-        <ChartConfig width={400} height={40}>
-          {({ data }) => (
-            <Chart
-              data={data}
-              type="line"
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear' },
-              ]}
-              primaryCursor={{
-                value: cursorValue,
-                onChange: cursor => {
-                  this.setState({
-                    cursorValue: cursor.show ? cursor.computedValue : null,
-                  })
-                },
+              secondaryCursor={{
+                value: secondaryCursorValue,
               }}
             />
           )}

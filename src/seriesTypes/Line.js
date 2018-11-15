@@ -7,12 +7,6 @@ import { line } from 'd3-shape'
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
-import {
-  selectSeries,
-  selectDatum,
-  hoverSeries,
-  hoverDatum
-} from '../utils/interactionMethods'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
@@ -25,8 +19,8 @@ const circleDefaultStyle = {
   r: 2
 }
 
-function Line({ series, showPoints, curve }) {
-  const [{ hovered, selected, interaction }, setChartState] = useContext(
+function Line({ series, curve }) {
+  const [{ showPoints, focused, selected }, setChartState] = useContext(
     ChartContext
   )
 
@@ -42,21 +36,9 @@ function Line({ series, showPoints, curve }) {
   const path = useMemo(() => lineFn(series.datums), [series])
 
   const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
-    [series, hovered, selected]
+    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
+    [series, focused, selected]
   )
-
-  const interactiveSeries = interaction === 'series'
-  const seriesInteractionProps = interactiveSeries
-    ? {
-      onClick: () => selectSeries(series, { setChartState }),
-      onMouseEnter: () => hoverSeries(series, { setChartState }),
-      onMouseMove: () => hoverSeries(series, { setChartState }),
-      onMouseLeave: () => hoverSeries(null, { setChartState })
-    }
-    : {}
-
-  const pointerEvents = interactiveSeries ? 'all' : 'none'
 
   const pathProps = {
     d: path,
@@ -64,14 +46,13 @@ function Line({ series, showPoints, curve }) {
       ...pathDefaultStyle,
       ...style,
       ...style.line,
-      fill: 'none',
-      pointerEvents
-    },
-    ...seriesInteractionProps
+      fill: 'none'
+    }
   }
-  const renderedPath = useMemo(() => <Path {...pathProps} />, [
-    JSON.stringify(pathProps)
-  ])
+  const renderedPath = Utils.useDeepMemo(
+    () => <Path {...pathProps} />,
+    pathProps
+  )
 
   return (
     <g>
@@ -83,11 +64,9 @@ function Line({ series, showPoints, curve }) {
               {...{
                 key: i,
                 datum,
-                hovered,
+                focused,
                 selected,
-                interaction,
-                style,
-                seriesInteractionProps
+                style
               }}
             />
           )
@@ -97,7 +76,6 @@ function Line({ series, showPoints, curve }) {
 }
 
 Line.defaultProps = {
-  showPoints: true,
   curve: 'monotoneX'
 }
 
@@ -118,14 +96,14 @@ Line.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
     datum.y += yAxis.tickOffset
   }
 
-  // Set the default focus point
-  datum.focus = {
+  // Set the default anchor point
+  datum.anchor = {
     x: datum.x,
     y: datum.y
   }
 
   // Set the pointer points (used in voronoi)
-  datum.pointerPoints = [datum.focus]
+  datum.boundingPoints = [datum.anchor]
 }
 
 Line.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
@@ -153,34 +131,15 @@ Line.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
   })
 }
 
-const Point = withHooks(function Point({
-  datum,
-  hovered,
-  selected,
-  interaction,
-  style,
-  seriesInteractionProps
-}) {
+const Point = withHooks(function Point({ datum, focused, selected, style }) {
   if (!datum.defined) {
     return null
   }
 
-  const [_, setChartState] = useContext(ChartContext)
-
   const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
-    [datum, hovered, selected]
+    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
+    [datum, focused, selected]
   )
-
-  const interactiveDatum = interaction === 'element'
-  const datumInteractionProps = interactiveDatum
-    ? {
-      onClick: () => selectDatum(datum, { setChartState }),
-      onMouseEnter: () => hoverDatum(datum, { setChartState }),
-      onMouseMove: () => hoverDatum(datum, { setChartState }),
-      onMouseLeave: () => hoverDatum(null, { setChartState })
-    }
-    : {}
 
   const circleProps = {
     x: datum ? datum.x : undefined,
@@ -190,22 +149,10 @@ const Point = withHooks(function Point({
       ...style,
       ...style.circle,
       ...dataStyle,
-      ...dataStyle.circle,
-      pointerEvents: interactiveDatum ? 'all' : 'none'
+      ...dataStyle.circle
     }
   }
-  return useMemo(
-    () => (
-      <Circle
-        {...circleProps}
-        {...{
-          ...seriesInteractionProps,
-          ...datumInteractionProps
-        }}
-      />
-    ),
-    [JSON.stringify(circleProps)]
-  )
+  return Utils.useDeepMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Line)

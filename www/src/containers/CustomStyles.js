@@ -65,14 +65,13 @@ class Story extends Component {
                   opacity: activeSeriesIndex > -1 ? (series.id === activeSeriesIndex ? 1 : 0.2) : 1,
                 })}
                 getDatumStyles={d => ({
-                  r: d.hovered ? 5 : d.otherHovered ? 3 : 0,
+                  r: d.focused ? 5 : d.otherHovered ? 3 : 0,
                 })}
-                tooltip={{
-                  onChange: info =>
-                    this.setState({
-                      activeSeriesIndex: info.show ? info.focusedDatum.series.id : -1,
-                    }),
-                }}
+                onFocus={focused =>
+                  this.setState({
+                    activeSeriesIndex: focused ? focused.datum.series.id : -1,
+                  })
+                }
                 renderSVG={() => defs}
               />
             )}

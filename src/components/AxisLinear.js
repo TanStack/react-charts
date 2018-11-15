@@ -136,8 +136,8 @@ function AxisLinear({
           (rotation !== 0 && newRotation === 0) ||
           (rotation !== maxLabelRotation && newRotation === maxLabelRotation)
         ) {
-          setRotation(
-            () => (axis.position === 'top' ? -newRotation : newRotation)
+          setRotation(() =>
+            axis.position === 'top' ? -newRotation : newRotation
           )
         }
       }

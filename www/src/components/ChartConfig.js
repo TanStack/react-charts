@@ -1,8 +1,6 @@
 import React from 'react'
 import { ResizableBox } from 'react-resizable'
 //
-//
-import { Line, Area, Bar, Bubble } from '../../../dist'
 
 const options = {
   elementType: ['line', 'area', 'bar', 'bubble'],
@@ -13,15 +11,9 @@ const options = {
   secondaryAxisStack: [true, false],
   primaryAxisShow: [true, false],
   secondaryAxisShow: [true, false],
-  interaction: [
-    'closestPoint',
-    'closestSeries',
-    'primaryAxis',
-    'secondaryAxis',
-    'element',
-    'series',
-  ],
-  tooltipPosition: [
+  groupMode: ['single', 'series', 'primary', 'secondary'],
+  tooltipAnchor: [
+    'closest',
     'top',
     'bottom',
     'left',
@@ -32,13 +24,7 @@ const options = {
     'gridLeft',
     'gridRight',
     'gridCenter',
-    'chartTop',
-    'chartBottom',
-    'chartLeft',
-    'chartRight',
-    'chartCenter',
-    'cursor',
-    'closest',
+    'pointer',
   ],
   tooltipAlign: ['top', 'bottom', 'left', 'right', 'center'],
   snapCursor: [true, false],
@@ -64,9 +50,9 @@ export default class ChartConfig extends React.Component {
     secondaryAxisStack: true,
     primaryAxisShow: true,
     secondaryAxisShow: true,
-    hoverMode: 'primary',
-    tooltipPosition: 'closest',
+    tooltipAnchor: 'closest',
     tooltipAlign: 'top',
+    groupMode: 'primary',
     snapCursor: true,
   }
   constructor (props) {
@@ -139,7 +125,6 @@ export default class ChartConfig extends React.Component {
                 <div
                   style={{
                     ...style,
-                    border: '2px solid rgba(0,0,0,.2)',
                     width: '100%',
                     height: '100%',
                   }}

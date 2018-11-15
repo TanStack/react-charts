@@ -1,12 +1,18 @@
 import React from 'react'
 //
 //
+import {
+  groupModeSeries,
+  groupModePrimary,
+  groupModeSecondary
+} from '../utils/Constants'
 
 const showCount = 10
 
 export default function TooltipRenderer(props) {
   const {
     datum,
+    groupMode,
     primaryAxis,
     secondaryAxis,
     formatSecondary,
@@ -33,16 +39,32 @@ export default function TooltipRenderer(props) {
   const sortedGroupDatums =
     secondaryAxis && secondaryAxis.stacked
       ? [...datum.group].reverse()
-      : [...datum.group]
-        .sort((a, b) => {
+      : [...datum.group].sort((a, b) => {
+        if (groupMode === groupModeSeries) {
+          if (a.primary < b.primary) {
+            return -1
+          } else if (a.primary > b.primary) {
+            return 1
+          }
+        } else if (groupMode === groupModeSecondary) {
+          if (a.primary < b.primary) {
+            return -1
+          } else if (a.primary > b.primary) {
+            return 1
+          }
+        } else {
           if (a.secondary < b.secondary) {
             return -1
           } else if (a.secondary > b.secondary) {
             return 1
           }
-          return a.seriesIndex < b.seriesIndex ? 1 : -1
-        })
-        .reverse()
+        }
+        return a.seriesIndex < b.seriesIndex ? 1 : -1
+      })
+
+  if (groupMode === groupModePrimary) {
+    sortedGroupDatums.reverse()
+  }
 
   if (secondaryAxis.invert) {
     sortedGroupDatums.reverse()
@@ -51,7 +73,7 @@ export default function TooltipRenderer(props) {
   const resolvedShowCount = showCount % 2 === 0 ? showCount : showCount + 1
   const length = sortedGroupDatums.length
 
-  // Get the hovered series' index
+  // Get the focused series' index
   const activeIndex = sortedGroupDatums.findIndex(d => d === datum)
   // Get the start by going back half of the showCount
   let start = activeIndex > -1 ? activeIndex - resolvedShowCount / 2 : 0
@@ -78,7 +100,13 @@ export default function TooltipRenderer(props) {
           textAlign: 'center'
         }}
       >
-        <strong>{primaryAxis.format(datum.primary)}</strong>
+        {groupMode === groupModeSeries ? (
+          <strong>{datum.seriesLabel}</strong>
+        ) : groupMode === groupModeSecondary ? (
+          <strong>{secondaryAxis.format(datum.secondary)}</strong>
+        ) : (
+          <strong>{primaryAxis.format(datum.primary)}</strong>
+        )}
       </div>
       <table
         style={{
@@ -128,17 +156,49 @@ export default function TooltipRenderer(props) {
                     />
                   </svg>
                 </td>
-                <td>{sortedDatum.seriesLabel}: &nbsp;</td>
-                <td
-                  style={{
-                    textAlign: 'right'
-                  }}
-                >
-                  {resolvedFormatSecondary(sortedDatum.secondary)}
-                  {sortedDatum.r
-                    ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
-                    : null}
-                </td>
+                {groupMode === groupModeSeries ? (
+                  <React.Fragment>
+                    <td>{primaryAxis.format(sortedDatum.primary)}: &nbsp;</td>
+                    <td
+                      style={{
+                        textAlign: 'right'
+                      }}
+                    >
+                      {resolvedFormatSecondary(sortedDatum.secondary)}
+                      {sortedDatum.r
+                        ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
+                        : null}
+                    </td>
+                  </React.Fragment>
+                ) : groupMode === groupModeSecondary ? (
+                  <React.Fragment>
+                    <td>{sortedDatum.seriesLabel}: &nbsp;</td>
+                    <td
+                      style={{
+                        textAlign: 'right'
+                      }}
+                    >
+                      {primaryAxis.format(sortedDatum.primary)}
+                      {sortedDatum.r
+                        ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
+                        : null}
+                    </td>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    <td>{sortedDatum.seriesLabel}: &nbsp;</td>
+                    <td
+                      style={{
+                        textAlign: 'right'
+                      }}
+                    >
+                      {resolvedFormatSecondary(sortedDatum.secondary)}
+                      {sortedDatum.r
+                        ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
+                        : null}
+                    </td>
+                  </React.Fragment>
+                )}
               </tr>
             )
           })}

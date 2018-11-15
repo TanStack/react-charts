@@ -14,12 +14,25 @@ import Line from '../seriesTypes/Line'
 import Bubble from '../seriesTypes/Bubble'
 import Area from '../seriesTypes/Area'
 import Bar from '../seriesTypes/Bar'
+
+import {
+  groupModeSingle,
+  groupModeSeries,
+  groupModePrimary,
+  groupModeSecondary,
+  alignAuto,
+  alignRight,
+  alignTopRight,
+  alignBottomRight,
+  alignLeft,
+  alignTopLeft,
+  alignBottomLeft,
+  alignTop,
+  alignBottom
+} from '../utils/Constants'
 // import Pie from '../seriesTypes/Pie'
 
 const debug = process.env.NODE_ENV === 'development' && false
-
-const modePrimary = 'primary'
-const modeSecondary = 'secondary'
 
 const seriesTypes = {
   line: Line,
@@ -54,18 +67,16 @@ const defaultCursorProps = {
 function Chart(
   {
     data,
-    interaction,
-    hoverMode,
     groupMode,
     showVoronoi,
     dark,
     type,
+    showPoints,
     axes,
     primaryCursor,
     secondaryCursor,
     tooltip,
     brush,
-    onHover,
     renderSVG,
     getSeries,
     getDatums,
@@ -78,40 +89,38 @@ function Chart(
     getSecondaryAxisID,
     getStyles,
     getDatumStyles,
-    ...rest
+    onClick,
+    onFocus,
+    onHover
   },
   ref
 ) {
   // Tooltip defaults
   tooltip = {
-    align: 'auto',
+    align: alignAuto,
     alignPriority: [
-      'right',
-      'topRight',
-      'bottomRight',
-      'left',
-      'topLeft',
-      'bottomLeft',
-      'top',
-      'bottom'
+      alignRight,
+      alignTopRight,
+      alignBottomRight,
+      alignLeft,
+      alignTopLeft,
+      alignBottomLeft,
+      alignTop,
+      alignBottom
     ],
     padding: 5,
     tooltipArrowPadding: 7,
-    focus: 'closest',
+    anchor: 'closest',
     render: TooltipRenderer,
     onChange: () => {},
     ...tooltip
   }
 
   let [
-    { hovered, axisDimensions, offset, padding, pointer },
+    { focused, axisDimensions, offset, padding, pointer },
     setChartState
   ] = useState({
-    hovered: {
-      active: false,
-      series: null,
-      datums: []
-    },
+    focused: null,
     axisDimensions: {},
     padding: {},
     offset: {},
@@ -377,6 +386,12 @@ function Chart(
     [secondaryAxesHashes, materializedData, gridHeight, gridWidth]
   )
 
+  // Make sure we're mapping x and y to the correct axes
+  const xKey = primaryAxes.find(d => d.vertical) ? 'secondary' : 'primary'
+  const yKey = primaryAxes.find(d => d.vertical) ? 'primary' : 'secondary'
+  const xAxes = primaryAxes.find(d => d.vertical) ? secondaryAxes : primaryAxes
+  const yAxes = primaryAxes.find(d => d.vertical) ? primaryAxes : secondaryAxes
+
   // Make stackData
   const stackData = useMemo(
     () => {
@@ -387,18 +402,6 @@ function Chart(
       }
 
       // If the axes are ready, let's decorate the materializedData for visual plotting
-      // const secondaryStacked = secondaryAxes.stacked
-
-      // Make sure we're mapping x and y to the correct axes
-      const xKey = primaryAxes.find(d => d.vertical) ? 'secondary' : 'primary'
-      const yKey = primaryAxes.find(d => d.vertical) ? 'primary' : 'secondary'
-      const xAxes = primaryAxes.find(d => d.vertical)
-        ? secondaryAxes
-        : primaryAxes
-      const yAxes = primaryAxes.find(d => d.vertical)
-        ? primaryAxes
-        : secondaryAxes
-
       // "totals" are kept per secondaryAxis and used for bases if secondaryAxis stacking is enabled
       const scaleTotals = secondaryAxes.map(() => ({}))
       materializedData.forEach(series => {
@@ -527,25 +530,34 @@ function Chart(
         })
       })
 
-      // Do any data grouping ahead of time
-      if ([modePrimary, modeSecondary].includes(groupMode)) {
+      // Do any data grouping ahead of time using
+      if ([groupModeSingle, groupModeSeries].includes(groupMode)) {
+        stackData.forEach(series => {
+          series.datums.forEach(datum => {
+            datum.group =
+              groupMode === groupModeSeries ? datum.series.datums : [datum]
+          })
+        })
+      } else if ([groupModePrimary, groupModeSecondary].includes(groupMode)) {
         const datumsByGrouping = {}
 
         stackData.forEach(series => {
-          series.datums.filter(d => d.defined).forEach(datum => {
-            const axisKey = String(
-              groupMode === modePrimary ? datum.primary : datum.secondary
-            )
+          series.datums
+            .filter(d => d.defined)
+            .forEach(datum => {
+              const axisKey = String(
+                groupMode === groupModePrimary ? datum.primary : datum.secondary
+              )
 
-            datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
-            datumsByGrouping[axisKey].push(datum)
-          })
+              datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
+              datumsByGrouping[axisKey].push(datum)
+            })
         })
 
         stackData.forEach(series => {
           series.datums.forEach(datum => {
             const axisKey = String(
-              groupMode === modePrimary ? datum.primary : datum.secondary
+              groupMode === groupModePrimary ? datum.primary : datum.secondary
             )
 
             datum.group = datumsByGrouping[axisKey]
@@ -576,71 +588,78 @@ function Chart(
     [primaryAxes, secondaryAxes, groupMode]
   )
 
+  pointer = useMemo(
+    () => {
+      return {
+        ...pointer,
+        axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
+          axis,
+          value: axis.scale.invert
+            ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
+            : null
+        }))
+      }
+    },
+    [pointer]
+  )
+
+  focused = useMemo(
+    () => {
+      // Get the closest focus datum out of the datum group
+      return focused ? Utils.getClosestPoint(pointer, focused.group) : null
+    },
+    [focused, pointer]
+  )
+
+  // keep the previous focused value around for animations
+  const lastFocused = Utils.useWhen(focused, focused)
+
   // Calculate Tooltip
   tooltip = useMemo(
     () => {
-      const hoveredDatums =
-        hovered.datums && hovered.datums.length ? hovered.datums : []
+      let anchor = {}
+      let show = true
 
-      // Get the closest focus datum out of the hoveredDatums
-      const focusedDatum = Utils.getClosestPoint(pointer, hoveredDatums)
-
-      let focused = {}
-
-      // If there is a focusedDatum, default the focus to its x and y
-      if (focusedDatum) {
-        focused = focusedDatum.focus
+      // If there is a focused datum, default the focus to its x and y
+      if (focused) {
+        anchor = focused.anchor
+      } else {
+        show = false
       }
 
-      if (typeof tooltip.focus === 'function') {
-        // Support functional override for focus
-        if (pointer) {
-          focused = tooltip.focus({
-            hoveredDatums,
-            pointer,
-            focusedDatum
-          })
-        }
-      } else if (tooltip.focus === 'pointer') {
+      if (tooltip.anchor === 'pointer') {
         // Support pointer-bound focus
-        focused = pointer
-      } else if (tooltip.focus === 'closest') {
+        anchor = pointer
+      } else if (tooltip.anchor === 'closest') {
         // Do nothing, this is already calculated
-      } else if (hoveredDatums && hoveredDatums.length) {
+      } else if (focused) {
         // Support manual definition of focus point using relative multiFocus strategy
-        const multiFocus = Array.isArray(tooltip.focus)
-          ? [...tooltip.focus]
-          : [tooltip.focus]
-        focused = Utils.getMultiFocus({
-          focus: multiFocus,
-          points: hoveredDatums,
-          gridX,
-          gridY,
+        const multiFocus = Array.isArray(tooltip.anchor)
+          ? [...tooltip.anchor]
+          : [tooltip.anchor]
+        anchor = Utils.getMultiAnchor({
+          anchor: multiFocus,
+          points: focused.group,
           gridWidth,
-          gridHeight,
-          width,
-          height
+          gridHeight
         })
       }
 
-      focused = focused
+      anchor = anchor
         ? {
-          horizontalPadding: focused.horizontalPadding || 0,
-          verticalPadding: focused.verticalPadding || 0,
-          ...focused
+          horizontalPadding: anchor.horizontalPadding || 0,
+          verticalPadding: anchor.verticalPadding || 0,
+          ...anchor
         }
-        : focused
+        : anchor
 
-      const newTooltip = {
-        focused,
-        focusedDatum,
-        show: hovered.active,
-        ...tooltip
+      return {
+        ...tooltip,
+        anchor,
+        show
       }
-
-      return newTooltip
     },
-    [hovered, pointer, tooltip]
+    [pointer, tooltip]
   )
 
   // Cursors
@@ -657,17 +676,12 @@ function Chart(
 
           let value
           let show = false
-          let datum
-
-          if (hovered && hovered.datums && hovered.datums.length) {
-            datum = Utils.getClosestPoint(pointer, hovered.datums)
-          }
 
           // Determine the axis to use
           const axis = Utils.getAxisByAxisID(
             primary ? primaryAxes : secondaryAxes,
-            cursor.axisID || datum
-              ? datum.series[primary ? 'primaryAxisID' : 'secondaryAxisID']
+            cursor.axisID || focused
+              ? focused.series[primary ? 'primaryAxisID' : 'secondaryAxisID']
               : undefined
           )
 
@@ -690,14 +704,13 @@ function Chart(
 
             // Implement snapping
             if (axis.type === 'ordinal' || cursor.snap) {
-              if (!datum) {
+              if (!focused) {
                 show = false
               } else {
-                // For snapping we need the hovered datums
                 if (axis.vertical) {
-                  value = datum.yValue
+                  value = focused.yValue
                 } else {
-                  value = datum.xValue
+                  value = focused.xValue
                 }
               }
             } else if (axis.vertical) {
@@ -709,15 +722,17 @@ function Chart(
             show = false
           }
 
-          const computedValue = value
+          let resolvedShow = show
+          let resolvedValue = value
 
           if (typeof cursor.value !== 'undefined' && cursor.value !== null) {
-            show = true
-            value = cursor.value
-          }
+            resolvedValue = cursor.value
 
-          if (typeof cursor.show !== 'undefined') {
-            show = cursor.show
+            if (typeof cursor.show !== 'undefined') {
+              resolvedShow = cursor.show
+            } else {
+              resolvedShow = true
+            }
           }
 
           return {
@@ -726,20 +741,38 @@ function Chart(
             siblingAxis,
             show,
             value,
-            computedValue,
-            datum
+            resolvedShow,
+            resolvedValue
           }
         },
-        [stackData, pointer, hovered, cursor && cursor.value]
+        [stackData, pointer, cursor && cursor.value]
       )
     }
   )
 
+  const originalOnClick = onClick
+  onClick = e => {
+    if (!originalOnClick) {
+      return
+    }
+    e && e.persist && e.persist()
+    originalOnClick(focused, e)
+  }
+
   useEffect(
     () => {
-      tooltip.onChange(tooltip)
-      primaryCursor.onChange(primaryCursor)
-      secondaryCursor.onChange(secondaryCursor)
+      if (onFocus) {
+        onFocus(focused)
+      }
+    },
+    [focused]
+  )
+
+  useEffect(
+    () => {
+      if (onHover) {
+        onHover(pointer)
+      }
     },
     [pointer]
   )
@@ -763,7 +796,9 @@ function Chart(
   // Decorate the chartState with computed values (or ones we just
   // want to pass down through context)
   const chartState = {
-    hovered,
+    showPoints,
+    focused,
+    lastFocused,
     pointer,
     tooltip,
     axisDimensions,
@@ -771,9 +806,7 @@ function Chart(
     padding,
     width,
     height,
-    interaction,
     brush,
-    hoverMode,
     groupMode,
     showVoronoi,
     materializedData,
@@ -787,14 +820,19 @@ function Chart(
     gridWidth,
     gridHeight,
     dark,
-    renderSVG
+    renderSVG,
+    xKey,
+    yKey,
+    xAxes,
+    yAxes,
+    onClick
   }
 
   const chartStateContextValue = [chartState, setChartState]
 
   return (
     <ChartContext.Provider value={chartStateContextValue}>
-      <ChartInner {...rest} handleRef={handleRef} />
+      <ChartInner handleRef={handleRef} />
     </ChartContext.Provider>
   )
 }
@@ -812,8 +850,6 @@ Chart.defaultProps = {
   getStyles: () => ({}),
   getDatumStyles: () => ({}),
   onHover: () => {},
-  interaction: null,
-  hoverMode: 'primary',
   groupMode: 'primary',
   showVoronoi: false
 }

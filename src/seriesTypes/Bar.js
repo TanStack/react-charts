@@ -3,41 +3,20 @@ import withHooks, { useMemo, useContext } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
-import {
-  selectSeries,
-  hoverSeries,
-  selectDatum,
-  hoverDatum
-} from '../utils/interactionMethods'
 
 import Rectangle from '../primitives/Rectangle'
 
 function Bar({ series }) {
-  const [
-    { hovered, selected, interaction, primaryAxes },
-    setChartState
-  ] = useContext(ChartContext)
+  const [{ focused, selected, primaryAxes }] = useContext(ChartContext)
 
   const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, hovered, selected)),
-    [series, hovered, selected]
+    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
+    [series, focused, selected]
   )
 
   const { barOffset } = series.primaryAxisID
     ? primaryAxes.find(d => d.id === series.primaryAxisID)
     : primaryAxes[0]
-
-  const interactiveSeries = interaction === 'series'
-  const seriesInteractionProps = interactiveSeries
-    ? {
-      onClick: () => selectSeries(series, { setChartState }),
-      onMouseEnter: () => hoverSeries(series, { setChartState }),
-      onMouseMove: () => hoverSeries(series, { setChartState }),
-      onMouseLeave: () => hoverSeries(null, { setChartState })
-    }
-    : {}
-
-  const pointerEvents = interactiveSeries ? 'all' : 'none'
 
   return (
     <g className='series bar'>
@@ -49,12 +28,9 @@ function Bar({ series }) {
               datum,
               primaryAxes,
               barOffset,
-              hovered,
+              focused,
               selected,
-              interaction,
-              style,
-              pointerEvents,
-              seriesInteractionProps
+              style
             }}
           />
         )
@@ -84,37 +60,37 @@ Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
     }
   }
 
-  // Set the default focus point
-  datum.focus = {
+  // Set the default anchor point
+  datum.anchor = {
     x: datum.x,
     y: datum.y,
     horizontalPadding: secondaryAxis.vertical ? datum.size / 2 : 0,
     verticalPadding: secondaryAxis.vertical ? 0 : datum.size / 2
   }
 
-  // Adjust the focus point for bars
+  // Adjust the anchor point for bars
   if (!primaryAxis.vertical) {
-    datum.focus.x += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
+    datum.anchor.x += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
   } else {
-    datum.focus.y += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
+    datum.anchor.y += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
   }
 
   // Set the pointer points (used in voronoi)
-  datum.pointerPoints = [
+  datum.boundingPoints = [
     // End of bar
-    datum.focus,
+    datum.anchor,
     // Start of bar
     {
       x: primaryAxis.vertical
         ? primaryAxis.position === 'left'
-          ? datum.base - 1
+          ? datum.base + 1
           : datum.base
-        : datum.focus.x,
+        : datum.anchor.x,
       y: !primaryAxis.vertical
         ? primaryAxis.position === 'bottom'
           ? datum.base - 1
           : datum.base
-        : datum.focus.y
+        : datum.anchor.y
     }
   ]
 }
@@ -148,14 +124,12 @@ const BarPiece = withHooks(function BarPiece({
   datum,
   primaryAxes,
   barOffset,
-  hovered,
+  focused,
   selected,
-  interaction,
   style,
-  pointerEvents,
-  seriesInteractionProps
+  pointerEvents
 }) {
-  const [_, setChartState] = useContext(ChartContext)
+  const [_] = useContext(ChartContext)
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
@@ -178,19 +152,9 @@ const BarPiece = withHooks(function BarPiece({
   }
 
   const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, hovered, selected)),
-    [datum, hovered, selected]
+    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
+    [datum, focused, selected]
   )
-
-  const interactiveDatum = interaction === 'element'
-  const datumInteractionProps = interactiveDatum
-    ? {
-      onClick: () => selectDatum(datum, { setChartState }),
-      onMouseEnter: () => hoverDatum(datum, { setChartState }),
-      onMouseMove: () => hoverDatum(datum, { setChartState }),
-      onMouseLeave: () => hoverDatum(null, { setChartState })
-    }
-    : {}
 
   const rectangleProps = {
     style: {
@@ -206,15 +170,9 @@ const BarPiece = withHooks(function BarPiece({
     y2: Number.isNaN(y2) ? null : y2
   }
 
-  return useMemo(
-    () => (
-      <Rectangle
-        {...rectangleProps}
-        {...seriesInteractionProps}
-        {...datumInteractionProps}
-      />
-    ),
-    [JSON.stringify(rectangleProps)]
+  return Utils.useDeepMemo(
+    () => <Rectangle {...rectangleProps} />,
+    rectangleProps
   )
 })
 

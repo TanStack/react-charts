@@ -16,6 +16,7 @@ import SyncedCursors from 'containers/SyncedCursors'
 import Brushing from 'containers/Brushing'
 import CustomCursors from 'containers/CustomCursors'
 import InteractionModes from 'containers/InteractionModes'
+import TooltipAnchor from 'containers/TooltipAnchor'
 import DynamicParent from 'containers/DynamicParent'
 import Sparklines from 'containers/Sparklines'
 import MixedTypes from 'containers/MixedTypes'
@@ -37,6 +38,7 @@ const sidebarItems = [
   { title: 'Brushing', link: './brushing' },
   { title: 'Custom Cursors', link: './custom-cursors' },
   { title: 'Interaction Modes', link: './interaction-modes' },
+  { title: 'Tooltip Anchor', link: './tooltip-anchor' },
   { title: 'Dynamic Parent', link: './dynamic-parent' },
   { title: 'Sparklines', link: './sparkline' },
   { title: 'Mixed Types', link: './mixed-element-types' },
@@ -62,6 +64,7 @@ export default function () {
         <Brushing path="/brushing" />
         <CustomCursors path="/custom-cursors" />
         <InteractionModes path="/interaction-modes" />
+        <TooltipAnchor path="/tooltip-anchor" />
         <DynamicParent path="/dynamic-parent" />
         <Sparklines path="/sparkline" />
         <MixedTypes path="/mixed-element-types" />

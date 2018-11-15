@@ -2,48 +2,18 @@ import React, { useContext } from 'react'
 
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
-import {
-  selectSeries,
-  selectDatum,
-  hoverSeries,
-  hoverDatum
-} from '../utils/interactionMethods'
 
 //
 import Path from '../primitives/Path'
 
-// if (!props.interaction) {
-//   this.props.dispatch(state => ({
-//     ...state,
-//     interaction: 'element'
-//   }))
-// }
-// this.props.dispatch(state => ({
-//   ...state,
-//   hoverMode: 'radial'
-// }))
-
 export default function Pie({ series }) {
-  const [
-    { selected, hovered, interaction, primaryAxes },
-    setChartState
-  ] = useContext(ChartContext)
+  const [{ selected, focused, primaryAxes }] = useContext(ChartContext)
 
   const style = series.getStatusStyle(
-    Utils.getStatus(series, hovered, selected)
+    Utils.getStatus(series, focused, selected)
   )
 
   const primaryAxis = primaryAxes[0]
-
-  const interactiveSeries = interaction === 'series'
-  const seriesInteractionProps = interactiveSeries
-    ? {
-      onClick: () => selectSeries(series, { setChartState }),
-      onMouseEnter: () => hoverSeries(series, { setChartState }),
-      onMouseMove: () => hoverSeries(series, { setChartState }),
-      onMouseLeave: () => hoverSeries(null, { setChartState })
-    }
-    : {}
 
   return (
     <g
@@ -54,18 +24,8 @@ export default function Pie({ series }) {
     >
       {series.datums.map((datum, i) => {
         const dataStyle = datum.getStatusStyle(
-          Utils.getStatus(datum, hovered, selected)
+          Utils.getStatus(datum, focused, selected)
         )
-
-        const interactiveDatum = interaction === 'element'
-        const datumInteractionProps = interactiveDatum
-          ? {
-            onClick: () => selectDatum(datum, { setChartState }),
-            onMouseEnter: () => hoverDatum(datum, { setChartState }),
-            onMouseMove: () => hoverDatum(datum, { setChartState }),
-            onMouseLeave: () => hoverDatum(null, { setChartState })
-          }
-          : {}
 
         return (
           <Path
@@ -75,11 +35,8 @@ export default function Pie({ series }) {
               ...style,
               ...style.arc,
               ...dataStyle,
-              ...dataStyle.arc,
-              pointerEvents: interactiveDatum ? 'all' : 'none'
+              ...dataStyle.arc
             }}
-            {...seriesInteractionProps}
-            {...datumInteractionProps}
           />
         )
       })}
@@ -100,11 +57,11 @@ Pie.plotDatum = (datum, { primaryAxis }) => {
       Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
   }
 
-  // Set the focus point
-  datum.focus = { x: datum.x, y: datum.y }
+  // Set the anchor point
+  datum.anchor = { x: datum.x, y: datum.y }
 
   // Set the pointer points (used in voronoi)
-  datum.pointerPoints = [datum.focus]
+  datum.boundingPoints = [datum.anchor]
 
   // Return the new datum
   return datum

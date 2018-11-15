@@ -23,7 +23,8 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       stackData,
       primaryAxes,
       secondaryAxes,
-      renderSVG
+      renderSVG,
+      onClick
     },
     setChartState
   ] = useContext(ChartContext)
@@ -70,10 +71,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
   const onMouseLeave = () => {
     setChartState(state => ({
       ...state,
-      hovered: {
-        ...state.hovered,
-        active: false
-      }
+      focused: null
     }))
     setChartState(state => ({
       ...state,
@@ -138,7 +136,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
         style={{
           width,
           height,
-          overflow: 'visible'
+          overflow: 'hidden'
         }}
       >
         <g
@@ -152,6 +150,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
           }}
           onMouseLeave={onMouseLeave}
           onMouseDown={onMouseDown}
+          onClick={onClick}
           style={{
             transform: `translate3d(${gridX || 0}px, ${gridY || 0}px, 0)`
           }}
@@ -172,7 +171,12 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
               <Axis key={axis.id} {...axis} />
             ))}
           </g>
-          <g className='Series'>
+          <g
+            className='Series'
+            style={{
+              pointerEvents: 'none'
+            }}
+          >
             {reversedStackData.map(stack => {
               return (
                 <stack.Component

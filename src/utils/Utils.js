@@ -1,9 +1,11 @@
-// import React, { useRef, useEffect } from 'react'
+import { useRef } from 'use-react-hooks'
+
+import deepEqual from './deepEqual'
 
 export default {
   getStatus,
   getStatusStyle,
-  getMultiFocus,
+  getMultiAnchor,
   getClosestPoint,
   normalizeGetter,
   isValidPoint,
@@ -12,17 +14,20 @@ export default {
   sumObjBy,
   translateX,
   translateY,
-  identity
+  identity,
+  hash,
+  useDeepMemo,
+  useWhen
   // usePrevious,
   // useDidChange,
 }
 
-function getStatus(item, hovered, selected) {
+function getStatus(item, focused, selected) {
   const status = {
     selected: false,
-    hovered: false,
+    focused: false,
     otherSelected: false,
-    otherHovered: false
+    otherFocused: false
   }
 
   if (item.series) {
@@ -37,24 +42,24 @@ function getStatus(item, hovered, selected) {
       }
       status.otherSelected = !status.selected
     }
-    if (hovered && hovered.active && hovered.datums) {
-      for (let i = 0; i < hovered.datums.length; i++) {
-        d = hovered.datums[i]
+    if (focused && focused.datums) {
+      for (let i = 0; i < focused.datums.length; i++) {
+        d = focused.datums[i]
         if (d.seriesID === item.series.id && d.index === item.index) {
-          status.hovered = true
+          status.focused = true
           break
         }
       }
-      status.otherHovered = !status.hovered
+      status.otherFocused = !status.focused
     }
   } else {
     if (selected && selected.active && selected.series) {
       status.selected = selected.series.id === item.id
       status.otherSelected = !status.selected
     }
-    if (hovered && hovered.active && hovered.series) {
-      status.hovered = hovered.series.id === item.id
-      status.otherHovered = !status.hovered
+    if (focused && focused.series) {
+      status.focused = focused.series.id === item.id
+      status.otherFocused = !status.focused
     }
   }
 
@@ -78,148 +83,104 @@ function getStatusStyle(item, status, decorator, defaults) {
   )
 }
 
-function getMultiFocus({
-  focus,
-  points,
-  gridX,
-  gridY,
-  gridWidth,
-  gridHeight,
-  width,
-  height
-}) {
+function getMultiAnchor({ anchor, points, gridWidth, gridHeight }) {
   const invalid = () => {
     throw new Error(
       `${JSON.stringify(
-        focus
-      )} is not a valid tooltip focus option. You should use a single focus option or 2 non-conflicting focus options.`
+        anchor
+      )} is not a valid tooltip anchor option. You should use a single anchor option or 2 non-conflicting anchor options.`
     )
   }
 
   let x
   let y
 
-  let xMin = points[0].focus.x
-  let xMax = points[0].focus.x
-  let yMin = points[0].focus.y
-  let yMax = points[0].focus.y
+  let xMin = points[0].anchor.x
+  let xMax = points[0].anchor.x
+  let yMin = points[0].anchor.y
+  let yMax = points[0].anchor.y
 
   points.forEach(point => {
-    xMin = Math.min(point.focus.x, xMin)
-    xMax = Math.max(point.focus.x, xMax)
-    yMin = Math.min(point.focus.y, yMin)
-    yMax = Math.max(point.focus.y, yMax)
+    xMin = Math.min(point.anchor.x, xMin)
+    xMax = Math.max(point.anchor.x, xMax)
+    yMin = Math.min(point.anchor.y, yMin)
+    yMax = Math.max(point.anchor.y, yMax)
   })
 
-  if (focus.length > 2) {
+  if (anchor.length > 2) {
     return invalid()
   }
 
-  focus = focus.sort(
-    a => (a.includes('center') || a.includes('Center') ? 1 : -1)
+  anchor = anchor.sort(a =>
+    a.includes('center') || a.includes('Center') ? 1 : -1
   )
 
-  for (let i = 0; i < focus.length; i++) {
-    const focusPart = focus[i]
+  for (let i = 0; i < anchor.length; i++) {
+    const anchorPart = anchor[i]
 
     // Horizontal Positioning
-    if (
-      [
-        'left',
-        'right',
-        'gridLeft',
-        'gridRight',
-        'chartLeft',
-        'chartRight'
-      ].includes(focusPart)
-    ) {
+    if (['left', 'right', 'gridLeft', 'gridRight'].includes(anchorPart)) {
       if (typeof x !== 'undefined') {
         invalid()
       }
-      if (focusPart === 'left') {
+      if (anchorPart === 'left') {
         x = xMin
-      } else if (focusPart === 'right') {
+      } else if (anchorPart === 'right') {
         x = xMax
-      } else if (focusPart === 'gridLeft') {
-        x = gridX
-      } else if (focusPart === 'gridRight') {
-        x = gridX + gridWidth
-      } else if (focusPart === 'chartLeft') {
+      } else if (anchorPart === 'gridLeft') {
         x = 0
-      } else if (focusPart === 'chartRight') {
-        x = width
+      } else if (anchorPart === 'gridRight') {
+        x = gridWidth
       } else {
         invalid()
       }
     }
 
     // Vertical Positioning
-    if (
-      [
-        'top',
-        'bottom',
-        'gridTop',
-        'gridBottom',
-        'chartTop',
-        'chartBottom'
-      ].includes(focusPart)
-    ) {
+    if (['top', 'bottom', 'gridTop', 'gridBottom'].includes(anchorPart)) {
       if (typeof y !== 'undefined') {
         invalid()
       }
-      if (focusPart === 'top') {
+      if (anchorPart === 'top') {
         y = yMin
-      } else if (focusPart === 'bottom') {
+      } else if (anchorPart === 'bottom') {
         y = yMax
-      } else if (focusPart === 'gridTop') {
-        y = gridY
-      } else if (focusPart === 'gridBottom') {
-        y = gridY + gridHeight
-      } else if (focusPart === 'chartTop') {
+      } else if (anchorPart === 'gridTop') {
         y = 0
-      } else if (focusPart === 'chartBottom') {
-        y = height
+      } else if (anchorPart === 'gridBottom') {
+        y = gridHeight
       } else {
         invalid()
       }
     }
 
     // Center Positioning
-    if (['center', 'gridCenter', 'chartCenter'].includes(focusPart)) {
-      if (focusPart === 'center') {
+    if (['center', 'gridCenter'].includes(anchorPart)) {
+      if (anchorPart === 'center') {
         if (typeof y === 'undefined') {
           y = (yMin + yMax) / 2
         }
         if (typeof x === 'undefined') {
           x = (xMin + xMax) / 2
         }
-      } else if (focusPart === 'gridCenter') {
+      } else if (anchorPart === 'gridCenter') {
         if (typeof y === 'undefined') {
-          y = gridY + gridHeight / 2
+          y = gridHeight / 2
         }
         if (typeof x === 'undefined') {
-          x = gridX + gridWidth / 2
-        }
-      } else if (focusPart === 'chartCenter') {
-        if (typeof y === 'undefined') {
-          y = height / 2
-        }
-        if (typeof x === 'undefined') {
-          x = width / 2
+          x = gridWidth / 2
         }
       } else {
         invalid()
       }
     }
 
-    // Auto center the remainder if there is only one focusPart listed
-    if (focus.length === 1) {
-      if (focus[0].includes('grid')) {
-        focus.push('gridCenter')
-      } else if (focus[0].includes('chart')) {
-        focus.push('chartCenter')
+    // Auto center the remainder if there is only one anchorPart listed
+    if (anchor.length === 1) {
+      if (anchor[0].includes('grid')) {
+        anchor.push('gridCenter')
       } else {
-        focus.push('center')
+        anchor.push('center')
       }
     }
   }
@@ -234,7 +195,7 @@ function getClosestPoint(position, datums) {
   let closestDistance = Infinity
   let closestDatum = datums[0]
   datums.forEach(datum => {
-    datum.pointerPoints.forEach(pointerPoint => {
+    datum.boundingPoints.forEach(pointerPoint => {
       const distance = Math.sqrt(
         (pointerPoint.x - position.x) ** 2 + (pointerPoint.y - position.y) ** 2
       )
@@ -300,7 +261,7 @@ function makePathArray(obj) {
 }
 
 function flattenDeep(arr, newArr = []) {
-  if (!isArray(arr)) {
+  if (!Array.isArray(arr)) {
     newArr.push(arr)
   } else {
     for (let i = 0; i < arr.length; i++) {
@@ -348,6 +309,47 @@ function translateY(y) {
 
 function identity(d) {
   return d
+}
+
+function hash(obj) {
+  let hash = ''
+  const unwrap = item => {
+    if (Array.isArray(item)) {
+      for (let i = 0; i < item.length; i++) {
+        unwrap(item[i])
+      }
+      return
+    } else if (typeof item === 'object') {
+      item = Object.values(item)
+      for (let i = 0; i < item.length; i++) {
+        unwrap(item[i])
+      }
+      return
+    }
+    hash += item
+  }
+  unwrap(obj)
+  return hash
+}
+
+function useDeepMemo(fn, obj) {
+  const watchRef = useRef()
+  const valueRef = useRef()
+
+  const changed = !deepEqual(watchRef.current, obj)
+  if (changed) {
+    watchRef.current = obj
+    valueRef.current = fn()
+  }
+  return valueRef.current
+}
+
+function useWhen(obj, when) {
+  const ref = useRef()
+  if (when) {
+    ref.current = obj
+  }
+  return ref.current
 }
 
 // function usePrevious(item) {
