@@ -1,5 +1,11 @@
 import React from 'react'
-import withHooks, { useContext, useMemo } from '../utils/hooks'
+import withHooks, {
+  useContext,
+  useMemo,
+  useDeepMemo,
+  useSeriesStyle,
+  useDatumStyle
+} from '../utils/hooks'
 import { line } from 'd3-shape'
 
 //
@@ -20,9 +26,7 @@ const circleDefaultStyle = {
 }
 
 function Line({ series, curve }) {
-  const [{ showPoints, focused, selected }, setChartState] = useContext(
-    ChartContext
-  )
+  const [{ showPoints }] = useContext(ChartContext)
 
   const lineFn = useMemo(
     () =>
@@ -35,10 +39,7 @@ function Line({ series, curve }) {
   )
   const path = useMemo(() => lineFn(series.datums), [series])
 
-  const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
-    [series, focused, selected]
-  )
+  const style = useSeriesStyle(series)
 
   const pathProps = {
     d: path,
@@ -49,10 +50,7 @@ function Line({ series, curve }) {
       fill: 'none'
     }
   }
-  const renderedPath = Utils.useDeepMemo(
-    () => <Path {...pathProps} />,
-    pathProps
-  )
+  const renderedPath = useDeepMemo(() => <Path {...pathProps} />, pathProps)
 
   return (
     <g>
@@ -64,8 +62,6 @@ function Line({ series, curve }) {
               {...{
                 key: i,
                 datum,
-                focused,
-                selected,
                 style
               }}
             />
@@ -106,40 +102,21 @@ Line.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
   datum.boundingPoints = [datum.anchor]
 }
 
-Line.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+Line.buildStyles = (series, { defaultColors }) => {
   const defaults = {
     // Pass some sane defaults
     color: defaultColors[series.index % (defaultColors.length - 1)]
   }
 
-  series.getStatusStyle = status => {
-    series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
-    return series.style
-  }
-
-  // We also need to decorate each datum in the same fashion
-  series.datums.forEach(datum => {
-    datum.getStatusStyle = status => {
-      datum.style = Utils.getStatusStyle(
-        datum,
-        status,
-        getDatumStyles,
-        defaults
-      )
-      return datum.style
-    }
-  })
+  Utils.buildStyleGetters(series, defaults)
 }
 
-const Point = withHooks(function Point({ datum, focused, selected, style }) {
+const Point = withHooks(function Point({ datum, style }) {
   if (!datum.defined) {
     return null
   }
 
-  const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
-    [datum, focused, selected]
-  )
+  const dataStyle = useDatumStyle(datum)
 
   const circleProps = {
     x: datum ? datum.x : undefined,
@@ -152,7 +129,7 @@ const Point = withHooks(function Point({ datum, focused, selected, style }) {
       ...dataStyle.circle
     }
   }
-  return Utils.useDeepMemo(() => <Circle {...circleProps} />, circleProps)
+  return useDeepMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Line)

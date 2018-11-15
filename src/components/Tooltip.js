@@ -21,9 +21,9 @@ function Tooltip() {
     gridWidth,
     gridHeight,
     dark,
-    selected,
     focused,
     lastFocused,
+    getDatumStyles,
     tooltip: {
       align,
       alignPriority,
@@ -304,8 +304,7 @@ function Tooltip() {
   const renderProps = {
     ...chartState,
     datum: resolvedFocused,
-    getStyle: datum =>
-      datum.getStatusStyle(Utils.getStatus(datum, resolvedFocused, selected)),
+    getStyle: datum => datum.getStatusStyle(resolvedFocused, getDatumStyles),
     primaryAxis,
     secondaryAxis
   }

@@ -32,7 +32,7 @@ function Brush() {
       <div
         style={{
           position: 'absolute',
-          transform: Utils.translate(Math.min(pointer.x, pointer.sourceX)),
+          transform: Utils.translate(Math.min(pointer.x, pointer.sourceX), 0),
           width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
           height: `${gridHeight}px`,
           background: dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)',

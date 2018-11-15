@@ -1,5 +1,10 @@
 import React from 'react'
-import withHooks, { useEffect, useRef, useState, useMemo } from '../utils/hooks'
+import withHooks, {
+  useEffect,
+  useState,
+  useMemo,
+  useWhen
+} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -128,12 +133,6 @@ function Chart(
   })
 
   const [{ width, height }, handleRef] = useHyperResponsive()
-
-  const getStylesRef = useRef()
-  const getDatumStylesRef = useRef()
-
-  getStylesRef.current = getStyles
-  getDatumStylesRef.current = getDatumStyles
 
   let materializedData = useMemo(
     () => {
@@ -574,9 +573,6 @@ function Chart(
           )
         }
         const result = series.Component.buildStyles(series, {
-          // Make sure we are using a thunk to get the most recent getStyles and getDatumStyles
-          getStyles: (...args) => getStylesRef.current(...args),
-          getDatumStyles: (...args) => getDatumStylesRef.current(...args),
           defaultColors
         })
 
@@ -612,7 +608,7 @@ function Chart(
   )
 
   // keep the previous focused value around for animations
-  const lastFocused = Utils.useWhen(focused, focused)
+  const lastFocused = useWhen(focused, focused)
 
   // Calculate Tooltip
   tooltip = useMemo(
@@ -825,7 +821,9 @@ function Chart(
     yKey,
     xAxes,
     yAxes,
-    onClick
+    onClick,
+    getStyles,
+    getDatumStyles
   }
 
   const chartStateContextValue = [chartState, setChartState]

@@ -1,9 +1,12 @@
 import React from 'react'
-import withHooks, { useMemo, useContext } from '../utils/hooks'
+import withHooks, {
+  useDeepMemo,
+  useSeriesStyle,
+  useDatumStyle
+} from '../utils/hooks'
 
 //
 
-import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 
 //
@@ -14,12 +17,7 @@ const circleDefaultStyle = {
 }
 
 function Bubble({ series }) {
-  const [{ focused, selected }] = useContext(ChartContext)
-
-  const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
-    [series, focused, selected]
-  )
+  const style = useSeriesStyle(series)
 
   return (
     <g>
@@ -29,8 +27,6 @@ function Bubble({ series }) {
             {...{
               key: i,
               datum,
-              focused,
-              selected,
               style
             }}
           />
@@ -68,40 +64,21 @@ Bubble.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
   datum.boundingPoints = [datum.anchor]
 }
 
-Bubble.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+Bubble.buildStyles = (series, { defaultColors }) => {
   const defaults = {
     // Pass some sane defaults
     color: defaultColors[series.index % (defaultColors.length - 1)]
   }
 
-  series.getStatusStyle = status => {
-    series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
-    return series.style
-  }
-
-  // We also need to decorate each datum in the same fashion
-  series.datums.forEach(datum => {
-    datum.getStatusStyle = status => {
-      datum.style = Utils.getStatusStyle(
-        datum,
-        status,
-        getDatumStyles,
-        defaults
-      )
-      return datum.style
-    }
-  })
+  Utils.buildStyleGetters(series, defaults)
 }
 
-const Point = withHooks(function Point({ datum, focused, selected, style }) {
+const Point = withHooks(function Point({ datum, style }) {
   if (!datum.defined) {
     return null
   }
 
-  const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
-    [datum, focused, selected]
-  )
+  const dataStyle = useDatumStyle(datum)
 
   const circleProps = {
     x: datum ? datum.x : undefined,
@@ -119,7 +96,7 @@ const Point = withHooks(function Point({ datum, focused, selected, style }) {
         : {})
     }
   }
-  return Utils.useDeepMemo(() => <Circle {...circleProps} />, circleProps)
+  return useDeepMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Bubble)

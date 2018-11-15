@@ -1,5 +1,10 @@
 import React from 'react'
-import withHooks, { useContext, useRef, useEffect } from '../utils/hooks'
+import withHooks, {
+  useContext,
+  useRef,
+  useEffect,
+  useWhen
+} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -32,10 +37,7 @@ function Cursor({ primary }) {
   } = cursor
 
   const resolvedFocused = focused || lastFocused
-  const lastValue = Utils.useWhen(
-    resolvedValue,
-    typeof resolvedValue !== 'undefined'
-  )
+  const lastValue = useWhen(resolvedValue, typeof resolvedValue !== 'undefined')
 
   // Should we animate?
   const animated = snap || axis.type === 'ordinal'

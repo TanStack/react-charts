@@ -1,9 +1,13 @@
 import React from 'react'
-import withHooks, { useMemo, useContext } from '../utils/hooks'
+import withHooks, {
+  useMemo,
+  useDeepMemo,
+  useSeriesStyle,
+  useDatumStyle
+} from '../utils/hooks'
 
 import { area, line } from 'd3-shape'
 //
-import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 
@@ -19,8 +23,6 @@ const lineDefaultStyle = {
 }
 
 function Area({ series, showOrphans, curve }) {
-  const [{ focused, selected }] = useContext(ChartContext)
-
   const areaFn = area()
     .x(d => d.x)
     .y0(d => d.base)
@@ -40,10 +42,7 @@ function Area({ series, showOrphans, curve }) {
   const areaPath = useMemo(() => areaFn(series.datums), [series])
   const linePath = useMemo(() => lineFn(series.datums), [series])
 
-  const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
-    [series, focused, selected]
-  )
+  const style = useSeriesStyle(series)
 
   const areaPathProps = {
     d: areaPath,
@@ -53,7 +52,7 @@ function Area({ series, showOrphans, curve }) {
       ...style.line
     }
   }
-  const renderedAreaPath = Utils.useDeepMemo(
+  const renderedAreaPath = useDeepMemo(
     () => <Path {...areaPathProps} />,
     areaPathProps
   )
@@ -67,7 +66,7 @@ function Area({ series, showOrphans, curve }) {
       fill: 'none'
     }
   }
-  const renderedLinePath = Utils.useDeepMemo(
+  const renderedLinePath = useDeepMemo(
     () => <Path {...linePathProps} />,
     linePathProps
   )
@@ -83,8 +82,6 @@ function Area({ series, showOrphans, curve }) {
               {...{
                 key: index,
                 datum,
-                focused,
-                selected,
                 style,
                 all,
                 index
@@ -141,49 +138,23 @@ Area.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
   ]
 }
 
-Area.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+Area.buildStyles = (series, { defaultColors }) => {
   const defaults = {
     // Pass some sane defaults
     color: defaultColors[series.index % (defaultColors.length - 1)]
   }
 
-  series.getStatusStyle = status => {
-    series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
-    return series.style
-  }
-
-  // We also need to decorate each datum in the same fashion
-  series.datums.forEach(datum => {
-    datum.getStatusStyle = status => {
-      datum.style = Utils.getStatusStyle(
-        datum,
-        status,
-        getDatumStyles,
-        defaults
-      )
-      return datum.style
-    }
-  })
+  Utils.buildStyleGetters(series, defaults)
 }
 
-const OrphanLine = withHooks(function OrphanLine({
-  datum,
-  focused,
-  selected,
-  style,
-  all,
-  index
-}) {
+const OrphanLine = withHooks(function OrphanLine({ datum, style, all, index }) {
   const prev = all[index - 1] || { defined: false }
   const next = all[index + 1] || { defined: false }
   if (!datum.defined || prev.defined || next.defined) {
     return null
   }
 
-  const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
-    [datum, focused, selected]
-  )
+  const dataStyle = useDatumStyle(datum)
 
   const lineProps = {
     x1: !datum || Number.isNaN(datum.x) ? null : datum.x,
@@ -199,7 +170,7 @@ const OrphanLine = withHooks(function OrphanLine({
     }
   }
 
-  return Utils.useDeepMemo(() => <Line {...lineProps} />, lineProps)
+  return useDeepMemo(() => <Line {...lineProps} />, lineProps)
 })
 
 export default withHooks(Area)

@@ -7,11 +7,9 @@ import Utils from '../utils/Utils'
 import Path from '../primitives/Path'
 
 export default function Pie({ series }) {
-  const [{ selected, focused, primaryAxes }] = useContext(ChartContext)
+  const [{ focused, primaryAxes }] = useContext(ChartContext)
 
-  const style = series.getStatusStyle(
-    Utils.getStatus(series, focused, selected)
-  )
+  const style = series.getStatusStyle(Utils.getStatus(series, focused))
 
   const primaryAxis = primaryAxes[0]
 
@@ -25,9 +23,7 @@ export default function Pie({ series }) {
       }}
     >
       {series.datums.map((datum, i) => {
-        const dataStyle = datum.getStatusStyle(
-          Utils.getStatus(datum, focused, selected)
-        )
+        const dataStyle = datum.getStatusStyle(Utils.getStatus(datum, focused))
 
         return (
           <Path

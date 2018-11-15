@@ -1,5 +1,10 @@
 import React from 'react'
-import withHooks, { useMemo, useContext } from '../utils/hooks'
+import withHooks, {
+  useContext,
+  useDeepMemo,
+  useSeriesStyle,
+  useDatumStyle
+} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -7,12 +12,9 @@ import Utils from '../utils/Utils'
 import Rectangle from '../primitives/Rectangle'
 
 function Bar({ series }) {
-  const [{ focused, selected, primaryAxes }] = useContext(ChartContext)
+  const [{ primaryAxes }] = useContext(ChartContext)
 
-  const style = useMemo(
-    () => series.getStatusStyle(Utils.getStatus(series, focused, selected)),
-    [series, focused, selected]
-  )
+  const style = useSeriesStyle(series)
 
   const { barOffset } = series.primaryAxisID
     ? primaryAxes.find(d => d.id === series.primaryAxisID)
@@ -26,10 +28,7 @@ function Bar({ series }) {
             key={i}
             {...{
               datum,
-              primaryAxes,
               barOffset,
-              focused,
-              selected,
               style
             }}
           />
@@ -95,41 +94,17 @@ Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
   ]
 }
 
-Bar.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+Bar.buildStyles = (series, { defaultColors }) => {
   const defaults = {
     // Pass some sane defaults
     color: defaultColors[series.index % (defaultColors.length - 1)]
   }
 
-  series.getStatusStyle = status => {
-    series.style = Utils.getStatusStyle(series, status, getStyles, defaults)
-    return series.style
-  }
-
-  // We also need to decorate each datum in the same fashion
-  series.datums.forEach(datum => {
-    datum.getStatusStyle = status => {
-      datum.style = Utils.getStatusStyle(
-        datum,
-        status,
-        getDatumStyles,
-        defaults
-      )
-      return datum.style
-    }
-  })
+  Utils.buildStyleGetters(series, defaults)
 }
 
-const BarPiece = withHooks(function BarPiece({
-  datum,
-  primaryAxes,
-  barOffset,
-  focused,
-  selected,
-  style,
-  pointerEvents
-}) {
-  const [_] = useContext(ChartContext)
+const BarPiece = withHooks(function BarPiece({ datum, barOffset, style }) {
+  const [{ primaryAxes }] = useContext(ChartContext)
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
@@ -151,18 +126,14 @@ const BarPiece = withHooks(function BarPiece({
     y2 = base
   }
 
-  const dataStyle = useMemo(
-    () => datum.getStatusStyle(Utils.getStatus(datum, focused, selected)),
-    [datum, focused, selected]
-  )
+  const dataStyle = useDatumStyle(datum)
 
   const rectangleProps = {
     style: {
       ...style,
       ...style.rectangle,
       ...dataStyle,
-      ...dataStyle.rectangle,
-      pointerEvents
+      ...dataStyle.rectangle
     },
     x1: Number.isNaN(x1) ? null : x1,
     y1: Number.isNaN(y1) ? null : y1,
@@ -170,10 +141,7 @@ const BarPiece = withHooks(function BarPiece({
     y2: Number.isNaN(y2) ? null : y2
   }
 
-  return Utils.useDeepMemo(
-    () => <Rectangle {...rectangleProps} />,
-    rectangleProps
-  )
+  return useDeepMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
 })
 
 export default withHooks(Bar)

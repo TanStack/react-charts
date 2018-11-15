@@ -1,10 +1,7 @@
-import { useRef } from 'use-react-hooks'
-
-import deepEqual from './deepEqual'
-
 export default {
   getStatus,
   getStatusStyle,
+  buildStyleGetters,
   getMultiAnchor,
   getClosestPoint,
   normalizeGetter,
@@ -15,53 +12,36 @@ export default {
   translateX,
   translateY,
   translate,
-  identity,
-  hash,
-  useDeepMemo,
-  useWhen
+  identity
   // usePrevious,
   // useDidChange,
 }
 
-function getStatus(item, focused, selected) {
+function getStatus(item, focused) {
   const status = {
-    selected: false,
     focused: false,
-    otherSelected: false,
     otherFocused: false
   }
 
-  if (item.series) {
+  if (!focused) {
+    return status
+  }
+
+  // If the item is a datum
+  if (typeof item.primary !== 'undefined') {
     let d
-    if (selected && selected.active && selected.datums) {
-      for (let i = 0; i < selected.datums.length; i++) {
-        d = selected.datums[i]
-        if (d.seriesID === item.series.id && d.index === item.index) {
-          status.selected = true
-          break
-        }
+    for (let i = 0; i < focused.group.length; i++) {
+      d = focused.group[i]
+      if (d.seriesID === item.series.id && d.index === item.index) {
+        status.focused = true
+        break
       }
-      status.otherSelected = !status.selected
     }
-    if (focused && focused.datums) {
-      for (let i = 0; i < focused.datums.length; i++) {
-        d = focused.datums[i]
-        if (d.seriesID === item.series.id && d.index === item.index) {
-          status.focused = true
-          break
-        }
-      }
-      status.otherFocused = !status.focused
-    }
-  } else {
-    if (selected && selected.active && selected.series) {
-      status.selected = selected.series.id === item.id
-      status.otherSelected = !status.selected
-    }
-    if (focused && focused.series) {
-      status.focused = focused.series.id === item.id
-      status.otherFocused = !status.focused
-    }
+    status.otherFocused = !status.focused
+    // For series
+  } else if (focused.series) {
+    status.focused = focused.series.id === item.id
+    status.otherFocused = !status.focused
   }
 
   return status
@@ -82,6 +62,23 @@ function getStatusStyle(item, status, decorator, defaults) {
     }),
     defaults
   )
+}
+
+function buildStyleGetters(series, defaults) {
+  series.getStatusStyle = (focused, decorator) => {
+    const status = getStatus(series, focused)
+    series.style = getStatusStyle(series, status, decorator, defaults)
+    return series.style
+  }
+
+  // We also need to decorate each datum in the same fashion
+  series.datums.forEach(datum => {
+    datum.getStatusStyle = (focused, decorator) => {
+      const status = getStatus(datum, focused)
+      datum.style = getStatusStyle(datum, status, decorator, defaults)
+      return datum.style
+    }
+  })
 }
 
 function getMultiAnchor({ anchor, points, gridWidth, gridHeight }) {
@@ -314,47 +311,6 @@ function translate(x, y) {
 
 function identity(d) {
   return d
-}
-
-function hash(obj) {
-  let hash = ''
-  const unwrap = item => {
-    if (Array.isArray(item)) {
-      for (let i = 0; i < item.length; i++) {
-        unwrap(item[i])
-      }
-      return
-    } else if (typeof item === 'object') {
-      item = Object.values(item)
-      for (let i = 0; i < item.length; i++) {
-        unwrap(item[i])
-      }
-      return
-    }
-    hash += item
-  }
-  unwrap(obj)
-  return hash
-}
-
-function useDeepMemo(fn, obj) {
-  const watchRef = useRef()
-  const valueRef = useRef()
-
-  const changed = !deepEqual(watchRef.current, obj)
-  if (changed) {
-    watchRef.current = obj
-    valueRef.current = fn()
-  }
-  return valueRef.current
-}
-
-function useWhen(obj, when) {
-  const ref = useRef()
-  if (when) {
-    ref.current = obj
-  }
-  return ref.current
 }
 
 // function usePrevious(item) {
