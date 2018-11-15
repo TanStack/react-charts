@@ -64,7 +64,7 @@ const lineChart = (
       }
     ]}
     axes={[
-      { primary: true, type: "time", position: "bottom" },
+      { primary: true, type: "linear", position: "bottom" },
       { type: "linear", position: "left" }
     ]}
   />
