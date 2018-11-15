@@ -12,11 +12,13 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type="line"
         axes={[
           {
- primary: true, position: 'bottom', type: 'time', show: false,
-},
+            primary: true,
+            position: 'bottom',
+            type: 'time',
+            show: false,
+          },
           { position: 'left', type: 'linear', show: false },
         ]}
         primaryCursor

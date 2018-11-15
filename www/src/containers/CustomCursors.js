@@ -11,7 +11,7 @@ class Story extends Component {
         {({ data }) => (
           <Chart
             data={data}
-            type="area"
+            series={{ type: 'area' }}
             axes={[
               { primary: true, position: 'bottom', type: 'time' },
               { position: 'left', type: 'linear', stacked: true },

@@ -11,7 +11,7 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type="bubble"
+        series={{ type: 'bubble' }}
         axes={[
           { primary: true, position: 'bottom', type: 'linear' },
           { position: 'left', type: 'linear' },

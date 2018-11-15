@@ -12,7 +12,7 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type="bar"
+        series={{ type: 'bar' }}
         axes={[
           { primary: true, type: 'ordinal', position: 'bottom' },
           { position: 'left', type: 'linear', stacked: true },

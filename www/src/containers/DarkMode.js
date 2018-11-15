@@ -17,7 +17,6 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type="line"
         dark
         axes={[
           { primary: true, position: 'bottom', type: 'time' },

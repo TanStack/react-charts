@@ -11,7 +11,6 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type="line"
         getSeries={data =>
           data.map(
             (d, i) =>

@@ -36,7 +36,6 @@ export default class extends Component {
           {({ data }) => (
             <Chart
               data={data}
-              type="line"
               axes={[
                 {
                   primary: true,

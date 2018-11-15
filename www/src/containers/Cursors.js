@@ -11,7 +11,6 @@ class Story extends Component {
         {({ data }) => (
           <Chart
             data={data}
-            type="line"
             axes={[
               { primary: true, position: 'bottom', type: 'time' },
               { position: 'left', type: 'linear' },

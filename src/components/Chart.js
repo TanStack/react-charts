@@ -47,6 +47,8 @@ const seriesTypes = {
   // pie: Pie
 }
 
+const defaultSeries = { type: 'line' }
+
 const defaultColors = [
   '#4ab5eb',
   '#fc6868',
@@ -75,7 +77,7 @@ function Chart(
     groupMode,
     showVoronoi,
     dark,
-    type,
+    series,
     showPoints,
     axes,
     primaryCursor,
@@ -213,16 +215,20 @@ function Chart(
     [data]
   )
 
-  const preResolvedSeriesTypes = materializedData.map((series, seriesIndex) => {
-    const resolvedType =
-      typeof type === 'function' ? type(series, seriesIndex) : type
-    const seriesType = seriesTypes[resolvedType]
-    if (!seriesType) {
-      throw new Error(
-        `Could not find a registered series type for ${resolvedType}`
-      )
+  const seriesOptions = materializedData.map((s, seriesIndex) => {
+    const { type, ...rest } = {
+      ...defaultSeries,
+      ...(typeof series === 'function' ? series(s, seriesIndex) : series)
     }
-    return seriesType
+    const renderer = seriesTypes[type]
+    if (!renderer) {
+      throw new Error(`Could not find a registered series type for ${type}`)
+    }
+    return {
+      ...rest,
+      type,
+      renderer
+    }
   })
 
   materializedData = useMemo(
@@ -230,7 +236,7 @@ function Chart(
       if (debug) console.info('materialize2')
       return materializedData
         .map((series, i) => {
-          series.Component = preResolvedSeriesTypes[i]
+          series.Component = seriesOptions[i].renderer
           return series
         })
         .map((series, i, all) => {
@@ -247,7 +253,7 @@ function Chart(
           }
         })
     },
-    [materializedData, ...preResolvedSeriesTypes]
+    [materializedData, ...seriesOptions.map(d => d.renderer)]
   )
 
   // Calculate:
@@ -663,6 +669,9 @@ function Chart(
     (cursor, i) => {
       return useMemo(
         () => {
+          if (!cursor) {
+            return
+          }
           const primary = i === 0
           cursor = {
             ...defaultCursorProps,
@@ -823,7 +832,8 @@ function Chart(
     yAxes,
     onClick,
     getStyles,
-    getDatumStyles
+    getDatumStyles,
+    seriesOptions
   }
 
   const chartStateContextValue = [chartState, setChartState]
@@ -850,7 +860,8 @@ Chart.defaultProps = {
   onHover: () => {},
   groupMode: 'primary',
   showVoronoi: false,
-  showPoints: true
+  showPoints: true,
+  series: {}
 }
 
 export default withHooks(Chart)

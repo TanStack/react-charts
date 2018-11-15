@@ -11,7 +11,6 @@ export default () => (
     {({ data, primaryAxisShow, secondaryAxisShow }) => (
       <Chart
         data={data}
-        type="line"
         axes={[
           {
             primary: true,

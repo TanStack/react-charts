@@ -25,7 +25,8 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       primaryAxes,
       secondaryAxes,
       renderSVG,
-      onClick
+      onClick,
+      seriesOptions
     },
     setChartState
   ] = useContext(ChartContext)
@@ -117,6 +118,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
   }
 
   const reversedStackData = [...stackData].reverse()
+  const reversedSeriesOptions = [...seriesOptions].reverse()
 
   return (
     <div
@@ -178,10 +180,11 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
               pointerEvents: 'none'
             }}
           >
-            {reversedStackData.map(stack => {
+            {reversedStackData.map((stack, i) => {
               return (
                 <stack.Component
                   key={stack.id}
+                  {...reversedSeriesOptions[i]}
                   series={stack}
                   stackData={stackData}
                 />

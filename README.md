@@ -52,7 +52,6 @@ import { Chart } from "react-charts";
 
 const lineChart = (
   <Chart
-    type="line"
     data={[
       {
         label: "Series 1",
@@ -195,7 +194,7 @@ For more information on usage and API, see the [`axes` prop](#axes)
 Example
 
 ```javascript
-<Chart type="line" curve="cardinal" />
+<Chart series={{ curve: "cardinal" }} />
 ```
 
 # Advanced API
