@@ -146,9 +146,9 @@ const SidebarStyles = styled('div')`
 
 const Menu = ({ items }) => (
   <div className="list">
-    {items.map(({ title, link }) => (
-      <div key={link} className="item">
-        <Link to={link}>{title}</Link>
+    {items.map(({ title, path }) => (
+      <div key={path} className="item">
+        <Link to={`./${path}`}>{title}</Link>
       </div>
     ))}
   </div>

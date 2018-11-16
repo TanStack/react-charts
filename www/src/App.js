@@ -4,6 +4,7 @@ import styled, { injectGlobal } from 'react-emotion'
 import { Router } from '@reach/router'
 //
 import 'react-resizable/css/styles.css'
+import './styles.css'
 
 import Home from 'containers/Home'
 import Examples from 'containers/Examples'

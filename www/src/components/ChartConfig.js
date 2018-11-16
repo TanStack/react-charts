@@ -78,6 +78,12 @@ export default class ChartConfig extends React.Component {
       style,
       className,
     } = this.props
+
+    const randomizeData = () =>
+      this.setState({
+        data: this.makeData(),
+      })
+
     return (
       <div>
         {optionKeys.filter(option => show.indexOf(option) > -1).map(option => (
@@ -103,15 +109,7 @@ export default class ChartConfig extends React.Component {
 
         {canRandomize && (
           <div>
-            <button
-              onClick={() =>
-                this.setState({
-                  data: this.makeData(),
-                })
-              }
-            >
-              Randomize Data
-            </button>
+            <button onClick={randomizeData}>Randomize Data</button>
 
             <br />
             <br />
@@ -133,6 +131,7 @@ export default class ChartConfig extends React.Component {
                   {children({
                     ...this.state,
                     elementType: this.state.elementType,
+                    randomizeData,
                   })}
                 </div>
               </ResizableBox>
@@ -141,6 +140,7 @@ export default class ChartConfig extends React.Component {
                 {children({
                   ...this.state,
                   elementType: this.state.elementType,
+                  randomizeData,
                 })}
               </div>
             )
