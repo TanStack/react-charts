@@ -84,9 +84,13 @@ function AxisLinear({
         position === positionTop || position === positionBottom
       const labelDims = Array(
         ...elRef.current.querySelectorAll('.tick text')
-      ).map(el => ({
-        ...el.getBoundingClientRect().toJSON()
-      }))
+      ).map(el => {
+        const rect = el.getBoundingClientRect()
+        return {
+          width: rect.width,
+          height: rect.height
+        }
+      })
 
       let smallestTickGap = 100000
       // This is just a ridiculously large tick spacing that would never happen (hopefully)
