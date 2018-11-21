@@ -66,7 +66,7 @@ class Story extends Component {
                               { type: 'linear', stacked: true, position: 'left' },
                             ]}
                             getDatumStyles={datum => ({
-                              color: datum.original.color,
+                              color: datum.originalDatum.color,
                             })}
                             primaryCursor={{
                               value: datum.seriesLabel,

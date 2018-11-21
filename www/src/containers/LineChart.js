@@ -11,6 +11,9 @@ export default () => (
       {({ data }) => (
         <Chart
           data={data}
+          series={{
+            showPoints: false,
+          }}
           axes={[
             { primary: true, type: 'time', position: 'bottom' },
             { type: 'linear', position: 'left' },

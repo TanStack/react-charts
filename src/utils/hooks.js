@@ -7,6 +7,7 @@ export default useHooks
 export * from 'use-react-hooks'
 
 export function useDeepMemo(fn, obj) {
+  return fn()
   const watchRef = useRef()
   const valueRef = useRef()
 

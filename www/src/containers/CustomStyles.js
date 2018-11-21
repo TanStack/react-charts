@@ -47,7 +47,9 @@ class Story extends Component {
               <Chart
                 data={data}
                 interaction={interaction}
-                type={elementType}
+                series={{
+                  type: elementType,
+                }}
                 axes={[
                   {
                     primary: true,
@@ -62,10 +64,17 @@ class Story extends Component {
                 ]}
                 getStyles={series => ({
                   color: `url(#${series.index % 4})`,
-                  opacity: activeSeriesIndex > -1 ? (series.id === activeSeriesIndex ? 1 : 0.2) : 1,
+                  opacity:
+                    activeSeriesIndex > -1 ? (series.index === activeSeriesIndex ? 1 : 0.2) : 1,
                 })}
-                getDatumStyles={d => ({
-                  r: d.focused ? 5 : d.otherHovered ? 3 : 0,
+                getDatumStyles={datum => ({
+                  r: datum.focused
+                    ? 5
+                    : datum.series.index === activeSeriesIndex
+                      ? 3
+                      : datum.otherHovered
+                        ? 2
+                        : 0,
                 })}
                 onFocus={focused =>
                   this.setState({

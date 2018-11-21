@@ -16,7 +16,9 @@ function Voronoi() {
       stackData,
       primaryAxes,
       secondaryAxes,
-      showVoronoi
+      showVoronoi,
+      width,
+      height
     },
     setChartState
   ] = useContext(ChartContext)
@@ -29,7 +31,13 @@ function Voronoi() {
   }
 
   // Don't render until we have all dependencies
-  if (!stackData || !primaryAxes.length || !secondaryAxes.length) {
+  if (
+    !stackData ||
+    !primaryAxes.length ||
+    !secondaryAxes.length ||
+    !width ||
+    !height
+  ) {
     return null
   }
 
@@ -112,7 +120,12 @@ function Voronoi() {
           .filter(d => d.defined)
           .forEach(datum => {
             datum.boundingPoints.forEach(boundingPoint => {
-              if (typeof datum.x !== 'number' || typeof datum.y !== 'number') {
+              if (
+                typeof datum.x !== 'number' ||
+                typeof datum.y !== 'number' ||
+                Number.isNaN(datum.y) ||
+                Number.isNaN(datum.x)
+              ) {
                 return
               }
               voronoiData.push({

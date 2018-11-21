@@ -1,3 +1,5 @@
+import RAF from 'raf'
+
 export default {
   getStatus,
   getStatusStyle,
@@ -12,7 +14,8 @@ export default {
   translateX,
   translateY,
   translate,
-  identity
+  identity,
+  throttle
   // usePrevious,
   // useDidChange,
 }
@@ -29,10 +32,12 @@ function getStatus(item, focused) {
 
   // If the item is a datum
   if (typeof item.primary !== 'undefined') {
-    let d
-    for (let i = 0; i < focused.group.length; i++) {
-      d = focused.group[i]
-      if (d.seriesID === item.series.id && d.index === item.index) {
+    const length = focused.group.length
+    for (let i = 0; i < length; i++) {
+      if (
+        focused.group[i].seriesID === item.series.id &&
+        focused.group[i].index === item.index
+      ) {
         status.focused = true
         break
       }
@@ -214,11 +219,13 @@ function normalizeColor(style, defaults) {
   }
 }
 
+const elementTypes = ['area', 'line', 'rectangle', 'circle']
 function materializeStyles(style = {}, defaults = {}) {
   style = normalizeColor(style, defaults)
-  ;['area', 'line', 'rectangle', 'circle'].forEach(type => {
+  for (let i = 0; i < elementTypes.length; i++) {
+    const type = elementTypes[i]
     style[type] = style[type] ? materializeStyles(style[type], defaults) : {}
-  })
+  }
   return style
 }
 
@@ -311,6 +318,18 @@ function translate(x, y) {
 
 function identity(d) {
   return d
+}
+
+function throttle(fn) {
+  let instance
+  return (...args) => {
+    if (!instance) {
+      instance = RAF(() => {
+        fn(...args)
+        instance = null
+      })
+    }
+  }
 }
 
 // function usePrevious(item) {

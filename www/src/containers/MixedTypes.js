@@ -11,7 +11,9 @@ export default () => (
     {({ data }) => (
       <Chart
         data={data}
-        type={(s, i) => (i % 2 ? 'bar' : 'line')}
+        series={(s, i) => ({
+          type: i % 2 ? 'bar' : 'line',
+        })}
         axes={[
           { primary: true, position: 'bottom', type: 'ordinal' },
           { position: 'left', type: 'linear', min: 0 },

@@ -1,5 +1,10 @@
 import React from 'react'
-import withHooks, { useContext, useEffect, useRef } from '../utils/hooks'
+import withHooks, {
+  useContext,
+  useEffect,
+  useRef,
+  useMemo
+} from '../utils/hooks'
 import Utils from '../utils/Utils'
 //
 import ChartContext from '../utils/ChartContext'
@@ -26,7 +31,9 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       secondaryAxes,
       renderSVG,
       onClick,
-      seriesOptions
+      seriesOptions,
+      getSeriesOrder,
+      focused
     },
     setChartState
   ] = useContext(ChartContext)
@@ -49,26 +56,30 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     }
   })
 
-  const onMouseMove = e => {
-    const { clientX, clientY } = e
+  const onMouseMove = useMemo(
+    () =>
+      Utils.throttle(e => {
+        const { clientX, clientY } = e
 
-    setChartState(state => {
-      const x = clientX - offset.left - gridX
-      const y = clientY - offset.top - gridY
+        setChartState(state => {
+          const x = clientX - offset.left - gridX
+          const y = clientY - offset.top - gridY
 
-      const pointer = {
-        ...state.pointer,
-        active: true,
-        x,
-        y,
-        dragging: state.pointer && state.pointer.down
-      }
-      return {
-        ...state,
-        pointer
-      }
-    })
-  }
+          const pointer = {
+            ...state.pointer,
+            active: true,
+            x,
+            y,
+            dragging: state.pointer && state.pointer.down
+          }
+          return {
+            ...state,
+            pointer
+          }
+        })
+      }),
+    [offset, gridX, gridY]
+  )
 
   const onMouseLeave = () => {
     setChartState(state => ({
@@ -117,8 +128,33 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     }))
   }
 
+  // Reverse the stack order for proper z-indexing
   const reversedStackData = [...stackData].reverse()
-  const reversedSeriesOptions = [...seriesOptions].reverse()
+  const orderedStackData = getSeriesOrder(reversedStackData)
+
+  const focusedSeriesIndex = focused
+    ? orderedStackData.findIndex(series => series.id === focused.series.id)
+    : -1
+
+  // Bring focused series to the front
+  const focusOrderedStackData = focused
+    ? [
+      orderedStackData[focusedSeriesIndex],
+      ...orderedStackData.slice(0, focusedSeriesIndex),
+      ...orderedStackData.slice(focusedSeriesIndex + 1)
+    ]
+    : orderedStackData
+
+  const stacks = focusOrderedStackData.map(stack => {
+    return (
+      <stack.Component
+        key={stack.id}
+        {...seriesOptions[stack.seriesIndex]}
+        series={stack}
+        stackData={stackData}
+      />
+    )
+  })
 
   return (
     <div
@@ -180,16 +216,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
               pointerEvents: 'none'
             }}
           >
-            {reversedStackData.map((stack, i) => {
-              return (
-                <stack.Component
-                  key={stack.id}
-                  {...reversedSeriesOptions[i]}
-                  series={stack}
-                  stackData={stackData}
-                />
-              )
-            })}
+            {stacks}
           </g>
         </g>
         {renderSVG
@@ -199,11 +226,10 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
           })
           : null}
       </svg>
-      <Tooltip />
       <Cursor primary />
       <Cursor />
-      <Tooltip />
       <Brush />
+      <Tooltip />
     </div>
   )
 }

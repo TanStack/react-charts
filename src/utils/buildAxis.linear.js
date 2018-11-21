@@ -4,18 +4,23 @@ import {
   positionTop,
   positionRight,
   positionBottom,
-  positionLeft
+  positionLeft,
+  axisTypeOrdinal,
+  axisTypeTime,
+  axisTypeUtc,
+  axisTypeLinear,
+  axisTypeLog
 } from '../utils/Constants.js'
 import Utils from '../utils/Utils'
 
 import Bar from '../seriesTypes/Bar'
 
 const scales = {
-  linear: scaleLinear,
-  log: scaleLog,
-  time: scaleTime,
-  utc: scaleUtc,
-  ordinal: scaleBand
+  [axisTypeLinear]: scaleLinear,
+  [axisTypeLog]: scaleLog,
+  [axisTypeTime]: scaleTime,
+  [axisTypeUtc]: scaleUtc,
+  [axisTypeOrdinal]: scaleBand
 }
 
 const detectVertical = d => [positionLeft, positionRight].indexOf(d) > -1
@@ -71,83 +76,74 @@ export default function buildAxisLinear({
   const uniqueVals = []
   let min
   let max
-  const datumValues = {}
-  let negativeTotal = 0
-  let positiveTotal = 0
+  let negativeTotalByKey = {}
+  let positiveTotalByKey = {}
   let domain
 
-  if (type === 'ordinal') {
-    materializedData.forEach(series => {
-      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
-        return
-      }
-      const seriesValues = series.datums.map(d => d[valueKey])
-      seriesValues.forEach(d => {
-        if (uniqueVals.indexOf(d) === -1) {
-          uniqueVals.push(d)
-        }
-      })
-    })
-    domain = uniqueVals
-  } else if (type === 'time' || type === 'utc') {
-    materializedData.forEach(series => {
-      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
-        return
-      }
-      const seriesValues = series.datums.map(d => +d[valueKey])
-      seriesValues.forEach((d, i) => {
-        const key = groupKey ? series.datums[i][groupKey] : i
-        datumValues[key] = [...(datumValues[key] || []), d]
-      })
-      min = Math.min(
-        ...(typeof min !== 'undefined' ? [min] : []),
-        ...seriesValues
-      )
-      max = Math.max(
-        ...(typeof max !== 'undefined' ? [max] : []),
-        ...seriesValues
-      )
-    })
-    domain = [min, max]
-  } else {
-    // Linear scale
-    materializedData.forEach(series => {
-      if (series[AxisIDKey] && series[AxisIDKey] !== id) {
-        return
-      }
-      let seriesValues = series.datums.map(d => d[valueKey])
-      seriesValues.forEach((d, i) => {
-        const key = groupKey ? series.datums[i][groupKey] : i
-        datumValues[key] = [...(datumValues[key] || []), d]
-      })
-      seriesValues = seriesValues.filter(d => typeof d === 'number')
-      min = Math.min(...(typeof min === 'number' ? [min] : []), ...seriesValues)
-      max = Math.max(...(typeof max === 'number' ? [max] : []), ...seriesValues)
-    })
-    if (stacked) {
-      // If we're stacking, calculate and use the max and min values for the largest stack
-      ;[positiveTotal, negativeTotal] = Object.keys(datumValues)
-        .map(d => datumValues[d])
-        .reduce(
-          (totals, vals) => {
-            const positive = vals
-              .filter(d => d >= 0)
-              .reduce((ds, d) => ds + d, 0)
-            const negative = vals
-              .filter(d => d < 0)
-              .reduce((ds, d) => ds + d, 0)
-            return [
-              positive > totals[0] ? positive : totals[0],
-              negative < totals[1] ? negative : totals[1]
-            ]
-          },
-          [0, 0]
-        )
-      domain = [negativeTotal, positiveTotal]
-    } else {
-      // If we're not stacking, use the min and max values
-      domain = [min, max]
+  // Loop through each series
+  for (
+    let seriesIndex = 0;
+    seriesIndex < materializedData.length;
+    seriesIndex++
+  ) {
+    if (
+      materializedData[seriesIndex][AxisIDKey] &&
+      materializedData[seriesIndex][AxisIDKey] !== id
+    ) {
+      continue
     }
+    // Loop through each datum
+    for (
+      let datumIndex = 0;
+      datumIndex < materializedData[seriesIndex].datums.length;
+      datumIndex++
+    ) {
+      const datum = materializedData[seriesIndex].datums[datumIndex]
+      let value
+      const key = groupKey ? datum[groupKey] : datumIndex
+      // For ordinal scales, unique the values
+      if (type === axisTypeOrdinal) {
+        if (uniqueVals.indexOf() === -1) {
+          uniqueVals.push(
+            materializedData[seriesIndex].datums[datumIndex][valueKey]
+          )
+        }
+      } else if (type === axisTypeTime || type === axisTypeUtc) {
+        value = +datum[valueKey]
+      } else {
+        value = datum[valueKey]
+      }
+
+      // Add to stack total
+      if (stacked) {
+        if (value > 0) {
+          positiveTotalByKey[key] =
+            typeof positiveTotalByKey[key] !== 'undefined'
+              ? positiveTotalByKey[key] + value
+              : value
+        } else {
+          negativeTotalByKey[key] =
+            typeof negativeTotalByKey[key] !== 'undefined'
+              ? negativeTotalByKey[key] + value
+              : value
+        }
+      } else {
+        // Find min/max
+        min = typeof min !== 'undefined' ? Math.min(min, value) : value
+        max = typeof max !== 'undefined' ? Math.max(max, value) : value
+      }
+    }
+  }
+
+  if (type === axisTypeOrdinal) {
+    domain = uniqueVals
+  } else if (stacked) {
+    domain = [
+      Math.min(0, ...Object.values(negativeTotalByKey)),
+      Math.max(0, ...Object.values(positiveTotalByKey))
+    ]
+  } else {
+    domain = [min, max]
   }
 
   // Now we need to figure out the range
@@ -178,7 +174,7 @@ export default function buildAxisLinear({
   let seriesBandScale = d => d
   let seriesBarSize = 1
 
-  if (type === 'ordinal' || primary) {
+  if (type === axisTypeOrdinal || primary) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
     bandScale = scaleBand()
@@ -197,7 +193,7 @@ export default function buildAxisLinear({
     bandScale.paddingOuter(outerPadding).paddingInner(innerPadding)
     barSize = bandScale.bandwidth()
 
-    if (type === 'ordinal') {
+    if (type === axisTypeOrdinal) {
       cursorSize = barSize
     }
 
@@ -215,7 +211,7 @@ export default function buildAxisLinear({
     seriesBarSize = seriesBandScale.bandwidth()
   }
 
-  if (type === 'ordinal') {
+  if (type === axisTypeOrdinal) {
     // If it's ordinal, just assign the bandScale we made
     scale = bandScale
   } else {
@@ -239,7 +235,7 @@ export default function buildAxisLinear({
   scale.domain(domain)
 
   // If we're not using an ordinal scale, round the ticks to "nice" values
-  if (type !== 'ordinal') {
+  if (type !== axisTypeOrdinal) {
     scale.nice()
   }
 
@@ -318,7 +314,7 @@ export default function buildAxisLinear({
     spacing: Math.max(tickSizeInner, 0) + tickPadding
   }
 
-  if (type === 'ordinal') {
+  if (type === axisTypeOrdinal) {
     axis.gridOffset = -(axis.stepSize * innerPadding) / 2
     axis.tickOffset = axis.barSize / 2
     axis.barOffset = 0

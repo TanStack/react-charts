@@ -24,18 +24,24 @@ function Tooltip() {
     focused,
     lastFocused,
     getDatumStyles,
-    tooltip: {
-      align,
-      alignPriority,
-      padding,
-      tooltipArrowPadding,
-      //
-      arrowPosition,
-      render,
-      anchor,
-      show
-    }
+    tooltip
   } = chartState
+
+  if (!tooltip) {
+    return null
+  }
+
+  const {
+    align,
+    alignPriority,
+    padding,
+    tooltipArrowPadding,
+    //
+    arrowPosition,
+    render,
+    anchor,
+    show
+  } = tooltip
 
   const elRef = useRef()
   const tooltipElRef = useRef()

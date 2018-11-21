@@ -11,7 +11,9 @@ class Story extends Component {
         {({ elementType, tooltipAnchor, data }) => (
           <Chart
             data={data}
-            type={elementType}
+            series={{
+              type: elementType,
+            }}
             axes={[
               { primary: true, position: 'bottom', type: 'time' },
               { position: 'left', type: 'linear' },

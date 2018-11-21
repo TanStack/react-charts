@@ -1,6 +1,5 @@
 import React from 'react'
 import withHooks, {
-  useContext,
   useMemo,
   useDeepMemo,
   useSeriesStyle,
@@ -10,7 +9,6 @@ import { line } from 'd3-shape'
 
 //
 
-import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 
@@ -25,9 +23,7 @@ const circleDefaultStyle = {
   r: 2
 }
 
-function Line({ series, curve }) {
-  const [{ showPoints }] = useContext(ChartContext)
-
+function Line({ series, showPoints, curve }) {
   const lineFn = useMemo(
     () =>
       line()
@@ -75,7 +71,9 @@ Line.defaultProps = {
   curve: 'monotoneX'
 }
 
-Line.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+Line.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
+  datum.primaryCoord = primaryAxis.scale(datum.primary)
+  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
   datum.defined =

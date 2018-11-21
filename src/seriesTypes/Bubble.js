@@ -36,7 +36,9 @@ function Bubble({ series }) {
   )
 }
 
-Bubble.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+Bubble.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
+  datum.primaryCoord = primaryAxis.scale(datum.primary)
+  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
   datum.defined =

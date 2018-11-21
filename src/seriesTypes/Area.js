@@ -98,7 +98,12 @@ Area.defaultProps = {
   curve: 'linear'
 }
 
-Area.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
+Area.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
+  // Turn clamping on for secondaryAxis
+  secondaryAxis.scale.clamp(true)
+
+  datum.primaryCoord = primaryAxis.scale(datum.primary)
+  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
   datum.defined =
@@ -106,6 +111,10 @@ Area.plotDatum = (datum, { primaryAxis, xAxis, yAxis }) => {
   datum.base = primaryAxis.vertical
     ? xAxis.scale(datum.baseValue)
     : yAxis.scale(datum.baseValue)
+
+  // Turn clamping back off for secondaryAxis
+  secondaryAxis.scale.clamp(false)
+
   // Adjust non-bar elements for ordinal scales
   if (xAxis.type === 'ordinal') {
     datum.x += xAxis.tickOffset

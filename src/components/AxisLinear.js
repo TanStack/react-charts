@@ -18,7 +18,8 @@ import {
   positionTop,
   positionRight,
   positionBottom,
-  positionLeft
+  positionLeft,
+  axisTypeOrdinal
 } from '../utils/Constants.js'
 
 const defaultStyles = {
@@ -267,7 +268,7 @@ function AxisLinear({
   let showGridLine
   if (typeof showGrid === 'boolean') {
     showGridLine = showGrid
-  } else if (type === 'ordinal') {
+  } else if (type === axisTypeOrdinal) {
     showGridLine = false
   } else {
     showGridLine = true
@@ -303,7 +304,7 @@ function AxisLinear({
       <Group className='ticks' ref={elRef} style={{}}>
         {ticks.map((tick, i) => (
           <Group
-            key={tick}
+            key={[String(tick), i].join('_')}
             className='tick'
             style={{
               transform: transform(scale(tick) || 0)

@@ -36,31 +36,25 @@ export default function TooltipRenderer(props) {
     formatTertiary ||
     (val => (Math.floor(val) < val ? Math.round(val * 100) / 100 : val))
 
-  const sortedGroupDatums =
-    secondaryAxis && secondaryAxis.stacked
-      ? [...datum.group].reverse()
-      : [...datum.group].sort((a, b) => {
-        if (groupMode === groupModeSeries) {
-          if (a.primary < b.primary) {
-            return -1
-          } else if (a.primary > b.primary) {
-            return 1
-          }
-        } else if (groupMode === groupModeSecondary) {
-          if (a.primary < b.primary) {
-            return -1
-          } else if (a.primary > b.primary) {
-            return 1
-          }
-        } else {
-          if (a.secondary < b.secondary) {
-            return -1
-          } else if (a.secondary > b.secondary) {
-            return 1
-          }
-        }
-        return a.seriesIndex < b.seriesIndex ? 1 : -1
-      })
+  const sortedGroupDatums = [...datum.group].sort((a, b) => {
+    if (
+      (!primaryAxis.stacked && groupMode === groupModeSeries) ||
+      groupMode === groupModeSecondary
+    ) {
+      if (a.primaryCoord > b.primaryCoord) {
+        return -1
+      } else if (a.primaryCoord < b.primaryCoord) {
+        return 1
+      }
+    } else if (!secondaryAxis.stacked) {
+      if (a.secondaryCoord > b.secondaryCoord) {
+        return -1
+      } else if (a.secondaryCoord < b.secondaryCoord) {
+        return 1
+      }
+    }
+    return a.seriesIndex > b.seriesIndex ? 1 : -1
+  })
 
   if (groupMode === groupModePrimary) {
     sortedGroupDatums.reverse()

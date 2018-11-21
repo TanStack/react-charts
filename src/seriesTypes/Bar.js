@@ -39,12 +39,20 @@ function Bar({ series }) {
 }
 
 Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
+  // Turn clamping on for secondaryAxis
+  secondaryAxis.scale.clamp(true)
+
+  datum.primaryCoord = primaryAxis.scale(datum.primary)
+  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
   datum.defined =
     Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
   datum.base = secondaryAxis.scale(datum.baseValue)
   datum.size = primaryAxis.barSize
+
+  // Turn clamping back off for secondaryAxis
+  secondaryAxis.scale.clamp(false)
 
   if (!secondaryAxis.stacked) {
     datum.size = primaryAxis.seriesBarSize

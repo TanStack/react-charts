@@ -54,6 +54,7 @@ export default class ChartConfig extends React.Component {
     tooltipAlign: 'top',
     groupMode: 'primary',
     snapCursor: true,
+    datums: 10,
   }
   constructor (props) {
     super(props)
@@ -63,8 +64,10 @@ export default class ChartConfig extends React.Component {
     }
   }
   makeData = () => {
-    const { dataType, series, useR } = this.props
-    return makeData(dataType, series, useR)
+    const {
+      dataType, series, useR, datums,
+    } = this.props
+    return makeData(dataType, series, useR, datums)
   }
   render () {
     const {
@@ -136,7 +139,7 @@ export default class ChartConfig extends React.Component {
                 </div>
               </ResizableBox>
             ) : (
-              <div key={i}>
+              <div key={i} style={style} className={className}>
                 {children({
                   ...this.state,
                   elementType: this.state.elementType,
@@ -150,20 +153,20 @@ export default class ChartConfig extends React.Component {
   }
 }
 
-function makeData (dataType, series, useR) {
+function makeData (dataType, series, useR, datums) {
   return [...new Array(series || Math.max(Math.round(Math.random() * 5), 1))].map((d, i) =>
-    makeSeries(i, dataType, useR)
+    makeSeries(i, dataType, useR, datums)
   )
 }
 
-function makeSeries (i, dataType, useR) {
+function makeSeries (i, dataType, useR, datums) {
   const start = 0
   const startDate = new Date()
   startDate.setMinutes(0)
   startDate.setSeconds(0)
   startDate.setMilliseconds(0)
   // const length = 5 + Math.round(Math.random() * 15)
-  const length = 10
+  const length = datums
   const min = 0
   const max = 100
   const rMin = 2
