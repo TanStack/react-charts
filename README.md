@@ -28,6 +28,13 @@ Simple, immersive &amp; interactive charts for React
 
 ## [Demos](https://react-charts.js.org)
 
+## Intro
+
+React-Charts is currently in an **alpha** state! This means:
+
+- The api is constantly changing as use-cases evolve
+- Support is limited to my personal immediate working memory of the system and 10 seconds of my time. If I can't answer your question with those limitations, I will invite you to read the source and contribute to your own answer so I can keep moving forward towards a stable release.
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -42,7 +49,9 @@ $ yarn add react-charts
 $ npm i react-charts --save
 ```
 
-## Quick Example
+## Quick Start
+
+React
 
 This will render a very basic line chart:
 
@@ -51,22 +60,31 @@ import React from "react";
 import { Chart } from "react-charts";
 
 const lineChart = (
-  <Chart
-    data={[
-      {
-        label: "Series 1",
-        data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
-      },
-      {
-        label: "Series 2",
-        data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
-      }
-    ]}
-    axes={[
-      { primary: true, type: "linear", position: "bottom" },
-      { type: "linear", position: "left" }
-    ]}
-  />
+  // A react-chart hyper-responsively and continuusly fills the available
+  // space of its parent element automatically
+  <div
+    style={{
+      width: "400px",
+      height: "300px"
+    }}
+  >
+    <Chart
+      data={[
+        {
+          label: "Series 1",
+          data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
+        },
+        {
+          label: "Series 2",
+          data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
+        }
+      ]}
+      axes={[
+        { primary: true, type: "linear", position: "bottom" },
+        { type: "linear", position: "left" }
+      ]}
+    />
+  </div>
 );
 ```
 
@@ -94,7 +112,20 @@ const data = [
   }
 ];
 
-<Chart data={data} />;
+<div
+  style={{
+    width: "400px",
+    height: "300px"
+  }}
+>
+  <Chart
+    data={data}
+    axes={[
+      { primary: true, type: "linear", position: "bottom" },
+      { type: "linear", position: "left" }
+    ]}
+  />
+</div>;
 ```
 
 In the following example, there is no need to use any accessors. The **default** accessors are able to easily understand this format, but **please note** that this format limits you from passing any **meta data** about your series and datums.
@@ -105,7 +136,21 @@ const data = [
   [[1, 10], [2, 10], [3, 10]],
   [[1, 10], [2, 10], [3, 10]]
 ];
-<Chart data={data} />;
+
+<div
+  style={{
+    width: "400px",
+    height: "300px"
+  }}
+>
+  <Chart
+    data={data}
+    axes={[
+      { primary: true, type: "linear", position: "bottom" },
+      { type: "linear", position: "left" }
+    ]}
+  />
+</div>;
 ```
 
 #### Data Accessors
@@ -124,18 +169,25 @@ const data = {
   ]
 };
 
-<Chart
-  // Pass the original data object
-  data={data}
-  // Use data.lines to represent the different series
-  getSeries={data => data.lines}
-  // Use data.lines[n].data to represent the different datums for each series
-  getDatums={serie => serie.data}
-  // Use the original data object and the datum index to reference the datum's primary value.
-  getPrimary={(datum, i, series, seriesIndex, data) => data.axis[i]}
-  // Use data.lines[n].data[n].value as each datums secondary value
-  getSecondary={datum => datum.value}
-/>;
+<div
+  style={{
+    width: "400px",
+    height: "300px"
+  }}
+>
+  <Chart
+    // Pass the original data object
+    data={data}
+    // Use data.lines to represent the different series
+    getSeries={data => data.lines}
+    // Use data.lines[n].data to represent the different datums for each series
+    getDatums={series => series.data}
+    // Use the original data object and the datum index to reference the datum's primary value.
+    getPrimary={(datum, i, series, seriesIndex, data) => data.axis[i]}
+    // Use data.lines[n].data[n].value as each datums secondary value
+    getSecondary={datum => datum.value}
+  />
+</div>;
 ```
 
 #### Series Labels
@@ -147,10 +199,19 @@ If the default label accessor doesn't suit your needs, then you can use the `<Ch
 ```javascript
 const data = [{
   specialLabel: 'Hello World!',
-  data: [...]
+  data: [
+    //...
+  ]
 }]
 
-<Chart data={data} getLabel={series => series.specialLabel} />
+<div
+  style={{
+    width: "400px",
+    height: "300px"
+  }}
+>
+  <Chart data={data} getLabel={series => series.specialLabel} />
+</div>;
 ```
 
 ## Axes & Scales
@@ -169,14 +230,21 @@ React Charts supports an `axes` prop that handles both the underlying scale and 
 Axes are a required component of a React Chart and can used like so:
 
 ```javascript
-import { Chart } from 'react-charts`
+import { Chart } from 'react-charts'
 
-<Chart
-  axes={[
-    { primary: true, type: "time", position: "bottom" },
-    { type: "linear", position: "left" }
-  ]}
-/>
+<div
+  style={{
+    width: "400px",
+    height: "300px"
+  }}
+>
+  <Chart
+    axes={[
+      { primary: true, type: "time", position: "bottom" },
+      { type: "linear", position: "left" }
+    ]}
+  />
+</div>
 ```
 
 For more information on usage and API, see the [`axes` prop](#axes)
