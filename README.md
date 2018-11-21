@@ -88,6 +88,12 @@ const lineChart = (
 );
 ```
 
+## Documentation
+
+Documentation is **not complete**. The most detailed usage examples are visible by [browsing the website's examples](https://github.com/react-tools/react-charts/tree/master/www/src/containers).
+
+What sparse documentation is available in this readme is being progressively worked on below.
+
 ## Data Model
 
 React-Charts uses a common and very flexible data model based on arrays of **series** and arrays of **datums**. You can either use the model defaults directly, or use **data accessors** to materialize this structure.
