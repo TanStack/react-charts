@@ -155,7 +155,6 @@ function Cursor({ primary }) {
             width: `${lineWidth}px`,
             height: `${lineHeight}px`,
             background: getLineBackgroundColor(dark),
-            WebkitBackfaceVisibility: 'hidden',
             transition:
               animated && animateCoords ? 'all .2s ease' : 'opacity .2s ease'
           }}
