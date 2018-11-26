@@ -37,7 +37,9 @@ const onTick = fn => {
     subscribers = subscribers.filter(d => d !== fn)
     if (!subscribers.length) {
       running = false
-      scheduled()
+      if (scheduled) {
+        scheduled()
+      }
     }
   }
 }

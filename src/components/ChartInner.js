@@ -139,9 +139,9 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
   // Bring focused series to the front
   const focusOrderedStackData = focused
     ? [
-      orderedStackData[focusedSeriesIndex],
       ...orderedStackData.slice(0, focusedSeriesIndex),
-      ...orderedStackData.slice(focusedSeriesIndex + 1)
+      ...orderedStackData.slice(focusedSeriesIndex + 1),
+      orderedStackData[focusedSeriesIndex]
     ]
     : orderedStackData
 

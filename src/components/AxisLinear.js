@@ -53,7 +53,7 @@ function AxisLinear({
 }) {
   const [rotation, setRotation] = useState(0)
   const [
-    { primaryAxes, secondaryAxes, gridWidth, gridHeight, dark },
+    { primaryAxes, secondaryAxes, gridWidth, gridHeight, dark, axisDimensions },
     setChartState
   ] = useContext(ChartContext)
 
@@ -66,18 +66,20 @@ function AxisLinear({
   useLayoutEffect(
     () => {
       if (!elRef.current) {
-        // If the entire axis is hidden, then we need to remove the axis dimensions
-        setChartState(state => {
-          const newAxes = state.axisDimensions[position] || {}
-          delete newAxes[id]
-          return {
-            ...state,
-            axisDimensions: {
-              ...state.axisDimensions,
-              [position]: newAxes
+        if (axisDimensions[position] && axisDimensions[position][id]) {
+          // If the entire axis is hidden, then we need to remove the axis dimensions
+          setChartState(state => {
+            const newAxes = state.axisDimensions[position] || {}
+            delete newAxes[id]
+            return {
+              ...state,
+              axisDimensions: {
+                ...state.axisDimensions,
+                [position]: newAxes
+              }
             }
-          }
-        })
+          })
+        }
         return
       }
 
