@@ -305,11 +305,11 @@ function sumObjBy(obj, str) {
 }
 
 function translateX(x) {
-  return `translate3d(${x}px, 0, 0)`
+  return `translate3d(${Math.round(x)}px, 0, 0)`
 }
 
 function translateY(y) {
-  return `translate3d(0, ${y}px, 0)`
+  return `translate3d(0, ${Math.round(y)}px, 0)`
 }
 
 function translate(x, y) {
