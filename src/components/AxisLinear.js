@@ -1,9 +1,11 @@
 import React from 'react'
+import RAF from 'raf'
 import withHooks, {
   useContext,
   useLayoutEffect,
   useState,
-  useRef
+  useRef,
+  useEffect
 } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
@@ -60,11 +62,24 @@ function AxisLinear({
   const axis = [...primaryAxes, ...secondaryAxes].find(d => d.id === id)
 
   const elRef = useRef()
+  const rendersRef = useRef(0)
   const visibleLabelStepRef = useRef()
+
+  rendersRef.current++
+  console.log(rendersRef.current)
+
+  useEffect(() => {
+    RAF(() => {
+      rendersRef.current = 0
+    })
+  })
 
   // Measure after if needed
   useLayoutEffect(
     () => {
+      if (rendersRef.current > 10) {
+        return
+      }
       if (!elRef.current) {
         if (axisDimensions[position] && axisDimensions[position][id]) {
           // If the entire axis is hidden, then we need to remove the axis dimensions
