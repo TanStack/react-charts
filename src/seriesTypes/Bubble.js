@@ -1,6 +1,6 @@
 import React from 'react'
 import withHooks, {
-  useDeepMemo,
+  usePropsMemo,
   useSeriesStyle,
   useDatumStyle
 } from '../utils/hooks'
@@ -98,7 +98,7 @@ const Point = withHooks(function Point({ datum, style }) {
         : {})
     }
   }
-  return useDeepMemo(() => <Circle {...circleProps} />, circleProps)
+  return usePropsMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Bubble)

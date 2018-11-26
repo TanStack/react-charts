@@ -23,7 +23,7 @@ function Tooltip() {
     dark,
     focused,
     lastFocused,
-    getDatumStyles,
+    getDatumStyle,
     tooltip
   } = chartState
 
@@ -310,7 +310,7 @@ function Tooltip() {
   const renderProps = {
     ...chartState,
     datum: resolvedFocused,
-    getStyle: datum => datum.getStatusStyle(resolvedFocused, getDatumStyles),
+    getStyle: datum => datum.getStatusStyle(resolvedFocused, getDatumStyle),
     primaryAxis,
     secondaryAxis
   }

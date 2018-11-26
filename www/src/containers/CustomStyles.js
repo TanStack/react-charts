@@ -28,12 +28,13 @@ const defs = (
 class Story extends Component {
   state = {
     activeSeriesIndex: -1,
+    activeDatumIndex: -1,
   }
   render () {
-    const { activeSeriesIndex } = this.state
+    const { activeSeriesIndex, activeDatumIndex } = this.state
     return (
       <div>
-        {JSON.stringify({ activeSeriesIndex }, null, 2)}
+        {JSON.stringify({ activeSeriesIndex, activeDatumIndex }, null, 2)}
         {['line', 'area', 'bar'].map(type => (
           <ChartConfig
             key={type}
@@ -62,23 +63,27 @@ class Story extends Component {
                     stacked: true,
                   },
                 ]}
-                getStyles={series => ({
+                getSeriesStyle={series => ({
                   color: `url(#${series.index % 4})`,
                   opacity:
-                    activeSeriesIndex > -1 ? (series.index === activeSeriesIndex ? 1 : 0.2) : 1,
+                    activeSeriesIndex > -1 ? (series.index === activeSeriesIndex ? 1 : 0.3) : 1,
                 })}
-                getDatumStyles={datum => ({
-                  r: datum.focused
-                    ? 5
-                    : datum.series.index === activeSeriesIndex
-                      ? 3
-                      : datum.otherHovered
-                        ? 2
-                        : 0,
+                getDatumStyle={datum => ({
+                  r:
+                    activeDatumIndex === datum.index && activeSeriesIndex === datum.seriesIndex
+                      ? 7
+                      : activeDatumIndex === datum.index
+                        ? 5
+                        : datum.series.index === activeSeriesIndex
+                          ? 3
+                          : datum.otherHovered
+                            ? 2
+                            : 2,
                 })}
                 onFocus={focused =>
                   this.setState({
                     activeSeriesIndex: focused ? focused.series.id : -1,
+                    activeDatumIndex: focused ? focused.index : -1,
                   })
                 }
                 renderSVG={() => defs}

@@ -237,7 +237,7 @@ export default ({
       }
 
       // Not we need to precalculate all of the possible status styles by
-      // calling the seemingly 'live' getStyles, and getDatumStyles callbacks ;)
+      // calling the seemingly 'live' getSeriesStyle, and getDatumStyle callbacks ;)
       stackData = stackData.map((series, i) => {
         if (!series.Component.buildStyles) {
           throw new Error(

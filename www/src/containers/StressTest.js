@@ -56,7 +56,7 @@ export default class StressTest extends React.Component {
                       secondaryCursor={{
                         value: secondaryCursorValue,
                       }}
-                      getStyles={series => ({
+                      getSeriesStyle={series => ({
                         opacity:
                           activeSeriesIndex > -1 ? (series.id === activeSeriesIndex ? 1 : 0.1) : 1,
                       })}

@@ -149,7 +149,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     return (
       <stack.Component
         key={stack.id}
-        {...seriesOptions[stack.seriesIndex]}
+        {...seriesOptions[stack.index]}
         series={stack}
         stackData={stackData}
       />

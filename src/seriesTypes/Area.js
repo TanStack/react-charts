@@ -1,7 +1,7 @@
 import React from 'react'
 import withHooks, {
   useMemo,
-  useDeepMemo,
+  usePropsMemo,
   useSeriesStyle,
   useDatumStyle
 } from '../utils/hooks'
@@ -52,7 +52,7 @@ function Area({ series, showOrphans, curve }) {
       ...style.line
     }
   }
-  const renderedAreaPath = useDeepMemo(
+  const renderedAreaPath = usePropsMemo(
     () => <Path {...areaPathProps} />,
     areaPathProps
   )
@@ -66,7 +66,7 @@ function Area({ series, showOrphans, curve }) {
       fill: 'none'
     }
   }
-  const renderedLinePath = useDeepMemo(
+  const renderedLinePath = usePropsMemo(
     () => <Path {...linePathProps} />,
     linePathProps
   )
@@ -179,7 +179,7 @@ const OrphanLine = withHooks(function OrphanLine({ datum, style, all, index }) {
     }
   }
 
-  return useDeepMemo(() => <Line {...lineProps} />, lineProps)
+  return usePropsMemo(() => <Line {...lineProps} />, lineProps)
 })
 
 export default withHooks(Area)

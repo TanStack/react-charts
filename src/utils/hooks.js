@@ -1,18 +1,23 @@
 import { useHooks, useRef, useContext } from 'use-react-hooks'
 //
-import deepEqual from './deepEqual'
 import ChartContext from './ChartContext'
+import Utils from '../utils/Utils'
 
 export default useHooks
 export * from 'use-react-hooks'
 
-export function useDeepMemo(fn, obj) {
-  return fn()
-  const watchRef = useRef()
+export function usePropsMemo(fn, obj = {}) {
+  const watchRef = useRef({
+    style: {},
+    props: {}
+  })
   const valueRef = useRef()
 
-  const changed = !deepEqual(watchRef.current, obj)
-  if (changed) {
+  const { style = {}, ...props } = obj
+  if (
+    Utils.shallowDiff(watchRef.current.style, style) ||
+    Utils.shallowDiff(watchRef.current.props, props)
+  ) {
     watchRef.current = obj
     valueRef.current = fn()
   }
@@ -28,11 +33,11 @@ export function useWhen(obj, when) {
 }
 
 export function useSeriesStyle(series) {
-  const [{ focused, getStyles }] = useContext(ChartContext)
-  return series.getStatusStyle(focused, getStyles)
+  const [{ focused, getSeriesStyle }] = useContext(ChartContext)
+  return series.getStatusStyle(focused, getSeriesStyle)
 }
 
 export function useDatumStyle(datum) {
-  const [{ focused, getDatumStyles }] = useContext(ChartContext)
-  return datum.getStatusStyle(focused, getDatumStyles)
+  const [{ focused, getDatumStyle }] = useContext(ChartContext)
+  return datum.getStatusStyle(focused, getDatumStyle)
 }

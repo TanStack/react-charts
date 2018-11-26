@@ -15,9 +15,8 @@ export default {
   translateY,
   translate,
   identity,
-  throttle
-  // usePrevious,
-  // useDidChange,
+  throttle,
+  shallowDiff
 }
 
 function getStatus(item, focused) {
@@ -332,23 +331,17 @@ function throttle(fn) {
   }
 }
 
-// function usePrevious(item) {
-//   const ref = useRef()
-//   useEffect(() => {
-//     ref.current = item
-//   })
-//   return ref.current
-// }
+function shallowDiff(a, b) {
+  const aKeys = Object.keys(a)
+  const bKeys = Object.keys(b)
 
-// function useDidChange(obj) {
-//   const prev = usePrevious(obj)
-//   const changed = {}
-//   Object.keys(obj).forEach(key => {
-//     const prevVal = prev ? prev[key] : undefined
-//     const val = obj ? obj[key] : undefined
-//     if (prevVal !== val) {
-//       changed[key] = [prevVal, val]
-//     }
-//   })
-//   return changed
-// }
+  if (aKeys.length !== bKeys.length) {
+    return true
+  }
+
+  return Object.keys(a).some(key => {
+    if (a[key] !== b[key]) {
+      return true
+    }
+  })
+}

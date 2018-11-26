@@ -65,16 +65,19 @@ Pie.plotDatum = (datum, { primaryAxis }) => {
   return datum
 }
 
-Pie.buildStyles = (series, { getStyles, getDatumStyles, defaultColors }) => {
+Pie.buildStyles = (
+  series,
+  { getSeriesStyle, getDatumStyle, defaultColors }
+) => {
   series.getStatusStyle = status => {
-    series.style = Utils.getStatusStyle(series, status, getStyles)
+    series.style = Utils.getStatusStyle(series, status, getSeriesStyle)
     return series.style
   }
 
   // We also need to decorate each datum in the same fashion
   series.datums.forEach(datum => {
     datum.getStatusStyle = status => {
-      datum.style = Utils.getStatusStyle(datum, status, getDatumStyles, {
+      datum.style = Utils.getStatusStyle(datum, status, getDatumStyle, {
         color: defaultColors[datum.index % (defaultColors.length - 1)]
       })
       return datum.style

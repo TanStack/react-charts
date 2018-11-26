@@ -1,7 +1,7 @@
 import React from 'react'
 import withHooks, {
   useContext,
-  useDeepMemo,
+  usePropsMemo,
   useSeriesStyle,
   useDatumStyle
 } from '../utils/hooks'
@@ -149,7 +149,7 @@ const BarPiece = withHooks(function BarPiece({ datum, barOffset, style }) {
     y2: Number.isNaN(y2) ? null : y2
   }
 
-  return useDeepMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
+  return usePropsMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
 })
 
 export default withHooks(Bar)

@@ -65,7 +65,7 @@ class Story extends Component {
                               { type: 'ordinal', primary: true, position: 'bottom' },
                               { type: 'linear', stacked: true, position: 'left' },
                             ]}
-                            getDatumStyles={datum => ({
+                            getDatumStyle={datum => ({
                               color: datum.originalDatum.color,
                             })}
                             primaryCursor={{

@@ -1,7 +1,7 @@
 import React from 'react'
 import withHooks, {
   useMemo,
-  useDeepMemo,
+  usePropsMemo,
   useSeriesStyle,
   useDatumStyle
 } from '../utils/hooks'
@@ -46,7 +46,7 @@ function Line({ series, showPoints, curve }) {
       fill: 'none'
     }
   }
-  const renderedPath = useDeepMemo(() => <Path {...pathProps} />, pathProps)
+  const renderedPath = usePropsMemo(() => <Path {...pathProps} />, pathProps)
 
   return (
     <g>
@@ -127,7 +127,7 @@ const Point = withHooks(function Point({ datum, style }) {
       ...dataStyle.circle
     }
   }
-  return useDeepMemo(() => <Circle {...circleProps} />, circleProps)
+  return usePropsMemo(() => <Circle {...circleProps} />, circleProps)
 })
 
 export default withHooks(Line)
