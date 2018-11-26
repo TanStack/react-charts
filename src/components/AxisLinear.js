@@ -66,7 +66,6 @@ function AxisLinear({
   const visibleLabelStepRef = useRef()
 
   rendersRef.current++
-  console.log(rendersRef.current)
 
   useEffect(() => {
     RAF(() => {
