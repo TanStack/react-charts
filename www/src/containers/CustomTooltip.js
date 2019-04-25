@@ -18,7 +18,6 @@ class Story extends Component {
                 { position: 'left', type: 'linear', stacked: true },
               ]}
               primaryCursor
-              secondaryCursor
               tooltip={{
                 render: ({ datum, primaryAxis, getStyle }) =>
                   datum ? (
