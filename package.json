@@ -16,6 +16,7 @@
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
     "build": "rollup -c",
+    "buildDocs": "cd www && yarn && yarn build",
     "start": "rollup -c -w",
     "prepare": "yarn build",
     "release": "yarn publish",
