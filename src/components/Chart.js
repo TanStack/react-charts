@@ -1,16 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import withHooks, {
-  useEffect,
-  useState,
-  useMemo,
-  useWhen
-} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 
-import useHyperResponsive from '../utils/useHyperResponsive'
+import useHyperResponsive from '../hooks/useHyperResponsive'
+import useLatestRef from '../hooks/useLatestRef'
+import useLatest from '../hooks/useLatest'
+import usePrevious from '../hooks/usePrevious'
+
 import ChartInner from './ChartInner'
 
 import calculateMaterializeData from './pipeline/calculateMaterializeData'
@@ -31,42 +29,39 @@ import {
   groupModeSecondary
 } from '../utils/Constants'
 
-function Chart(
-  {
-    data,
-    groupMode,
-    showVoronoi,
-    dark,
-    series,
-    axes,
-    primaryCursor,
-    secondaryCursor,
-    tooltip,
-    brush,
-    renderSVG,
-    getSeries,
-    getDatums,
-    getLabel,
-    getSeriesID,
-    getPrimary,
-    getSecondary,
-    getR,
-    getPrimaryAxisID,
-    getSecondaryAxisID,
-    getSeriesStyle,
-    getDatumStyle,
-    onClick,
-    onFocus,
-    onHover,
-    getSeriesOrder,
-    ...rest
-  },
-  ref
-) {
+export default function Chart({
+  data,
+  groupMode,
+  showVoronoi,
+  dark,
+  series,
+  axes,
+  primaryCursor,
+  secondaryCursor,
+  tooltip,
+  brush,
+  renderSVG,
+  getSeries,
+  getDatums,
+  getLabel,
+  getSeriesID,
+  getPrimary,
+  getSecondary,
+  getR,
+  getPrimaryAxisID,
+  getSecondaryAxisID,
+  getSeriesStyle,
+  getDatumStyle,
+  onClick,
+  onFocus,
+  onHover,
+  getSeriesOrder,
+  ...rest
+}) {
   let [
     { focused, axisDimensions, offset: offsetState, padding, pointer },
     setChartState
-  ] = useState({
+  ] = React.useState({
     focused: null,
     axisDimensions: {},
     padding: {},
@@ -74,11 +69,38 @@ function Chart(
     pointer: {}
   })
 
-  const [{ width, height }, handleRef] = useHyperResponsive()
+  const onClickRef = useLatestRef(onClick)
+  const onFocusRef = useLatestRef(onFocus)
+  const onHoverRef = useLatestRef(onHover)
+
+  const responsiveElRef = React.useRef()
+  const [{ width, height }] = useHyperResponsive(responsiveElRef)
+
+  getSeries = React.useCallback(Utils.normalizeGetter(getSeries), getSeries)
+  getSeriesID = React.useCallback(
+    Utils.normalizeGetter(getSeriesID),
+    getSeriesID
+  )
+  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), getLabel)
+  getPrimaryAxisID = React.useCallback(
+    Utils.normalizeGetter(getPrimaryAxisID),
+    getPrimaryAxisID
+  )
+  getSecondaryAxisID = React.useCallback(
+    Utils.normalizeGetter(getSecondaryAxisID),
+    getSecondaryAxisID
+  )
+  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), getDatums)
+  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), getPrimary)
+  getSecondary = React.useCallback(
+    Utils.normalizeGetter(getSecondary),
+    getSecondary
+  )
+  getR = React.useCallback(Utils.normalizeGetter(getR), getR)
 
   let materializedData = calculateMaterializeData({
-    getSeries,
     data,
+    getSeries,
     getSeriesID,
     getLabel,
     getPrimaryAxisID,
@@ -132,31 +154,25 @@ function Chart(
     groupMode
   })
 
-  pointer = useMemo(
-    () => {
-      return {
-        ...pointer,
-        axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
-          axis,
-          value: axis.scale.invert
-            ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
-            : null
-        }))
-      }
-    },
-    [pointer]
-  )
+  pointer = React.useMemo(() => {
+    return {
+      ...pointer,
+      axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
+        axis,
+        value: axis.scale.invert
+          ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
+          : null
+      }))
+    }
+  }, [pointer, primaryAxes, secondaryAxes])
 
-  focused = useMemo(
-    () => {
-      // Get the closest focus datum out of the datum group
-      return focused ? Utils.getClosestPoint(pointer, focused.group) : null
-    },
-    [focused, pointer]
-  )
+  focused = React.useMemo(() => {
+    // Get the closest focus datum out of the datum group
+    return focused ? Utils.getClosestPoint(pointer, focused.group) : null
+  }, [focused, pointer])
 
   // keep the previous focused value around for animations
-  const lastFocused = useWhen(focused, focused)
+  const latestFocus = useLatest(focused, focused)
 
   // Calculate Tooltip
   tooltip = calculateTooltip({
@@ -180,92 +196,133 @@ function Chart(
     stackData
   })
 
-  const originalOnClick = onClick
-  onClick = e => {
-    if (!originalOnClick) {
-      return
+  React.useEffect(() => {
+    if (onFocusRef.current) {
+      onFocusRef.current(focused)
     }
-    e && e.persist && e.persist()
-    originalOnClick(focused, e)
-  }
+  }, [onFocusRef, focused])
 
-  useEffect(
-    () => {
-      if (onFocus) {
-        onFocus(focused)
-      }
-    },
-    [focused]
-  )
+  React.useEffect(() => {
+    if (onHoverRef.current) {
+      onHoverRef.current(pointer)
+    }
+  }, [onHoverRef, pointer])
 
-  useEffect(
-    () => {
-      if (onHover) {
-        onHover(pointer)
-      }
-    },
-    [pointer]
-  )
+  const previousDragging = usePrevious(pointer.dragging)
 
-  useEffect(
-    () => {
-      if (brush && pointer.released) {
-        if (Math.abs(pointer.sourceX - pointer.x) < 20) {
-          return
-        }
-        brush.onSelect({
-          pointer: pointer.released,
-          start: primaryAxes[0].scale.invert(pointer.sourceX),
-          end: primaryAxes[0].scale.invert(pointer.x)
-        })
+  React.useEffect(() => {
+    if (brush && previousDragging && !pointer.dragging) {
+      console.log(pointer)
+      if (Math.abs(pointer.sourceX - pointer.x) < 20) {
+        return
       }
-    },
-    [pointer.released]
-  )
+      brush.onSelect({
+        pointer: pointer.released,
+        start: primaryAxes[0].scale.invert(pointer.sourceX),
+        end: primaryAxes[0].scale.invert(pointer.x)
+      })
+    }
+  }, [
+    brush,
+    pointer,
+    pointer.released,
+    pointer.sourceX,
+    pointer.x,
+    previousDragging,
+    primaryAxes
+  ])
 
   // Decorate the chartState with computed values (or ones we just
   // want to pass down through context)
-  const chartState = {
-    focused,
-    lastFocused,
-    pointer,
-    tooltip,
-    axisDimensions,
-    offset,
-    padding,
-    width,
-    height,
-    brush,
-    groupMode,
-    showVoronoi,
-    materializedData,
-    stackData,
-    primaryAxes,
-    secondaryAxes,
-    primaryCursor,
-    secondaryCursor,
-    gridX,
-    gridY,
-    gridWidth,
-    gridHeight,
-    dark,
-    renderSVG,
-    xKey,
-    yKey,
-    xAxes,
-    yAxes,
-    onClick,
-    getSeriesStyle,
-    getDatumStyle,
-    seriesOptions,
-    getSeriesOrder
-  }
+  const chartState = React.useMemo(
+    () => ({
+      focused,
+      latestFocus,
+      pointer,
+      tooltip,
+      axisDimensions,
+      offset,
+      padding,
+      width,
+      height,
+      brush,
+      groupMode,
+      showVoronoi,
+      materializedData,
+      stackData,
+      primaryAxes,
+      secondaryAxes,
+      primaryCursor,
+      secondaryCursor,
+      gridX,
+      gridY,
+      gridWidth,
+      gridHeight,
+      dark,
+      renderSVG,
+      xKey,
+      yKey,
+      xAxes,
+      yAxes,
+      onClickRef,
+      getSeriesStyle,
+      getDatumStyle,
+      seriesOptions,
+      getSeriesOrder
+    }),
+    [
+      axisDimensions,
+      brush,
+      dark,
+      focused,
+      getDatumStyle,
+      getSeriesOrder,
+      getSeriesStyle,
+      gridHeight,
+      gridWidth,
+      gridX,
+      gridY,
+      groupMode,
+      height,
+      latestFocus,
+      materializedData,
+      offset,
+      onClickRef,
+      padding,
+      pointer,
+      primaryAxes,
+      primaryCursor,
+      renderSVG,
+      secondaryAxes,
+      secondaryCursor,
+      seriesOptions,
+      showVoronoi,
+      stackData,
+      tooltip,
+      width,
+      xAxes,
+      xKey,
+      yAxes,
+      yKey
+    ]
+  )
 
-  const chartStateContextValue = [chartState, setChartState]
+  const chartStateContextValue = React.useMemo(
+    () => [chartState, setChartState],
+    [chartState]
+  )
 
   return (
     <ChartContext.Provider value={chartStateContextValue}>
-      <ChartInner handleRef={handleRef} {...rest} />
+      <ChartInner
+        ref={responsiveElRef}
+        {...rest}
+        onClick={e => {
+          if (onClickRef.current) {
+            onClickRef.current(focused)
+          }
+        }}
+      />
     </ChartContext.Provider>
   )
 }
@@ -320,5 +377,3 @@ Chart.defaultProps = {
   groupMode: groupModePrimary,
   showVoronoi: false
 }
-
-export default withHooks(Chart)

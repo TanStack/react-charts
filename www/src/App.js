@@ -1,15 +1,18 @@
 import React from 'react'
-import { hot } from 'react-hot-loader'
-import styled, { injectGlobal } from 'react-emotion'
+import styled, { createGlobalStyle } from 'styled-components'
 import { Router } from '@reach/router'
+import { addPrefetchExcludes } from 'react-static'
 //
 import 'react-resizable/css/styles.css'
-import './styles.css'
 
 import Home from 'containers/Home'
 import Examples from 'containers/Examples'
 
-injectGlobal`
+import './styles.css'
+
+addPrefetchExcludes(['examples/'])
+
+const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
   body {
@@ -63,9 +66,10 @@ const AppStyles = styled('div')`
   min-height: 100vh;
 `
 
-export function App () {
+export default function App () {
   return (
     <AppStyles>
+      <GlobalStyles />
       <Router>
         <Home path="/" />
         <Examples path="examples/*" />
@@ -73,5 +77,3 @@ export function App () {
     </AppStyles>
   )
 }
-
-export default hot(module)(App)

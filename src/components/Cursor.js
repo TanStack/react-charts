@@ -1,29 +1,31 @@
 import React from 'react'
-import withHooks, {
-  useContext,
-  useRef,
-  useEffect,
-  useWhen
-} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 
+import useLatest from '../hooks/useLatest'
+
 const getLineBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)'
+
 const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
-function Cursor({ primary }) {
+export default function Cursor({ primary }) {
   const [
-    { primaryCursor, secondaryCursor, focused, lastFocused, gridX, gridY, dark }
-  ] = useContext(ChartContext)
+    {
+      primaryCursor,
+      secondaryCursor,
+      focused,
+      latestFocused,
+      gridX,
+      gridY,
+      dark
+    }
+  ] = React.useContext(ChartContext)
 
+  const resolvedFocused = focused || latestFocused
   const cursor = primary ? primaryCursor : secondaryCursor
-
-  if (!cursor) {
-    return null
-  }
 
   const {
     showLine,
@@ -34,10 +36,21 @@ function Cursor({ primary }) {
     axis,
     siblingAxis,
     resolvedShow
-  } = cursor
+  } = cursor || {}
 
-  const resolvedFocused = focused || lastFocused
-  const lastValue = useWhen(resolvedValue, typeof resolvedValue !== 'undefined')
+  const latestValue = useLatest(
+    resolvedValue,
+    typeof resolvedValue !== 'undefined'
+  )
+
+  const previousShowRef = React.useRef()
+  React.useEffect(() => {
+    previousShowRef.current = resolvedShow
+  }, [resolvedShow])
+
+  if (!cursor) {
+    return null
+  }
 
   // Should we animate?
   const animated = snap || axis.type === 'ordinal'
@@ -56,7 +69,7 @@ function Cursor({ primary }) {
 
   // Vertical alignment
   if (axis.vertical) {
-    y = axis.scale(lastValue)
+    y = axis.scale(latestValue)
     x1 = siblingRange[0]
     x2 = siblingRange[1]
     y1 = y - 1
@@ -69,7 +82,7 @@ function Cursor({ primary }) {
       alignPctY = -50
     }
   } else {
-    x = axis.scale(lastValue)
+    x = axis.scale(latestValue)
     x1 = x - 1
     x2 = x + axis.cursorSize + 1
     y1 = siblingRange[0]
@@ -87,20 +100,20 @@ function Cursor({ primary }) {
 
   renderProps.formattedValue = String(
     axis.vertical
-      ? typeof lastValue !== 'undefined'
+      ? typeof latestValue !== 'undefined'
         ? axis.format(
+            axis.stacked && !primary && resolvedFocused
+              ? resolvedFocused.totalValue
+              : latestValue
+          )
+        : ''
+      : typeof latestValue !== 'undefined'
+      ? axis.format(
           axis.stacked && !primary && resolvedFocused
             ? resolvedFocused.totalValue
-            : lastValue
+            : latestValue
         )
-        : ''
-      : typeof lastValue !== 'undefined'
-        ? axis.format(
-          axis.stacked && !primary && resolvedFocused
-            ? resolvedFocused.totalValue
-            : lastValue
-        )
-        : ''
+      : ''
   )
 
   const lineStartX = Math.min(x1, x2)
@@ -118,11 +131,6 @@ function Cursor({ primary }) {
 
   const lineHeight = Math.max(lineEndY - lineStartY, 0)
   const lineWidth = Math.max(lineEndX - lineStartX, 0)
-
-  const previousShowRef = useRef()
-  useEffect(() => {
-    previousShowRef.current = resolvedShow
-  })
 
   let animateCoords
   if (previousShowRef.current === resolvedShow) {
@@ -142,7 +150,7 @@ function Cursor({ primary }) {
         opacity: resolvedShow ? 1 : 0,
         transition: 'all .3s ease'
       }}
-      className='Cursor'
+      className="Cursor"
     >
       {/* Render the cursor line */}
       {showLine ? (
@@ -178,7 +186,7 @@ function Cursor({ primary }) {
               padding: '5px',
               fontSize: '10px',
               background: getBackgroundColor(dark),
-              color: dark ? 'black' : 'white',
+              color: getBackgroundColor(!dark),
               borderRadius: '3px',
               position: 'relative',
               transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0)`,
@@ -192,5 +200,3 @@ function Cursor({ primary }) {
     </div>
   )
 }
-
-export default withHooks(Cursor)

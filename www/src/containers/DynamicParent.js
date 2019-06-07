@@ -2,27 +2,53 @@ import React from 'react'
 
 //
 
-import ChartConfig from 'components/ChartConfig'
-
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-export default () => (
-  <ChartConfig resizable={false}>
-    {({ data }) => (
+export default () => {
+  const { data, randomizeData } = useChartConfig({
+    series: 10
+  })
+
+  const series = React.useMemo(
+    () => ({
+      showPoints: false
+    }),
+    []
+  )
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'time', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  return (
+    <>
+      <p>
+        This example demos a chart's ability to position itself responsively in
+        elements while respecting the box-model (margin, padding, and borders)
+      </p>
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <br />
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           padding: '12px',
           border: '2px solid black',
-          height: '400px',
+          height: '400px'
         }}
       >
         <div
           style={{
             flex: '0 0 auto',
             padding: '10px',
-            border: '1px solid red',
+            border: '1px solid red'
           }}
         >
           Header
@@ -32,21 +58,12 @@ export default () => (
             flex: 2,
             border: '5px solid blue',
             maxHeight: '400px',
-            margin: '10px',
+            margin: '10px'
           }}
         >
-          <Chart
-            data={data}
-            axes={[
-              { primary: true, position: 'bottom', type: 'time' },
-              { position: 'left', type: 'linear' },
-            ]}
-            primaryCursor
-            secondaryCursor
-            tooltip
-          />
+          <Chart data={data} series={series} axes={axes} tooltip />
         </div>
       </div>
-    )}
-  </ChartConfig>
-)
+    </>
+  )
+}

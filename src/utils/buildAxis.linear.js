@@ -294,10 +294,10 @@ export default function buildAxisLinear({
       position === positionBottom
         ? -gridHeight
         : position === positionLeft
-          ? gridWidth
-          : position === positionTop
-            ? gridHeight
-            : -gridWidth,
+        ? gridWidth
+        : position === positionTop
+        ? gridHeight
+        : -gridWidth,
     directionMultiplier:
       position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? Utils.translateX : Utils.translateY,

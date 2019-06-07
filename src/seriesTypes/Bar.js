@@ -1,18 +1,16 @@
 import React from 'react'
-import withHooks, {
-  useContext,
-  usePropsMemo,
-  useSeriesStyle,
-  useDatumStyle
-} from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 
+import usePropsMemo from '../hooks/usePropsMemo'
+import useSeriesStyle from '../hooks/useSeriesStyle'
+import useDatumStyle from '../hooks/useDatumStyle'
+
 import Rectangle from '../primitives/Rectangle'
 
-function Bar({ series }) {
-  const [{ primaryAxes }] = useContext(ChartContext)
+export default function Bar({ series }) {
+  const [{ primaryAxes }] = React.useContext(ChartContext)
 
   const style = useSeriesStyle(series)
 
@@ -21,7 +19,7 @@ function Bar({ series }) {
     : primaryAxes[0]
 
   return (
-    <g className='series bar'>
+    <g className="series bar">
       {series.datums.map((datum, i) => {
         return (
           <BarPiece
@@ -111,8 +109,8 @@ Bar.buildStyles = (series, { defaultColors }) => {
   Utils.buildStyleGetters(series, defaults)
 }
 
-const BarPiece = withHooks(function BarPiece({ datum, barOffset, style }) {
-  const [{ primaryAxes }] = useContext(ChartContext)
+function BarPiece({ datum, barOffset, style }) {
+  const [{ primaryAxes }] = React.useContext(ChartContext)
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
@@ -150,6 +148,4 @@ const BarPiece = withHooks(function BarPiece({ datum, barOffset, style }) {
   }
 
   return usePropsMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
-})
-
-export default withHooks(Bar)
+}

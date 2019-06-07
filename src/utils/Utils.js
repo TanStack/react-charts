@@ -1,5 +1,3 @@
-import RAF from 'raf'
-
 export default {
   getStatus,
   getStatusStyle,
@@ -15,7 +13,6 @@ export default {
   translateY,
   translate,
   identity,
-  throttle,
   shallowDiff
 }
 
@@ -317,18 +314,6 @@ function translate(x, y) {
 
 function identity(d) {
   return d
-}
-
-function throttle(fn) {
-  let instance
-  return (...args) => {
-    if (!instance) {
-      instance = RAF(() => {
-        fn(...args)
-        instance = null
-      })
-    }
-  }
 }
 
 function shallowDiff(a, b) {

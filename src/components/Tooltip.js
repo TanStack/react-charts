@@ -1,5 +1,4 @@
 import React from 'react'
-import withHooks, { useContext, useEffect, useRef } from '../utils/hooks'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
@@ -10,8 +9,8 @@ const triangleSize = 7
 const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
-function Tooltip() {
-  const [chartState] = useContext(ChartContext)
+export default function Tooltip() {
+  const [chartState] = React.useContext(ChartContext)
 
   const {
     primaryAxes,
@@ -22,14 +21,14 @@ function Tooltip() {
     gridHeight,
     dark,
     focused,
-    lastFocused,
+    latestFocused,
     getDatumStyle,
     tooltip
   } = chartState
 
-  if (!tooltip) {
-    return null
-  }
+  const elRef = React.useRef()
+  const tooltipElRef = React.useRef()
+  const previousShowRef = React.useRef()
 
   const {
     align,
@@ -41,12 +40,17 @@ function Tooltip() {
     render,
     anchor,
     show
-  } = tooltip
+  } = tooltip || {}
 
-  const elRef = useRef()
-  const tooltipElRef = useRef()
+  React.useEffect(() => {
+    previousShowRef.current = show
+  }, [show])
 
-  const resolvedFocused = focused || lastFocused
+  if (!tooltip) {
+    return null
+  }
+
+  const resolvedFocused = focused || latestFocused
 
   let alignX = 0
   let alignY = -50
@@ -195,6 +199,9 @@ function Tooltip() {
   } else if (resolvedAlign === 'topLeft') {
     alignX = -100
     alignY = -100
+  } else if (resolvedAlign === 'center') {
+    alignX = -50
+    alignY = -50
   }
 
   if (!resolvedArrowPosition) {
@@ -317,11 +324,6 @@ function Tooltip() {
 
   const renderedChildren = render(renderProps)
 
-  const previousShowRef = useRef()
-  useEffect(() => {
-    previousShowRef.current = show
-  })
-
   let animateCoords
   if (previousShowRef.current === show) {
     animateCoords = true
@@ -329,7 +331,7 @@ function Tooltip() {
 
   return (
     <div
-      className='tooltip-wrap'
+      className="tooltip-wrap"
       style={{
         pointerEvents: 'none',
         position: 'absolute',
@@ -392,5 +394,3 @@ function Tooltip() {
     </div>
   )
 }
-
-export default withHooks(Tooltip)

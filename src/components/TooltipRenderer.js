@@ -137,13 +137,13 @@ export default function TooltipRenderer(props) {
                     marginRight: '5px'
                   }}
                 >
-                  <svg width='16' height='16'>
+                  <svg width="16" height="16">
                     <circle
-                      cx='8'
-                      cy='8'
+                      cx="8"
+                      cy="8"
+                      r="7"
                       style={{
                         ...getStyle(sortedDatum),
-                        r: 7,
                         stroke: dark ? 'black' : 'white',
                         strokeWidth: active ? 2 : 1
                       }}

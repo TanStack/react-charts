@@ -1,68 +1,69 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 //
 
-import ChartConfig from 'components/ChartConfig'
-
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-export default class extends Component {
-  constructor () {
-    super()
-    this.state = {
-      min: null,
-      max: null,
-    }
-  }
-  render () {
-    const { min, max } = this.state
+export default () => {
+  const [{ min, max }, setState] = React.useState({
+    min: null,
+    max: null
+  })
 
-    return (
-      <div>
-        <button
-          onClick={() =>
-            this.setState({
-              min: null,
-              max: null,
-            })
-          }
-        >
-          Reset Zoom
-        </button>
+  const { data, randomizeData } = useChartConfig({
+    series: 10
+  })
 
-        <br />
-        <br />
-        <ChartConfig dataType="time">
-          {({ data }) => (
-            <Chart
-              data={data}
-              axes={[
-                {
-                  primary: true,
-                  type: 'time',
-                  position: 'bottom',
-                  hardMin: min,
-                  hardMax: max,
-                },
-                {
-                  type: 'linear',
-                  position: 'left',
-                },
-              ]}
-              primaryCursor
-              tooltip
-              brush={{
-                onSelect: brushData => {
-                  this.setState({
-                    min: Math.min(brushData.start, brushData.end),
-                    max: Math.max(brushData.start, brushData.end),
-                  })
-                },
-              }}
-            />
-          )}
-        </ChartConfig>
-      </div>
-    )
-  }
+  const axes = React.useMemo(
+    () => [
+      {
+        primary: true,
+        type: 'time',
+        position: 'bottom',
+        hardMin: min,
+        hardMax: max
+      },
+      {
+        type: 'linear',
+        position: 'left'
+      }
+    ],
+    [max, min]
+  )
+
+  const brush = React.useMemo(
+    () => ({
+      onSelect: brushData => {
+        setState({
+          min: Math.min(brushData.start, brushData.end),
+          max: Math.max(brushData.start, brushData.end)
+        })
+      }
+    }),
+    []
+  )
+
+  return (
+    <>
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <button
+        onClick={() =>
+          setState({
+            min: null,
+            max: null
+          })
+        }
+      >
+        Reset Zoom
+      </button>
+      <br />
+      <br />
+      <Box>
+        <Chart data={data} axes={axes} primaryCursor tooltip brush={brush} />
+      </Box>
+    </>
+  )
 }

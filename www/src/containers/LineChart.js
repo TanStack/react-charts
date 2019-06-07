@@ -2,25 +2,38 @@ import React from 'react'
 
 //
 
-import ChartConfig from 'components/ChartConfig'
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-export default () => (
-  <div>
-    <ChartConfig series={10}>
-      {({ data }) => (
-        <Chart
-          data={data}
-          series={{
-            showPoints: false,
-          }}
-          axes={[
-            { primary: true, type: 'time', position: 'bottom' },
-            { type: 'linear', position: 'left' },
-          ]}
-          tooltip
-        />
-      )}
-    </ChartConfig>
-  </div>
-)
+export default () => {
+  const { data, randomizeData } = useChartConfig({
+    series: 10
+  })
+
+  const series = React.useMemo(
+    () => ({
+      showPoints: false
+    }),
+    []
+  )
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'time', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  return (
+    <>
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <br />
+      <Box>
+        <Chart data={data} series={series} axes={axes} tooltip />
+      </Box>
+    </>
+  )
+}

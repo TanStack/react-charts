@@ -1,4 +1,4 @@
-import { useMemo } from 'use-react-hooks'
+import React from 'react'
 import PropTypes from 'prop-types'
 //
 import buildAxis from '../../utils/buildAxis'
@@ -62,7 +62,7 @@ export default ({ axes, materializedData, gridHeight, gridWidth }) => {
   const secondaryAxesHashes = JSON.stringify(preSecondaryAxes)
 
   // Calculate primary axes
-  const primaryAxes = useMemo(
+  const primaryAxes = React.useMemo(
     () => {
       return prePrimaryAxes.map((axis, i) => {
         return buildAxis({
@@ -73,10 +73,11 @@ export default ({ axes, materializedData, gridHeight, gridWidth }) => {
         })
       })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [primaryAxesHashes, materializedData, gridHeight, gridWidth]
   )
   // Calculate secondary axes
-  const secondaryAxes = useMemo(
+  const secondaryAxes = React.useMemo(
     () => {
       return preSecondaryAxes.map((axis, i) => {
         return buildAxis({
@@ -88,6 +89,7 @@ export default ({ axes, materializedData, gridHeight, gridWidth }) => {
         })
       })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [secondaryAxesHashes, materializedData, gridHeight, gridWidth]
   )
 

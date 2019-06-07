@@ -24,17 +24,17 @@ class AxisPie extends React.Component {
     outerPadding: 10,
     cornerRadius: 1,
     arcPadding: 0.2,
-    seriesPadding: 0.2,
+    seriesPadding: 0.2
   }
   // Lifecycle
-  constructor () {
+  constructor() {
     super()
     this.updateScale = updateScale.bind(this)
   }
-  componentDidMount () {
+  componentDidMount() {
     this.updateScale(this.props)
   }
-  componentDidUpdate (oldProps) {
+  componentDidUpdate(oldProps) {
     // If any of the following change,
     // we need to update the axis
     if (
@@ -49,7 +49,7 @@ class AxisPie extends React.Component {
       this.updateStackData(this.props)
     }
   }
-  render () {
+  render() {
     // TODO: This is where permanent labels and lines will be drawn
     return null
   }
@@ -58,11 +58,11 @@ class AxisPie extends React.Component {
 export default ChartConnect(() => {
   const selectors = {
     gridWidth: Selectors.gridWidth(),
-    gridHeight: Selectors.gridHeight(),
+    gridHeight: Selectors.gridHeight()
   }
   return state => ({
     materializedData: state.materializedData,
     width: selectors.gridWidth(state),
-    height: selectors.gridHeight(state),
+    height: selectors.gridHeight(state)
   })
 })(AxisPie)

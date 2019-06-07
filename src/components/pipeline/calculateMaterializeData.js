@@ -1,10 +1,9 @@
-import { useMemo } from 'use-react-hooks'
+import React from 'react'
 //
-import Utils from '../../utils/Utils'
 
 export default ({
-  getSeries,
   data,
+  getSeries,
   getSeriesID,
   getLabel,
   getPrimaryAxisID,
@@ -14,94 +13,82 @@ export default ({
   getSecondary,
   getR
 }) => {
-  return useMemo(
-    () => {
-      getSeries = Utils.normalizeGetter(getSeries)
-      getSeriesID = Utils.normalizeGetter(getSeriesID)
-      getLabel = Utils.normalizeGetter(getLabel)
-      getPrimaryAxisID = Utils.normalizeGetter(getPrimaryAxisID)
-      getSecondaryAxisID = Utils.normalizeGetter(getSecondaryAxisID)
-      getDatums = Utils.normalizeGetter(getDatums)
-      getPrimary = Utils.normalizeGetter(getPrimary)
-      getSecondary = Utils.normalizeGetter(getSecondary)
-      getR = Utils.normalizeGetter(getR)
+  return React.useMemo(() => {
+    // getSeries
+    const originalData = getSeries(data)
+    const materializedData = []
 
-      // getSeries
-      const originalData = getSeries(data)
-      const materializedData = []
+    // First access the data, and provide it to the context
+    for (
+      let seriesIndex = 0;
+      seriesIndex < originalData.length;
+      seriesIndex++
+    ) {
+      const originalSeries = originalData[seriesIndex]
+      const seriesID = getSeriesID(originalSeries, seriesIndex, data)
+      const seriesLabel = getLabel(originalSeries, seriesIndex, data)
+      const primaryAxisID = getPrimaryAxisID(originalSeries, seriesIndex, data)
+      const secondaryAxisID = getSecondaryAxisID(
+        originalSeries,
+        seriesIndex,
+        data
+      )
+      const originalDatums = getDatums(originalSeries, seriesIndex, data)
+      const datums = []
 
-      // First access the data, and provide it to the context
       for (
-        let seriesIndex = 0;
-        seriesIndex < originalData.length;
-        seriesIndex++
+        let datumIndex = 0;
+        datumIndex < originalDatums.length;
+        datumIndex++
       ) {
-        const originalSeries = originalData[seriesIndex]
-        const seriesID = getSeriesID(originalSeries, seriesIndex, data)
-        const seriesLabel = getLabel(originalSeries, seriesIndex, data)
-        const primaryAxisID = getPrimaryAxisID(
+        const originalDatum = originalDatums[datumIndex]
+        datums[datumIndex] = {
           originalSeries,
           seriesIndex,
-          data
-        )
-        const secondaryAxisID = getSecondaryAxisID(
-          originalSeries,
-          seriesIndex,
-          data
-        )
-        const originalDatums = getDatums(originalSeries, seriesIndex, data)
-        const datums = []
-
-        for (
-          let datumIndex = 0;
-          datumIndex < originalDatums.length;
-          datumIndex++
-        ) {
-          const originalDatum = originalDatums[datumIndex]
-          datums[datumIndex] = {
+          seriesID,
+          seriesLabel,
+          index: datumIndex,
+          originalDatum,
+          primary: getPrimary(
+            originalDatum,
+            datumIndex,
             originalSeries,
             seriesIndex,
-            seriesID,
-            seriesLabel,
-            index: datumIndex,
+            data
+          ),
+          secondary: getSecondary(
             originalDatum,
-            primary: getPrimary(
-              originalDatum,
-              datumIndex,
-              originalSeries,
-              seriesIndex,
-              data
-            ),
-            secondary: getSecondary(
-              originalDatum,
-              datumIndex,
-              originalSeries,
-              seriesIndex,
-              data
-            ),
-            r: getR(
-              originalDatum,
-              datumIndex,
-              originalSeries,
-              seriesIndex,
-              data
-            )
-          }
-        }
-
-        materializedData[seriesIndex] = {
-          originalSeries,
-          index: seriesIndex,
-          id: seriesID,
-          label: seriesLabel,
-          primaryAxisID,
-          secondaryAxisID,
-          datums
+            datumIndex,
+            originalSeries,
+            seriesIndex,
+            data
+          ),
+          r: getR(originalDatum, datumIndex, originalSeries, seriesIndex, data)
         }
       }
 
-      return materializedData
-    },
-    [data]
-  )
+      materializedData[seriesIndex] = {
+        originalSeries,
+        index: seriesIndex,
+        id: seriesID,
+        label: seriesLabel,
+        primaryAxisID,
+        secondaryAxisID,
+        datums
+      }
+    }
+
+    return materializedData
+  }, [
+    data,
+    getDatums,
+    getLabel,
+    getPrimary,
+    getPrimaryAxisID,
+    getR,
+    getSecondary,
+    getSecondaryAxisID,
+    getSeries,
+    getSeriesID
+  ])
 }

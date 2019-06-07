@@ -1,97 +1,105 @@
-import React, { Component } from 'react'
-//
-import ChartConfig from 'components/ChartConfig'
+import React from 'react'
 
+//
+
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-class Story extends Component {
-  render () {
-    return (
-      <React.Fragment>
-        <ChartConfig>
-          {({ data }) => (
-            <Chart
-              data={data}
-              series={{ type: 'area' }}
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear', stacked: true },
-              ]}
-              primaryCursor
-              tooltip={{
-                render: ({ datum, primaryAxis, getStyle }) =>
-                  datum ? (
-                    <div
-                      style={{
-                        color: 'white',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      <h3
-                        style={{
-                          display: 'block',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {primaryAxis.format(datum.primary)}
-                      </h3>
-                      <div
-                        style={{
-                          width: '400px',
-                          height: '150px',
-                          background: 'white',
-                          display: 'flex',
-                        }}
-                      >
-                        <div
-                          style={{
-                            flex: '0 0 50%',
-                          }}
-                        >
-                          <Chart
-                            data={datum.group}
-                            series={{ type: 'bar' }}
-                            getSeries={data => [
-                              {
-                                datums: data.map(d => ({
-                                  x: d.seriesLabel,
-                                  y: d.secondary,
-                                  color: getStyle(d).fill,
-                                })),
-                              },
-                            ]}
-                            axes={[
-                              { type: 'ordinal', primary: true, position: 'bottom' },
-                              { type: 'linear', stacked: true, position: 'left' },
-                            ]}
-                            getDatumStyle={datum => ({
-                              color: datum.originalDatum.color,
-                            })}
-                            primaryCursor={{
-                              value: datum.seriesLabel,
-                            }}
-                          />
-                        </div>
-                        <img
-                          src="https://media.giphy.com/media/26AHLBZUC1n53ozi8/giphy.gif"
-                          alt=""
-                          style={{
-                            width: '200px',
-                            height: 'auto',
-                            display: 'block',
-                            margin: '0 auto',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : null,
-              }}
-            />
-          )}
-        </ChartConfig>
-      </React.Fragment>
-    )
-  }
-}
+export default () => {
+  const { data, randomizeData } = useChartConfig({
+    series: 10,
+    dataType: 'ordinal'
+  })
 
-export default () => <Story />
+  const series = React.useMemo(() => ({ type: 'bar' }), [])
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, position: 'bottom', type: 'ordinal' },
+      { position: 'left', type: 'linear', stacked: true }
+    ],
+    []
+  )
+
+  const tooltip = React.useMemo(
+    () => ({
+      render: ({ datum, primaryAxis, getStyle }) =>
+        datum ? (
+          <div
+            style={{
+              color: 'white',
+              pointerEvents: 'none'
+            }}
+          >
+            <h3
+              style={{
+                display: 'block',
+                textAlign: 'center'
+              }}
+            >
+              {primaryAxis.format(datum.primary)}
+            </h3>
+            <div
+              style={{
+                width: '300px',
+                height: '200px',
+                display: 'flex'
+              }}
+            >
+              <Chart
+                data={datum.group}
+                dark
+                series={{ type: 'bar' }}
+                getSeries={data => [
+                  {
+                    datums: data.map(d => ({
+                      x: d.seriesLabel,
+                      y: d.secondary,
+                      color: getStyle(d).fill
+                    }))
+                  }
+                ]}
+                axes={[
+                  {
+                    type: 'ordinal',
+                    primary: true,
+                    position: 'bottom'
+                  },
+                  {
+                    type: 'linear',
+                    stacked: true,
+                    position: 'left'
+                  }
+                ]}
+                getDatumStyle={datum => ({
+                  color: datum.originalDatum.color
+                })}
+                primaryCursor={{
+                  value: datum.seriesLabel
+                }}
+              />
+            </div>
+          </div>
+        ) : null
+    }),
+    []
+  )
+
+  return (
+    <>
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <br />
+      <Box>
+        <Chart
+          data={data}
+          series={series}
+          axes={axes}
+          primaryCursor
+          tooltip={tooltip}
+        />
+      </Box>
+    </>
+  )
+}

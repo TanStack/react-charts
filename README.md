@@ -21,19 +21,19 @@ Simple, immersive &amp; interactive charts for React
 ## Features
 
 - Line, Bar, Bubble, Area.
-- Hyper Responsive (container-based)
+- Hyper Responsive
 - Powered by D3
-- Rendered by React
+- React Hooks Ready
 - Flexible data model
 
 ## [Demos](https://react-charts.js.org)
 
 ## Intro
 
-React-Charts is currently in an **alpha** state! This means:
+React Charts is currently in **beta**! This means:
 
-- The api is constantly changing as use-cases evolve
-- Support is limited to my personal immediate working memory of the system and 10 seconds of my time. If I can't answer your question with those limitations, I will invite you to read the source and contribute to your own answer so I can keep moving forward towards a stable release.
+- The existing API is mostly stable. Expect only subtle changes/additions as use-cases become polished.
+- It's safe for **most** production sites, as long as you lock in the alpha version.
 
 ## Table of Contents
 
@@ -56,107 +56,140 @@ React
 This will render a very basic line chart:
 
 ```javascript
-import React from "react";
-import { Chart } from "react-charts";
+import React from 'react'
+import { Chart } from 'react-charts'
 
-const lineChart = (
-  // A react-chart hyper-responsively and continuusly fills the available
-  // space of its parent element automatically
-  <div
-    style={{
-      width: "400px",
-      height: "300px"
-    }}
-  >
-    <Chart
-      data={[
-        {
-          label: "Series 1",
-          data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
-        },
-        {
-          label: "Series 2",
-          data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
-        }
-      ]}
-      axes={[
-        { primary: true, type: "linear", position: "bottom" },
-        { type: "linear", position: "left" }
-      ]}
-    />
-  </div>
-);
+function MyChart() {
+  const data = React.useMemo(
+    () => [
+      {
+        label: 'Series 1',
+        data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
+      },
+      {
+        label: 'Series 2',
+        data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
+      }
+    ],
+    []
+  )
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'linear', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  const lineChart = (
+    // A react-chart hyper-responsively and continuusly fills the available
+    // space of its parent element automatically
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart data={data} axes={axes} />
+    </div>
+  )
+}
 ```
 
 ## Documentation
 
-Documentation is **not complete**. The most detailed usage examples are visible by [browsing the website's examples](https://github.com/react-tools/react-charts/tree/master/www/src/containers).
+Complete documentation is **coming soon**. The most detailed usage examples are visible by [browsing the website's examples](https://github.com/react-tools/react-charts/tree/master/www/src/containers).
 
-What sparse documentation is available in this readme is being progressively worked on below.
+Any sparse documentation available in this Readme is being progressively improved as the API evolves.
+
+## Memoize your Props!
+
+As you'll see in every example, the React Charts `<Chart>` component expects all props and options to be memoized using either `React.useMemo` or `React.useCallback`. While passing an unmemoized option/prop to the `<Chart>` component won't severly break any visible functionality, your charts will be severly non-performant. Internally, React Charts uses the immutable nature of thes options/props to detect changes to the configuration and update accordingly.
+
+While this may feel heavy at first, it gives you, the dev, full control over when you want to update your charts. To trigger and update, simply trigger one of your `React.useMemo` or `React.useCallback` hooks on the part of the config that you would like to update!
 
 ## Data Model
 
-React-Charts uses a common and very flexible data model based on arrays of **series** and arrays of **datums**. You can either use the model defaults directly, or use **data accessors** to materialize this structure.
+React Charts uses a common and very flexible data model based on arrays of **series** and arrays of **datums**. You can either use the model defaults directly, or use **data accessors** to materialize this structure.
 
 Typical visualization data can come in practically any shape and size. The following examples show data structures that are all reasonably equivalent **at some level** since they each contain an array of **series[]** and **datums[]**. They also show how to parse that data.
 
 In the following example, there is no need to use any accessors. The **default** accessors are able to easily understand this format:
 
 ```javascript
-const data = [
-  {
-    label: "Series 1",
-    data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
-  },
-  {
-    label: "Series 2",
-    data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
-  },
-  {
-    label: "Series 3",
-    data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
-  }
-];
+function MyChart() {
+  const data = React.useMemo(
+    () => [
+      {
+        label: 'Series 1',
+        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
+      },
+      {
+        label: 'Series 2',
+        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
+      },
+      {
+        label: 'Series 3',
+        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
+      }
+    ],
+    []
+  )
 
-<div
-  style={{
-    width: "400px",
-    height: "300px"
-  }}
->
-  <Chart
-    data={data}
-    axes={[
-      { primary: true, type: "linear", position: "bottom" },
-      { type: "linear", position: "left" }
-    ]}
-  />
-</div>;
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'linear', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  return (
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart data={data} axes={axes} />
+    </div>
+  )
+}
 ```
 
 In the following example, there is no need to use any accessors. The **default** accessors are able to easily understand this format, but **please note** that this format limits you from passing any **meta data** about your series and datums.
 
 ```javascript
-const data = [
-  [[1, 10], [2, 10], [3, 10]],
-  [[1, 10], [2, 10], [3, 10]],
-  [[1, 10], [2, 10], [3, 10]]
-];
+function MyChart() {
+  const data = React.useMemo(
+    () => [
+      [[1, 10], [2, 10], [3, 10]],
+      [[1, 10], [2, 10], [3, 10]],
+      [[1, 10], [2, 10], [3, 10]]
+    ],
+    []
+  )
 
-<div
-  style={{
-    width: "400px",
-    height: "300px"
-  }}
->
-  <Chart
-    data={data}
-    axes={[
-      { primary: true, type: "linear", position: "bottom" },
-      { type: "linear", position: "left" }
-    ]}
-  />
-</div>;
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'linear', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  return (
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart data={data} axes={axes} />
+    </div>
+  )
+}
 ```
 
 #### Data Accessors
@@ -166,34 +199,52 @@ When data isn't in a convenient format for React Charts, **your first instinct w
 In the following example, the data is in a very funky format, but at it's core is the same as the previous examples.
 
 ```javascript
-const data = {
-  axis: [1, 2, 3],
-  lines: [
-    { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-    { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-    { data: [{ value: 10 }, { value: 10 }, { value: 10 }] }
-  ]
-};
+function MyChart() {
+  // Use any data object you want
+  const data = React.useMemo(
+    () => ({
+      axis: [1, 2, 3],
+      lines: [
+        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
+        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
+        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] }
+      ]
+    }),
+    []
+  )
 
-<div
-  style={{
-    width: "400px",
-    height: "300px"
-  }}
->
-  <Chart
-    // Pass the original data object
-    data={data}
-    // Use data.lines to represent the different series
-    getSeries={data => data.lines}
-    // Use data.lines[n].data to represent the different datums for each series
-    getDatums={series => series.data}
-    // Use the original data object and the datum index to reference the datum's primary value.
-    getPrimary={(datum, i, series, seriesIndex, data) => data.axis[i]}
-    // Use data.lines[n].data[n].value as each datums secondary value
-    getSecondary={datum => datum.value}
-  />
-</div>;
+  // Use data.lines to represent the different series
+  const getSeries = React.useCallback(data => data.lines, [])
+
+  // Use data.lines[n].data to represent the different datums for each series
+  const getDatums = React.useCallback(series => series.data, [])
+
+  // Use the original data object and the datum index to reference the datum's primary value.
+  const getPrimary = React.useCallback(
+    (datum, i, series, seriesIndex, data) => data.axis[i],
+    []
+  )
+
+  // Use data.lines[n].data[n].value as each datums secondary value
+  const getSecondary = React.useCallback(datum => datum.value, [])
+
+  return (
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart
+        data={data}
+        getSeries={getSeries}
+        getDatums={getDatums}
+        getPrimary={getPrimary}
+        getSecondary={getSecondary}
+      />
+    </div>
+  )
+}
 ```
 
 #### Series Labels
@@ -203,21 +254,32 @@ Multiple series are often useless without labels. By default, React Charts looks
 If the default label accessor doesn't suit your needs, then you can use the `<Chart>` component's `getLabel` accessor prop:
 
 ```javascript
-const data = [{
-  specialLabel: 'Hello World!',
-  data: [
-    //...
-  ]
-}]
+function MyChart() {
+  const data = React.useMemo(
+    () => [
+      {
+        specialLabel: 'Hello World!',
+        data: [
+          //...
+        ]
+      }
+    ],
+    []
+  )
 
-<div
-  style={{
-    width: "400px",
-    height: "300px"
-  }}
->
-  <Chart data={data} getLabel={series => series.specialLabel} />
-</div>;
+  const getLabel = React.useCallback(series => series.specialLabel, [])
+
+  return (
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart data={data} getLabel={getLabel} />
+    </div>
+  )
+}
 ```
 
 ## Axes & Scales
@@ -238,19 +300,26 @@ Axes are a required component of a React Chart and can used like so:
 ```javascript
 import { Chart } from 'react-charts'
 
-<div
-  style={{
-    width: "400px",
-    height: "300px"
-  }}
->
-  <Chart
-    axes={[
-      { primary: true, type: "time", position: "bottom" },
-      { type: "linear", position: "left" }
-    ]}
-  />
-</div>
+function MyChart() {
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'time', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
+  return (
+    <div
+      style={{
+        width: '400px',
+        height: '300px'
+      }}
+    >
+      <Chart axes={axes} />
+    </div>
+  )
+}
 ```
 
 For more information on usage and API, see the [`axes` prop](#axes)
@@ -268,7 +337,11 @@ For more information on usage and API, see the [`axes` prop](#axes)
 Example
 
 ```javascript
-<Chart series={{ curve: "cardinal" }} />
+function MyChart() {
+  const series = React.useMemo(() => ({ curve: 'cardinal' }), [])
+
+  return <Chart series={series} />
+}
 ```
 
 # Advanced API

@@ -1,3 +1,4 @@
+import React from 'react'
 import PropTypes from 'prop-types'
 import Curves from '../../utils/Curves'
 
@@ -32,18 +33,22 @@ export const seriesPropType = PropTypes.oneOfType([
 ])
 
 export default ({ materializedData, series }) =>
-  materializedData.map((s, seriesIndex) => {
-    const { type, ...rest } = {
-      ...defaultSeries,
-      ...(typeof series === 'function' ? series(s, seriesIndex) : series)
-    }
-    const renderer = seriesTypes[type]
-    if (!renderer) {
-      throw new Error(`Could not find a registered series type for ${type}`)
-    }
-    return {
-      ...rest,
-      type,
-      renderer
-    }
-  })
+  React.useMemo(
+    () =>
+      materializedData.map((s, seriesIndex) => {
+        const { type, ...rest } = {
+          ...defaultSeries,
+          ...(typeof series === 'function' ? series(s, seriesIndex) : series)
+        }
+        const renderer = seriesTypes[type]
+        if (!renderer) {
+          throw new Error(`Could not find a registered series type for ${type}`)
+        }
+        return {
+          ...rest,
+          type,
+          renderer
+        }
+      }),
+    [materializedData, series]
+  )

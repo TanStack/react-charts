@@ -1,84 +1,91 @@
-import React, { Component } from 'react'
-//
-import ChartConfig from 'components/ChartConfig'
+import React from 'react'
 
+//
+
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-class Story extends Component {
-  state = {
+export default function SyncedCursors() {
+  const [
+    { primaryCursorValue, secondaryCursorValue },
+    setState
+  ] = React.useState({
     primaryCursorValue: null,
-    secondaryCursorValue: null,
-  }
-  render () {
-    const { primaryCursorValue, secondaryCursorValue } = this.state
-    const onFocus = datum => {
-      this.setState({
-        primaryCursorValue: datum ? datum.primary : null,
-        secondaryCursorValue: datum ? datum.secondary : null,
-      })
-    }
-    return (
-      <React.Fragment>
-        <pre>{JSON.stringify({ primaryCursorValue, secondaryCursorValue }, null, 2)}</pre>
-        <ChartConfig width={500} height={250}>
-          {({ data }) => (
-            <Chart
-              data={data}
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear' },
-              ]}
-              onFocus={onFocus}
-              primaryCursor={{
-                value: primaryCursorValue,
-              }}
-              secondaryCursor={{
-                value: secondaryCursorValue,
-              }}
-            />
-          )}
-        </ChartConfig>
-        <br />
-        <ChartConfig width={600} height={200}>
-          {({ data }) => (
-            <Chart
-              data={data}
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear' },
-              ]}
-              onFocus={onFocus}
-              primaryCursor={{
-                value: primaryCursorValue,
-              }}
-              secondaryCursor={{
-                value: secondaryCursorValue,
-              }}
-            />
-          )}
-        </ChartConfig>
-        <br />
-        <ChartConfig width={700} height={150}>
-          {({ data }) => (
-            <Chart
-              data={data}
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear' },
-              ]}
-              onFocus={onFocus}
-              primaryCursor={{
-                value: primaryCursorValue,
-              }}
-              secondaryCursor={{
-                value: secondaryCursorValue,
-              }}
-            />
-          )}
-        </ChartConfig>
-      </React.Fragment>
-    )
-  }
+    secondaryCursorValue: null
+  })
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, position: 'bottom', type: 'time' },
+      { position: 'left', type: 'linear' }
+    ],
+    []
+  )
+
+  const primaryCursor = React.useMemo(
+    () => ({
+      value: primaryCursorValue
+    }),
+    [primaryCursorValue]
+  )
+
+  const secondaryCursor = React.useMemo(
+    () => ({
+      value: secondaryCursorValue
+    }),
+    [secondaryCursorValue]
+  )
+
+  const onFocus = React.useCallback(datum => {
+    setState({
+      primaryCursorValue: datum ? datum.primary : null,
+      secondaryCursorValue: datum ? datum.secondary : null
+    })
+  }, [])
+
+  return (
+    <React.Fragment>
+      <pre>
+        {JSON.stringify({ primaryCursorValue, secondaryCursorValue }, null, 2)}
+      </pre>
+      <Box width={500} height={250}>
+        <ChartWithData
+          axes={axes}
+          onFocus={onFocus}
+          primaryCursor={primaryCursor}
+          secondaryCursor={secondaryCursor}
+          tooltip
+        />
+      </Box>
+      <br />
+      <Box width={600} height={200}>
+        <ChartWithData
+          axes={axes}
+          onFocus={onFocus}
+          primaryCursor={primaryCursor}
+          secondaryCursor={secondaryCursor}
+          tooltip
+        />
+      </Box>
+      <br />
+      <Box width={700} height={150}>
+        <ChartWithData
+          axes={axes}
+          onFocus={onFocus}
+          primaryCursor={primaryCursor}
+          secondaryCursor={secondaryCursor}
+          tooltip
+        />
+      </Box>
+    </React.Fragment>
+  )
 }
 
-export default () => <Story />
+function ChartWithData(props) {
+  const { data } = useChartConfig({
+    series: 10
+  })
+
+  return <Chart data={data} {...props} />
+}

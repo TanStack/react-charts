@@ -1,7 +1,9 @@
-import React, { Component } from 'react'
-//
-import ChartConfig from 'components/ChartConfig'
+import React from 'react'
 
+//
+
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
 const defs = (
@@ -25,75 +27,131 @@ const defs = (
   </defs>
 )
 
-class Story extends Component {
-  state = {
+export default function CustomStyles() {
+  const [{ activeSeriesIndex, activeDatumIndex }, setState] = React.useState({
     activeSeriesIndex: -1,
-    activeDatumIndex: -1,
-  }
-  render () {
-    const { activeSeriesIndex, activeDatumIndex } = this.state
-    return (
-      <div>
-        {JSON.stringify({ activeSeriesIndex, activeDatumIndex }, null, 2)}
-        {['line', 'area', 'bar'].map(type => (
-          <ChartConfig
-            key={type}
-            interaction="axis"
-            elementType={type}
-            show={['elementType', 'interaction']}
-            series={4}
-            height={200}
-          >
-            {({ elementType, interaction, data }) => (
-              <Chart
-                data={data}
-                interaction={interaction}
-                series={{
-                  type: elementType,
-                }}
-                axes={[
-                  {
-                    primary: true,
-                    type: 'time',
-                    position: 'bottom',
-                  },
-                  {
-                    type: 'linear',
-                    position: 'left',
-                    stacked: true,
-                  },
-                ]}
-                getSeriesStyle={series => ({
-                  color: `url(#${series.index % 4})`,
-                  opacity:
-                    activeSeriesIndex > -1 ? (series.index === activeSeriesIndex ? 1 : 0.3) : 1,
-                })}
-                getDatumStyle={datum => ({
-                  r:
-                    activeDatumIndex === datum.index && activeSeriesIndex === datum.seriesIndex
-                      ? 7
-                      : activeDatumIndex === datum.index
-                        ? 5
-                        : datum.series.index === activeSeriesIndex
-                          ? 3
-                          : datum.otherHovered
-                            ? 2
-                            : 2,
-                })}
-                onFocus={focused =>
-                  this.setState({
-                    activeSeriesIndex: focused ? focused.series.id : -1,
-                    activeDatumIndex: focused ? focused.index : -1,
-                  })
-                }
-                renderSVG={() => defs}
-              />
-            )}
-          </ChartConfig>
-        ))}
-      </div>
-    )
-  }
+    activeDatumIndex: -1
+  })
+
+  return (
+    <div>
+      {JSON.stringify({ activeSeriesIndex, activeDatumIndex }, null, 2)}
+      <MyChart
+        elementType="line"
+        setState={setState}
+        activeDatumIndex={activeDatumIndex}
+        activeSeriesIndex={activeSeriesIndex}
+      />
+      <MyChart
+        elementType="area"
+        setState={setState}
+        activeDatumIndex={activeDatumIndex}
+        activeSeriesIndex={activeSeriesIndex}
+      />
+      <MyChart
+        elementType="bar"
+        setState={setState}
+        activeDatumIndex={activeDatumIndex}
+        activeSeriesIndex={activeSeriesIndex}
+      />
+    </div>
+  )
 }
 
-export default () => <Story />
+function MyChart({
+  elementType,
+  activeDatumIndex,
+  activeSeriesIndex,
+  setState
+}) {
+  const { data, interaction, randomizeData } = useChartConfig({
+    series: 4,
+    height: 200,
+    interaction: 'axis',
+    dataType: 'ordinal',
+    show: ['elementType', 'interaction']
+  })
+
+  const series = React.useMemo(
+    () => ({
+      type: elementType
+    }),
+    [elementType]
+  )
+
+  const axes = React.useMemo(
+    () => [
+      {
+        primary: true,
+        type: 'ordinal',
+        position: 'bottom'
+      },
+      {
+        type: 'linear',
+        position: 'left',
+        stacked: true
+      }
+    ],
+    []
+  )
+
+  const getSeriesStyle = React.useCallback(
+    series => ({
+      color: `url(#${series.index % 4})`,
+      opacity:
+        activeSeriesIndex > -1
+          ? series.index === activeSeriesIndex
+            ? 1
+            : 0.3
+          : 1
+    }),
+    [activeSeriesIndex]
+  )
+
+  const getDatumStyle = React.useCallback(
+    datum => ({
+      r:
+        activeDatumIndex === datum.index &&
+        activeSeriesIndex === datum.seriesIndex
+          ? 7
+          : activeDatumIndex === datum.index
+          ? 5
+          : datum.series.index === activeSeriesIndex
+          ? 3
+          : datum.otherHovered
+          ? 2
+          : 2
+    }),
+    [activeDatumIndex, activeSeriesIndex]
+  )
+
+  const onFocus = React.useCallback(
+    focused =>
+      setState({
+        activeSeriesIndex: focused ? focused.series.id : -1,
+        activeDatumIndex: focused ? focused.index : -1
+      }),
+    [setState]
+  )
+
+  return (
+    <>
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <br />
+      <Box>
+        <Chart
+          data={data}
+          interaction={interaction}
+          series={series}
+          axes={axes}
+          getSeriesStyle={getSeriesStyle}
+          getDatumStyle={getDatumStyle}
+          onFocus={onFocus}
+          renderSVG={() => defs}
+          tooltip
+        />
+      </Box>
+    </>
+  )
+}

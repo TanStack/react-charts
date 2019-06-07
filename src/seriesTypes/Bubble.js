@@ -1,22 +1,19 @@
 import React from 'react'
-import withHooks, {
-  usePropsMemo,
-  useSeriesStyle,
-  useDatumStyle
-} from '../utils/hooks'
-
 //
 
 import Utils from '../utils/Utils'
 
-//
+import usePropsMemo from '../hooks/usePropsMemo'
+import useSeriesStyle from '../hooks/useSeriesStyle'
+import useDatumStyle from '../hooks/useDatumStyle'
+
 import Circle from '../primitives/Circle'
 
 const circleDefaultStyle = {
   r: 2
 }
 
-function Bubble({ series }) {
+export default function Bubble({ series }) {
   const style = useSeriesStyle(series)
 
   return (
@@ -75,11 +72,7 @@ Bubble.buildStyles = (series, { defaultColors }) => {
   Utils.buildStyleGetters(series, defaults)
 }
 
-const Point = withHooks(function Point({ datum, style }) {
-  if (!datum.defined) {
-    return null
-  }
-
+function Point({ datum, style }) {
   const dataStyle = useDatumStyle(datum)
 
   const circleProps = {
@@ -93,12 +86,15 @@ const Point = withHooks(function Point({ datum, style }) {
       ...dataStyle.circle,
       ...(typeof datum.r !== 'undefined'
         ? {
-          r: datum.r
-        }
+            r: datum.r
+          }
         : {})
     }
   }
-  return usePropsMemo(() => <Circle {...circleProps} />, circleProps)
-})
-
-export default withHooks(Bubble)
+  return usePropsMemo(() => {
+    if (!datum.defined) {
+      return null
+    }
+    return <Circle {...circleProps} />
+  }, circleProps)
+}

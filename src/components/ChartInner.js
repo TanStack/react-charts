@@ -1,12 +1,7 @@
 import React from 'react'
-import withHooks, {
-  useContext,
-  useEffect,
-  useRef,
-  useMemo
-} from '../utils/hooks'
-import Utils from '../utils/Utils'
+import RAF from 'raf'
 //
+import Utils from '../utils/Utils'
 import ChartContext from '../utils/ChartContext'
 
 import Rectangle from '../primitives/Rectangle'
@@ -17,8 +12,11 @@ import Tooltip from './Tooltip'
 import Cursor from './Cursor'
 import Brush from './Brush'
 
-function ChartInner({ handleRef, className, style = {}, ...rest }) {
-  const [chartState] = useContext(ChartContext)
+export default React.forwardRef(function ChartInner(
+  { className, style = {}, ...rest },
+  ref
+) {
+  const [chartState] = React.useContext(ChartContext)
   const [
     {
       width,
@@ -36,15 +34,15 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       focused
     },
     setChartState
-  ] = useContext(ChartContext)
+  ] = React.useContext(ChartContext)
 
-  const elRef = useRef()
+  const svgRef = React.useRef()
 
-  useEffect(() => {
-    if (!elRef.current) {
+  React.useLayoutEffect(() => {
+    if (!svgRef.current) {
       return
     }
-    const current = elRef.current.getBoundingClientRect()
+    const current = svgRef.current.getBoundingClientRect()
     if (current.left !== offset.left || current.top !== offset.top) {
       setChartState(state => ({
         ...state,
@@ -56,32 +54,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     }
   })
 
-  const onMouseMove = useMemo(
-    () =>
-      Utils.throttle(e => {
-        const { clientX, clientY } = e
-
-        setChartState(state => {
-          const x = clientX - offset.left - gridX
-          const y = clientY - offset.top - gridY
-
-          const pointer = {
-            ...state.pointer,
-            active: true,
-            x,
-            y,
-            dragging: state.pointer && state.pointer.down
-          }
-          return {
-            ...state,
-            pointer
-          }
-        })
-      }),
-    [offset, gridX, gridY]
-  )
-
-  const onMouseLeave = () => {
+  const onMouseLeave = e => {
     setChartState(state => ({
       ...state,
       focused: null
@@ -95,19 +68,33 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     }))
   }
 
-  const onMouseDown = () => {
-    document.addEventListener('mouseup', onMouseUp)
-    document.addEventListener('mousemove', onMouseMove)
+  const rafRef = React.useRef()
 
-    setChartState(state => ({
-      ...state,
-      pointer: {
-        ...state.pointer,
-        sourceX: state.pointer.x,
-        sourceY: state.pointer.y,
-        down: true
-      }
-    }))
+  const onMouseMove = e => {
+    if (rafRef.current) {
+      RAF.cancel(rafRef.current)
+    }
+    rafRef.current = RAF(() => {
+      rafRef.current = null
+      const { clientX, clientY } = e
+
+      setChartState(state => {
+        const x = clientX - offset.left - gridX
+        const y = clientY - offset.top - gridY
+
+        const pointer = {
+          ...state.pointer,
+          active: true,
+          x,
+          y,
+          dragging: state.pointer && state.pointer.down
+        }
+        return {
+          ...state,
+          pointer
+        }
+      })
+    })
   }
 
   const onMouseUp = () => {
@@ -128,6 +115,21 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
     }))
   }
 
+  const onMouseDown = () => {
+    document.addEventListener('mouseup', onMouseUp)
+    document.addEventListener('mousemove', onMouseMove)
+
+    setChartState(state => ({
+      ...state,
+      pointer: {
+        ...state.pointer,
+        sourceX: state.pointer.x,
+        sourceY: state.pointer.y,
+        down: true
+      }
+    }))
+  }
+
   // Reverse the stack order for proper z-indexing
   const reversedStackData = [...stackData].reverse()
   const orderedStackData = getSeriesOrder(reversedStackData)
@@ -139,10 +141,10 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
   // Bring focused series to the front
   const focusOrderedStackData = focused
     ? [
-      ...orderedStackData.slice(0, focusedSeriesIndex),
-      ...orderedStackData.slice(focusedSeriesIndex + 1),
-      orderedStackData[focusedSeriesIndex]
-    ]
+        ...orderedStackData.slice(0, focusedSeriesIndex),
+        ...orderedStackData.slice(focusedSeriesIndex + 1),
+        orderedStackData[focusedSeriesIndex]
+      ]
     : orderedStackData
 
   const stacks = focusOrderedStackData.map(stack => {
@@ -158,7 +160,7 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
 
   return (
     <div
-      ref={handleRef}
+      ref={ref}
       {...rest}
       className={`ReactChart ${className || ''}`}
       style={{
@@ -169,27 +171,19 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       }}
     >
       <svg
-        ref={el => {
-          elRef.current = el
-        }}
+        ref={svgRef}
         style={{
           width,
           height,
           overflow: 'hidden'
         }}
+        onMouseEnter={e => e.persist() || onMouseMove(e)}
+        onMouseMove={e => e.persist() || onMouseMove(e)}
+        onMouseLeave={e => e.persist() || onMouseLeave(e)}
+        onMouseDown={e => e.persist() || onMouseDown(e)}
+        onClick={onClick}
       >
         <g
-          onMouseEnter={e => {
-            e.persist()
-            onMouseMove(e)
-          }}
-          onMouseMove={e => {
-            e.persist()
-            onMouseMove(e)
-          }}
-          onMouseLeave={onMouseLeave}
-          onMouseDown={onMouseDown}
-          onClick={onClick}
           style={{
             transform: Utils.translate(gridX, gridY)
           }}
@@ -205,13 +199,13 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
             }}
           />
           <Voronoi />
-          <g className='axes'>
+          <g className="axes">
             {[...primaryAxes, ...secondaryAxes].map(axis => (
               <Axis key={axis.id} {...axis} />
             ))}
           </g>
           <g
-            className='Series'
+            className="Series"
             style={{
               pointerEvents: 'none'
             }}
@@ -221,9 +215,9 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
         </g>
         {renderSVG
           ? renderSVG({
-            chartState,
-            setChartState
-          })
+              chartState,
+              setChartState
+            })
           : null}
       </svg>
       <Cursor primary />
@@ -232,6 +226,4 @@ function ChartInner({ handleRef, className, style = {}, ...rest }) {
       <Tooltip />
     </div>
   )
-}
-
-export default withHooks(ChartInner)
+})

@@ -1,6 +1,6 @@
 import { arc as makeArc, pie as makePie } from 'd3-shape'
 
-export default function updateScale (props) {
+export default function updateScale(props) {
   const {
     type,
     id,
@@ -12,7 +12,7 @@ export default function updateScale (props) {
     outerPadding,
     cornerRadius,
     arcPadding,
-    seriesPadding,
+    seriesPadding
   } = props
   // We need the data to proceed
   if (!materializedData) {
@@ -28,7 +28,7 @@ export default function updateScale (props) {
   const totalRadius = outerRadius - innerRadius
   const seriesRadius = totalRadius / materializedData.length
   const padRadius = outerRadius * arcPadding * 20
-  const seriesPaddingRadius = totalRadius * seriesPadding / 2.5
+  const seriesPaddingRadius = (totalRadius * seriesPadding) / 2.5
   const padAngle = 0.01
 
   const data = materializedData.map(series => {
@@ -51,7 +51,7 @@ export default function updateScale (props) {
         innerRadius: seriesInnerRadius + seriesPaddingRadius,
         outerRadius: seriesOuterRadius,
         cornerRadius,
-        seriesPaddingRadius,
+        seriesPaddingRadius
       }
       // Calculate the arc for the centroid
       const arc = makeArc()
@@ -69,13 +69,17 @@ export default function updateScale (props) {
         arcData,
         arc,
         x: centroid[0] + midX,
-        y: centroid[1] + midY,
+        y: centroid[1] + midY
       }
     })
   })
 
   const primaryScale = d =>
-    data[d.seriesIndex] ? (data[d.seriesIndex][d.index] ? data[d.seriesIndex][d.index] : 0) : 0
+    data[d.seriesIndex]
+      ? data[d.seriesIndex][d.index]
+        ? data[d.seriesIndex][d.index]
+        : 0
+      : 0
   const secondaryScale = () => {}
 
   primaryScale.range = () => [0, width]
@@ -100,21 +104,21 @@ export default function updateScale (props) {
     seriesRadius,
     padRadius,
     seriesPaddingRadius,
-    padAngle,
+    padAngle
   }
 
   const secondaryAxis = {
     id,
     scale: secondaryScale,
     format: d => d,
-    type,
+    type
   }
 
   dispatch(state => ({
     ...state,
     axes: {
       pie_primary: primaryAxis,
-      pie_secondary: secondaryAxis,
-    },
+      pie_secondary: secondaryAxis
+    }
   }))
 }

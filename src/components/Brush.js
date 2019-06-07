@@ -1,11 +1,10 @@
 import React from 'react'
-import withHooks, { useContext } from '../utils/hooks'
 import Utils from '../utils/Utils'
 //
 import ChartContext from '../utils/ChartContext'
 
-function Brush() {
-  const [{ pointer, brush, gridX, gridY, gridHeight, dark }] = useContext(
+export default function Brush() {
+  const [{ pointer, brush, gridX, gridY, gridHeight, dark }] = React.useContext(
     ChartContext
   )
 
@@ -15,7 +14,7 @@ function Brush() {
 
   return (
     <div
-      className='Brush'
+      className="Brush"
       style={{
         pointerEvents: 'none',
         position: 'absolute',
@@ -46,5 +45,3 @@ function Brush() {
 Brush.defaultProps = {
   onSelect: () => {}
 }
-
-export default withHooks(Brush)

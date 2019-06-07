@@ -1,15 +1,13 @@
 import React from 'react'
-import withHooks, {
-  useMemo,
-  usePropsMemo,
-  useSeriesStyle,
-  useDatumStyle
-} from '../utils/hooks'
-
 import { area, line } from 'd3-shape'
 //
+
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
+
+import usePropsMemo from '../hooks/usePropsMemo'
+import useSeriesStyle from '../hooks/useSeriesStyle'
+import useDatumStyle from '../hooks/useDatumStyle'
 
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
@@ -22,15 +20,19 @@ const lineDefaultStyle = {
   strokeWidth: 3
 }
 
-function Area({ series, showOrphans, curve }) {
-  const areaFn = area()
-    .x(d => d.x)
-    .y0(d => d.base)
-    .y1(d => d.y)
-    .defined(d => d.defined)
-    .curve(Curves[curve] || curve)
+export default function Area({ series, showOrphans, curve }) {
+  const areaFn = React.useMemo(
+    () =>
+      area()
+        .x(d => d.x)
+        .y0(d => d.base)
+        .y1(d => d.y)
+        .defined(d => d.defined)
+        .curve(Curves[curve] || curve),
+    [curve]
+  )
 
-  const lineFn = useMemo(
+  const lineFn = React.useMemo(
     () =>
       line()
         .x(d => d.x)
@@ -39,8 +41,14 @@ function Area({ series, showOrphans, curve }) {
         .curve(Curves[curve] || curve),
     [curve]
   )
-  const areaPath = useMemo(() => areaFn(series.datums), [series])
-  const linePath = useMemo(() => lineFn(series.datums), [series])
+  const areaPath = React.useMemo(() => areaFn(series.datums), [
+    areaFn,
+    series.datums
+  ])
+  const linePath = React.useMemo(() => lineFn(series.datums), [
+    lineFn,
+    series.datums
+  ])
 
   const style = useSeriesStyle(series)
 
@@ -156,12 +164,9 @@ Area.buildStyles = (series, { defaultColors }) => {
   Utils.buildStyleGetters(series, defaults)
 }
 
-const OrphanLine = withHooks(function OrphanLine({ datum, style, all, index }) {
+const OrphanLine = function OrphanLine({ datum, style, all, index }) {
   const prev = all[index - 1] || { defined: false }
   const next = all[index + 1] || { defined: false }
-  if (!datum.defined || prev.defined || next.defined) {
-    return null
-  }
 
   const dataStyle = useDatumStyle(datum)
 
@@ -179,7 +184,10 @@ const OrphanLine = withHooks(function OrphanLine({ datum, style, all, index }) {
     }
   }
 
-  return usePropsMemo(() => <Line {...lineProps} />, lineProps)
-})
-
-export default withHooks(Area)
+  return usePropsMemo(() => {
+    if (!datum.defined || prev.defined || next.defined) {
+      return null
+    }
+    return <Line {...lineProps} />
+  }, lineProps)
+}

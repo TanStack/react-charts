@@ -1,48 +1,66 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Tree from 'react-json-tree'
-//
-import ChartConfig from 'components/ChartConfig'
 
+//
+
+import useChartConfig from 'hooks/useChartConfig'
+import Box from 'components/Box'
 import { Chart } from '../../../dist'
 
-class Story extends Component {
-  state = {
+export default () => {
+  const [{ clicked, focused, hovered }, setState] = React.useState({
     clicked: null,
     focused: null,
-    hovered: null,
-  }
-  render () {
-    const { clicked, focused, hovered } = this.state
-    return (
-      <div>
-        <ChartConfig show={['elementType', 'groupMode']} useR>
-          {({ elementType, groupMode, data }) => (
-            <Chart
-              data={data}
-              groupMode={groupMode}
-              type={elementType}
-              axes={[
-                { primary: true, position: 'bottom', type: 'time' },
-                { position: 'left', type: 'linear' },
-              ]}
-              primaryCursor
-              secondaryCursor
-              tooltip
-              onClick={datum => this.setState({ clicked: datum })}
-              onFocus={datum => this.setState({ focused: datum })}
-              onHover={pointer => this.setState({ hovered: pointer })}
-            />
-          )}
-        </ChartConfig>
-        <div>Clicked:</div>
-        <Tree hideRoot data={clicked} />
-        <div>Hovered:</div>
-        <Tree hideRoot data={hovered} />
-        <div>Focused:</div>
-        <Tree hideRoot data={focused} />
-      </div>
-    )
-  }
-}
+    hovered: null
+  })
 
-export default () => <Story />
+  const {
+    data,
+    groupMode,
+    elementType,
+    randomizeData,
+    Options
+  } = useChartConfig({
+    series: 10,
+    show: ['elementType', 'groupMode']
+  })
+
+  const axes = React.useMemo(
+    () => [
+      { primary: true, position: 'bottom', type: 'time' },
+      { position: 'left', type: 'linear' }
+    ],
+    []
+  )
+
+  return (
+    <>
+      {Options}
+      <br />
+      <button onClick={randomizeData}>Randomize Data</button>
+      <br />
+      <br />
+      <Box>
+        <Chart
+          data={data}
+          groupMode={groupMode}
+          type={elementType}
+          axes={axes}
+          primaryCursor
+          secondaryCursor
+          tooltip
+          onClick={datum => setState(old => ({ ...old, clicked: datum }))}
+          onFocus={datum => setState(old => ({ ...old, focused: datum }))}
+          onHover={pointer => setState(old => ({ ...old, hovered: pointer }))}
+        />
+      </Box>
+      <br />
+      <div>Hovered:</div>
+      <Tree hideRoot data={hovered} />
+      <div>Focused:</div>
+      <Tree hideRoot data={focused} />
+      <div>Clicked:</div>
+      <Tree hideRoot data={clicked} />
+    </>
+  )
+}

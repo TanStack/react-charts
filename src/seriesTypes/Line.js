@@ -1,16 +1,14 @@
 import React from 'react'
-import withHooks, {
-  useMemo,
-  usePropsMemo,
-  useSeriesStyle,
-  useDatumStyle
-} from '../utils/hooks'
 import { line } from 'd3-shape'
 
 //
 
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
+
+import usePropsMemo from '../hooks/usePropsMemo'
+import useSeriesStyle from '../hooks/useSeriesStyle'
+import useDatumStyle from '../hooks/useDatumStyle'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
@@ -23,8 +21,8 @@ const circleDefaultStyle = {
   r: 2
 }
 
-function Line({ series, showPoints, curve }) {
-  const lineFn = useMemo(
+export default function Line({ series, showPoints, curve }) {
+  const lineFn = React.useMemo(
     () =>
       line()
         .x(d => d.x)
@@ -33,7 +31,10 @@ function Line({ series, showPoints, curve }) {
         .curve(Curves[curve] || curve),
     [curve]
   )
-  const path = useMemo(() => lineFn(series.datums), [series])
+  const path = React.useMemo(() => lineFn(series.datums), [
+    lineFn,
+    series.datums
+  ])
 
   const style = useSeriesStyle(series)
 
@@ -48,22 +49,25 @@ function Line({ series, showPoints, curve }) {
   }
   const renderedPath = usePropsMemo(() => <Path {...pathProps} />, pathProps)
 
-  return (
-    <g>
-      {renderedPath}
-      {showPoints &&
-        series.datums.map((datum, i) => {
-          return (
-            <Point
-              {...{
-                key: i,
-                datum,
-                style
-              }}
-            />
-          )
-        })}
-    </g>
+  return React.useMemo(
+    () => (
+      <g>
+        {renderedPath}
+        {showPoints &&
+          series.datums.map((datum, i) => {
+            return (
+              <Point
+                {...{
+                  key: i,
+                  datum,
+                  style
+                }}
+              />
+            )
+          })}
+      </g>
+    ),
+    [renderedPath, series.datums, showPoints, style]
   )
 }
 
@@ -109,11 +113,7 @@ Line.buildStyles = (series, { defaultColors }) => {
   Utils.buildStyleGetters(series, defaults)
 }
 
-const Point = withHooks(function Point({ datum, style }) {
-  if (!datum.defined) {
-    return null
-  }
-
+function Point({ datum, style }) {
   const dataStyle = useDatumStyle(datum)
 
   const circleProps = {
@@ -127,7 +127,10 @@ const Point = withHooks(function Point({ datum, style }) {
       ...dataStyle.circle
     }
   }
-  return usePropsMemo(() => <Circle {...circleProps} />, circleProps)
-})
-
-export default withHooks(Line)
+  return usePropsMemo(() => {
+    if (!datum.defined) {
+      return null
+    }
+    return <Circle {...circleProps} />
+  }, circleProps)
+}
