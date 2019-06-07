@@ -8,10 +8,6 @@
   "main": "dist/index.js",
   "_module": "dist/index.es.js",
   "_jsnext:main": "dist/index.es.js",
-  "engines": {
-    "node": ">=8",
-    "npm": ">=5"
-  },
   "scripts": {
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
