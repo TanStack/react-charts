@@ -3,10 +3,10 @@ import React from 'react'
 import Utils from '../../utils/Utils'
 
 import {
-  groupModeSingle,
-  groupModeSeries,
-  groupModePrimary,
-  groupModeSecondary
+  groupingSingle,
+  groupingSeries,
+  groupingPrimary,
+  groupingSecondary
 } from '../../utils/Constants'
 
 const defaultColors = [
@@ -30,7 +30,7 @@ export default ({
   yKey,
   xAxes,
   xKey,
-  groupMode
+  grouping
 }) => {
   // Make stackData
   return React.useMemo(() => {
@@ -169,7 +169,7 @@ export default ({
     })
 
     // Do any data grouping ahead of time using
-    if ([groupModeSingle, groupModeSeries].includes(groupMode)) {
+    if ([groupingSingle, groupingSeries].includes(grouping)) {
       for (let seriesIndex = 0; seriesIndex < stackData.length; seriesIndex++) {
         const series = stackData[seriesIndex]
         for (
@@ -179,10 +179,10 @@ export default ({
         ) {
           const datum = series.datums[datumIndex]
           datum.group =
-            groupMode === groupModeSeries ? datum.series.datums : [datum]
+            grouping === groupingSeries ? datum.series.datums : [datum]
         }
       }
-    } else if ([groupModePrimary, groupModeSecondary].includes(groupMode)) {
+    } else if ([groupingPrimary, groupingSecondary].includes(grouping)) {
       const datumsByGrouping = {}
 
       for (let seriesIndex = 0; seriesIndex < stackData.length; seriesIndex++) {
@@ -198,7 +198,7 @@ export default ({
             continue
           }
           const axisKey = String(
-            groupMode === groupModePrimary ? datum.primary : datum.secondary
+            grouping === groupingPrimary ? datum.primary : datum.secondary
           )
 
           datumsByGrouping[axisKey] = datumsByGrouping[axisKey] || []
@@ -215,7 +215,7 @@ export default ({
         ) {
           const datum = series.datums[datumIndex]
           const axisKey = String(
-            groupMode === groupModePrimary ? datum.primary : datum.secondary
+            grouping === groupingPrimary ? datum.primary : datum.secondary
           )
 
           datum.group = datumsByGrouping[axisKey]
@@ -243,7 +243,7 @@ export default ({
     primaryAxes,
     secondaryAxes,
     materializedData,
-    groupMode,
+    grouping,
     xKey,
     yKey,
     xAxes,

@@ -36,6 +36,47 @@ export default function Bar({ series }) {
   )
 }
 
+function BarPiece({ datum, barOffset, style }) {
+  const [{ primaryAxes }] = React.useContext(ChartContext)
+
+  const x = datum ? datum.x : 0
+  const y = datum ? datum.y : 0
+  const base = datum ? datum.base : 0
+  const size = datum ? datum.size : 0
+  let x1
+  let y1
+  let x2
+  let y2
+  if (primaryAxes.find(d => d.vertical)) {
+    x1 = base
+    x2 = x
+    y1 = y + barOffset
+    y2 = y1 + size
+  } else {
+    x1 = x + barOffset
+    x2 = x1 + size
+    y1 = y
+    y2 = base
+  }
+
+  const dataStyle = useDatumStyle(datum)
+
+  const rectangleProps = {
+    style: {
+      ...style,
+      ...style.rectangle,
+      ...dataStyle,
+      ...dataStyle.rectangle
+    },
+    x1: Number.isNaN(x1) ? null : x1,
+    y1: Number.isNaN(y1) ? null : y1,
+    x2: Number.isNaN(x2) ? null : x2,
+    y2: Number.isNaN(y2) ? null : y2
+  }
+
+  return usePropsMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
+}
+
 Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
   // Turn clamping on for secondaryAxis
   secondaryAxis.scale.clamp(true)
@@ -107,45 +148,4 @@ Bar.buildStyles = (series, { defaultColors }) => {
   }
 
   Utils.buildStyleGetters(series, defaults)
-}
-
-function BarPiece({ datum, barOffset, style }) {
-  const [{ primaryAxes }] = React.useContext(ChartContext)
-
-  const x = datum ? datum.x : 0
-  const y = datum ? datum.y : 0
-  const base = datum ? datum.base : 0
-  const size = datum ? datum.size : 0
-  let x1
-  let y1
-  let x2
-  let y2
-  if (primaryAxes.find(d => d.vertical)) {
-    x1 = base
-    x2 = x
-    y1 = y + barOffset
-    y2 = y1 + size
-  } else {
-    x1 = x + barOffset
-    x2 = x1 + size
-    y1 = y
-    y2 = base
-  }
-
-  const dataStyle = useDatumStyle(datum)
-
-  const rectangleProps = {
-    style: {
-      ...style,
-      ...style.rectangle,
-      ...dataStyle,
-      ...dataStyle.rectangle
-    },
-    x1: Number.isNaN(x1) ? null : x1,
-    y1: Number.isNaN(y1) ? null : y1,
-    x2: Number.isNaN(x2) ? null : x2,
-    y2: Number.isNaN(y2) ? null : y2
-  }
-
-  return usePropsMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)
 }

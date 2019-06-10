@@ -1,3 +1,4 @@
 {
-  "presets": ["./node_modules/react-static/babel-preset.js"]
+  "presets": ["./node_modules/react-static/babel-preset.js"],
+  "plugins": ["source"]
 }

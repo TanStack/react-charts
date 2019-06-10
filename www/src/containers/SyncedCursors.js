@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 export default function SyncedCursors() {
   const [
@@ -45,7 +48,7 @@ export default function SyncedCursors() {
   }, [])
 
   return (
-    <React.Fragment>
+    <>
       <pre>
         {JSON.stringify({ primaryCursorValue, secondaryCursorValue }, null, 2)}
       </pre>
@@ -78,7 +81,11 @@ export default function SyncedCursors() {
           tooltip
         />
       </Box>
-    </React.Fragment>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
+    </>
   )
 }
 
@@ -89,3 +96,4 @@ function ChartWithData(props) {
 
   return <Chart data={data} {...props} />
 }
+// @source sourceCode

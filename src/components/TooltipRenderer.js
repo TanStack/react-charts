@@ -2,9 +2,9 @@ import React from 'react'
 //
 //
 import {
-  groupModeSeries,
-  groupModePrimary,
-  groupModeSecondary
+  groupingSeries,
+  groupingPrimary,
+  groupingSecondary
 } from '../utils/Constants'
 
 const showCount = 10
@@ -12,7 +12,7 @@ const showCount = 10
 export default function TooltipRenderer(props) {
   const {
     datum,
-    groupMode,
+    grouping,
     primaryAxis,
     secondaryAxis,
     formatSecondary,
@@ -38,8 +38,8 @@ export default function TooltipRenderer(props) {
 
   const sortedGroupDatums = [...datum.group].sort((a, b) => {
     if (
-      (!primaryAxis.stacked && groupMode === groupModeSeries) ||
-      groupMode === groupModeSecondary
+      (!primaryAxis.stacked && grouping === groupingSeries) ||
+      grouping === groupingSecondary
     ) {
       if (a.primaryCoord > b.primaryCoord) {
         return -1
@@ -56,7 +56,7 @@ export default function TooltipRenderer(props) {
     return a.seriesIndex > b.seriesIndex ? 1 : -1
   })
 
-  if (groupMode === groupModePrimary) {
+  if (grouping === groupingPrimary) {
     sortedGroupDatums.reverse()
   }
 
@@ -94,9 +94,9 @@ export default function TooltipRenderer(props) {
           textAlign: 'center'
         }}
       >
-        {groupMode === groupModeSeries ? (
+        {grouping === groupingSeries ? (
           <strong>{datum.seriesLabel}</strong>
-        ) : groupMode === groupModeSecondary ? (
+        ) : grouping === groupingSecondary ? (
           <strong>{secondaryAxis.format(datum.secondary)}</strong>
         ) : (
           <strong>{primaryAxis.format(datum.primary)}</strong>
@@ -150,7 +150,7 @@ export default function TooltipRenderer(props) {
                     />
                   </svg>
                 </td>
-                {groupMode === groupModeSeries ? (
+                {grouping === groupingSeries ? (
                   <React.Fragment>
                     <td>{primaryAxis.format(sortedDatum.primary)}: &nbsp;</td>
                     <td
@@ -164,7 +164,7 @@ export default function TooltipRenderer(props) {
                         : null}
                     </td>
                   </React.Fragment>
-                ) : groupMode === groupModeSecondary ? (
+                ) : grouping === groupingSecondary ? (
                   <React.Fragment>
                     <td>{sortedDatum.seriesLabel}: &nbsp;</td>
                     <td

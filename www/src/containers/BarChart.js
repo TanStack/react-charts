@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
@@ -30,8 +33,14 @@ export default () => {
       <br />
       <br />
       <Box>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart data={data} series={series} axes={axes} tooltip showVoronoi />
       </Box>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </>
   )
 }
+
+// @source sourceCode

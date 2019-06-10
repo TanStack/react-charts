@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 export default () => {
   const [{ min, max }, setState] = React.useState({
@@ -64,6 +67,11 @@ export default () => {
       <Box>
         <Chart data={data} axes={axes} primaryCursor tooltip brush={brush} />
       </Box>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </>
   )
 }
+// @source sourceCode

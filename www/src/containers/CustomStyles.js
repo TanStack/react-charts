@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 const defs = (
   <defs>
@@ -64,12 +67,12 @@ function MyChart({
   activeSeriesIndex,
   setState
 }) {
-  const { data, interaction, randomizeData } = useChartConfig({
+  const { data, grouping, randomizeData } = useChartConfig({
     series: 4,
     height: 200,
-    interaction: 'axis',
+    grouping: 'axis',
     dataType: 'ordinal',
-    show: ['elementType', 'interaction']
+    show: ['elementType', 'grouping']
   })
 
   const series = React.useMemo(
@@ -142,7 +145,7 @@ function MyChart({
       <Box>
         <Chart
           data={data}
-          interaction={interaction}
+          grouping={grouping}
           series={series}
           axes={axes}
           getSeriesStyle={getSeriesStyle}
@@ -152,6 +155,11 @@ function MyChart({
           tooltip
         />
       </Box>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </>
   )
 }
+// @source sourceCode

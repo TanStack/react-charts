@@ -58,6 +58,9 @@ const GlobalStyles = createGlobalStyle`
   pre {
     font-size: 13px;
     border-radius: 5px;
+    background: rgba(0,0,0,.03);
+    border: 2px solid rgba(0,0,0,.1);
+    padding: 1rem;
   }
 }
 `
@@ -66,7 +69,7 @@ const AppStyles = styled('div')`
   min-height: 100vh;
 `
 
-export default function App () {
+export default function App() {
   return (
     <AppStyles>
       <GlobalStyles />

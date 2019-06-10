@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
@@ -58,6 +61,11 @@ export default () => {
           secondaryCursor={secondaryCursor}
         />
       </Box>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </>
   )
 }
+// @source sourceCode

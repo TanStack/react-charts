@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 //
 
@@ -5,6 +6,8 @@ import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
 import lagRadar from '../lag-radar'
+
+let sourceCode
 
 export default function StressTest() {
   const [
@@ -158,6 +161,11 @@ export default function StressTest() {
           />
         </Box>
       ))}
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </div>
   )
 }
+// @source sourceCode

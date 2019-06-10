@@ -1,3 +1,4 @@
+// @source sourceCode
 import React from 'react'
 
 //
@@ -5,6 +6,8 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import { Chart } from '../../../dist'
+
+let sourceCode
 
 export default () => {
   const {
@@ -17,6 +20,7 @@ export default () => {
     series: 10,
     show: ['primaryAxisShow', 'secondaryAxisShow']
   })
+
   const axes = React.useMemo(
     () => [
       {
@@ -29,6 +33,7 @@ export default () => {
     ],
     [primaryAxisShow, secondaryAxisShow]
   )
+
   return (
     <>
       {Options}
@@ -39,6 +44,11 @@ export default () => {
       <Box>
         <Chart data={data} axes={axes} tooltip />
       </Box>
+      <br />
+      <pre>
+        <code>{sourceCode}</code>
+      </pre>
     </>
   )
 }
+// @source sourceCode

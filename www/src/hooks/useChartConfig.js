@@ -10,7 +10,7 @@ const options = {
   secondaryAxisStack: [true, false],
   primaryAxisShow: [true, false],
   secondaryAxisShow: [true, false],
-  groupMode: ['single', 'series', 'primary', 'secondary'],
+  grouping: ['single', 'series', 'primary', 'secondary'],
   tooltipAnchor: [
     'closest',
     'top',
@@ -61,7 +61,7 @@ export default function useBox({
   secondaryAxisShow = true,
   tooltipAnchor = 'closest',
   tooltipAlign = 'auto',
-  groupMode = 'primary',
+  grouping = 'primary',
   snapCursor = true,
   datums = 10
 }) {
@@ -81,7 +81,7 @@ export default function useBox({
     secondaryAxisShow,
     tooltipAnchor,
     tooltipAlign,
-    groupMode,
+    grouping,
     snapCursor,
     datums,
     data: makeDataFrom(dataType, series, useR, datums)

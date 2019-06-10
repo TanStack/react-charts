@@ -65,9 +65,9 @@ const sidebarItems = [
     component: require('containers/CustomCursors').default
   },
   {
-    title: 'Interaction Modes',
-    path: 'interaction-modes',
-    component: require('containers/InteractionModes').default
+    title: 'Grouping Modes',
+    path: 'grouping-modes',
+    component: require('containers/GroupingModes').default
   },
   {
     title: 'Tooltip Options',

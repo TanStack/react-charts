@@ -23,15 +23,15 @@ import calculateTooltip, { tooltipShape } from './pipeline/calculateTooltip'
 import calculateCursors, { cursorShape } from './pipeline/calculateCursors'
 
 import {
-  groupModeSingle,
-  groupModeSeries,
-  groupModePrimary,
-  groupModeSecondary
+  groupingSingle,
+  groupingSeries,
+  groupingPrimary,
+  groupingSecondary
 } from '../utils/Constants'
 
 export default function Chart({
   data,
-  groupMode,
+  grouping,
   showVoronoi,
   dark,
   series,
@@ -151,7 +151,7 @@ export default function Chart({
     yKey,
     xAxes,
     xKey,
-    groupMode
+    grouping
   })
 
   pointer = React.useMemo(() => {
@@ -172,7 +172,7 @@ export default function Chart({
   }, [focused, pointer])
 
   // keep the previous focused value around for animations
-  const latestFocus = useLatest(focused, focused)
+  const latestFocused = useLatest(focused, focused)
 
   // Calculate Tooltip
   tooltip = calculateTooltip({
@@ -237,7 +237,7 @@ export default function Chart({
   const chartState = React.useMemo(
     () => ({
       focused,
-      latestFocus,
+      latestFocused,
       pointer,
       tooltip,
       axisDimensions,
@@ -246,7 +246,7 @@ export default function Chart({
       width,
       height,
       brush,
-      groupMode,
+      grouping,
       showVoronoi,
       materializedData,
       stackData,
@@ -282,9 +282,9 @@ export default function Chart({
       gridWidth,
       gridX,
       gridY,
-      groupMode,
+      grouping,
       height,
-      latestFocus,
+      latestFocused,
       materializedData,
       offset,
       onClickRef,
@@ -309,7 +309,7 @@ export default function Chart({
 
   const chartStateContextValue = React.useMemo(
     () => [chartState, setChartState],
-    [chartState]
+    [chartState, setChartState]
   )
 
   return (
@@ -329,11 +329,11 @@ export default function Chart({
 
 Chart.propTypes = {
   data: PropTypes.any.isRequired,
-  groupMode: PropTypes.oneOf([
-    groupModeSingle,
-    groupModeSeries,
-    groupModePrimary,
-    groupModeSecondary
+  grouping: PropTypes.oneOf([
+    groupingSingle,
+    groupingSeries,
+    groupingPrimary,
+    groupingSecondary
   ]).isRequired,
   showVoronoi: PropTypes.bool,
   dark: PropTypes.bool,
@@ -374,6 +374,6 @@ Chart.defaultProps = {
   getDatumStyle: () => ({}),
   getSeriesOrder: d => d,
   onHover: () => {},
-  groupMode: groupModePrimary,
+  grouping: groupingPrimary,
   showVoronoi: false
 }
