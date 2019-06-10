@@ -42,35 +42,27 @@ export default function Tooltip() {
     show
   } = tooltip || {}
 
+  const [finalAlign, setFinalAlign] = React.useState(align || 'auto')
+
   React.useEffect(() => {
     previousShowRef.current = show
   }, [show])
 
-  if (!tooltip) {
-    return null
-  }
+  React.useLayoutEffect(() => {
+    if (align !== 'auto' || !elRef.current || !show || !anchor) {
+      return
+    }
 
-  const resolvedFocused = focused || latestFocused
-
-  let alignX = 0
-  let alignY = -50
-  let triangleStyles = {}
-  let resolvedAlign = align || 'auto'
-
-  const backgroundColor = getBackgroundColor(dark)
-
-  let resolvedArrowPosition = arrowPosition
-
-  if (resolvedAlign === 'auto' && elRef.current) {
-    let container = elRef.current
-    const gridDims = container.getBoundingClientRect()
-    const tooltipDims = tooltipElRef.current.getBoundingClientRect()
     const space = {
       left: Infinity,
       top: Infinity,
       right: Infinity,
       bottom: Infinity
     }
+
+    let container = elRef.current
+    const gridDims = container.getBoundingClientRect()
+    const tooltipDims = tooltipElRef.current.getBoundingClientRect()
 
     while (container !== document.body) {
       container = container.parentElement
@@ -92,134 +84,146 @@ export default function Tooltip() {
       }
     }
 
-    resolvedAlign = null
+    let resolvedAlign = null
 
     alignPriority.forEach(priority => {
       if (resolvedAlign) {
         return
       }
-      if (priority === 'left') {
-        if (
+      const fits = {
+        left:
           space.left -
             tooltipArrowPadding -
             padding -
             anchor.horizontalPadding >
-            tooltipDims.width &&
-          space.top > tooltipDims.height / 2 &&
-          space.bottom > tooltipDims.height / 2
-        ) {
-          resolvedAlign = priority
-        }
-      } else if (priority === 'right') {
-        if (
+          tooltipDims.width,
+        right:
           space.right -
             tooltipArrowPadding -
             padding -
             anchor.horizontalPadding >
-            tooltipDims.width &&
-          space.top > tooltipDims.height / 2 &&
-          space.bottom > tooltipDims.height / 2
-        ) {
-          resolvedAlign = priority
-        }
-      } else if (priority === 'top') {
-        if (
+          tooltipDims.width,
+        top:
           space.top - tooltipArrowPadding - padding - anchor.verticalPadding >
-            tooltipDims.height &&
-          space.left > tooltipDims.width / 2 &&
-          space.right > tooltipDims.width / 2
-        ) {
-          resolvedAlign = priority
-        }
-      } else if (priority === 'bottom') {
-        if (
+            tooltipDims.height && space.left > tooltipDims.width / 2,
+        bottom:
           space.bottom -
             tooltipArrowPadding -
             padding -
             anchor.verticalPadding >
-            tooltipDims.height &&
-          space.left > tooltipDims.width / 2 &&
-          space.right > tooltipDims.width / 2
-        ) {
+          tooltipDims.height,
+        centeredFromLeft: space.left > tooltipDims.width / 2,
+        centeredFromRight: space.right > tooltipDims.width / 2,
+        centeredFromTop: space.top > tooltipDims.height / 2,
+        centeredFromBottom: space.bottom > tooltipDims.height / 2
+      }
+      if (priority === 'left') {
+        if (fits.left && fits.centeredFromTop && fits.centeredFromBottom) {
+          resolvedAlign = priority
+        }
+      } else if (priority === 'right') {
+        if (fits.right && fits.centeredFromTop && fits.centeredFromBottom) {
+          resolvedAlign = priority
+        }
+      } else if (priority === 'top') {
+        if (fits.top && fits.centeredFromLeft && fits.centeredFromRight) {
+          resolvedAlign = priority
+        }
+      } else if (priority === 'bottom') {
+        if (fits.bottom && fits.centeredFromLeft && fits.centeredFromRight) {
           resolvedAlign = priority
         }
       } else if (priority === 'topLeft') {
-        if (
-          space.top - tooltipArrowPadding > tooltipDims.height &&
-          space.left - tooltipArrowPadding > tooltipDims.width
-        ) {
+        if (fits.top && fits.left) {
           resolvedAlign = priority
         }
       } else if (priority === 'topRight') {
-        if (
-          space.top - tooltipArrowPadding > tooltipDims.height &&
-          space.right - tooltipArrowPadding > tooltipDims.width
-        ) {
+        if (fits.top && fits.right) {
           resolvedAlign = priority
         }
       } else if (priority === 'bottomLeft') {
-        if (
-          space.bottom - tooltipArrowPadding > tooltipDims.height &&
-          space.left - tooltipArrowPadding > tooltipDims.width
-        ) {
+        if (fits.bottom && fits.left) {
           resolvedAlign = priority
         }
       } else if (priority === 'bottomRight') {
-        if (
-          space.bottom - tooltipArrowPadding > tooltipDims.height &&
-          space.right - tooltipArrowPadding > tooltipDims.width
-        ) {
+        if (fits.bottom && fits.right) {
           resolvedAlign = priority
         }
       }
     })
+
+    if (resolvedAlign !== finalAlign) {
+      setFinalAlign(resolvedAlign)
+    }
+  }, [
+    align,
+    alignPriority,
+    anchor,
+    finalAlign,
+    padding,
+    show,
+    tooltipArrowPadding
+  ])
+
+  if (!tooltip) {
+    return null
   }
 
-  if (resolvedAlign === 'top') {
+  const resolvedFocused = focused || latestFocused
+
+  let alignX = 0
+  let alignY = -50
+  let triangleStyles = {}
+
+  const backgroundColor = getBackgroundColor(dark)
+
+  let resolvedArrowPosition = arrowPosition
+
+  if (finalAlign === 'top') {
     alignX = -50
     alignY = -100
-  } else if (resolvedAlign === 'topRight') {
+  } else if (finalAlign === 'topRight') {
     alignX = 0
     alignY = -100
-  } else if (resolvedAlign === 'right') {
+  } else if (finalAlign === 'right') {
     alignX = 0
     alignY = -50
-  } else if (resolvedAlign === 'bottomRight') {
+  } else if (finalAlign === 'bottomRight') {
     alignX = 0
     alignY = 0
-  } else if (resolvedAlign === 'bottom') {
+  } else if (finalAlign === 'bottom') {
     alignX = -50
     alignY = 0
-  } else if (resolvedAlign === 'bottomLeft') {
+  } else if (finalAlign === 'bottomLeft') {
     alignX = -100
     alignY = 0
-  } else if (resolvedAlign === 'left') {
+  } else if (finalAlign === 'left') {
     alignX = -100
     alignY = -50
-  } else if (resolvedAlign === 'topLeft') {
+  } else if (finalAlign === 'topLeft') {
     alignX = -100
     alignY = -100
-  } else if (resolvedAlign === 'center') {
+  } else if (finalAlign === 'center') {
     alignX = -50
     alignY = -50
   }
 
   if (!resolvedArrowPosition) {
-    if (resolvedAlign === 'left') {
+    if (finalAlign === 'left') {
       resolvedArrowPosition = 'right'
-    } else if (resolvedAlign === 'right') {
+    } else if (finalAlign === 'right') {
       resolvedArrowPosition = 'left'
-    } else if (resolvedAlign === 'top') {
+    } else if (finalAlign === 'top') {
       resolvedArrowPosition = 'bottom'
-    } else if (resolvedAlign === 'bottom') {
+    } else if (finalAlign === 'bottom') {
       resolvedArrowPosition = 'top'
-    } else if (resolvedAlign === 'topRight') {
+    } else if (finalAlign === 'topRight') {
       resolvedArrowPosition = 'bottomLeft'
-    } else if (resolvedAlign === 'bottomRight') {
+    } else if (finalAlign === 'bottomRight') {
       resolvedArrowPosition = 'topLeft'
-    } else if (resolvedAlign === 'topLeft') {
+    } else if (finalAlign === 'topLeft') {
       resolvedArrowPosition = 'bottomRight'
-    } else if (resolvedAlign === 'bottomLeft') {
+    } else if (finalAlign === 'bottomLeft') {
       resolvedArrowPosition = 'topRight'
     }
   }
