@@ -35,7 +35,7 @@ const SidebarStyles = styled('div')`
     @media screen and (max-width: ${breakpoint}px) {
       transform: translateX(-100%);
       ${props =>
-    props.isOpen &&
+        props.isOpen &&
         css`
           box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
           transform: translateX(0%);
@@ -71,7 +71,7 @@ const SidebarStyles = styled('div')`
       }
 
       ${props =>
-    !props.isOpen &&
+        !props.isOpen &&
         css`
           transform: translateX(100%) rotate(180deg);
         `};
@@ -156,13 +156,13 @@ const Menu = ({ items }) => (
 
 class Sidebar extends React.Component {
   state = {
-    isOpen: false,
+    isOpen: false
   }
   toggle = isOpen =>
     this.setState({
-      isOpen,
+      isOpen
     })
-  render () {
+  render() {
     const { children, items } = this.props
     const { isOpen } = this.state
     return (
@@ -172,7 +172,7 @@ class Sidebar extends React.Component {
             isOpen
               ? () => {
                   this.setState({
-                    isOpen: false,
+                    isOpen: false
                   })
                 }
               : undefined
@@ -189,7 +189,9 @@ class Sidebar extends React.Component {
             </button>
             <div className="header">
               <span className="link">
-                <a href="https://github.com/react-tools/react-charts">React Charts</a>
+                <a href="https://github.com/react-tools/react-charts">
+                  React Charts
+                </a>
               </span>
               <div className="version" />
             </div>

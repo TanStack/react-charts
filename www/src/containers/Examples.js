@@ -99,7 +99,6 @@ const sidebarItems = [
     path: 'multiple-axes',
     component: require('containers/MultipleAxes').default
   },
-  // { title: 'Doughnut Chart', path: 'doughnut', component: require('containers/DoughnutChart') /.default* },
   {
     title: 'Dark Mode',
     path: 'dark',

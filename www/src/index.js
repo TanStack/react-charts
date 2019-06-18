@@ -7,13 +7,17 @@ import { AppContainer } from 'react-hot-loader'
 import App from './App'
 
 // Export your top level component as JSX (for static rendering)
-export default App
+export default function() {
+  return null // I don't want any static rendering
+}
 
 // Render your app
 if (typeof document !== 'undefined') {
   const target = document.getElementById('root')
 
-  const renderMethod = target.hasChildNodes() ? ReactDOM.hydrate : ReactDOM.render
+  const renderMethod = target.hasChildNodes()
+    ? ReactDOM.hydrate
+    : ReactDOM.render
 
   const render = Comp => {
     renderMethod(

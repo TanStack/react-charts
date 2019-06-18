@@ -36,13 +36,21 @@ const Styles = styled('div')`
     .background1 {
       transform: scale(3) rotate(50deg);
       transform-origin: top left;
-      background: linear-gradient(to bottom, rgba(0, 120, 150, 0.05), transparent 15px);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 120, 150, 0.05),
+        transparent 15px
+      );
     }
 
     .background2 {
       transform: scale(3) rotate(-25deg);
       transform-origin: top right;
-      background: linear-gradient(to bottom, rgba(0, 120, 150, 0.05), transparent 15px);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 120, 150, 0.05),
+        transparent 15px
+      );
     }
   }
 
