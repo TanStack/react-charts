@@ -10,12 +10,12 @@ import { Chart } from '../../../dist'
 let sourceCode
 
 export default () => {
-  const { data, randomizeData } = useChartConfig({
+  let { data, randomizeData } = useChartConfig({
     series: 10
   })
 
-  const getSeries = React.useCallback(
-    data =>
+  data = React.useMemo(
+    () =>
       data.map((d, i) =>
         i % 2 === 0
           ? {
@@ -31,7 +31,7 @@ export default () => {
               secondaryAxisID: 'Second Metric'
             }
       ),
-    []
+    [data]
   )
 
   const series = React.useMemo(
@@ -66,13 +66,7 @@ export default () => {
       <br />
       <br />
       <Box>
-        <Chart
-          data={data}
-          getSeries={getSeries}
-          series={series}
-          axes={axes}
-          tooltip
-        />
+        <Chart data={data} series={series} axes={axes} tooltip />
       </Box>
       <br />
       <pre>

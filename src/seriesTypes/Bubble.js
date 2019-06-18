@@ -1,6 +1,7 @@
 import React from 'react'
 //
 
+import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 
 import usePropsMemo from '../hooks/usePropsMemo'
@@ -74,23 +75,35 @@ Bubble.buildStyles = (series, { defaultColors }) => {
 
 function Point({ datum, style }) {
   const dataStyle = useDatumStyle(datum)
+  const [, setChartState] = React.useContext(ChartContext)
 
   const circleProps = {
     x: datum ? datum.x : undefined,
     y: datum ? datum.y : undefined,
     style: {
       ...circleDefaultStyle,
-      ...style,
-      ...style.circle,
-      ...dataStyle,
-      ...dataStyle.circle,
       ...(typeof datum.r !== 'undefined'
         ? {
             r: datum.r
           }
-        : {})
-    }
+        : {}),
+      ...style,
+      ...style.circle,
+      ...dataStyle,
+      ...dataStyle.circle
+    },
+    onMouseEnter: e =>
+      setChartState(state => ({
+        ...state,
+        element: datum
+      })),
+    onMouseLeave: e =>
+      setChartState(state => ({
+        ...state,
+        element: null
+      }))
   }
+
   return usePropsMemo(() => {
     if (!datum.defined) {
       return null

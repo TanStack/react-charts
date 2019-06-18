@@ -38,12 +38,14 @@ export default function buildAxisLinear({
     hardMin = undefined,
     hardMax = undefined,
     base = undefined,
-    tickArguments = [],
+    tickCount = 'auto',
+    minTickCount = 0,
+    maxTickCount = Infinity,
     tickValues = null,
     tickFormat = null,
     tickSizeInner = 6,
     tickSizeOuter = 6,
-    tickPadding = 3,
+    tickPadding = 14,
     maxLabelRotation = 50,
     innerPadding = 0.2,
     outerPadding = 0.1,
@@ -53,10 +55,10 @@ export default function buildAxisLinear({
     stacked = false,
     id: userID
   },
-  primaryAxes,
   materializedData,
   gridHeight,
-  gridWidth
+  gridWidth,
+  axisDimensions
 }) {
   if (!position) {
     throw new Error(`Chart axes must have a valid 'position' property`)
@@ -79,6 +81,9 @@ export default function buildAxisLinear({
   let negativeTotalByKey = {}
   let positiveTotalByKey = {}
   let domain
+
+  const axisDimension =
+    axisDimensions && axisDimensions[position] && axisDimensions[position][id]
 
   // Loop through each series
   for (
@@ -147,19 +152,10 @@ export default function buildAxisLinear({
   }
 
   // Now we need to figure out the range
-  let range = vertical
-    ? [gridHeight, 0] // If the axis is inverted, swap the range, too
-    : [0, gridWidth]
-
-  if (!primary) {
-    const primaryAxis =
-      primaryAxes.find(d => d.id === primaryAxisID) || primaryAxes[0]
-    // Secondary axes are usually dependent on primary axes for orientation, so if the
-    // primaryAxis is in RTL mode, we need to reverse the range on this secondary axis
-    // to match the origin of the primary axis
-    if (primaryAxis.RTL) {
-      range = [...range].reverse()
-    }
+  let range = [0, vertical ? gridHeight : gridWidth] // axes by default read from top to bottom and left to right
+  if (vertical && !primary) {
+    // Vertical secondary ranges get inverted by default
+    range.reverse()
   }
 
   // Give the scale a home
@@ -266,7 +262,9 @@ export default function buildAxisLinear({
     hardMin,
     hardMax,
     base,
-    tickArguments,
+    tickCount,
+    minTickCount,
+    maxTickCount,
     tickValues,
     tickFormat,
     tickSizeInner,
@@ -301,16 +299,20 @@ export default function buildAxisLinear({
     directionMultiplier:
       position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? Utils.translateX : Utils.translateY,
-    ticks: !tickValues
-      ? scale.ticks
-        ? scale.ticks(...tickArguments)
-        : scale.domain()
-      : tickValues,
-    format: !tickFormat
-      ? scale.tickFormat
-        ? scale.tickFormat(...tickArguments)
-        : Utils.identity
-      : tickFormat,
+    ticks:
+      tickValues || scale.ticks
+        ? scale.ticks(
+            tickCount === 'auto'
+              ? axisDimension
+                ? axisDimension.tickCount
+                : 10
+              : tickCount
+          )
+        : scale.domain(),
+    format:
+      tickFormat || scale.tickFormat
+        ? scale.tickFormat(tickFormat)
+        : Utils.identity,
     spacing: Math.max(tickSizeInner, 0) + tickPadding
   }
 

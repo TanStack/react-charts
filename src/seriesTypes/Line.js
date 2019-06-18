@@ -2,7 +2,7 @@ import React from 'react'
 import { line } from 'd3-shape'
 
 //
-
+import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import Curves from '../utils/Curves'
 
@@ -114,6 +114,8 @@ Line.buildStyles = (series, { defaultColors }) => {
 }
 
 function Point({ datum, style }) {
+  const [, setChartState] = React.useContext(ChartContext)
+
   const dataStyle = useDatumStyle(datum)
 
   const circleProps = {
@@ -125,7 +127,17 @@ function Point({ datum, style }) {
       ...style.circle,
       ...dataStyle,
       ...dataStyle.circle
-    }
+    },
+    onMouseEnter: e =>
+      setChartState(state => ({
+        ...state,
+        element: datum
+      })),
+    onMouseLeave: e =>
+      setChartState(state => ({
+        ...state,
+        element: null
+      }))
   }
   return usePropsMemo(() => {
     if (!datum.defined) {

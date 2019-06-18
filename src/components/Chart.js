@@ -26,12 +26,34 @@ import {
   groupingSingle,
   groupingSeries,
   groupingPrimary,
-  groupingSecondary
+  groupingSecondary,
+  focusAuto,
+  focusElement,
+  focusClosest
 } from '../utils/Constants'
+
+const defaultProps = {
+  getDatums: d => (Array.isArray(d) ? d : d.datums || d.data),
+  getLabel: (d, i) => d.label || `Series ${i + 1}`,
+  getSeriesID: (d, i) => i,
+  getPrimary: d => (Array.isArray(d) ? d[0] : d.primary || d.x),
+  getSecondary: d => (Array.isArray(d) ? d[1] : d.secondary || d.y),
+  getR: d => (Array.isArray(d) ? d[2] : d.radius || d.r),
+  getPrimaryAxisID: s => s.primaryAxisID,
+  getSecondaryAxisID: s => s.secondaryAxisID,
+  getSeriesStyle: series => ({ color: series.originalSeries.color }),
+  getDatumStyle: () => ({}),
+  getSeriesOrder: d => d,
+  onHover: () => {},
+  grouping: groupingPrimary,
+  focus: focusAuto,
+  showVoronoi: false
+}
 
 export default function Chart({
   data,
   grouping,
+  focus,
   showVoronoi,
   dark,
   series,
@@ -41,7 +63,6 @@ export default function Chart({
   tooltip,
   brush,
   renderSVG,
-  getSeries,
   getDatums,
   getLabel,
   getSeriesID,
@@ -59,10 +80,11 @@ export default function Chart({
   ...rest
 }) {
   let [
-    { focused, axisDimensions, offset: offsetState, padding, pointer },
+    { focused, element, axisDimensions, offset: offsetState, padding, pointer },
     setChartState
   ] = React.useState({
     focused: null,
+    element: null,
     axisDimensions: {},
     padding: {},
     offset: {},
@@ -76,7 +98,6 @@ export default function Chart({
   const responsiveElRef = React.useRef()
   const [{ width, height }] = useHyperResponsive(responsiveElRef)
 
-  getSeries = React.useCallback(Utils.normalizeGetter(getSeries), getSeries)
   getSeriesID = React.useCallback(
     Utils.normalizeGetter(getSeriesID),
     getSeriesID
@@ -100,7 +121,6 @@ export default function Chart({
 
   let materializedData = calculateMaterializeData({
     data,
-    getSeries,
     getSeriesID,
     getLabel,
     getPrimaryAxisID,
@@ -140,7 +160,8 @@ export default function Chart({
     axes,
     materializedData,
     gridHeight,
-    gridWidth
+    gridWidth,
+    axisDimensions
   })
 
   const stackData = calculateStackData({
@@ -168,8 +189,25 @@ export default function Chart({
 
   focused = React.useMemo(() => {
     // Get the closest focus datum out of the datum group
-    return focused ? Utils.getClosestPoint(pointer, focused.group) : null
-  }, [focused, pointer])
+    if (focused || element) {
+      let resolvedFocus = focus
+
+      if (focus === focusAuto) {
+        if (element) {
+          resolvedFocus = focusElement
+        } else {
+          resolvedFocus = focusClosest
+        }
+      }
+
+      if (resolvedFocus === focusElement && element) {
+        return element
+      } else if (resolvedFocus === focusClosest) {
+        return Utils.getClosestPoint(pointer, focused.group)
+      }
+    }
+    return null
+  }, [element, focus, focused, pointer])
 
   // keep the previous focused value around for animations
   const latestFocused = useLatest(focused, focused)
@@ -212,7 +250,7 @@ export default function Chart({
 
   React.useEffect(() => {
     if (brush && previousDragging && !pointer.dragging) {
-      console.log(pointer)
+      // console.log(pointer)
       if (Math.abs(pointer.sourceX - pointer.x) < 20) {
         return
       }
@@ -329,6 +367,7 @@ export default function Chart({
 
 Chart.propTypes = {
   data: PropTypes.any.isRequired,
+  focus: PropTypes.oneOf([focusAuto, focusClosest, focusElement]).isRequired,
   grouping: PropTypes.oneOf([
     groupingSingle,
     groupingSeries,
@@ -343,7 +382,6 @@ Chart.propTypes = {
   secondaryCursor: cursorShape,
   tooltip: tooltipShape,
   renderSVG: PropTypes.func,
-  getSeries: PropTypes.func.isRequired,
   getDatums: PropTypes.func.isRequired,
   getLabel: PropTypes.func.isRequired,
   getSeriesID: PropTypes.func.isRequired,
@@ -360,20 +398,4 @@ Chart.propTypes = {
   onHover: PropTypes.func
 }
 
-Chart.defaultProps = {
-  getSeries: d => d,
-  getDatums: d => (Array.isArray(d) ? d : d.datums || d.data),
-  getLabel: (d, i) => d.label || `Series ${i + 1}`,
-  getSeriesID: (d, i) => i,
-  getPrimary: d => (Array.isArray(d) ? d[0] : d.primary || d.x),
-  getSecondary: d => (Array.isArray(d) ? d[1] : d.secondary || d.y),
-  getR: d => (Array.isArray(d) ? d[2] : d.radius || d.r),
-  getPrimaryAxisID: s => s.primaryAxisID,
-  getSecondaryAxisID: s => s.secondaryAxisID,
-  getSeriesStyle: () => ({}),
-  getDatumStyle: () => ({}),
-  getSeriesOrder: d => d,
-  onHover: () => {},
-  grouping: groupingPrimary,
-  showVoronoi: false
-}
+Chart.defaultProps = defaultProps

@@ -35,3 +35,7 @@ export const anchorGridTop = 'gridTop'
 export const anchorGridBottom = 'gridBottom'
 export const anchorGridLeft = 'gridLeft'
 export const anchorGridRight = 'gridRight'
+
+export const focusAuto = 'auto'
+export const focusClosest = 'closest'
+export const focusElement = 'element'

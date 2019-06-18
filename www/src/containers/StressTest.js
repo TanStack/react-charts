@@ -1,5 +1,6 @@
 // @source sourceCode
 import React from 'react'
+import RAF from 'raf'
 //
 
 import useChartConfig from 'hooks/useChartConfig'
@@ -17,7 +18,9 @@ export default function StressTest() {
       datumCount,
       primaryCursorValue,
       secondaryCursorValue,
-      activeSeriesIndex
+      activeSeriesIndex,
+      liveData,
+      liveDataInterval
     },
     setState
   ] = React.useState({
@@ -26,7 +29,9 @@ export default function StressTest() {
     activeSeriesIndex: -1,
     chartCount: 10,
     seriesCount: 10,
-    datumCount: 20
+    datumCount: 20,
+    liveData: false,
+    liveDataInterval: 1000
   })
 
   React.useEffect(
@@ -45,6 +50,20 @@ export default function StressTest() {
     series: seriesCount,
     datums: datumCount
   })
+
+  React.useEffect(() => {
+    let interval
+
+    if (liveData) {
+      interval = setInterval(() => {
+        randomizeData()
+      }, liveDataInterval)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [liveData, liveDataInterval, randomizeData])
 
   const onFocus = React.useCallback(datum => {
     setState(old => ({
@@ -139,6 +158,40 @@ export default function StressTest() {
             }))
           }
         />
+      </label>
+      <br />
+      <label>
+        Live Data:{' '}
+        <input
+          type="checkbox"
+          checked={liveData}
+          onChange={e =>
+            e.persist() ||
+            setState(old => ({ ...old, liveData: e.target.checked }))
+          }
+        />
+      </label>
+      <br />
+      <label>
+        Live Data Update Interval:{' '}
+        <select
+          value={String(liveDataInterval)}
+          onChange={e =>
+            e.persist() ||
+            setState(old => ({
+              ...old,
+              liveDataInterval: parseInt(e.target.value)
+            }))
+          }
+        >
+          <option value="16">16 ms</option>
+          <option value="32">32 ms</option>
+          <option value="50">50 ms</option>
+          <option value="100">100 ms</option>
+          <option value="250">250 ms</option>
+          <option value="500">500 ms</option>
+          <option value="1000">1000 ms</option>
+        </select>
       </label>
       <br />
       <br />

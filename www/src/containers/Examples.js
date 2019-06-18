@@ -30,6 +30,11 @@ const sidebarItems = [
     component: require('containers/ColumnChart').default
   },
   {
+    title: 'Animated',
+    path: 'animated',
+    component: require('containers/Animated').default
+  },
+  {
     title: 'Axis Options',
     path: 'axis-options',
     component: require('containers/AxisOptions').default

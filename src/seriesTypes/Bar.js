@@ -37,7 +37,7 @@ export default function Bar({ series }) {
 }
 
 function BarPiece({ datum, barOffset, style }) {
-  const [{ primaryAxes }] = React.useContext(ChartContext)
+  const [{ primaryAxes }, setChartState] = React.useContext(ChartContext)
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
@@ -63,6 +63,7 @@ function BarPiece({ datum, barOffset, style }) {
 
   const rectangleProps = {
     style: {
+      pointerEvents: 'all',
       ...style,
       ...style.rectangle,
       ...dataStyle,
@@ -71,7 +72,17 @@ function BarPiece({ datum, barOffset, style }) {
     x1: Number.isNaN(x1) ? null : x1,
     y1: Number.isNaN(y1) ? null : y1,
     x2: Number.isNaN(x2) ? null : x2,
-    y2: Number.isNaN(y2) ? null : y2
+    y2: Number.isNaN(y2) ? null : y2,
+    onMouseEnter: e =>
+      setChartState(state => ({
+        ...state,
+        element: datum
+      })),
+    onMouseLeave: e =>
+      setChartState(state => ({
+        ...state,
+        element: null
+      }))
   }
 
   return usePropsMemo(() => <Rectangle {...rectangleProps} />, rectangleProps)

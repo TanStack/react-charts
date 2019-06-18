@@ -11,29 +11,33 @@ let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
-    series: 10,
+    series: 8,
+    datums: 3,
     dataType: 'ordinal'
   })
+
   const series = React.useMemo(
     () => ({
       type: 'bar'
     }),
     []
   )
+
   const axes = React.useMemo(
     () => [
       { primary: true, type: 'ordinal', position: 'bottom' },
-      { position: 'left', type: 'linear', stacked: true }
+      { position: 'left', type: 'linear', stacked: false }
     ],
     []
   )
+
   return (
     <>
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
       <br />
       <Box>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart data={data} series={series} axes={axes} tooltip showVoronoi />
       </Box>
       <br />
       <pre>

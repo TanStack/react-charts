@@ -320,6 +320,7 @@ export default function Tooltip() {
 
   const renderProps = {
     ...chartState,
+    ...chartState.tooltip,
     datum: resolvedFocused,
     getStyle: datum => datum.getStatusStyle(resolvedFocused, getDatumStyle),
     primaryAxis,

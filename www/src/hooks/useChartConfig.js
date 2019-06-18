@@ -163,6 +163,12 @@ function makeSeries(i, dataType, useR, datums) {
       if (dataType === 'time') {
         x = new Date(startDate.getTime() + 60 * 1000 * 30 * i)
       }
+      if (dataType === 'linear') {
+        x =
+          Math.random() < nullChance
+            ? null
+            : min + Math.round(Math.random() * (max - min))
+      }
       const distribution = 1.1
       const y =
         Math.random() < nullChance

@@ -201,7 +201,7 @@ In the following example, the data is in a very funky format, but at it's core i
 ```javascript
 function MyChart() {
   // Use any data object you want
-  const data = React.useMemo(
+  const originalData = React.useMemo(
     () => ({
       axis: [1, 2, 3],
       lines: [
@@ -213,15 +213,15 @@ function MyChart() {
     []
   )
 
-  // Use data.lines to represent the different series
-  const getSeries = React.useCallback(data => data.lines, [])
+  // Make data.lines represent the different series
+  const data = React.useMemo(data => originalData.lines, [originalData])
 
   // Use data.lines[n].data to represent the different datums for each series
   const getDatums = React.useCallback(series => series.data, [])
 
   // Use the original data object and the datum index to reference the datum's primary value.
   const getPrimary = React.useCallback(
-    (datum, i, series, seriesIndex, data) => data.axis[i],
+    (datum, i, series, seriesIndex, data) => originalData.axis[i],
     []
   )
 

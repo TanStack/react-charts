@@ -23,7 +23,9 @@ export default function Voronoi() {
       secondaryAxes,
       showVoronoi,
       width,
-      height
+      height,
+      gridWidth,
+      gridHeight
     },
     setChartState
   ] = React.useContext(ChartContext)
@@ -50,15 +52,7 @@ export default function Voronoi() {
       return null
     }
 
-    const primaryVertical = primaryAxes.find(d => d.vertical)
-
-    const xScales = primaryVertical ? secondaryAxes : primaryAxes
-    const yScales = primaryVertical ? primaryAxes : secondaryAxes
-
-    const extent = [
-      [xScales[0].scale.range()[0], yScales[0].scale.range()[1]],
-      [xScales[0].scale.range()[1], yScales[0].scale.range()[0]]
-    ]
+    const extent = [[0, 0], [gridWidth, gridHeight]]
 
     // if (type === 'pie') {
     //   const primaryAxis = primaryAxes[0]
@@ -167,10 +161,12 @@ export default function Voronoi() {
       </VoronoiElement>
     )
   }, [
+    gridHeight,
+    gridWidth,
     height,
     onHover,
-    primaryAxes,
-    secondaryAxes,
+    primaryAxes.length,
+    secondaryAxes.length,
     showVoronoi,
     stackData,
     width

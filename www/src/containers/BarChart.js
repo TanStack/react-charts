@@ -33,7 +33,7 @@ export default () => {
       <br />
       <br />
       <Box>
-        <Chart data={data} series={series} axes={axes} tooltip showVoronoi />
+        <Chart data={data} series={series} axes={axes} tooltip />
       </Box>
       <br />
       <pre>

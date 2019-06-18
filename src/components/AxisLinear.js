@@ -28,9 +28,6 @@ const defaultStyles = {
   }
 }
 
-const fontSize = 10
-
-const identity = d => d
 const radiansToDegrees = r => r * (180 / Math.PI)
 
 export default function AxisLinear({
@@ -44,15 +41,28 @@ export default function AxisLinear({
   showTicks,
   styles,
   maxLabelRotation,
-  tickPadding
+  tickPadding,
+  ticks,
+  tickCount,
+  minTickCount,
+  maxTickCount,
+  barSize,
+  scale,
+  max: scaleMax,
+  transform,
+  vertical,
+  format,
+  range: [range0, range1],
+  directionMultiplier,
+  tickOffset,
+  gridOffset,
+  spacing
 }) {
   const [rotation, setRotation] = React.useState(0)
   const [
-    { primaryAxes, secondaryAxes, gridWidth, gridHeight, dark, axisDimensions },
+    { gridWidth, gridHeight, dark, axisDimensions },
     setChartState
   ] = React.useContext(ChartContext)
-
-  const axis = [...primaryAxes, ...secondaryAxes].find(d => d.id === id)
 
   const elRef = React.useRef()
   const rendersRef = React.useRef(0)
@@ -69,6 +79,7 @@ export default function AxisLinear({
   // Measure after if needed
   React.useLayoutEffect(() => {
     if (rendersRef.current > 10) {
+      rendersRef.current = 0
       return
     }
     if (!elRef.current) {
@@ -89,9 +100,8 @@ export default function AxisLinear({
       return
     }
 
-    const isHorizontal = position === positionTop || position === positionBottom
     const labelDims = Array(
-      ...elRef.current.querySelectorAll('.tick text')
+      ...elRef.current.querySelectorAll('.tickLabel')
     ).map(el => {
       const rect = el.getBoundingClientRect()
       return {
@@ -100,46 +110,86 @@ export default function AxisLinear({
       }
     })
 
-    let smallestTickGap = 100000
-    // This is just a ridiculously large tick spacing that would never happen (hopefully)
-    // If the axis is horizontal, we need to determine any necessary rotation and tick skipping
-    if (isHorizontal) {
-      const tickDims = Array(...elRef.current.querySelectorAll('.tick')).map(
-        el => el.getBoundingClientRect()
-      )
-      // Determine the smallest gap in ticks on the axis
-      tickDims.reduce((prev, current) => {
-        if (prev) {
-          const gap = current.left - prev.left
-          smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
-        }
-        return current
-      }, false)
+    let tickSpace = !vertical ? gridWidth : gridHeight
+    let calculatedTickCount = tickCount
+    let width = 0
+    let height = 0
+    let top = 0
+    let bottom = 0
+    let left = 0
+    let right = 0
 
-      // Determine the largest label on the axis
-      const largestLabel = labelDims.reduce(
-        (prev, current) => {
-          current._overflow = current.width - smallestTickGap
-          if (current._overflow > 0 && current._overflow > prev._overflow) {
-            return current
-          }
-          return prev
-        },
-        { ...labelDims[0], _overflow: 0 }
-      )
+    let smallestTickGap = 100000 // This is just a ridiculously large tick spacing that would never happen (hopefully)
 
-      // Determine axis rotation before we measure
+    // First find the dimensions of each tick
+    const tickDims = Array(...elRef.current.querySelectorAll('.tick')).map(el =>
+      el.getBoundingClientRect()
+    )
+
+    // Then, determine the smallest gap in ticks on the axis
+    tickDims.reduce((prev, current) => {
+      if (prev) {
+        const gap = vertical ? current.top - prev.top : current.left - prev.left
+        smallestTickGap = gap < smallestTickGap ? gap : smallestTickGap
+      }
+      return current
+    }, false)
+
+    const firstLabelDim = labelDims[0] || { width: 0, height: 0 }
+    const lastLabelDim = labelDims[labelDims.length - 1] || {
+      width: 0,
+      height: 0
+    }
+
+    // Then determine the largest label
+    let largestLabel = { ...firstLabelDim, _overflow: 0 }
+
+    // Determine the largest label on the axis
+    labelDims.forEach(labelDim => {
+      labelDim._overflow = !vertical
+        ? labelDim.width
+        : labelDim.height - smallestTickGap
+      if (
+        labelDim._overflow > 0 &&
+        labelDim._overflow > largestLabel._overflow
+      ) {
+        largestLabel = labelDim
+      }
+    })
+
+    const largestLabelSize = !vertical
+      ? largestLabel.width
+      : largestLabel.height
+
+    // We need to detect auto tick mode
+    if ((vertical || type !== 'ordinal') && tickCount === 'auto') {
+      // if it's on, determine how many ticks we could display if they were all flat
+      // How many ticks can we fit in the available axis space?
+      calculatedTickCount = Math.max(
+        minTickCount,
+        Math.min(
+          Math.floor(
+            (tickSpace + largestLabelSize - tickPadding) /
+              (largestLabelSize + tickPadding * 2)
+          ),
+          maxTickCount
+        )
+      )
+    } else if (!vertical) {
+      // Otherwise, if it's horizontal, then we need to determine axis rotation
       let newRotation = Math.min(
         Math.max(
           Math.abs(
             radiansToDegrees(
-              Math.acos(smallestTickGap / (largestLabel.width + fontSize))
+              Math.acos(smallestTickGap / (largestLabel.width + tickPadding))
             )
           ),
           0
         ),
         maxLabelRotation
       )
+
+      console.log(smallestTickGap, largestLabel.width, tickPadding)
 
       newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
 
@@ -148,37 +198,23 @@ export default function AxisLinear({
         (rotation !== 0 && newRotation === 0) ||
         (rotation !== maxLabelRotation && newRotation === maxLabelRotation)
       ) {
-        setRotation(() =>
-          axis.position === 'top' ? -newRotation : newRotation
-        )
+        setRotation(() => (position === 'top' ? -newRotation : newRotation))
       }
     }
 
-    const newVisibleLabelStep = Math.ceil(fontSize / smallestTickGap)
+    const newVisibleLabelStep = Math.ceil(tickPadding / smallestTickGap)
 
     if (visibleLabelStepRef.current !== newVisibleLabelStep) {
       visibleLabelStepRef.current = newVisibleLabelStep
     }
 
-    if (!labelDims.length) {
-      return
-    }
-
-    let width = 0
-    let height = 0
-    let top = 0
-    let bottom = 0
-    let left = 0
-    let right = 0
-
-    if (isHorizontal) {
+    if (!vertical) {
       // Add width overflow from the first and last ticks
-      const leftWidth = identity(labelDims[0].width)
-      const rightWidth = identity(labelDims[labelDims.length - 1].width)
+      const leftWidth = firstLabelDim.width
+      const rightWidth = lastLabelDim.width
       if (rotation) {
-        right = Math.ceil(fontSize / 2)
-        left =
-          Math.abs(Math.ceil(Math.cos(rotation) * leftWidth)) - axis.barSize / 2
+        right = Math.ceil(tickPadding / 2)
+        left = Math.abs(Math.ceil(Math.cos(rotation) * leftWidth)) - barSize / 2
       } else {
         left = Math.ceil(leftWidth / 2)
         right = Math.ceil(rightWidth / 2)
@@ -187,16 +223,16 @@ export default function AxisLinear({
         Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
         tickPadding + // Add tick padding
         // Add the height of the largest label
-        Math.max(...labelDims.map(d => Math.ceil(identity(d.height))))
+        Math.max(...labelDims.map(d => Math.ceil(d.height)))
     } else {
       // Add height overflow from the first and last ticks
-      top = Math.ceil(identity(labelDims[0].height) / 2)
-      bottom = Math.ceil(identity(labelDims[labelDims.length - 1].height) / 2)
+      top = Math.ceil(firstLabelDim.height / 2)
+      bottom = Math.ceil(lastLabelDim.height / 2)
       width =
         Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
         tickPadding + // Add tick padding
         // Add the width of the largest label
-        Math.max(...labelDims.map(d => Math.ceil(identity(d.width))))
+        Math.max(...labelDims.map(d => Math.ceil(d.width)))
     }
 
     const newDimensions = {
@@ -205,7 +241,8 @@ export default function AxisLinear({
       top,
       bottom,
       left,
-      right
+      right,
+      tickCount: calculatedTickCount
     }
 
     setChartState(state => ({
@@ -219,38 +256,31 @@ export default function AxisLinear({
       }
     }))
   }, [
-    axis,
     axisDimensions,
+    barSize,
+    gridHeight,
+    gridWidth,
     id,
     maxLabelRotation,
+    maxTickCount,
+    minTickCount,
     position,
     rotation,
     setChartState,
+    tickCount,
     tickPadding,
     tickSizeInner,
-    tickSizeOuter
+    tickSizeOuter,
+    ticks.length,
+    type,
+    vertical
   ])
 
   return React.useMemo(() => {
     // Not ready? Render null
-    if (!axis || !show) {
+    if (!show) {
       return null
     }
-
-    const {
-      scale,
-      max: scaleMax,
-      transform,
-      vertical,
-      format,
-      //
-      ticks,
-      range: [range0, range1],
-      directionMultiplier,
-      tickOffset,
-      gridOffset,
-      spacing
-    } = axis
 
     let axisPath
     if (vertical) {
@@ -299,8 +329,10 @@ export default function AxisLinear({
       ...defaultStyles,
       ...styles
     }
+
     return (
       <Group
+        ref={elRef}
         className="Axis"
         style={{
           pointerEvents: 'none',
@@ -320,7 +352,7 @@ export default function AxisLinear({
             ...axisStyles.line
           }}
         />
-        <Group className="ticks" ref={elRef} style={{}}>
+        <Group className="ticks" style={{}}>
           {ticks.map((tick, i) => (
             <Group
               key={[String(tick), i].join('_')}
@@ -329,27 +361,10 @@ export default function AxisLinear({
                 transform: transform(scale(tick) || 0)
               }}
             >
-              {/* Render the tick line  */}
-              {showTicks ? (
-                <Line
-                  x1={vertical ? 0 : tickOffset}
-                  x2={
-                    vertical ? directionMultiplier * tickSizeInner : tickOffset
-                  }
-                  y1={vertical ? tickOffset : 0}
-                  y2={
-                    vertical ? tickOffset : directionMultiplier * tickSizeInner
-                  }
-                  style={{
-                    stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
-                    strokeWidth: 1,
-                    ...axisStyles.line
-                  }}
-                />
-              ) : null}
               {/* Render the grid line */}
               {showGridLine && (
                 <Line
+                  className="gridLine"
                   x1={vertical ? 0 : gridOffset}
                   x2={vertical ? scaleMax : gridOffset}
                   y1={vertical ? gridOffset : 0}
@@ -361,37 +376,63 @@ export default function AxisLinear({
                   }}
                 />
               )}
+              {/* Render the tick line  */}
               {showTicks ? (
-                <Text
-                  style={{
-                    fill: dark ? 'white' : 'black',
-                    ...axisStyles.tick,
-                    transform: `${Utils.translate(
-                      vertical ? directionMultiplier * spacing : tickOffset,
-                      vertical ? tickOffset : directionMultiplier * spacing
-                    )} rotate(${-rotation}deg)`
-                  }}
-                  dominantBaseline={
-                    rotation
-                      ? 'central'
-                      : position === positionBottom
-                      ? 'hanging'
-                      : position === positionTop
-                      ? 'alphabetic'
-                      : 'central'
-                  }
-                  textAnchor={
-                    rotation
-                      ? 'end'
-                      : position === positionRight
-                      ? 'start'
-                      : position === positionLeft
-                      ? 'end'
-                      : 'middle'
-                  }
-                >
-                  {String(format(tick, i))}
-                </Text>
+                <g className="labelGroup">
+                  <Line
+                    className="tickline"
+                    x1={vertical ? 0 : tickOffset}
+                    x2={
+                      vertical
+                        ? directionMultiplier * tickSizeInner
+                        : tickOffset
+                    }
+                    y1={vertical ? tickOffset : 0}
+                    y2={
+                      vertical
+                        ? tickOffset
+                        : directionMultiplier * tickSizeInner
+                    }
+                    style={{
+                      stroke: dark
+                        ? 'rgba(255,255,255, .1)'
+                        : 'rgba(0,0,0, .1)',
+                      strokeWidth: 1,
+                      ...axisStyles.line
+                    }}
+                  />
+                  <Text
+                    className="tickLabel"
+                    style={{
+                      fill: dark ? 'white' : 'black',
+                      ...axisStyles.tick,
+                      transform: `${Utils.translate(
+                        vertical ? directionMultiplier * spacing : tickOffset,
+                        vertical ? tickOffset : directionMultiplier * spacing
+                      )} rotate(${-rotation}deg)`
+                    }}
+                    dominantBaseline={
+                      rotation
+                        ? 'central'
+                        : position === positionBottom
+                        ? 'hanging'
+                        : position === positionTop
+                        ? 'alphabetic'
+                        : 'central'
+                    }
+                    textAnchor={
+                      rotation
+                        ? 'end'
+                        : position === positionRight
+                        ? 'start'
+                        : position === positionLeft
+                        ? 'end'
+                        : 'middle'
+                    }
+                  >
+                    {String(format(tick, i))}
+                  </Text>
+                </g>
               ) : null}
             </Group>
           ))}
@@ -399,18 +440,29 @@ export default function AxisLinear({
       </Group>
     )
   }, [
-    axis,
     dark,
+    directionMultiplier,
+    format,
     gridHeight,
+    gridOffset,
     gridWidth,
     position,
+    range0,
+    range1,
     rotation,
+    scale,
+    scaleMax,
     show,
     showGrid,
     showTicks,
+    spacing,
     styles,
+    tickOffset,
     tickSizeInner,
     tickSizeOuter,
-    type
+    ticks,
+    transform,
+    type,
+    vertical
   ])
 }

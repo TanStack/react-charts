@@ -14,7 +14,7 @@ export const positionLeft = 'left'
 
 class AxisPie extends React.Component {
   static defaultProps = {
-    tickArguments: [],
+    tics: undefined,
     tickValues: null,
     tickFormat: null,
     tickSizeInner: 6,

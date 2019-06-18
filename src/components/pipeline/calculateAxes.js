@@ -37,7 +37,7 @@ export const axisShape = PropTypes.shape({
   hardMin: PropTypes.any,
   hardMax: PropTypes.any,
   base: PropTypes.any,
-  tickArguments: PropTypes.any,
+  ticks: PropTypes.any,
   tickValues: PropTypes.any,
   tickFormat: PropTypes.func,
   tickSizeInner: PropTypes.number,
@@ -53,7 +53,13 @@ export const axisShape = PropTypes.shape({
   id: PropTypes.any
 })
 
-export default ({ axes, materializedData, gridHeight, gridWidth }) => {
+export default ({
+  axes,
+  materializedData,
+  gridHeight,
+  gridWidth,
+  axisDimensions
+}) => {
   // Detect axes changes and build axes
   let prePrimaryAxes = axes.filter(d => d.primary)
   let preSecondaryAxes = axes.filter(d => !d.primary)
@@ -69,7 +75,8 @@ export default ({ axes, materializedData, gridHeight, gridWidth }) => {
           axis,
           materializedData,
           gridWidth,
-          gridHeight
+          gridHeight,
+          axisDimensions
         })
       })
     },
@@ -85,7 +92,8 @@ export default ({ axes, materializedData, gridHeight, gridWidth }) => {
           primaryAxes,
           materializedData,
           gridWidth,
-          gridHeight
+          gridHeight,
+          axisDimensions
         })
       })
     },

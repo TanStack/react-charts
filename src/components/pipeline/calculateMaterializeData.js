@@ -3,7 +3,6 @@ import React from 'react'
 
 export default ({
   data,
-  getSeries,
   getSeriesID,
   getLabel,
   getPrimaryAxisID,
@@ -14,17 +13,11 @@ export default ({
   getR
 }) => {
   return React.useMemo(() => {
-    // getSeries
-    const originalData = getSeries(data)
     const materializedData = []
 
     // First access the data, and provide it to the context
-    for (
-      let seriesIndex = 0;
-      seriesIndex < originalData.length;
-      seriesIndex++
-    ) {
-      const originalSeries = originalData[seriesIndex]
+    for (let seriesIndex = 0; seriesIndex < data.length; seriesIndex++) {
+      const originalSeries = data[seriesIndex]
       const seriesID = getSeriesID(originalSeries, seriesIndex, data)
       const seriesLabel = getLabel(originalSeries, seriesIndex, data)
       const primaryAxisID = getPrimaryAxisID(originalSeries, seriesIndex, data)
@@ -88,7 +81,6 @@ export default ({
     getR,
     getSecondary,
     getSecondaryAxisID,
-    getSeries,
     getSeriesID
   ])
 }

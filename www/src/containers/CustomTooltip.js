@@ -27,64 +27,9 @@ export default () => {
 
   const tooltip = React.useMemo(
     () => ({
-      render: ({ datum, primaryAxis, getStyle }) =>
-        datum ? (
-          <div
-            style={{
-              color: 'white',
-              pointerEvents: 'none'
-            }}
-          >
-            <h3
-              style={{
-                display: 'block',
-                textAlign: 'center'
-              }}
-            >
-              {primaryAxis.format(datum.primary)}
-            </h3>
-            <div
-              style={{
-                width: '300px',
-                height: '200px',
-                display: 'flex'
-              }}
-            >
-              <Chart
-                data={datum.group}
-                dark
-                series={{ type: 'bar' }}
-                getSeries={data => [
-                  {
-                    datums: data.map(d => ({
-                      x: d.seriesLabel,
-                      y: d.secondary,
-                      color: getStyle(d).fill
-                    }))
-                  }
-                ]}
-                axes={[
-                  {
-                    type: 'ordinal',
-                    primary: true,
-                    position: 'bottom'
-                  },
-                  {
-                    type: 'linear',
-                    stacked: true,
-                    position: 'left'
-                  }
-                ]}
-                getDatumStyle={datum => ({
-                  color: datum.originalDatum.color
-                })}
-                primaryCursor={{
-                  value: datum.seriesLabel
-                }}
-              />
-            </div>
-          </div>
-        ) : null
+      render: ({ datum, primaryAxis, getStyle }) => {
+        return <CustomTooltip {...{ getStyle, primaryAxis, datum }} />
+      }
     }),
     []
   )
@@ -109,5 +54,70 @@ export default () => {
       </pre>
     </>
   )
+}
+
+function CustomTooltip({ getStyle, primaryAxis, datum }) {
+  const data = React.useMemo(
+    () =>
+      datum
+        ? [
+            {
+              data: datum.group.map(d => ({
+                primary: d.series.label,
+                secondary: d.secondary,
+                color: getStyle(d).fill
+              }))
+            }
+          ]
+        : [],
+    [datum, getStyle]
+  )
+  return datum ? (
+    <div
+      style={{
+        color: 'white',
+        pointerEvents: 'none'
+      }}
+    >
+      <h3
+        style={{
+          display: 'block',
+          textAlign: 'center'
+        }}
+      >
+        {primaryAxis.format(datum.primary)}
+      </h3>
+      <div
+        style={{
+          width: '300px',
+          height: '200px',
+          display: 'flex'
+        }}
+      >
+        <Chart
+          data={data}
+          dark
+          series={{ type: 'bar' }}
+          axes={[
+            {
+              primary: true,
+              position: 'bottom',
+              type: 'ordinal'
+            },
+            {
+              position: 'left',
+              type: 'linear'
+            }
+          ]}
+          getDatumStyle={datum => ({
+            color: datum.originalDatum.color
+          })}
+          primaryCursor={{
+            value: datum.seriesLabel
+          }}
+        />
+      </div>
+    </div>
+  ) : null
 }
 // @source sourceCode

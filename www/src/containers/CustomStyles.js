@@ -70,7 +70,7 @@ function MyChart({
   const { data, grouping, randomizeData } = useChartConfig({
     series: 4,
     height: 200,
-    grouping: 'axis',
+    grouping: 'primary',
     dataType: 'ordinal',
     show: ['elementType', 'grouping']
   })

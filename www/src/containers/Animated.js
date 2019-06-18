@@ -10,25 +10,39 @@ import { Chart } from '../../../dist'
 let sourceCode
 
 export default () => {
-  const { data, randomizeData } = useChartConfig({
-    dataType: 'linear',
+  const { data, elementType, randomizeData, Options } = useChartConfig({
     series: 10,
-    useR: true
+    useR: true,
+    show: ['elementType']
   })
 
   const series = React.useMemo(
     () => ({
-      type: 'bubble',
+      type: elementType,
       showPoints: false
     }),
-    []
+    [elementType]
   )
 
   const axes = React.useMemo(
     () => [
-      { primary: true, type: 'linear', position: 'bottom' },
-      { type: 'linear', position: 'left' }
+      { primary: true, type: 'time', position: 'bottom' },
+      { type: 'linear', position: 'left', stacked: true }
     ],
+    []
+  )
+
+  const getSeriesStyle = React.useCallback(
+    () => ({
+      transition: 'all .5s ease'
+    }),
+    []
+  )
+
+  const getDatumStyle = React.useCallback(
+    () => ({
+      transition: 'all .5s ease'
+    }),
     []
   )
 
@@ -36,13 +50,15 @@ export default () => {
     <>
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
+      {Options}
       <br />
       <Box>
         <Chart
           data={data}
           series={series}
           axes={axes}
-          grouping="single"
+          getSeriesStyle={getSeriesStyle}
+          getDatumStyle={getDatumStyle}
           tooltip
         />
       </Box>
