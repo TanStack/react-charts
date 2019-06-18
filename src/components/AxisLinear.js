@@ -189,8 +189,6 @@ export default function AxisLinear({
         maxLabelRotation
       )
 
-      console.log(smallestTickGap, largestLabel.width, tickPadding)
-
       newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
 
       if (

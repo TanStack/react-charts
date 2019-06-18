@@ -250,7 +250,6 @@ export default function Chart({
 
   React.useEffect(() => {
     if (brush && previousDragging && !pointer.dragging) {
-      // console.log(pointer)
       if (Math.abs(pointer.sourceX - pointer.x) < 20) {
         return
       }
