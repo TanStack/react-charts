@@ -103,6 +103,60 @@ Complete documentation is **coming soon**. The most detailed usage examples are 
 
 Any sparse documentation available in this Readme is being progressively improved as the API evolves.
 
+## API
+
+React Charts exposes these top-level exports:
+
+- `Chart` - The Chart component used to render charts
+- Series Type Components
+  - `Line`
+  - `Bar`
+  - `Bubble`
+  - `Area`
+- `curves` - An object of different curve types and their corresponding functions
+- Position Constants
+  - `positionTop`
+  - `positionRight`
+  - `positionBottom`
+  - `positionLeft`
+- Grouping Constants
+  - `groupingSingle`
+  - `groupingSeries`
+  - `groupingPrimary`
+  - `groupingSecondary`
+- Tooltip Alignment Constants
+  - `alignAuto`
+  - `alignRight`
+  - `alignTopRight`
+  - `alignBottomRight`
+  - `alignLeft`
+  - `alignTopLeft`
+  - `alignBottomLeft`
+  - `alignTop`
+  - `alignBottom`
+- Axis Type Constants
+  - `axisTypeOrdinal`
+  - `axisTypeTime`
+  - `axisTypeUtc`
+  - `axisTypeLinear`
+  - `axisTypeLog`
+- Tooltip Anchor Constants
+  - `anchorPointer`
+  - `anchorClosest`
+  - `anchorCenter`
+  - `anchorTop`
+  - `anchorBottom`
+  - `anchorLeft`
+  - `anchorRight`
+  - `anchorGridTop`
+  - `anchorGridBottom`
+  - `anchorGridLeft`
+  - `anchorGridRight`
+- Focus Mode Constants
+  - `focusAuto`
+  - `focusClosest`
+  - `focusElement`
+
 ## Memoize your Props!
 
 As you'll see in every example, the React Charts `<Chart>` component expects all props and options to be memoized using either `React.useMemo` or `React.useCallback`. While passing an unmemoized option/prop to the `<Chart>` component won't severly break any visible functionality, your charts will be severly non-performant. Internally, React Charts uses the immutable nature of thes options/props to detect changes to the configuration and update accordingly.
