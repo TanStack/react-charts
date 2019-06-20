@@ -1,8 +1,9 @@
 import React from 'react'
-import RAF from 'raf'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
+
+import usePrevious from '../hooks/usePrevious'
 
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
@@ -41,12 +42,12 @@ export default function AxisLinear({
   showTicks,
   styles,
   maxLabelRotation,
+  labelRotationStep,
   tickPadding,
   ticks,
   tickCount,
   minTickCount,
   maxTickCount,
-  barSize,
   scale,
   max: scaleMax,
   transform,
@@ -65,23 +66,9 @@ export default function AxisLinear({
   ] = React.useContext(ChartContext)
 
   const elRef = React.useRef()
-  const rendersRef = React.useRef(0)
   const visibleLabelStepRef = React.useRef()
 
-  rendersRef.current++
-
-  React.useEffect(() => {
-    RAF(() => {
-      rendersRef.current = 0
-    })
-  }, [])
-
-  // Measure after if needed
-  React.useLayoutEffect(() => {
-    if (rendersRef.current > 10) {
-      rendersRef.current = 0
-      return
-    }
+  const measureDimensions = React.useCallback(() => {
     if (!elRef.current) {
       if (axisDimensions[position] && axisDimensions[position][id]) {
         // If the entire axis is hidden, then we need to remove the axis dimensions
@@ -177,6 +164,8 @@ export default function AxisLinear({
       )
     } else if (!vertical) {
       // Otherwise, if it's horizontal, then we need to determine axis rotation
+      // This is the raw mathematical rotation, using acosign and radians
+      // (some tricky stuff I found on some geomoetry forum. Can't remember where though)
       let newRotation = Math.min(
         Math.max(
           Math.abs(
@@ -189,12 +178,18 @@ export default function AxisLinear({
         maxLabelRotation
       )
 
-      newRotation = Number.isNaN(newRotation) ? 0 : Math.round(newRotation)
+      // Make sure the rotation isn't NaN
+      newRotation = Number.isNaN(newRotation) ? 0 : newRotation
+
+      // Round the rotation to the nearest rotationStep
+      newRotation = Math.ceil(
+        Math.ceil(newRotation / labelRotationStep) * labelRotationStep
+      )
 
       if (
-        Math.abs(rotation - newRotation) > 15 ||
-        (rotation !== 0 && newRotation === 0) ||
-        (rotation !== maxLabelRotation && newRotation === maxLabelRotation)
+        newRotation === 0 ||
+        newRotation === maxLabelRotation ||
+        Math.abs(newRotation) - Math.abs(rotation) > 5
       ) {
         setRotation(() => (position === 'top' ? -newRotation : newRotation))
       }
@@ -208,15 +203,15 @@ export default function AxisLinear({
 
     if (!vertical) {
       // Add width overflow from the first and last ticks
-      const leftWidth = firstLabelDim.width
-      const rightWidth = lastLabelDim.width
-      if (rotation) {
-        right = Math.ceil(tickPadding / 2)
-        left = Math.abs(Math.ceil(Math.cos(rotation) * leftWidth)) - barSize / 2
-      } else {
-        left = Math.ceil(leftWidth / 2)
-        right = Math.ceil(rightWidth / 2)
-      }
+      // const leftWidth = firstLabelDim.width
+      // const rightWidth = lastLabelDim.width
+      // if (rotation) {
+      //   right = tickPadding
+      //   left = Math.abs(Math.ceil(Math.cos(rotation) * leftWidth)) - barSize / 2
+      // } else {
+      //   left = Math.ceil(leftWidth / 2)
+      //   right = Math.ceil(rightWidth / 2)
+      // }
       height =
         Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
         tickPadding + // Add tick padding
@@ -243,22 +238,32 @@ export default function AxisLinear({
       tickCount: calculatedTickCount
     }
 
-    setChartState(state => ({
-      ...state,
-      axisDimensions: {
-        ...state.axisDimensions,
-        [position]: {
-          ...(state.axisDimensions[position] || {}),
-          [id]: newDimensions
+    // Only update the axisDimensions if something has changed
+    if (
+      !axisDimensions ||
+      !axisDimensions[position] ||
+      !axisDimensions[position][id] ||
+      Object.keys(newDimensions).some(key => {
+        return newDimensions[key] !== axisDimensions[position][id][key]
+      })
+    ) {
+      setChartState(state => ({
+        ...state,
+        axisDimensions: {
+          ...state.axisDimensions,
+          [position]: {
+            ...(state.axisDimensions[position] || {}),
+            [id]: newDimensions
+          }
         }
-      }
-    }))
+      }))
+    }
   }, [
     axisDimensions,
-    barSize,
     gridHeight,
     gridWidth,
     id,
+    labelRotationStep,
     maxLabelRotation,
     maxTickCount,
     minTickCount,
@@ -269,9 +274,38 @@ export default function AxisLinear({
     tickPadding,
     tickSizeInner,
     tickSizeOuter,
-    ticks.length,
     type,
     vertical
+  ])
+
+  const previousRotation = usePrevious(rotation)
+
+  // Measure after if needed
+  React.useLayoutEffect(() => {
+    if (previousRotation === rotation) {
+      measureDimensions()
+    }
+  }, [
+    axisDimensions,
+    id,
+    measureDimensions,
+    position,
+    previousRotation,
+    rotation
+  ])
+
+  // Measure after if needed
+  React.useEffect(() => {
+    if (previousRotation !== rotation) {
+      measureDimensions()
+    }
+  }, [
+    axisDimensions,
+    id,
+    measureDimensions,
+    position,
+    previousRotation,
+    rotation
   ])
 
   return React.useMemo(() => {

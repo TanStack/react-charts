@@ -3,7 +3,7 @@ import { area, line } from 'd3-shape'
 //
 
 import Utils from '../utils/Utils'
-import Curves from '../utils/Curves'
+import { curveLinear } from '../utils/Curves'
 
 import usePropsMemo from '../hooks/usePropsMemo'
 import useSeriesStyle from '../hooks/useSeriesStyle'
@@ -28,7 +28,7 @@ export default function Area({ series, showOrphans, curve }) {
         .y0(d => d.base)
         .y1(d => d.y)
         .defined(d => d.defined)
-        .curve(Curves[curve] || curve),
+        .curve(curve),
     [curve]
   )
 
@@ -38,7 +38,7 @@ export default function Area({ series, showOrphans, curve }) {
         .x(d => d.x)
         .y(d => d.y)
         .defined(d => d.defined)
-        .curve(Curves[curve] || curve),
+        .curve(curve),
     [curve]
   )
   const areaPath = React.useMemo(() => areaFn(series.datums), [
@@ -103,7 +103,7 @@ export default function Area({ series, showOrphans, curve }) {
 
 Area.defaultProps = {
   showOrphans: true,
-  curve: 'linear'
+  curve: curveLinear
 }
 
 Area.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {

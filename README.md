@@ -113,7 +113,25 @@ React Charts exposes these top-level exports:
   - `Bar`
   - `Bubble`
   - `Area`
-- `curves` - An object of different curve types and their corresponding functions
+- Curve Functions
+  - `curveBasisClosed`
+  - `curveBasisOpen`
+  - `curveBasis`
+  - `curveBundle`
+  - `curveCardinalClosed`
+  - `curveCardinalOpen`
+  - `curveCardinal`
+  - `curveCatmullRomClosed`
+  - `curveCatmullRomOpen`
+  - `curveCatmullRom`
+  - `curveLinearClosed`
+  - `curveLinear`
+  - `curveMonotoneX`
+  - `curveMonotoneY`
+  - `curveNatural`
+  - `curveStep`
+  - `curveStepAfter`
+  - `curveStepBefore`
 - Position Constants
   - `positionTop`
   - `positionRight`

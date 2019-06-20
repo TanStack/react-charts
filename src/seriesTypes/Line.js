@@ -4,7 +4,7 @@ import { line } from 'd3-shape'
 //
 import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
-import Curves from '../utils/Curves'
+import { curveMonotoneX } from '../utils/Curves'
 
 import usePropsMemo from '../hooks/usePropsMemo'
 import useSeriesStyle from '../hooks/useSeriesStyle'
@@ -28,7 +28,7 @@ export default function Line({ series, showPoints, curve }) {
         .x(d => d.x)
         .y(d => d.y)
         .defined(d => d.defined)
-        .curve(Curves[curve] || curve),
+        .curve(curve),
     [curve]
   )
   const path = React.useMemo(() => lineFn(series.datums), [
@@ -72,7 +72,7 @@ export default function Line({ series, showPoints, curve }) {
 }
 
 Line.defaultProps = {
-  curve: 'monotoneX'
+  curve: curveMonotoneX
 }
 
 Line.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {

@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Curves from '../../utils/Curves'
+//
+
+import { curveMonotoneX } from '../../utils/Curves'
 
 import Line from '../../seriesTypes/Line'
 import Bubble from '../../seriesTypes/Bubble'
@@ -19,7 +21,7 @@ const defaultSeries = {
   type: 'line',
   showPoints: true,
   showOrphans: true,
-  curve: 'monotoneX'
+  curve: curveMonotoneX
 }
 
 export const seriesPropType = PropTypes.oneOfType([
@@ -27,7 +29,7 @@ export const seriesPropType = PropTypes.oneOfType([
     type: PropTypes.string,
     showPoints: PropTypes.bool,
     showOrphans: PropTypes.bool,
-    curve: PropTypes.oneOf(Object.keys(Curves))
+    curve: PropTypes.func
   }),
   PropTypes.func
 ])
