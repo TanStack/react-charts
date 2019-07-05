@@ -313,7 +313,7 @@ export default function buildAxisLinear({
         : scale.domain(),
     format:
       tickFormat || scale.tickFormat
-        ? (tickFormat || scale.tickFormat)(tickFormat)
+        ? tickFormat || scale.tickFormat(tickFormat)
         : Utils.identity,
     spacing: Math.max(tickSizeInner, 0) + tickPadding
   }
