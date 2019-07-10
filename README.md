@@ -16,7 +16,7 @@
   <img alt="" src="https://img.shields.io/twitter/follow/tannerlinsley.svg?style=social&label=Follow" />
 </a>
 
-Simple, immersive &amp; interactive charts for React
+Simple, immersive and interactive charts for React
 
 ## Features
 
@@ -475,7 +475,7 @@ function MyChart() {
   - `onChange` - **func** - When the cursor is updated, this function will be called with relevant information
 - `tooltip{}`
   `align` - **
-  `alignPriority**`- **arrayOf**(alignPropType),`padding`- **number**,`tooltipArrowPadding`- **number**,`anchor`- **oneOf**([`anchorPointer`,`anchorClosest`,`anchorCenter`,`anchorTop`,`anchorBottom`,`anchorLeft`,`anchorRight`,`anchorGridTop`,`anchorGridBottom`,`anchorGridLeft`,`anchorGridRight``]),``render`- **func**.required,`onChange` - **func**
+  `alignPriority**`- **arrayOf**(alignPropType),`padding`- **number**,`tooltipArrowPadding`- **number**,`anchor`- **oneOf**([`anchorPointer`,`anchorClosest`,`anchorCenter`,`anchorTop`,`anchorBottom`,`anchorLeft`,`anchorRight`,`anchorGridTop`,`anchorGridBottom`,`anchorGridLeft`,`anchorGridRight`]),`render`- **func**.required,`onChange` - **func**
 
 ### Curve Types
 
