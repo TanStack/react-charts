@@ -1,0 +1,6 @@
+{
+  "root": "./",
+  "version": 2,
+  "builds": [{ "src": "www/package.json", "use": "@now/next" }],
+  "alias": "react-charts.js.org"
+}
