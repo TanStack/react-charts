@@ -4,6 +4,7 @@ import React from 'react'
 //
 
 import useChartConfig from 'hooks/useChartConfig'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
 
 let sourceCode
@@ -68,9 +69,7 @@ export default () => {
       </div>
 
       <br />
-      <pre>
-        <code>{sourceCode}</code>
-      </pre>
+      <SyntaxHighlighter code={sourceCode} />
     </>
   )
 }

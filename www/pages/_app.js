@@ -1,16 +1,16 @@
 import React from 'react'
+import App, { Container } from 'next/app'
 import styled, { createGlobalStyle } from 'styled-components'
-import { Router } from '@reach/router'
-import { addPrefetchExcludes } from 'react-static'
+import Head from 'next/head'
 //
 import 'react-resizable/css/styles.css'
+import '../src/styles.css'
 
-import Home from 'containers/Home'
-import Examples from 'containers/Examples'
+import Sidebar from 'components/Sidebar'
 
-import './styles.css'
-
-addPrefetchExcludes(['examples/'])
+if (typeof document === 'undefined') {
+  React.useLayoutEffect = React.useEffect
+}
 
 const GlobalStyles = createGlobalStyle`
   @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
@@ -69,14 +69,24 @@ const AppStyles = styled('div')`
   min-height: 100vh;
 `
 
-export default function App() {
-  return (
-    <AppStyles>
-      <GlobalStyles />
-      <Router>
-        <Home path="/" />
-        <Examples path="examples/*" />
-      </Router>
-    </AppStyles>
-  )
+export default class MyApp extends App {
+  render() {
+    const { Component, pageProps } = this.props
+
+    return (
+      <Container>
+        <Head>
+          <title>React Charts Examples</title>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+        </Head>
+        <GlobalStyles />
+        <AppStyles>
+          <Sidebar>
+            <Component {...pageProps} />
+          </Sidebar>
+        </AppStyles>
+      </Container>
+    )
+  }
 }

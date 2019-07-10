@@ -4,6 +4,7 @@ import React from 'react'
 //
 
 import Box from 'components/Box'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
 
 let sourceCode
@@ -14,9 +15,7 @@ export default () => (
       {({ data }) => <Chart data={data} type="pie" tooltip />}
     </Box>
     <br />
-    <pre>
-      <code>{sourceCode}</code>
-    </pre>
+    <SyntaxHighlighter code={sourceCode} />
   </>
 )
 // @source sourceCode

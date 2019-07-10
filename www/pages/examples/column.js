@@ -5,35 +5,29 @@ import React from 'react'
 
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
 
 let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
-    series: 10,
-    dataType: 'ordinal',
-    useR: true
+    series: 8,
+    datums: 3,
+    dataType: 'ordinal'
   })
 
-  const series = React.useCallback(
-    (s, i) => ({
-      type:
-        i % 4 === 0
-          ? 'bubble'
-          : i % 3 === 0
-          ? 'line'
-          : i % 2 === 0
-          ? 'area'
-          : 'bar'
+  const series = React.useMemo(
+    () => ({
+      type: 'bar'
     }),
     []
   )
 
   const axes = React.useMemo(
     () => [
-      { primary: true, position: 'bottom', type: 'ordinal' },
-      { position: 'left', type: 'linear', min: 0, stacked: true }
+      { primary: true, type: 'ordinal', position: 'bottom' },
+      { position: 'left', type: 'linear', stacked: false }
     ],
     []
   )
@@ -47,9 +41,7 @@ export default () => {
         <Chart data={data} series={series} axes={axes} tooltip />
       </Box>
       <br />
-      <pre>
-        <code>{sourceCode}</code>
-      </pre>
+      <SyntaxHighlighter code={sourceCode} />
     </>
   )
 }

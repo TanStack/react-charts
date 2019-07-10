@@ -6,6 +6,7 @@ import Tree from 'react-json-tree'
 
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
 
 let sourceCode
@@ -65,9 +66,7 @@ export default () => {
       <div>Clicked:</div>
       <Tree hideRoot data={clicked} />
       <br />
-      <pre>
-        <code>{sourceCode}</code>
-      </pre>
+      <SyntaxHighlighter code={sourceCode} />
     </>
   )
 }

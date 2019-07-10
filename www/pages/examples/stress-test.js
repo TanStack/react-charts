@@ -5,8 +5,9 @@ import RAF from 'raf'
 
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
-import lagRadar from '../lag-radar'
+import lagRadar from '../../src/lag-radar'
 
 let sourceCode
 
@@ -215,9 +216,7 @@ export default function StressTest() {
         </Box>
       ))}
       <br />
-      <pre>
-        <code>{sourceCode}</code>
-      </pre>
+      <SyntaxHighlighter code={sourceCode} />
     </div>
   )
 }

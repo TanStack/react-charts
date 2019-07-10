@@ -1,11 +1,98 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { Link } from '@reach/router'
+import Link from 'next/link'
 //
 import ClickOutside from 'components/ClickOutside'
 
 const breakpoint = 800
 const sidebarBackground = '#f7f7f7'
+
+const menuItems = [
+  {
+    title: 'Line Chart',
+    path: 'line'
+  },
+  {
+    title: 'Bubble Chart',
+    path: 'bubble'
+  },
+  {
+    title: 'Area Chart',
+    path: 'area'
+  },
+  {
+    title: 'Bar Chart',
+    path: 'bar'
+  },
+  {
+    title: 'Column Chart',
+    path: 'column'
+  },
+  {
+    title: 'Animated',
+    path: 'animated'
+  },
+  {
+    title: 'Axis Options',
+    path: 'axis-options'
+  },
+  {
+    title: 'Custom Styles',
+    path: 'custom-styles'
+  },
+  {
+    title: 'Custom Tooltip',
+    path: 'custom-tooltip'
+  },
+  {
+    title: 'Cursors',
+    path: 'cursors'
+  },
+  {
+    title: 'Synced Cursors',
+    path: 'synced-cursors'
+  },
+  {
+    title: 'Brushing',
+    path: 'brushing'
+  },
+  {
+    title: 'Custom Cursors',
+    path: 'custom-cursors'
+  },
+  {
+    title: 'Grouping Modes',
+    path: 'grouping-modes'
+  },
+  {
+    title: 'Tooltip Options',
+    path: 'tooltip-options'
+  },
+  {
+    title: 'Dynamic Parent',
+    path: 'dynamic-parent'
+  },
+  {
+    title: 'Sparklines',
+    path: 'sparklines'
+  },
+  {
+    title: 'Mixed Types',
+    path: 'mixed-types'
+  },
+  {
+    title: 'Multiple Axes',
+    path: 'multiple-axes'
+  },
+  {
+    title: 'Dark Mode',
+    path: 'dark-mode'
+  },
+  {
+    title: 'Stress Test',
+    path: 'stress-test'
+  }
+]
 
 const SidebarStyles = styled('div')`
   position: relative;
@@ -148,7 +235,7 @@ const Menu = ({ items }) => (
   <div className="list">
     {items.map(({ title, path }) => (
       <div key={path} className="item">
-        <Link to={`./${path}`}>{title}</Link>
+        <Link href={`/examples/${path}`}>{title}</Link>
       </div>
     ))}
   </div>
@@ -163,7 +250,7 @@ class Sidebar extends React.Component {
       isOpen
     })
   render() {
-    const { children, items } = this.props
+    const { children } = this.props
     const { isOpen } = this.state
     return (
       <SidebarStyles className="sidebar" isOpen={isOpen}>
@@ -196,7 +283,7 @@ class Sidebar extends React.Component {
               <div className="version" />
             </div>
             <div className="scroll">
-              <Menu items={items} />
+              <Menu items={menuItems} />
             </div>
           </div>
         </ClickOutside>

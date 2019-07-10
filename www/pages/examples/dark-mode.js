@@ -5,20 +5,18 @@ import React from 'react'
 
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from '../../../dist'
 
 let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
-    dataType: 'linear',
-    series: 10,
-    useR: true
+    series: 10
   })
 
   const series = React.useMemo(
     () => ({
-      type: 'bubble',
       showPoints: false
     }),
     []
@@ -26,7 +24,7 @@ export default () => {
 
   const axes = React.useMemo(
     () => [
-      { primary: true, type: 'linear', position: 'bottom' },
+      { primary: true, type: 'time', position: 'bottom' },
       { type: 'linear', position: 'left' }
     ],
     []
@@ -37,19 +35,17 @@ export default () => {
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
       <br />
-      <Box>
-        <Chart
-          data={data}
-          series={series}
-          axes={axes}
-          grouping="single"
-          tooltip
-        />
+      <Box
+        style={{
+          background: 'rgba(0, 27, 45, 0.9)',
+          padding: '.5rem',
+          borderRadius: '5px'
+        }}
+      >
+        <Chart data={data} series={series} axes={axes} tooltip dark />
       </Box>
       <br />
-      <pre>
-        <code>{sourceCode}</code>
-      </pre>
+      <SyntaxHighlighter code={sourceCode} />
     </>
   )
 }

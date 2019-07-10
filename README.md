@@ -416,42 +416,68 @@ function MyChart() {
 }
 ```
 
-# Advanced API
+# API
 
 **`<Chart />` Props**
 
-- `getSeries()` - Responsible for returning an array of series.
-  - Default - `() => null`
-  - Arguments:
-    - `data` - The original
-  - Returns an `Object`
-- `getLabel()`
-  - Default - `() => null`
-  - Arguments:
-    - Thing
-  - Returns an `Object`
-- `getSeriesID()`
-  - Default - `() => null`
-  - Arguments:
-    - Thing
-  - Returns an `Object`
-- `getDatums()`
-  - Default - `() => null`
-  - Arguments:
-    - Thing
-  - Returns an `Object`
-- `getPrimary()`
-  - Default - `() => null`
-  - Arguments:
-    - Thing
-  - Returns an `Object`
-- `getSecondary()`
-  - Default - `() => null`
-  - Arguments:
-    - Thing
-  - Returns an `Object`
+- `getLabel` - A `memoized` function that returns the series label
+- `getSeriesID` - A `memoized` function that returns the series ID
+- `getDatums` - A `memoized` function that returns the series' datums array
+- `getPrimary` - A `memoized` function that returns the datum's primary value
+- `getSecondary` - A `memoized` function that returns the datum's secondary value
+- `getR` - A `memoized` function that returns the datum's radius value (where applicable)
+- `series({} or function)` - A `memoized` object (or function that returns an object) of series options that correspond to all or each of the series in the dataset.
+  `type` - **string** - The series type (Line, Bar, Bubble, Area, etc)
+  `showPoints` - **bool** - If true, will show points for datums where applicable
+  `showOrphans` - **bool** - If true, will show orphan datums where applicable
+  `curve` - **func** - The curve function to use for this series where applicable (see [Curve Types](#curve-types))
+- `axes[]` - An array of `memoized` axes
+  - `axis{}` - An axis object
+    - `primary` **bool** - Denotes whether this axis is the primary axis
+    - `type` **oneOf, required** - The type of scale for this axis
+      - `axisTypeOrdinal`
+      - `axisTypeTime`
+      - `axisTypeUtc`
+      - `axisTypeLinear`
+      - `axisTypeLog`
+    - `position` **oneOf, required** - The cartesian position of this axis
+      - `positionTop`
+      - `positionRight`
+      - `positionBottom`
+      - `positionLeft`
+    - `invert` **bool** - Whether this axis's scale should be inverted
+    - `primaryAxisID` **string** - If multiple secondary axes are used, which primary axis ID does this axis refer to?
+    - `min` **number** - The suggested minimum for this axis
+    - `max` **number** - The suggested maximum for this axis
+    - `hardMin` **number** - The hard/forced minimum for this axis
+    - `hardMax` **number** - The hard/forced maximum for this axis
+    - `base` **number** - The base value for this axis. Defaults to `0`
+    - `ticks` **function** - The function used to generate ticks for the axis
+    - `tickValues` **any** - The optional override for the tick values of the axis
+    - `tickFormat` **func** - The function used to format tick values for display
+    - `tickSizeInner` **number** - The size of inner tick lines for the axis
+    - `tickSizeOuter` **number** - The size of the outer tick lines for the axis
+    - `tickPadding` **number** - The padding amount between tick labels
+    - `maxLabelRotation` **number** - The max label rotation angle in degrees. Defaults to 50
+    - `innerPadding` **number** - The inner padding for the axis
+    - `outerPadding` **number** - The outer padding for the axis
+    - `showGrid` **bool** - Whether or not the axis grid lines should be visible
+    - `showTicks` **bool** - Whether or not the tick and tick labels should be visible
+    - `show` **bool** - Whether or not the axis and scale are visible
+    - `stacked` **bool** - If true, will use stacked mode
+    - `id` **any** - An optional ID to identify this axis
+- `primaryCursor{}` - An object of options for the primary cursor. If falsey, the cursor is disabled
+  - `render` - **func** - The render function for this cursor. Returns JSX
+  - `snap` - **bool** - If true, the cursor will snap to nearest values on the axis
+  - `showLine` - **bool** - If true, will show the grid line for this cursor
+  - `showLabel` - **bool** - If true, will show the label for this cursor
+  - `axisID` - **any** - The ID of the axis that this cursor corresponds to
+  - `onChange` - **func** - When the cursor is updated, this function will be called with relevant information
+- `tooltip{}`
+  `align` - **
+  `alignPriority**`- **arrayOf**(alignPropType),`padding`- **number**,`tooltipArrowPadding`- **number**,`anchor`- **oneOf**([`anchorPointer`,`anchorClosest`,`anchorCenter`,`anchorTop`,`anchorBottom`,`anchorLeft`,`anchorRight`,`anchorGridTop`,`anchorGridBottom`,`anchorGridLeft`,`anchorGridRight``]),``render`- **func**.required,`onChange` - **func**
 
-**Curve Types**
+### Curve Types
 
 All series types that support lines or curves can be configured to use any [curve function from `d3-shape`](https://github.com/d3/d3-shape#curves) by passing one of the following strings as the `curve` prop to a series component. You may also pass your own curve function directly from d3 or if you're feeling powerful, even create your own!
 

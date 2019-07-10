@@ -1,9 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Link } from '@reach/router'
+import Link from 'next/link'
 //
 
-import logoImg from '../logo.png'
+import logoImg from '../src/logo.png'
 
 const Styles = styled('div')`
   display: flex;
@@ -55,7 +55,9 @@ const Styles = styled('div')`
   }
 
   img {
-    width: 800px;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
   }
 
   h1 {
@@ -113,31 +115,24 @@ const Card = styled(Link)`
   }
 `
 
-export default () => (
-  <Styles>
-    <div className="backgrounds">
-      <div className="background1" />
-      <div className="background2" />
-    </div>
-    <img src={logoImg} alt="" />
-    <h1>React Charts</h1>
-    <h2>Simple, immersive &amp; interactive charts for React</h2>
-    {/* <p>
-          My Awesome Libary was built to help you get stuff done fast. It will change your live by
-          being faster, lighter, and easier to use than the next thing.
-        </p> */}
-    <Cards>
-      <Card to="/examples/line" background="#efbb3c">
-        Examples
-      </Card>
-    </Cards>
-    <div className="github">
-      <a href="https://github.com/react-tools/react-charts">
-        <img
-          src="https://img.shields.io/github/stars/react-tools/react-charts.svg?style=social&label=Star"
-          alt="Github Stars"
-        />
-      </a>
-    </div>
-  </Styles>
-)
+export default function Home() {
+  return (
+    <Styles>
+      <div className="backgrounds">
+        <div className="background1" />
+        <div className="background2" />
+      </div>
+      <img src={logoImg} alt="" />
+      <h1>React Charts</h1>
+      <h2>Simple, immersive &amp; interactive charts for React</h2>
+      <div className="github">
+        <a href="https://github.com/react-tools/react-charts">
+          <img
+            src="https://img.shields.io/github/stars/react-tools/react-charts.svg?style=social&label=Star"
+            alt="Github Stars"
+          />
+        </a>
+      </div>
+    </Styles>
+  )
+}
