@@ -2,5 +2,5 @@
   "version": 2,
   "alias": "react-charts.tannerlinsley.com",
   "builds": [{ "src": "www/package.json", "use": "@now/next" }],
-  "routes": [{ "src": "/(.*)", "dest": "/www/$1" }]
+  "routes": [{ "src": "/(.*)", "dest": "/www/$1", "continue": true }]
 }
