@@ -6,7 +6,6 @@
   "scripts": {
     "start": "next",
     "build": "next build",
-    "now-build": "cd .. && yarn && cd www && yarn build",
     "prettier": "prettier src/**/*.js --write"
   },
   "dependencies": {
