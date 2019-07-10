@@ -1686,10 +1686,10 @@ babel-plugin-react-require@3.0.0:
   resolved "https://registry.yarnpkg.com/babel-plugin-react-require/-/babel-plugin-react-require-3.0.0.tgz#2e4e7b4496b93a654a1c80042276de4e4eeb20e3"
   integrity sha1-Lk57RJa5OmVKHIAEInbeTk7rIOM=
 
-babel-plugin-source@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/babel-plugin-source/-/babel-plugin-source-0.0.4.tgz#2e6a01d0e6c73cffe677ce71f898691b64421886"
-  integrity sha512-BlQPswX058mqHmVeMT+2+BaNY+qY+jQFiPRilMGRnMaEjVOeHjOYCZJ7mZmGhdMj/m6xkC87hy4nvpxKI0IELQ==
+babel-plugin-source@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/babel-plugin-source/-/babel-plugin-source-0.0.6.tgz#7d0d748bb97abc72c56f68dc940747d4ef40fe69"
+  integrity sha512-C/sYytlHoLOyKZ/os9QoTO/w34nUfNtsOe+/guylO0okqo+QPLICLwzdC2hceuweG0ezZtoKAPnacMtEXtcPfA==
   dependencies:
     "@babel/runtime" "^7.4.5"
     babel-plugin-macros "^2.0.0"

@@ -28,7 +28,7 @@
   "devDependencies": {
     "@svgr/rollup": "^4.3.0",
     "babel-eslint": "10.0.1",
-    "babel-plugin-source": "^0.0.4",
+    "babel-plugin-source": "^0.0.6",
     "eslint": "5.x",
     "eslint-plugin-flowtype": "3.10.1",
     "eslint-plugin-import": "2.x",
