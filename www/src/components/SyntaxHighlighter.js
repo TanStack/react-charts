@@ -1,13 +1,14 @@
-import { Light } from 'react-syntax-highlighter'
-import js from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript'
-import theme from 'react-syntax-highlighter/dist/cjs/styles/hljs/atom-one-dark'
+import React from 'react'
+import { PrismLight } from 'react-syntax-highlighter'
+import jsx from 'react-syntax-highlighter/dist/cjs/languages/prism/jsx'
+import theme from 'react-syntax-highlighter/dist/cjs/styles/prism/tomorrow'
 
-Light.registerLanguage('javascript', js)
+PrismLight.registerLanguage('javascript', jsx)
 
 export default function SyntaxHighlighter({ code }) {
   return (
-    <Light language="javascript" style={theme}>
+    <PrismLight language="javascript" style={theme}>
       {code}
-    </Light>
+    </PrismLight>
   )
 }

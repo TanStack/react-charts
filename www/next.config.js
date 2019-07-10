@@ -11,6 +11,7 @@ const node_modules = path.resolve(__dirname, 'node_modules')
 
 const baseConfig = {
   target: 'serverless',
+  distDir: '../.next',
   pageExtensions: ['js', 'jsx', 'md', 'mdx'],
   webpack(config) {
     config.resolve.modules = [...config.resolve.modules, path.resolve('./src')]
