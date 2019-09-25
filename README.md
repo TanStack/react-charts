@@ -2,9 +2,9 @@
 
 Simple, immersive and interactive charts for React
 
-<a href="https://travis-ci.org/react-charts/react-charts" target="\_parent">
+<!-- <a href="https://travis-ci.org/react-charts/react-charts" target="\_parent">
   <img alt="" src="https://travis-ci.org/react-charts/react-charts.svg?branch=master" />
-</a>
+</a> -->
 <a href="https://npmjs.com/package/react-charts" target="\_parent">
   <img alt="" src="https://img.shields.io/npm/dm/react-charts.svg" />
 </a>
