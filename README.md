@@ -1,13 +1,15 @@
 # React Charts
 
+Simple, immersive and interactive charts for React
+
 <a href="https://travis-ci.org/react-charts/react-charts" target="\_parent">
   <img alt="" src="https://travis-ci.org/react-charts/react-charts.svg?branch=master" />
 </a>
 <a href="https://npmjs.com/package/react-charts" target="\_parent">
   <img alt="" src="https://img.shields.io/npm/dm/react-charts.svg" />
 </a>
-<a href="https://react-chat-signup.herokuapp.com/" target="\_parent">
-  <img alt="" src="https://img.shields.io/badge/slack-react--chat-blue.svg" />
+<a href="https://bundlephobia.com/result?p=react-charts" target="\_parent">
+  <img alt="" src="https://badgen.net/bundlephobia/minzip/react-charts" />
 </a>
 <a href="https://github.com/react-charts/react-charts" target="\_parent">
   <img alt="" src="https://img.shields.io/github/stars/react-charts/react-charts.svg?style=social&label=Star" />
@@ -15,8 +17,11 @@
 <a href="https://twitter.com/tannerlinsley" target="\_parent">
   <img alt="" src="https://img.shields.io/twitter/follow/tannerlinsley.svg?style=social&label=Follow" />
 </a>
-
-Simple, immersive and interactive charts for React
+<br />
+<br />
+<a href="https://patreon.com/tannerlinsley">
+  <img width="180" alt="" src="https://raw.githubusercontent.com/tannerlinsley/files/master/images/patreon/become-a-patron.png" />
+</a>
 
 ## Features
 
@@ -26,7 +31,9 @@ Simple, immersive and interactive charts for React
 - React Hooks Ready
 - Flexible data model
 
-## [Demos](https://react-charts.js.org)
+## Demos
+
+- [react-charts.js.org](https://react-charts.js.org)
 
 ## Intro
 
