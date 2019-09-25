@@ -25,10 +25,10 @@ Simple, immersive and interactive charts for React
 
 ## Features
 
-- Line, Bar, Bubble, Area.
+- Line, Bar, Bubble, & Area Charts
 - Hyper Responsive
 - Powered by D3
-- React Hooks Ready
+- Fully Declarative
 - Flexible data model
 
 ## Demos
