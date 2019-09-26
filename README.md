@@ -1,4 +1,6 @@
-# React Charts
+![React Form Header](https://github.com/tannerlinsley/react-form/raw/master/media/header.png)
+
+<img src='https://github.com/tannerlinsley/react-form/raw/master/media/logo.png' width='300'/>
 
 Simple, immersive and interactive charts for React
 
