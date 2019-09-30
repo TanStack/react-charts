@@ -13,6 +13,9 @@ Simple, immersive and interactive charts for React
 <a href="https://bundlephobia.com/result?p=react-charts" target="\_parent">
   <img alt="" src="https://badgen.net/bundlephobia/minzip/react-charts" />
 </a>
+<a href="https://spectrum.chat/react-charts">
+  <img alt="Join the community on Spectrum" src="https://withspectrum.github.io/badge/badge.svg" />
+</a>
 <a href="https://github.com/react-charts/react-charts" target="\_parent">
   <img alt="" src="https://img.shields.io/github/stars/react-charts/react-charts.svg?style=social&label=Star" />
 </a>
