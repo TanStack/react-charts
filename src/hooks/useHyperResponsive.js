@@ -8,9 +8,12 @@ export default function useHyperResponsive(ref) {
     height: 0
   })
 
-  const resize = React.useRef()
-
-  resize.current = () => {
+  const dimsRef = React.useRef()
+  dimsRef.current = {
+    width, height
+  }
+  
+  const resize = React.useCallback(() => {
     if (!ref.current) {
       return
     }
@@ -46,20 +49,20 @@ export default function useHyperResponsive(ref) {
       newHeight -= parseInt(borderBottomWidth)
     }
 
-    if (newWidth !== width || newHeight !== height) {
+    if (newWidth !== dimsRef.current.width || newHeight !== dimsRef.current.height) {
       setState(() => ({
         width: newWidth,
         height: newHeight
       }))
     }
-  }
+  }, [ref])
 
   React.useEffect(() => {
-    const stopListening = onResize(ref.current.parentElement, resize.current)
+    const stopListening = onResize(ref.current.parentElement, resize)
     return () => {
       stopListening()
     }
-  }, [ref])
+  }, [ref, resize])
 
   return [{ width, height }]
 }
