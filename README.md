@@ -28,6 +28,8 @@ Simple, immersive and interactive charts for React
   <img width="180" alt="" src="https://raw.githubusercontent.com/tannerlinsley/files/master/images/patreon/become-a-patron.png" />
 </a>
 
+Enjoy this library? Try them all! [React Table](https://github.com/tannerlinsley/react-table), [React Query](https://github.com/tannerlinsley/react-query), [React Form](https://github.com/tannerlinsley/react-form)
+
 ## Features
 
 - Line, Bar, Bubble, & Area Charts
