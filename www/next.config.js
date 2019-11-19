@@ -19,13 +19,11 @@ Module.prototype.require = function(modulePath) {
       return false
     }
   })) {
-    console.log(require.resolve(modulePath))
     try {
       modulePath = resolveFrom(
         node_modules,
         modulePath
       )
-      console.log('NEW: ', modulePath)
     } catch (err) {
       //
     }
