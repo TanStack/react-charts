@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "start": "next dev",
-    "build": "yarn install-lib && yarn link-react && yarn link-react-dom && yarn build-lib && yarn link-lib && next build",
-    "install-lib": "cd .. && yarn",
+    "build": "yarn link-react && yarn link-react-dom && yarn build-lib && yarn link-lib && next build && next export",
     "link-react": "cd node_modules/react && yarn link && cd ../../../ && yarn link react",
     "link-react-dom": "cd node_modules/react-dom && yarn link && cd ../../../ && yarn link react-dom",
     "build-lib": "cd .. && yarn build && yarn link",

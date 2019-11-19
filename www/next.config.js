@@ -35,7 +35,7 @@ const node_modules = path.resolve(__dirname, 'node_modules')
 // }
 
 const baseConfig = {
-  target: 'serverless',
+  // target: 'serverless',
   pageExtensions: ['js', 'jsx'],
   webpack(config) {
     config.resolve.modules = [...config.resolve.modules, path.resolve('./src')]
