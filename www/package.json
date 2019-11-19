@@ -5,10 +5,12 @@
   "private": true,
   "scripts": {
     "start": "next dev",
-    "build": "yarn link react-charts && yarn link-react && next build",
-    "prebuild": "yarn link-lib",
-    "link-lib": "cd .. && yarn && yarn link",
-    "link-react": "cd node_modules/react-dom/ && yarn link && cd ../../../ && yarn link react-dom",
+    "prebuild": "yarn build-lib && yarn link-lib && yarn link-react && yarn link-react-dom",
+    "build-lib": "cd .. && yarn",
+    "link-lib": "cd .. && yarn link && cd www && yarn link react-charts",
+    "link-react": "cd node_modules/react && yarn link && cd ../../../ && yarn link react",
+    "link-react-dom": "cd node_modules/react-dom && yarn link && cd ../../../ && yarn link react-dom",
+    "build": "next build",
     "prettier": "prettier src/**/*.js --write"
   },
   "dependencies": {

@@ -12,9 +12,7 @@
     "test": "cross-env CI=1 react-scripts test --env=jsdom",
     "test:watch": "react-scripts test --env=jsdom",
     "build": "rollup -c",
-    "now-build": "yarn && cd www && yarn && yarn build",
     "start": "rollup -c -w",
-    "prepare": "yarn build",
     "release": "yarn publish",
     "releaseNext": "yarn publish --tag next",
     "prettier": "prettier src/**/*.js --write"
