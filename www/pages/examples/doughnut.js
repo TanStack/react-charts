@@ -5,7 +5,7 @@ import React from 'react'
 
 import Box from 'components/Box'
 import SyntaxHighlighter from 'components/SyntaxHighlighter'
-import { Chart } from '../../../dist'
+import { Chart } from 'react-charts'
 
 let sourceCode
 

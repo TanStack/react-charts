@@ -6,7 +6,7 @@ import RAF from 'raf'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import SyntaxHighlighter from 'components/SyntaxHighlighter'
-import { Chart } from '../../../dist'
+import { Chart } from 'react-charts'
 import lagRadar from '../../src/lag-radar'
 
 let sourceCode

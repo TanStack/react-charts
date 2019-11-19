@@ -235,7 +235,10 @@ const Menu = ({ items }) => (
   <div className="list">
     {items.map(({ title, path }) => (
       <div key={path} className="item">
-        <Link href={`/examples/${path}`}>{title}</Link>
+        <Link href={`/examples/${path}`}><a>
+        {title}
+        </a>
+        </Link>
       </div>
     ))}
   </div>
@@ -252,6 +255,7 @@ class Sidebar extends React.Component {
   render() {
     const { children } = this.props
     const { isOpen } = this.state
+    
     return (
       <SidebarStyles className="sidebar" isOpen={isOpen}>
         <ClickOutside

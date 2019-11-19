@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react";
 //
-import ChartContext from '../utils/ChartContext'
+import ChartContext from "../utils/ChartContext";
 
 export default function useDatumStyle(datum) {
-  const [{ focused, getDatumStyle }] = React.useContext(ChartContext)
-  return datum.getStatusStyle(focused, getDatumStyle)
+  const [{ focused, getDatumStyle }] = React.useContext(ChartContext);
+  return datum.getStatusStyle(focused, getDatumStyle);
 }

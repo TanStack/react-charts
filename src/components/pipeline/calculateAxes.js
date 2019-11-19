@@ -39,7 +39,7 @@ export const axisShape = PropTypes.shape({
   base: PropTypes.any,
   ticks: PropTypes.any,
   tickValues: PropTypes.any,
-  tickFormat: PropTypes.func,
+  format: PropTypes.func,
   tickSizeInner: PropTypes.number,
   tickSizeOuter: PropTypes.number,
   tickPadding: PropTypes.number,

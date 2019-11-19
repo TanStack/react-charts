@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react";
 //
-import ChartContext from '../utils/ChartContext'
+import ChartContext from "../utils/ChartContext";
 
 export default function useSeriesStyle(series) {
-  const [{ focused, getSeriesStyle }] = React.useContext(ChartContext)
-  return series.getStatusStyle(focused, getSeriesStyle)
+  const [{ focused, getSeriesStyle }] = React.useContext(ChartContext);
+  return series.getStatusStyle(focused, getSeriesStyle);
 }

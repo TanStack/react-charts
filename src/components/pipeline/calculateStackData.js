@@ -70,9 +70,13 @@ export default ({
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
       return {
         ...series,
+        primaryAxis,
+        secondaryAxis,
         datums: series.datums.map(d => {
           const datum = {
             ...d,
+            primaryAxis,
+            secondaryAxis,
             xValue: d[xKey],
             yValue: d[yKey],
             baseValue: 0

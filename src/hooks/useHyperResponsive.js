@@ -1,68 +1,78 @@
-import React from 'react'
+import React from "react";
 //
-import onResize from '../utils/detectElementResize'
+import onResize from "../utils/detectElementResize";
 
 export default function useHyperResponsive(ref) {
   const [{ width, height }, setState] = React.useState({
     width: 0,
     height: 0
-  })
+  });
 
-  const dimsRef = React.useRef()
+  const dimsRef = React.useRef();
   dimsRef.current = {
-    width, height
-  }
-  
-  const resize = React.useCallback(() => {
-    if (!ref.current) {
-      return
-    }
+    width,
+    height
+  };
 
-    const computed = window.getComputedStyle(ref.current.parentElement)
+  const resize = React.useCallback(
+    () => {
+      if (!ref.current) {
+        return;
+      }
 
-    const {
-      paddingTop,
-      paddingBottom,
-      paddingLeft,
-      paddingRight,
-      boxSizing,
-      borderTopWidth,
-      borderLeftWidth,
-      borderRightWidth,
-      borderBottomWidth
-    } = computed
+      const computed = window.getComputedStyle(ref.current.parentElement);
 
-    let { width: newWidth, height: newHeight } = computed
+      const {
+        paddingTop,
+        paddingBottom,
+        paddingLeft,
+        paddingRight,
+        boxSizing,
+        borderTopWidth,
+        borderLeftWidth,
+        borderRightWidth,
+        borderBottomWidth
+      } = computed;
 
-    newWidth = parseInt(newWidth)
-    newHeight = parseInt(newHeight)
+      let { width: newWidth, height: newHeight } = computed;
 
-    if (boxSizing === 'border-box') {
-      newWidth -= parseInt(paddingLeft)
-      newWidth -= parseInt(paddingRight)
-      newHeight -= parseInt(paddingTop)
-      newHeight -= parseInt(paddingBottom)
+      newWidth = parseInt(newWidth);
+      newHeight = parseInt(newHeight);
 
-      newWidth -= parseInt(borderLeftWidth)
-      newWidth -= parseInt(borderRightWidth)
-      newHeight -= parseInt(borderTopWidth)
-      newHeight -= parseInt(borderBottomWidth)
-    }
+      if (boxSizing === "border-box") {
+        newWidth -= parseInt(paddingLeft);
+        newWidth -= parseInt(paddingRight);
+        newHeight -= parseInt(paddingTop);
+        newHeight -= parseInt(paddingBottom);
 
-    if (newWidth !== dimsRef.current.width || newHeight !== dimsRef.current.height) {
-      setState(() => ({
-        width: newWidth,
-        height: newHeight
-      }))
-    }
-  }, [ref])
+        newWidth -= parseInt(borderLeftWidth);
+        newWidth -= parseInt(borderRightWidth);
+        newHeight -= parseInt(borderTopWidth);
+        newHeight -= parseInt(borderBottomWidth);
+      }
 
-  React.useEffect(() => {
-    const stopListening = onResize(ref.current.parentElement, resize)
-    return () => {
-      stopListening()
-    }
-  }, [ref, resize])
+      if (
+        newWidth !== dimsRef.current.width ||
+        newHeight !== dimsRef.current.height
+      ) {
+        setState(() => ({
+          width: newWidth,
+          height: newHeight
+        }));
+      }
+    },
+    [ref]
+  );
 
-  return [{ width, height }]
+  React.useEffect(
+    () => {
+      const stopListening = onResize(ref.current.parentElement, resize);
+      return () => {
+        stopListening();
+      };
+    },
+    [ref, resize]
+  );
+
+  return [{ width, height }];
 }

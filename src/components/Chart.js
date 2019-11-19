@@ -1,26 +1,26 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React from "react";
+import PropTypes from "prop-types";
 //
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import ChartContext from "../utils/ChartContext";
+import Utils from "../utils/Utils";
 
-import useHyperResponsive from '../hooks/useHyperResponsive'
-import useLatestRef from '../hooks/useLatestRef'
-import useLatest from '../hooks/useLatest'
-import usePrevious from '../hooks/usePrevious'
+import useHyperResponsive from "../hooks/useHyperResponsive";
+import useLatestRef from "../hooks/useLatestRef";
+import useLatest from "../hooks/useLatest";
+import usePrevious from "../hooks/usePrevious";
 
-import ChartInner from './ChartInner'
+import ChartInner from "./ChartInner";
 
-import calculateMaterializeData from './pipeline/calculateMaterializeData'
+import calculateMaterializeData from "./pipeline/calculateMaterializeData";
 import calculateSeriesOptions, {
   seriesPropType
-} from './pipeline/calculateSeriesOptions'
-import calculateSeriesTypes from './pipeline/calculateSeriesTypes'
-import calculateDimensions from './pipeline/calculateDimensions'
-import calculateAxes, { axisShape } from './pipeline/calculateAxes'
-import calculateStackData from './pipeline/calculateStackData'
-import calculateTooltip, { tooltipShape } from './pipeline/calculateTooltip'
-import calculateCursors, { cursorShape } from './pipeline/calculateCursors'
+} from "./pipeline/calculateSeriesOptions";
+import calculateSeriesTypes from "./pipeline/calculateSeriesTypes";
+import calculateDimensions from "./pipeline/calculateDimensions";
+import calculateAxes, { axisShape } from "./pipeline/calculateAxes";
+import calculateStackData from "./pipeline/calculateStackData";
+import calculateTooltip, { tooltipShape } from "./pipeline/calculateTooltip";
+import calculateCursors, { cursorShape } from "./pipeline/calculateCursors";
 
 import {
   groupingSingle,
@@ -30,7 +30,7 @@ import {
   focusAuto,
   focusElement,
   focusClosest
-} from '../utils/Constants'
+} from "../utils/Constants";
 
 const defaultProps = {
   getDatums: d => (Array.isArray(d) ? d : d.datums || d.data),
@@ -48,7 +48,7 @@ const defaultProps = {
   grouping: groupingPrimary,
   focus: focusAuto,
   showVoronoi: false
-}
+};
 
 export default function Chart({
   data,
@@ -89,35 +89,35 @@ export default function Chart({
     padding: {},
     offset: {},
     pointer: {}
-  })
+  });
 
-  const onClickRef = useLatestRef(onClick)
-  const onFocusRef = useLatestRef(onFocus)
-  const onHoverRef = useLatestRef(onHover)
+  const onClickRef = useLatestRef(onClick);
+  const onFocusRef = useLatestRef(onFocus);
+  const onHoverRef = useLatestRef(onHover);
 
-  const responsiveElRef = React.useRef()
-  const [{ width, height }] = useHyperResponsive(responsiveElRef)
+  const responsiveElRef = React.useRef();
+  const [{ width, height }] = useHyperResponsive(responsiveElRef);
 
   getSeriesID = React.useCallback(
     Utils.normalizeGetter(getSeriesID),
     getSeriesID
-  )
-  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), getLabel)
+  );
+  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), getLabel);
   getPrimaryAxisID = React.useCallback(
     Utils.normalizeGetter(getPrimaryAxisID),
     getPrimaryAxisID
-  )
+  );
   getSecondaryAxisID = React.useCallback(
     Utils.normalizeGetter(getSecondaryAxisID),
     getSecondaryAxisID
-  )
-  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), getDatums)
-  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), getPrimary)
+  );
+  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), getDatums);
+  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), getPrimary);
   getSecondary = React.useCallback(
     Utils.normalizeGetter(getSecondary),
     getSecondary
-  )
-  getR = React.useCallback(Utils.normalizeGetter(getR), getR)
+  );
+  getR = React.useCallback(Utils.normalizeGetter(getR), getR);
 
   let materializedData = calculateMaterializeData({
     data,
@@ -129,17 +129,17 @@ export default function Chart({
     getPrimary,
     getSecondary,
     getR
-  })
+  });
 
   const seriesOptions = calculateSeriesOptions({
     materializedData,
     series
-  })
+  });
 
   materializedData = calculateSeriesTypes({
     materializedData,
     seriesOptions
-  })
+  });
 
   const { offset, gridX, gridY, gridWidth, gridHeight } = calculateDimensions({
     width,
@@ -147,7 +147,7 @@ export default function Chart({
     axisDimensions,
     padding,
     offset: offsetState
-  })
+  });
 
   const {
     primaryAxes,
@@ -162,7 +162,7 @@ export default function Chart({
     gridHeight,
     gridWidth,
     axisDimensions
-  })
+  });
 
   const stackData = calculateStackData({
     materializedData,
@@ -173,44 +173,50 @@ export default function Chart({
     xAxes,
     xKey,
     grouping
-  })
+  });
 
-  pointer = React.useMemo(() => {
-    return {
-      ...pointer,
-      axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
-        axis,
-        value: axis.scale.invert
-          ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
-          : null
-      }))
-    }
-  }, [pointer, primaryAxes, secondaryAxes])
+  pointer = React.useMemo(
+    () => {
+      return {
+        ...pointer,
+        axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
+          axis,
+          value: axis.scale.invert
+            ? axis.scale.invert(pointer[axis.vertical ? "y" : "x"])
+            : null
+        }))
+      };
+    },
+    [pointer, primaryAxes, secondaryAxes]
+  );
 
-  focused = React.useMemo(() => {
-    // Get the closest focus datum out of the datum group
-    if (focused || element) {
-      let resolvedFocus = focus
+  focused = React.useMemo(
+    () => {
+      // Get the closest focus datum out of the datum group
+      if (focused || element) {
+        let resolvedFocus = focus;
 
-      if (focus === focusAuto) {
-        if (element) {
-          resolvedFocus = focusElement
-        } else {
-          resolvedFocus = focusClosest
+        if (focus === focusAuto) {
+          if (element) {
+            resolvedFocus = focusElement;
+          } else {
+            resolvedFocus = focusClosest;
+          }
+        }
+
+        if (resolvedFocus === focusElement && element) {
+          return element;
+        } else if (resolvedFocus === focusClosest) {
+          return Utils.getClosestPoint(pointer, focused.group);
         }
       }
-
-      if (resolvedFocus === focusElement && element) {
-        return element
-      } else if (resolvedFocus === focusClosest) {
-        return Utils.getClosestPoint(pointer, focused.group)
-      }
-    }
-    return null
-  }, [element, focus, focused, pointer])
+      return null;
+    },
+    [element, focus, focused, pointer]
+  );
 
   // keep the previous focused value around for animations
-  const latestFocused = useLatest(focused, focused)
+  const latestFocused = useLatest(focused, focused);
 
   // Calculate Tooltip
   tooltip = calculateTooltip({
@@ -219,10 +225,10 @@ export default function Chart({
     pointer,
     gridWidth,
     gridHeight
-  })
+  });
 
   // Cursors
-  ;[primaryCursor, secondaryCursor] = calculateCursors({
+  [primaryCursor, secondaryCursor] = calculateCursors({
     primaryCursor,
     secondaryCursor,
     primaryAxes,
@@ -232,42 +238,51 @@ export default function Chart({
     gridWidth,
     gridHeight,
     stackData
-  })
+  });
 
-  React.useEffect(() => {
-    if (onFocusRef.current) {
-      onFocusRef.current(focused)
-    }
-  }, [onFocusRef, focused])
-
-  React.useEffect(() => {
-    if (onHoverRef.current) {
-      onHoverRef.current(pointer)
-    }
-  }, [onHoverRef, pointer])
-
-  const previousDragging = usePrevious(pointer.dragging)
-
-  React.useEffect(() => {
-    if (brush && previousDragging && !pointer.dragging) {
-      if (Math.abs(pointer.sourceX - pointer.x) < 20) {
-        return
+  React.useEffect(
+    () => {
+      if (onFocusRef.current) {
+        onFocusRef.current(focused);
       }
-      brush.onSelect({
-        pointer: pointer.released,
-        start: primaryAxes[0].scale.invert(pointer.sourceX),
-        end: primaryAxes[0].scale.invert(pointer.x)
-      })
-    }
-  }, [
-    brush,
-    pointer,
-    pointer.released,
-    pointer.sourceX,
-    pointer.x,
-    previousDragging,
-    primaryAxes
-  ])
+    },
+    [onFocusRef, focused]
+  );
+
+  React.useEffect(
+    () => {
+      if (onHoverRef.current) {
+        onHoverRef.current(pointer);
+      }
+    },
+    [onHoverRef, pointer]
+  );
+
+  const previousDragging = usePrevious(pointer.dragging);
+
+  React.useEffect(
+    () => {
+      if (brush && previousDragging && !pointer.dragging) {
+        if (Math.abs(pointer.sourceX - pointer.x) < 20) {
+          return;
+        }
+        brush.onSelect({
+          pointer: pointer.released,
+          start: primaryAxes[0].scale.invert(pointer.sourceX),
+          end: primaryAxes[0].scale.invert(pointer.x)
+        });
+      }
+    },
+    [
+      brush,
+      pointer,
+      pointer.released,
+      pointer.sourceX,
+      pointer.x,
+      previousDragging,
+      primaryAxes
+    ]
+  );
 
   // Decorate the chartState with computed values (or ones we just
   // want to pass down through context)
@@ -342,12 +357,12 @@ export default function Chart({
       yAxes,
       yKey
     ]
-  )
+  );
 
   const chartStateContextValue = React.useMemo(
     () => [chartState, setChartState],
     [chartState, setChartState]
-  )
+  );
 
   return (
     <ChartContext.Provider value={chartStateContextValue}>
@@ -356,12 +371,12 @@ export default function Chart({
         {...rest}
         onClick={e => {
           if (onClickRef.current) {
-            onClickRef.current(focused)
+            onClickRef.current(focused);
           }
         }}
       />
     </ChartContext.Provider>
-  )
+  );
 }
 
 Chart.propTypes = {
@@ -395,6 +410,6 @@ Chart.propTypes = {
   onClick: PropTypes.func,
   onFocus: PropTypes.func,
   onHover: PropTypes.func
-}
+};
 
-Chart.defaultProps = defaultProps
+Chart.defaultProps = defaultProps;

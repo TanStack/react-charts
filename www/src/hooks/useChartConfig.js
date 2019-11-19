@@ -42,7 +42,7 @@ const options = {
 
 const optionKeys = Object.keys(options)
 
-export default function useBox({
+export default function useChartConfig({
   series,
   useR,
   show = [],

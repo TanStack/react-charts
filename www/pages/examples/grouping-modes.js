@@ -7,7 +7,7 @@ import Tree from 'react-json-tree'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import SyntaxHighlighter from 'components/SyntaxHighlighter'
-import { Chart } from '../../../dist'
+import { Chart } from 'react-charts'
 
 let sourceCode
 

@@ -5,7 +5,7 @@ import React from 'react'
 
 import useChartConfig from 'hooks/useChartConfig'
 import SyntaxHighlighter from 'components/SyntaxHighlighter'
-import { Chart } from '../../../dist'
+import { Chart } from 'react-charts'
 
 let sourceCode
 

@@ -1,7 +1,7 @@
-import React from 'react'
+import React from "react";
 
 //
 
 export default function({ children }) {
-  return <defs>{children}</defs>
+  return <defs>{children}</defs>;
 }

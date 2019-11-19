@@ -6,7 +6,7 @@ import React from 'react'
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
 import SyntaxHighlighter from 'components/SyntaxHighlighter'
-import { Chart } from '../../../dist'
+import { Chart } from 'react-charts'
 
 let sourceCode
 
@@ -55,7 +55,8 @@ export default () => {
         type: 'linear',
         id: 'Second Metric',
         min: 0,
-        position: 'right'
+        position: 'right',
+        format: d => `$${d}`
       }
     ],
     []

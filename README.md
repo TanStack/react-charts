@@ -465,8 +465,8 @@ function MyChart() {
     - `hardMax` **number** - The hard/forced maximum for this axis
     - `base` **number** - The base value for this axis. Defaults to `0`
     - `ticks` **function** - The function used to generate ticks for the axis
+    - `format` **func** - The function used to format values on this axis for display
     - `tickValues` **any** - The optional override for the tick values of the axis
-    - `tickFormat` **func** - The function used to format tick values for display
     - `tickSizeInner` **number** - The size of inner tick lines for the axis
     - `tickSizeOuter` **number** - The size of the outer tick lines for the axis
     - `tickPadding` **number** - The padding amount between tick labels
