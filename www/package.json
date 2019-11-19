@@ -12,12 +12,12 @@
   "dependencies": {
     "next": "^9.1.4",
     "react": "^16.12.0",
+    "react-charts": "file:../../",
     "react-click-outside": "^3.0.1",
     "react-dom": "^16.12.0",
     "react-resizable": "^1.9.0",
     "react-syntax-highlighter": "^11.0.2",
-    "styled-components": "^4.4.1",
-    "react-charts": "file:../../"
+    "styled-components": "^4.4.1"
   },
   "devDependencies": {
     "@zeit/next-css": "^1.0.1",
