@@ -5,10 +5,10 @@ import React from 'react'
 
 import useChartConfig from 'hooks/useChartConfig'
 import Box from 'components/Box'
-// import SyntaxHighlighter from 'components/SyntaxHighlighter'
+import SyntaxHighlighter from 'components/SyntaxHighlighter'
 import { Chart } from 'react-charts'
 
-// let sourceCode
+let sourceCode
 
 export default function Line () {
   const { data, randomizeData } = useChartConfig({
@@ -39,7 +39,7 @@ export default function Line () {
         <Chart data={data} series={series} axes={axes} tooltip />
       </Box>
       <br />
-      {/* <SyntaxHighlighter code={sourceCode} /> */}
+      <SyntaxHighlighter code={sourceCode} />
     </>
   )
 }

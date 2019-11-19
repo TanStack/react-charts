@@ -100,24 +100,24 @@ export default function Chart({
 
   getSeriesID = React.useCallback(
     Utils.normalizeGetter(getSeriesID),
-    getSeriesID
+    [getSeriesID]
   );
-  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), getLabel);
+  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), [getLabel]);
   getPrimaryAxisID = React.useCallback(
     Utils.normalizeGetter(getPrimaryAxisID),
-    getPrimaryAxisID
+    [getPrimaryAxisID]
   );
   getSecondaryAxisID = React.useCallback(
     Utils.normalizeGetter(getSecondaryAxisID),
-    getSecondaryAxisID
+    [getSecondaryAxisID]
   );
-  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), getDatums);
-  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), getPrimary);
+  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), [getDatums]);
+  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), [getPrimary]);
   getSecondary = React.useCallback(
     Utils.normalizeGetter(getSecondary),
-    getSecondary
+    [getSecondary]
   );
-  getR = React.useCallback(Utils.normalizeGetter(getR), getR);
+  getR = React.useCallback(Utils.normalizeGetter(getR), [getR]);
 
   let materializedData = calculateMaterializeData({
     data,

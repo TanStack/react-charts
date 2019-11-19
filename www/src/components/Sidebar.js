@@ -244,57 +244,45 @@ const Menu = ({ items }) => (
   </div>
 )
 
-class Sidebar extends React.Component {
-  state = {
-    isOpen: false
-  }
-  toggle = isOpen =>
-    this.setState({
-      isOpen
-    })
-  render() {
-    const { children } = this.props
-    const { isOpen } = this.state
-    
-    return (
-      <SidebarStyles className="sidebar" isOpen={isOpen}>
-        <ClickOutside
-          onClickOutside={
-            isOpen
-              ? () => {
-                  this.setState({
-                    isOpen: false
-                  })
-                }
-              : undefined
-          }
-        >
-          <div className="sidebar">
-            <button
-              className="toggle"
-              onClick={() => {
-                this.toggle(!isOpen)
-              }}
-            >
-              ⇤
-            </button>
-            <div className="header">
-              <span className="link">
-                <a href="https://github.com/react-tools/react-charts">
-                  React Charts
-                </a>
-              </span>
-              <div className="version" />
-            </div>
-            <div className="scroll">
-              <Menu items={menuItems} />
-            </div>
-          </div>
-        </ClickOutside>
-        <div className="content">{children}</div>
-      </SidebarStyles>
-    )
-  }
-}
+export default function Sidebar ({ children }) {
+  const [isOpen, setIsOpen] = React.useState(false)
 
-export default Sidebar
+  const toggle = () => setIsOpen(old => !old)
+
+  return (
+    <SidebarStyles className="sidebar" isOpen={isOpen}>
+      <ClickOutside
+        onClickOutside={
+          isOpen
+            ? () => {
+                this.setState({
+                  isOpen: false
+                })
+              }
+            : undefined
+        }
+      >
+        <div className="sidebar">
+          <button
+            className="toggle"
+            onClick={toggle}
+          >
+            ⇤
+          </button>
+          <div className="header">
+            <span className="link">
+              <a href="https://github.com/react-tools/react-charts">
+                React Charts
+              </a>
+            </span>
+            <div className="version" />
+          </div>
+          <div className="scroll">
+            <Menu items={menuItems} />
+          </div>
+        </div>
+      </ClickOutside>
+      <div className="content">{children}</div>
+    </SidebarStyles>
+  )
+}

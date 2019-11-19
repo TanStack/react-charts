@@ -33,8 +33,7 @@ Module.prototype.require = function(modulePath) {
 }
 
 const baseConfig = {
-  // target: 'serverless',
-  // distDir: '../.next',
+  target: 'serverless',
   pageExtensions: ['js', 'jsx'],
   webpack(config) {
     config.resolve.modules = [...config.resolve.modules, path.resolve('./src')]
