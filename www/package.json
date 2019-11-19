@@ -6,8 +6,8 @@
   "scripts": {
     "start": "next dev",
     "prebuild": "yarn build-lib && yarn link-lib && yarn link-react && yarn link-react-dom",
-    "build-lib": "cd .. && yarn",
-    "link-lib": "cd .. && yarn link && cd www && yarn link react-charts",
+    "build-lib": "cd .. && yarn && yarn link",
+    "link-lib": "yarn link react-charts",
     "link-react": "cd node_modules/react && yarn link && cd ../../../ && yarn link react",
     "link-react-dom": "cd node_modules/react-dom && yarn link && cd ../../../ && yarn link react-dom",
     "build": "next build",
