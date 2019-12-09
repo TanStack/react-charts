@@ -113,7 +113,7 @@ function MyChart() {
 
 ## Documentation
 
-Complete documentation is **coming soon**. The most detailed usage examples are visible by [browsing the website's examples](https://github.com/react-tools/react-charts/tree/master/www/src/containers).
+Complete documentation is **coming soon**. The most detailed usage examples are visible by [browsing the website's examples](https://github.com/tannerlinsley/react-charts/tree/master/www/pages/examples).
 
 Any sparse documentation available in this Readme is being progressively improved as the API evolves.
 
