@@ -314,6 +314,14 @@ function MyChart() {
   // Use data.lines[n].data[n].value as each datums secondary value
   const getSecondary = React.useCallback(datum => datum.value, [])
 
+  const axes = React.useMemo(
+    () => [
+      { primary: true, type: 'linear', position: 'bottom' },
+      { type: 'linear', position: 'left' }
+    ],
+    []
+  )
+
   return (
     <div
       style={{
@@ -323,7 +331,7 @@ function MyChart() {
     >
       <Chart
         data={data}
-        getSeries={getSeries}
+        axes={axes}
         getDatums={getDatums}
         getPrimary={getPrimary}
         getSecondary={getSecondary}
