@@ -12,12 +12,12 @@ let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
-    series: 10
+    series: 10,
   })
 
   const series = React.useMemo(
     () => ({
-      showPoints: false
+      showPoints: false,
     }),
     []
   )
@@ -28,9 +28,9 @@ export default () => {
         primary: true,
         position: 'bottom',
         type: 'time',
-        show: false
+        show: false,
       },
-      { position: 'left', type: 'linear', show: false }
+      { position: 'left', type: 'linear', show: false },
     ],
     []
   )
@@ -41,7 +41,7 @@ export default () => {
       <br />
       <br />
       <Box width={500} height={100}>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart data={data} series={series} axes={axes} />
       </Box>
       <br />
       <SyntaxHighlighter code={sourceCode} />

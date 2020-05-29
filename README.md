@@ -29,6 +29,10 @@ Enjoy this library? Try them all! [React Table](https://github.com/tannerlinsley
 
 ### [Become a Sponsor](https://github.com/sponsors/tannerlinsley/)
 
+### React Charts 2.x.x is under-construction!
+
+> **The `@latest` distribution of the `react-charts` npm package currently points to version `2.0.0-beta.7` and will remain there until 2.x.x is stable. To use the bleeding-edge version of React Charts, please install using the `@next` distribution channel as directed in the docs.**
+
 ## Features
 
 - Line, Bar, Bubble, & Area Charts

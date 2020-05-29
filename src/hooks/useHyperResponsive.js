@@ -1,78 +1,40 @@
-import React from "react";
-//
-import onResize from "../utils/detectElementResize";
+import React from 'react'
 
-export default function useHyperResponsive(ref) {
-  const [{ width, height }, setState] = React.useState({
-    width: 0,
-    height: 0
-  });
+import observeRect from '@reach/observe-rect'
 
-  const dimsRef = React.useRef();
-  dimsRef.current = {
-    width,
-    height
-  };
+import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
-  const resize = React.useCallback(
-    () => {
-      if (!ref.current) {
-        return;
-      }
+export default function useRect(nodeRef) {
+  const [element, setElement] = React.useState(nodeRef.current?.parentElement)
+  const [rect, setRect] = React.useState({ width: 0, height: 0 })
+  const initialRectSet = React.useRef(false)
 
-      const computed = window.getComputedStyle(ref.current.parentElement);
+  useIsomorphicLayoutEffect(() => {
+    if (nodeRef.current?.parentElement !== element) {
+      setElement(nodeRef.current?.parentElement)
+    }
+  })
 
-      const {
-        paddingTop,
-        paddingBottom,
-        paddingLeft,
-        paddingRight,
-        boxSizing,
-        borderTopWidth,
-        borderLeftWidth,
-        borderRightWidth,
-        borderBottomWidth
-      } = computed;
+  useIsomorphicLayoutEffect(() => {
+    if (element && !initialRectSet.current) {
+      initialRectSet.current = true
+      setRect(element.getBoundingClientRect())
+    }
+  }, [element])
 
-      let { width: newWidth, height: newHeight } = computed;
+  React.useEffect(() => {
+    if (!element) {
+      return
+    }
 
-      newWidth = parseInt(newWidth);
-      newHeight = parseInt(newHeight);
+    const observer = observeRect(element, setRect)
 
-      if (boxSizing === "border-box") {
-        newWidth -= parseInt(paddingLeft);
-        newWidth -= parseInt(paddingRight);
-        newHeight -= parseInt(paddingTop);
-        newHeight -= parseInt(paddingBottom);
+    observer.observe()
 
-        newWidth -= parseInt(borderLeftWidth);
-        newWidth -= parseInt(borderRightWidth);
-        newHeight -= parseInt(borderTopWidth);
-        newHeight -= parseInt(borderBottomWidth);
-      }
+    return () => {
+      observer.unobserve()
+    }
+  }, [element])
 
-      if (
-        newWidth !== dimsRef.current.width ||
-        newHeight !== dimsRef.current.height
-      ) {
-        setState(() => ({
-          width: newWidth,
-          height: newHeight
-        }));
-      }
-    },
-    [ref]
-  );
-
-  React.useEffect(
-    () => {
-      const stopListening = onResize(ref.current.parentElement, resize);
-      return () => {
-        stopListening();
-      };
-    },
-    [ref, resize]
-  );
-
-  return [{ width, height }];
+  return { width: rect.width, height: rect.height }
 }

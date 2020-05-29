@@ -27,6 +27,7 @@ export default function TooltipRenderer(props) {
     formatTertiary,
     getStyle,
     dark,
+    tooltip,
   } = props
 
   if (!datum) {
@@ -62,6 +63,10 @@ export default function TooltipRenderer(props) {
   }
 
   if (secondaryAxis.invert) {
+    sortedGroupDatums.reverse()
+  }
+
+  if (tooltip.invert) {
     sortedGroupDatums.reverse()
   }
 

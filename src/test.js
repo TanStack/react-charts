@@ -1,7 +1,5 @@
-import ExampleComponent from './'
-
-describe('ExampleComponent', () => {
-  it('is truthy', () => {
-    expect(ExampleComponent).toBeTruthy()
+describe('React Charts', () => {
+  it('has no tests', () => {
+    expect('yup').toEqual('yup')
   })
 })

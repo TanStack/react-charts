@@ -90,7 +90,7 @@ export default function Chart({
   const onHoverRef = useLatestRef(onHover)
 
   const responsiveElRef = React.useRef()
-  const [{ width, height }] = useHyperResponsive(responsiveElRef)
+  const { width, height } = useHyperResponsive(responsiveElRef)
 
   getSeriesID = React.useCallback(Utils.normalizeGetter(getSeriesID), [
     getSeriesID,

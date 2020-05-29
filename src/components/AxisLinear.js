@@ -216,7 +216,7 @@ export default function AxisLinear({
         Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
         tickPadding + // Add tick padding
         // Add the height of the largest label
-        Math.max(...labelDims.map(d => Math.ceil(d.height)))
+        Math.max(0, ...labelDims.map(d => Math.ceil(d.height)))
     } else {
       // Add height overflow from the first and last ticks
       top = Math.ceil(firstLabelDim.height / 2)
@@ -225,7 +225,7 @@ export default function AxisLinear({
         Math.max(tickSizeInner, tickSizeOuter) + // Add tick size
         tickPadding + // Add tick padding
         // Add the width of the largest label
-        Math.max(...labelDims.map(d => Math.ceil(d.width)))
+        Math.max(0, ...labelDims.map(d => Math.ceil(d.width)))
     }
 
     const newDimensions = {
