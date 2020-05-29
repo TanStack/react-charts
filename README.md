@@ -29,12 +29,6 @@ Enjoy this library? Try them all! [React Table](https://github.com/tannerlinsley
 
 ### [Become a Sponsor](https://github.com/sponsors/tannerlinsley/)
 
-### React Charts 2.x.x is under-construction!
-
-> **You are currently on the `next` branch and the bleeding-edge / under-construction version of React Charts. Currently, the `@next` distribution channel is used to release this branch as directed in the docs.**
-
-> **The `master` branch and `@latest` distribution of the `react-charts` npm package currently points to version `2.0.0-beta.7` and will remain there until 2.x.x is stable.**
-
 ## Features
 
 - Line, Bar, Bubble, & Area Charts
@@ -116,12 +110,11 @@ This library is being built and maintained by me, @tannerlinsley and I am always
 
 - [react-charts.js.org](https://react-charts.js.org)
 
-## Intro
+### React Charts 2.x.x is under-construction!
 
-React Charts is currently in **beta**! This means:
+> **You are currently on the `next` branch and the bleeding-edge / under-construction version of React Charts. Currently, the `@next` distribution channel is used to release this branch as directed in the docs.**
 
-- The existing API is mostly stable. Expect only subtle changes/additions as use-cases become polished.
-- It's safe for **most** production sites, as long as you lock in the alpha version.
+> **The `master` branch and `@latest` distribution of the `react-charts` npm package currently points to version `2.0.0-beta.7` and will remain there until 2.x.x is stable.**
 
 ## Table of Contents
 
@@ -132,9 +125,9 @@ React Charts is currently in **beta**! This means:
 ## Installation
 
 ```bash
-$ yarn add react-charts
+$ yarn add react-charts@next
 # or
-$ npm i react-charts --save
+$ npm i react-charts@next --save
 ```
 
 ## Quick Start
