@@ -1,64 +1,13 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 //
 import buildAxis from '../../utils/buildAxis'
-
-import {
-  axisTypeOrdinal,
-  axisTypeTime,
-  axisTypeUtc,
-  axisTypeLinear,
-  axisTypeLog,
-  positionTop,
-  positionRight,
-  positionBottom,
-  positionLeft
-} from '../../utils/Constants'
-
-export const axisShape = PropTypes.shape({
-  primary: PropTypes.bool,
-  type: PropTypes.oneOf([
-    axisTypeOrdinal,
-    axisTypeTime,
-    axisTypeUtc,
-    axisTypeLinear,
-    axisTypeLog
-  ]).isRequired,
-  invert: PropTypes.bool,
-  position: PropTypes.oneOf([
-    positionTop,
-    positionRight,
-    positionBottom,
-    positionLeft
-  ]),
-  primaryAxisID: PropTypes.any,
-  min: PropTypes.any,
-  max: PropTypes.any,
-  hardMin: PropTypes.any,
-  hardMax: PropTypes.any,
-  base: PropTypes.any,
-  ticks: PropTypes.any,
-  tickValues: PropTypes.any,
-  format: PropTypes.func,
-  tickSizeInner: PropTypes.number,
-  tickSizeOuter: PropTypes.number,
-  tickPadding: PropTypes.number,
-  maxLabelRotation: PropTypes.number,
-  innerPadding: PropTypes.number,
-  outerPadding: PropTypes.number,
-  showGrid: PropTypes.bool,
-  showTicks: PropTypes.bool,
-  show: PropTypes.bool,
-  stacked: PropTypes.bool,
-  id: PropTypes.any
-})
 
 export default ({
   axes,
   materializedData,
   gridHeight,
   gridWidth,
-  axisDimensions
+  axisDimensions,
 }) => {
   // Detect axes changes and build axes
   let prePrimaryAxes = axes.filter(d => d.primary)
@@ -76,7 +25,7 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          axisDimensions
+          axisDimensions,
         })
       })
     },
@@ -93,7 +42,7 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          axisDimensions
+          axisDimensions,
         })
       })
     },
@@ -113,6 +62,6 @@ export default ({
     xKey,
     yKey,
     xAxes,
-    yAxes
+    yAxes,
   }
 }

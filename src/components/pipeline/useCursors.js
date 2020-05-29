@@ -1,19 +1,6 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import Utils from '../../utils/Utils'
-
-export const cursorShape = PropTypes.oneOfType([
-  PropTypes.oneOf([true]),
-  PropTypes.shape({
-    render: PropTypes.func,
-    snap: PropTypes.bool,
-    showLine: PropTypes.bool,
-    showLabel: PropTypes.bool,
-    axisID: PropTypes.any,
-    onChange: PropTypes.func
-  })
-])
 
 const defaultCursorProps = {
   render: ({ formattedValue }) => <span>{formattedValue}</span>,
@@ -21,7 +8,7 @@ const defaultCursorProps = {
   showLine: true,
   showLabel: true,
   axisID: undefined,
-  onChange: () => {}
+  onChange: () => {},
 }
 
 export default ({
@@ -33,7 +20,7 @@ export default ({
   pointer,
   gridWidth,
   gridHeight,
-  stackData
+  stackData,
 }) => {
   return [primaryCursor, secondaryCursor].map((cursor, i) => {
     const cursorValue = cursor && cursor.value
@@ -47,7 +34,7 @@ export default ({
       cursor = {
         ...defaultCursorProps,
         ...cursor,
-        primary
+        primary,
       }
 
       let value
@@ -122,7 +109,7 @@ export default ({
         show,
         value,
         resolvedShow,
-        resolvedValue
+        resolvedValue,
       }
     }, [stackData, pointer, cursorValue])
   })

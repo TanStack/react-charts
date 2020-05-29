@@ -4,7 +4,7 @@ import {
   scaleTime,
   scaleUtc,
   scaleBand
-} from "d3-scale";
+} from "../d3";
 //
 import {
   positionTop,

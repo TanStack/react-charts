@@ -1,5 +1,5 @@
 import React from "react";
-import { area, line } from "d3-shape";
+import { area, line } from "../d3";
 //
 
 import Utils from "../utils/Utils";

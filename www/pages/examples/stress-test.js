@@ -1,6 +1,5 @@
 // @source sourceCode
 import React from 'react'
-import RAF from 'raf'
 //
 
 import useChartConfig from 'hooks/useChartConfig'

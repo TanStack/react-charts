@@ -1,4 +1,18 @@
+export {voronoi} from 'd3-voronoi'
+
 export {
+  scaleLinear,
+  scaleLog,
+  scaleTime,
+  scaleUtc,
+  scaleBand
+} from "d3-scale"
+
+export {
+  arc,
+  area,
+  line,
+  pie,
   curveBasisClosed,
   curveBasisOpen,
   curveBasis,
@@ -16,5 +30,5 @@ export {
   curveNatural,
   curveStep,
   curveStepAfter,
-  curveStepBefore
-} from "../d3";
+  curveStepBefore,
+} from 'd3-shape'

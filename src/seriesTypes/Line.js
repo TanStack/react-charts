@@ -1,5 +1,5 @@
 import React from "react";
-import { line } from "d3-shape";
+import { line } from "../d3";
 
 //
 import ChartContext from "../utils/ChartContext";

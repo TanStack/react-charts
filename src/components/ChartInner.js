@@ -1,6 +1,6 @@
 import React from "react";
-import RAF from "raf";
 //
+import Raf from '../utils/Raf'
 import Utils from "../utils/Utils";
 import ChartContext from "../utils/ChartContext";
 
@@ -72,9 +72,9 @@ export default React.forwardRef(function ChartInner(
 
   const onMouseMove = e => {
     if (rafRef.current) {
-      RAF.cancel(rafRef.current);
+      Raf.cancel(rafRef.current);
     }
-    rafRef.current = RAF(() => {
+    rafRef.current = Raf(() => {
       rafRef.current = null;
       const { clientX, clientY } = e;
 

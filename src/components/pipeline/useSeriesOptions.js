@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 //
 
 import { curveMonotoneX } from '../../utils/Curves'
@@ -13,7 +12,7 @@ const seriesTypes = {
   line: Line,
   bubble: Bubble,
   area: Area,
-  bar: Bar
+  bar: Bar,
   // pie: Pie
 }
 
@@ -21,26 +20,16 @@ const defaultSeries = {
   type: 'line',
   showPoints: true,
   showOrphans: true,
-  curve: curveMonotoneX
+  curve: curveMonotoneX,
 }
 
-export const seriesPropType = PropTypes.oneOfType([
-  PropTypes.shape({
-    type: PropTypes.string,
-    showPoints: PropTypes.bool,
-    showOrphans: PropTypes.bool,
-    curve: PropTypes.func
-  }),
-  PropTypes.func
-])
-
-export default ({ materializedData, series }) =>
-  React.useMemo(
+export default ({ materializedData, series }) => {
+  return React.useMemo(
     () =>
       materializedData.map((s, seriesIndex) => {
         const { type, ...rest } = {
           ...defaultSeries,
-          ...(typeof series === 'function' ? series(s, seriesIndex) : series)
+          ...(typeof series === 'function' ? series(s, seriesIndex) : series),
         }
         const renderer = seriesTypes[type]
         if (!renderer) {
@@ -49,8 +38,9 @@ export default ({ materializedData, series }) =>
         return {
           ...rest,
           type,
-          renderer
+          renderer,
         }
       }),
     [materializedData, series]
   )
+}

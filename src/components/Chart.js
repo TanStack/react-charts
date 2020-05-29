@@ -1,36 +1,30 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react'
 //
-import ChartContext from "../utils/ChartContext";
-import Utils from "../utils/Utils";
+import ChartContext from '../utils/ChartContext'
+import Utils from '../utils/Utils'
 
-import useHyperResponsive from "../hooks/useHyperResponsive";
-import useLatestRef from "../hooks/useLatestRef";
-import useLatest from "../hooks/useLatest";
-import usePrevious from "../hooks/usePrevious";
+import useHyperResponsive from '../hooks/useHyperResponsive'
+import useLatestRef from '../hooks/useLatestRef'
+import useLatest from '../hooks/useLatest'
+import usePrevious from '../hooks/usePrevious'
 
-import ChartInner from "./ChartInner";
+import ChartInner from './ChartInner'
 
-import calculateMaterializeData from "./pipeline/calculateMaterializeData";
-import calculateSeriesOptions, {
-  seriesPropType
-} from "./pipeline/calculateSeriesOptions";
-import calculateSeriesTypes from "./pipeline/calculateSeriesTypes";
-import calculateDimensions from "./pipeline/calculateDimensions";
-import calculateAxes, { axisShape } from "./pipeline/calculateAxes";
-import calculateStackData from "./pipeline/calculateStackData";
-import calculateTooltip, { tooltipShape } from "./pipeline/calculateTooltip";
-import calculateCursors, { cursorShape } from "./pipeline/calculateCursors";
+import useMaterializeData from './pipeline/useMaterializeData'
+import useSeriesOptions from './pipeline/useSeriesOptions'
+import useSeriesTypes from './pipeline/useSeriesTypes'
+import useDimensions from './pipeline/useDimensions'
+import useAxes from './pipeline/useAxes'
+import useStackData from './pipeline/useStackData'
+import useTooltip from './pipeline/useTooltip'
+import useCursors from './pipeline/useCursors'
 
 import {
-  groupingSingle,
-  groupingSeries,
   groupingPrimary,
-  groupingSecondary,
   focusAuto,
   focusElement,
-  focusClosest
-} from "../utils/Constants";
+  focusClosest,
+} from '../utils/Constants'
 
 const defaultProps = {
   getDatums: d => (Array.isArray(d) ? d : d.datums || d.data),
@@ -47,8 +41,8 @@ const defaultProps = {
   onHover: () => {},
   grouping: groupingPrimary,
   focus: focusAuto,
-  showVoronoi: false
-};
+  showVoronoi: false,
+}
 
 export default function Chart({
   data,
@@ -81,45 +75,45 @@ export default function Chart({
 }) {
   let [
     { focused, element, axisDimensions, offset: offsetState, padding, pointer },
-    setChartState
+    setChartState,
   ] = React.useState({
     focused: null,
     element: null,
     axisDimensions: {},
     padding: {},
     offset: {},
-    pointer: {}
-  });
+    pointer: {},
+  })
 
-  const onClickRef = useLatestRef(onClick);
-  const onFocusRef = useLatestRef(onFocus);
-  const onHoverRef = useLatestRef(onHover);
+  const onClickRef = useLatestRef(onClick)
+  const onFocusRef = useLatestRef(onFocus)
+  const onHoverRef = useLatestRef(onHover)
 
-  const responsiveElRef = React.useRef();
-  const [{ width, height }] = useHyperResponsive(responsiveElRef);
+  const responsiveElRef = React.useRef()
+  const [{ width, height }] = useHyperResponsive(responsiveElRef)
 
-  getSeriesID = React.useCallback(
-    Utils.normalizeGetter(getSeriesID),
-    [getSeriesID]
-  );
-  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), [getLabel]);
+  getSeriesID = React.useCallback(Utils.normalizeGetter(getSeriesID), [
+    getSeriesID,
+  ])
+  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), [getLabel])
   getPrimaryAxisID = React.useCallback(
     Utils.normalizeGetter(getPrimaryAxisID),
     [getPrimaryAxisID]
-  );
+  )
   getSecondaryAxisID = React.useCallback(
     Utils.normalizeGetter(getSecondaryAxisID),
     [getSecondaryAxisID]
-  );
-  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), [getDatums]);
-  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), [getPrimary]);
-  getSecondary = React.useCallback(
-    Utils.normalizeGetter(getSecondary),
-    [getSecondary]
-  );
-  getR = React.useCallback(Utils.normalizeGetter(getR), [getR]);
+  )
+  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), [getDatums])
+  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), [
+    getPrimary,
+  ])
+  getSecondary = React.useCallback(Utils.normalizeGetter(getSecondary), [
+    getSecondary,
+  ])
+  getR = React.useCallback(Utils.normalizeGetter(getR), [getR])
 
-  let materializedData = calculateMaterializeData({
+  let materializedData = useMaterializeData({
     data,
     getSeriesID,
     getLabel,
@@ -128,43 +122,36 @@ export default function Chart({
     getDatums,
     getPrimary,
     getSecondary,
-    getR
-  });
+    getR,
+  })
 
-  const seriesOptions = calculateSeriesOptions({
+  const seriesOptions = useSeriesOptions({
     materializedData,
-    series
-  });
+    series,
+  })
 
-  materializedData = calculateSeriesTypes({
+  materializedData = useSeriesTypes({
     materializedData,
-    seriesOptions
-  });
+    seriesOptions,
+  })
 
-  const { offset, gridX, gridY, gridWidth, gridHeight } = calculateDimensions({
+  const { offset, gridX, gridY, gridWidth, gridHeight } = useDimensions({
     width,
     height,
     axisDimensions,
     padding,
-    offset: offsetState
-  });
+    offset: offsetState,
+  })
 
-  const {
-    primaryAxes,
-    secondaryAxes,
-    xKey,
-    yKey,
-    xAxes,
-    yAxes
-  } = calculateAxes({
+  const { primaryAxes, secondaryAxes, xKey, yKey, xAxes, yAxes } = useAxes({
     axes,
     materializedData,
     gridHeight,
     gridWidth,
-    axisDimensions
-  });
+    axisDimensions,
+  })
 
-  const stackData = calculateStackData({
+  const stackData = useStackData({
     materializedData,
     primaryAxes,
     secondaryAxes,
@@ -172,63 +159,57 @@ export default function Chart({
     yKey,
     xAxes,
     xKey,
-    grouping
-  });
+    grouping,
+  })
 
-  pointer = React.useMemo(
-    () => {
-      return {
-        ...pointer,
-        axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
-          axis,
-          value: axis.scale.invert
-            ? axis.scale.invert(pointer[axis.vertical ? "y" : "x"])
-            : null
-        }))
-      };
-    },
-    [pointer, primaryAxes, secondaryAxes]
-  );
+  pointer = React.useMemo(() => {
+    return {
+      ...pointer,
+      axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
+        axis,
+        value: axis.scale.invert
+          ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
+          : null,
+      })),
+    }
+  }, [pointer, primaryAxes, secondaryAxes])
 
-  focused = React.useMemo(
-    () => {
-      // Get the closest focus datum out of the datum group
-      if (focused || element) {
-        let resolvedFocus = focus;
+  focused = React.useMemo(() => {
+    // Get the closest focus datum out of the datum group
+    if (focused || element) {
+      let resolvedFocus = focus
 
-        if (focus === focusAuto) {
-          if (element) {
-            resolvedFocus = focusElement;
-          } else {
-            resolvedFocus = focusClosest;
-          }
-        }
-
-        if (resolvedFocus === focusElement && element) {
-          return element;
-        } else if (resolvedFocus === focusClosest) {
-          return Utils.getClosestPoint(pointer, focused.group);
+      if (focus === focusAuto) {
+        if (element) {
+          resolvedFocus = focusElement
+        } else {
+          resolvedFocus = focusClosest
         }
       }
-      return null;
-    },
-    [element, focus, focused, pointer]
-  );
+
+      if (resolvedFocus === focusElement && element) {
+        return element
+      } else if (resolvedFocus === focusClosest) {
+        return Utils.getClosestPoint(pointer, focused.group)
+      }
+    }
+    return null
+  }, [element, focus, focused, pointer])
 
   // keep the previous focused value around for animations
-  const latestFocused = useLatest(focused, focused);
+  const latestFocused = useLatest(focused, focused)
 
   // Calculate Tooltip
-  tooltip = calculateTooltip({
+  tooltip = useTooltip({
     focused,
     tooltip,
     pointer,
     gridWidth,
-    gridHeight
-  });
+    gridHeight,
+  })
 
   // Cursors
-  [primaryCursor, secondaryCursor] = calculateCursors({
+  ;[primaryCursor, secondaryCursor] = useCursors({
     primaryCursor,
     secondaryCursor,
     primaryAxes,
@@ -237,52 +218,43 @@ export default function Chart({
     pointer,
     gridWidth,
     gridHeight,
-    stackData
-  });
+    stackData,
+  })
 
-  React.useEffect(
-    () => {
-      if (onFocusRef.current) {
-        onFocusRef.current(focused);
+  React.useEffect(() => {
+    if (onFocusRef.current) {
+      onFocusRef.current(focused)
+    }
+  }, [onFocusRef, focused])
+
+  React.useEffect(() => {
+    if (onHoverRef.current) {
+      onHoverRef.current(pointer)
+    }
+  }, [onHoverRef, pointer])
+
+  const previousDragging = usePrevious(pointer.dragging)
+
+  React.useEffect(() => {
+    if (brush && previousDragging && !pointer.dragging) {
+      if (Math.abs(pointer.sourceX - pointer.x) < 20) {
+        return
       }
-    },
-    [onFocusRef, focused]
-  );
-
-  React.useEffect(
-    () => {
-      if (onHoverRef.current) {
-        onHoverRef.current(pointer);
-      }
-    },
-    [onHoverRef, pointer]
-  );
-
-  const previousDragging = usePrevious(pointer.dragging);
-
-  React.useEffect(
-    () => {
-      if (brush && previousDragging && !pointer.dragging) {
-        if (Math.abs(pointer.sourceX - pointer.x) < 20) {
-          return;
-        }
-        brush.onSelect({
-          pointer: pointer.released,
-          start: primaryAxes[0].scale.invert(pointer.sourceX),
-          end: primaryAxes[0].scale.invert(pointer.x)
-        });
-      }
-    },
-    [
-      brush,
-      pointer,
-      pointer.released,
-      pointer.sourceX,
-      pointer.x,
-      previousDragging,
-      primaryAxes
-    ]
-  );
+      brush.onSelect({
+        pointer: pointer.released,
+        start: primaryAxes[0].scale.invert(pointer.sourceX),
+        end: primaryAxes[0].scale.invert(pointer.x),
+      })
+    }
+  }, [
+    brush,
+    pointer,
+    pointer.released,
+    pointer.sourceX,
+    pointer.x,
+    previousDragging,
+    primaryAxes,
+  ])
 
   // Decorate the chartState with computed values (or ones we just
   // want to pass down through context)
@@ -320,7 +292,7 @@ export default function Chart({
       getSeriesStyle,
       getDatumStyle,
       seriesOptions,
-      getSeriesOrder
+      getSeriesOrder,
     }),
     [
       axisDimensions,
@@ -355,14 +327,14 @@ export default function Chart({
       xAxes,
       xKey,
       yAxes,
-      yKey
+      yKey,
     ]
-  );
+  )
 
   const chartStateContextValue = React.useMemo(
     () => [chartState, setChartState],
     [chartState, setChartState]
-  );
+  )
 
   return (
     <ChartContext.Provider value={chartStateContextValue}>
@@ -371,45 +343,12 @@ export default function Chart({
         {...rest}
         onClick={e => {
           if (onClickRef.current) {
-            onClickRef.current(focused);
+            onClickRef.current(focused)
           }
         }}
       />
     </ChartContext.Provider>
-  );
+  )
 }
 
-Chart.propTypes = {
-  data: PropTypes.any.isRequired,
-  focus: PropTypes.oneOf([focusAuto, focusClosest, focusElement]).isRequired,
-  grouping: PropTypes.oneOf([
-    groupingSingle,
-    groupingSeries,
-    groupingPrimary,
-    groupingSecondary
-  ]).isRequired,
-  showVoronoi: PropTypes.bool,
-  dark: PropTypes.bool,
-  series: seriesPropType,
-  axes: PropTypes.arrayOf(axisShape),
-  primaryCursor: cursorShape,
-  secondaryCursor: cursorShape,
-  tooltip: tooltipShape,
-  renderSVG: PropTypes.func,
-  getDatums: PropTypes.func.isRequired,
-  getLabel: PropTypes.func.isRequired,
-  getSeriesID: PropTypes.func.isRequired,
-  getPrimary: PropTypes.func.isRequired,
-  getSecondary: PropTypes.func.isRequired,
-  getR: PropTypes.func.isRequired,
-  getPrimaryAxisID: PropTypes.func.isRequired,
-  getSecondaryAxisID: PropTypes.func.isRequired,
-  getSeriesOrder: PropTypes.func.isRequired,
-  getSeriesStyle: PropTypes.func,
-  getDatumStyle: PropTypes.func,
-  onClick: PropTypes.func,
-  onFocus: PropTypes.func,
-  onHover: PropTypes.func
-};
-
-Chart.defaultProps = defaultProps;
+Chart.defaultProps = defaultProps

@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 //
 import Utils from '../../utils/Utils'
 
@@ -15,55 +14,7 @@ import {
   alignBottomLeft,
   alignTop,
   alignBottom,
-  anchorPointer,
-  anchorClosest,
-  anchorCenter,
-  anchorTop,
-  anchorBottom,
-  anchorLeft,
-  anchorRight,
-  anchorGridTop,
-  anchorGridBottom,
-  anchorGridLeft,
-  anchorGridRight
 } from '../../utils/Constants'
-
-const alignPropType = PropTypes.oneOf([
-  alignAuto,
-  alignRight,
-  alignTopRight,
-  alignBottomRight,
-  alignLeft,
-  alignTopLeft,
-  alignBottomLeft,
-  alignTop,
-  alignBottom
-])
-
-export const tooltipShape = PropTypes.oneOfType([
-  PropTypes.oneOf([true]),
-  PropTypes.shape({
-    align: alignPropType,
-    alignPriority: PropTypes.arrayOf(alignPropType),
-    padding: PropTypes.number,
-    tooltipArrowPadding: PropTypes.number,
-    anchor: PropTypes.oneOf([
-      anchorPointer,
-      anchorClosest,
-      anchorCenter,
-      anchorTop,
-      anchorBottom,
-      anchorLeft,
-      anchorRight,
-      anchorGridTop,
-      anchorGridBottom,
-      anchorGridLeft,
-      anchorGridRight
-    ]),
-    render: PropTypes.func.required,
-    onChange: PropTypes.func
-  })
-])
 
 export default ({ focused, tooltip, pointer, gridWidth, gridHeight }) => {
   return React.useMemo(() => {
@@ -82,14 +33,14 @@ export default ({ focused, tooltip, pointer, gridWidth, gridHeight }) => {
         alignTopLeft,
         alignBottomLeft,
         alignTop,
-        alignBottom
+        alignBottom,
       ],
       padding: 5,
       tooltipArrowPadding: 7,
       anchor: 'closest',
       render: TooltipRenderer,
       onChange: () => {},
-      ...tooltip
+      ...tooltip,
     }
     let anchor = {}
     let show = true
@@ -115,7 +66,7 @@ export default ({ focused, tooltip, pointer, gridWidth, gridHeight }) => {
         anchor: multiFocus,
         points: focused.group,
         gridWidth,
-        gridHeight
+        gridHeight,
       })
     }
 
@@ -123,14 +74,14 @@ export default ({ focused, tooltip, pointer, gridWidth, gridHeight }) => {
       ? {
           horizontalPadding: anchor.horizontalPadding || 0,
           verticalPadding: anchor.verticalPadding || 0,
-          ...anchor
+          ...anchor,
         }
       : anchor
 
     return {
       ...tooltip,
       anchor,
-      show
+      show,
     }
   }, [focused, gridHeight, gridWidth, pointer, tooltip])
 }
