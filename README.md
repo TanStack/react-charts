@@ -24,11 +24,10 @@ Simple, immersive and interactive charts for React
 </a>
 <br />
 <br />
-<a href="https://patreon.com/tannerlinsley">
-  <img width="180" alt="" src="https://raw.githubusercontent.com/tannerlinsley/files/master/images/patreon/become-a-patron.png" />
-</a>
 
 Enjoy this library? Try them all! [React Table](https://github.com/tannerlinsley/react-table), [React Query](https://github.com/tannerlinsley/react-query), [React Form](https://github.com/tannerlinsley/react-form)
+
+### [Become a Sponsor](https://github.com/sponsors/tannerlinsley/)
 
 ## Features
 
@@ -37,6 +36,75 @@ Enjoy this library? Try them all! [React Table](https://github.com/tannerlinsley
 - Powered by D3
 - Fully Declarative
 - Flexible data model
+
+## Github Sponsors
+
+This library is being built and maintained by me, @tannerlinsley and I am always in need of more support to keep this project afloat. If you would like to get additional support, add your logo or name on this README, or simply just contribute to my open source Sponsorship goal, [visit my Github Sponsors page!](https://github.com/sponsors/tannerlinsley/)
+
+[![Diamond Sponsors](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/diamond.png)](https://github.com/sponsors/tannerlinsley)
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://github.com/sponsors/tannerlinsley" target="_blank">
+          Get Your Logo Here!
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+[![Gold Sponsors](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/gold.png)](https://github.com/sponsors/tannerlinsley)
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://github.com/sponsors/tannerlinsley" target="_blank">
+          Get Your Logo Here!
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+[![Silver Sponsors](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/silver.png)](https://github.com/sponsors/tannerlinsley)
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://nozzle.io" target="_blank">
+          <img width='225' src="https://nozzle.io/img/logo-blue.png" alt="Nozzle - Google Keyword Rank Tracker" />
+        </a>
+      </td>
+  </tbody>
+</table>
+
+[![Bronze Sponsors](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/bronze.png)](https://github.com/sponsors/tannerlinsley)
+
+<table>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://github.com/sponsors/tannerlinsley" target="_blank">
+          Get Your Logo Here!
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+[![Supporters](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/supporters.png)](https://github.com/sponsors/tannerlinsley)
+
+- [Become a Supporter!](https://github.com/sponsors/tannerlinsley/)
+
+[![Fans](https://raw.githubusercontent.com/tannerlinsley/files/master/sponsorships/fans.png)](https://github.com/sponsors/tannerlinsley)
+
+- [Become a Fan!](https://github.com/sponsors/tannerlinsley/)
+
+### [Become a Sponsor](https://github.com/sponsors/tannerlinsley/)
 
 ## Demos
 
@@ -78,12 +146,24 @@ function MyChart() {
     () => [
       {
         label: 'Series 1',
-        data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
+        data: [
+          [0, 1],
+          [1, 2],
+          [2, 4],
+          [3, 2],
+          [4, 7],
+        ],
       },
       {
         label: 'Series 2',
-        data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
-      }
+        data: [
+          [0, 3],
+          [1, 1],
+          [2, 5],
+          [3, 6],
+          [4, 4],
+        ],
+      },
     ],
     []
   )
@@ -91,7 +171,7 @@ function MyChart() {
   const axes = React.useMemo(
     () => [
       { primary: true, type: 'linear', position: 'bottom' },
-      { type: 'linear', position: 'left' }
+      { type: 'linear', position: 'left' },
     ],
     []
   )
@@ -102,7 +182,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart data={data} axes={axes} />
@@ -209,16 +289,28 @@ function MyChart() {
     () => [
       {
         label: 'Series 1',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
+        data: [
+          { x: 1, y: 10 },
+          { x: 2, y: 10 },
+          { x: 3, y: 10 },
+        ],
       },
       {
         label: 'Series 2',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
+        data: [
+          { x: 1, y: 10 },
+          { x: 2, y: 10 },
+          { x: 3, y: 10 },
+        ],
       },
       {
         label: 'Series 3',
-        data: [{ x: 1, y: 10 }, { x: 2, y: 10 }, { x: 3, y: 10 }]
-      }
+        data: [
+          { x: 1, y: 10 },
+          { x: 2, y: 10 },
+          { x: 3, y: 10 },
+        ],
+      },
     ],
     []
   )
@@ -226,7 +318,7 @@ function MyChart() {
   const axes = React.useMemo(
     () => [
       { primary: true, type: 'linear', position: 'bottom' },
-      { type: 'linear', position: 'left' }
+      { type: 'linear', position: 'left' },
     ],
     []
   )
@@ -235,7 +327,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart data={data} axes={axes} />
@@ -250,9 +342,21 @@ In the following example, there is no need to use any accessors. The **default**
 function MyChart() {
   const data = React.useMemo(
     () => [
-      [[1, 10], [2, 10], [3, 10]],
-      [[1, 10], [2, 10], [3, 10]],
-      [[1, 10], [2, 10], [3, 10]]
+      [
+        [1, 10],
+        [2, 10],
+        [3, 10],
+      ],
+      [
+        [1, 10],
+        [2, 10],
+        [3, 10],
+      ],
+      [
+        [1, 10],
+        [2, 10],
+        [3, 10],
+      ],
     ],
     []
   )
@@ -260,7 +364,7 @@ function MyChart() {
   const axes = React.useMemo(
     () => [
       { primary: true, type: 'linear', position: 'bottom' },
-      { type: 'linear', position: 'left' }
+      { type: 'linear', position: 'left' },
     ],
     []
   )
@@ -269,7 +373,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart data={data} axes={axes} />
@@ -293,8 +397,8 @@ function MyChart() {
       lines: [
         { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
         { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] }
-      ]
+        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
+      ],
     }),
     []
   )
@@ -318,7 +422,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart
@@ -347,8 +451,8 @@ function MyChart() {
         specialLabel: 'Hello World!',
         data: [
           //...
-        ]
-      }
+        ],
+      },
     ],
     []
   )
@@ -359,7 +463,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart data={data} getLabel={getLabel} />
@@ -390,7 +494,7 @@ function MyChart() {
   const axes = React.useMemo(
     () => [
       { primary: true, type: 'time', position: 'bottom' },
-      { type: 'linear', position: 'left' }
+      { type: 'linear', position: 'left' },
     ],
     []
   )
@@ -399,7 +503,7 @@ function MyChart() {
     <div
       style={{
         width: '400px',
-        height: '300px'
+        height: '300px',
       }}
     >
       <Chart axes={axes} />
