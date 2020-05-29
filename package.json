@@ -26,7 +26,10 @@
   "release": {
     "branches": [
       "master",
-      "next"
+      {
+        "name": "next",
+        "prerelease": true
+      }
     ]
   },
   "files": [
