@@ -57,7 +57,8 @@ export default function Area({ series, showOrphans, curve }) {
     style: {
       ...defaultAreaStyle,
       ...style,
-      ...style.line
+      ...style.line,
+      ...style.area
     }
   };
   const renderedAreaPath = usePropsMemo(
