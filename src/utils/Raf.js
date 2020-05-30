@@ -1,5 +1,6 @@
-var now = require('performance-now'),
-  root = typeof window === 'undefined' ? global : window,
+import now from 'performance-now'
+
+var root = typeof window === 'undefined' ? global : window,
   vendors = ['moz', 'webkit'],
   suffix = 'AnimationFrame',
   raf = root['request' + suffix],
@@ -19,12 +20,12 @@ if (!raf || !caf) {
     queue = [],
     frameDuration = 1000 / 60
 
-  raf = function(callback) {
+  raf = function (callback) {
     if (queue.length === 0) {
       var _now = now(),
         next = Math.max(0, frameDuration - (_now - last))
       last = next + _now
-      setTimeout(function() {
+      setTimeout(function () {
         var cp = queue.slice(0)
         // Clear queue here to prevent
         // callbacks from appending listeners
@@ -35,7 +36,7 @@ if (!raf || !caf) {
             try {
               cp[i].callback(last)
             } catch (e) {
-              setTimeout(function() {
+              setTimeout(function () {
                 throw e
               }, 0)
             }
@@ -51,7 +52,7 @@ if (!raf || !caf) {
     return id
   }
 
-  caf = function(handle) {
+  caf = function (handle) {
     for (var i = 0; i < queue.length; i++) {
       if (queue[i].handle === handle) {
         queue[i].cancelled = true
@@ -67,11 +68,11 @@ export default function Raf(fn) {
   return raf.call(root, fn)
 }
 
-Raf.cancel = function() {
+Raf.cancel = function () {
   caf.apply(root, arguments)
 }
 
-Raf.polyfill = function(object) {
+Raf.polyfill = function (object) {
   if (!object) {
     object = root
   }
