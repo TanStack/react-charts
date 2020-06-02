@@ -14,7 +14,7 @@
     "prettier": "prettier src/**/*.js --write"
   },
   "dependencies": {
-    "next": "^9.1.4",
+    "next": "^9.3.2",
     "react": "^16.12.0",
     "react-charts": "latest",
     "react-click-outside": "^3.0.1",
