@@ -9,6 +9,7 @@ build
 dist
 artifacts
 .rpt2_cache
+d3/index.js
 
 # misc
 .DS_Store

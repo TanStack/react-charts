@@ -1,12 +1,6 @@
-export {voronoi} from 'd3-voronoi'
+export { Delaunay } from 'd3-delaunay'
 
-export {
-  scaleLinear,
-  scaleLog,
-  scaleTime,
-  scaleUtc,
-  scaleBand
-} from "d3-scale"
+export { scaleLinear, scaleLog, scaleTime, scaleUtc, scaleBand } from 'd3-scale'
 
 export {
   arc,

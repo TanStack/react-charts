@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog, scaleTime, scaleUtc, scaleBand } from '../d3'
+import { scaleLinear, scaleLog, scaleTime, scaleUtc, scaleBand } from '../../d3'
 //
 import {
   positionTop,

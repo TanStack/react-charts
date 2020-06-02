@@ -1,17 +1,17 @@
-import React from "react";
+import React from 'react'
 //
 
 const defaultStyle = {
-  fontFamily: "Helvetica",
+  fontFamily: 'Helvetica',
   fontSize: 10,
-  opacity: 1
-};
+  opacity: 1,
+}
 
-export default function Text ({ style, opacity = 1, ...rest }) {
+export default function Text({ style, opacity = 1, ...rest }) {
   const resolvedStyle = {
     ...defaultStyle,
-    ...style
-  };
+    ...style,
+  }
 
-  return <text {...rest} style={resolvedStyle} />;
+  return <text {...rest} style={resolvedStyle} />
 }

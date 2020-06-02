@@ -1,5 +1,5 @@
-import React from "react";
+import React from 'react'
 
 export default React.forwardRef(function Group(props, ref) {
-  return <g {...props} ref={ref} />;
-});
+  return <g {...props} ref={ref} />
+})

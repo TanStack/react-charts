@@ -16,5 +16,5 @@ export {
   curveNatural,
   curveStep,
   curveStepAfter,
-  curveStepBefore
-} from "../d3";
+  curveStepBefore,
+} from '../../d3'

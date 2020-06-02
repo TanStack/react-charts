@@ -1,9 +1,8 @@
 import React from 'react'
-import { voronoi, line } from '../d3'
+import { Delaunay, line } from '../../d3'
 //
 import ChartContext from '../utils/ChartContext'
 import Path from '../primitives/Path'
-// import Utils from '../utils/Utils'
 
 const lineFn = line()
 
@@ -143,23 +142,28 @@ export default function Voronoi() {
         })
     })
 
-    vor = voronoi()
-      .x(d => d.x)
-      .y(d => d.y)
-      .extent(extent)(voronoiData)
+    const delaunay = Delaunay.from(
+      voronoiData,
+      d => d.x,
+      d => d.y
+    )
 
-    polygons = vor.polygons()
+    const voronoi = delaunay.voronoi(extent.flat())
+
+    polygons = [...voronoi.cellPolygons()]
 
     return (
       <VoronoiElement>
         {polygons.map((points, i) => {
+          const index = points.index
+          const datum = voronoiData[index].datum
           const path = lineFn(points)
           return (
             <Path
               key={i}
               d={path}
               className="action-voronoi"
-              onMouseEnter={e => onHover(points.data.datum)}
+              onMouseEnter={e => onHover(datum)}
               onMouseLeave={e => onHover(null)}
               style={{
                 fill: 'rgba(0,0,0,.2)',
@@ -175,6 +179,7 @@ export default function Voronoi() {
     gridHeight,
     gridWidth,
     height,
+    needsVoronoi,
     onHover,
     primaryAxes.length,
     secondaryAxes.length,
