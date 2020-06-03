@@ -1,22 +1,22 @@
-import React from "react";
+import React from 'react'
 //
 import Raf from '../utils/Raf'
-import Utils from "../utils/Utils";
-import ChartContext from "../utils/ChartContext";
+import Utils from '../utils/Utils'
+import ChartContext from '../utils/ChartContext'
 
-import Rectangle from "../primitives/Rectangle";
+import Rectangle from '../primitives/Rectangle'
 
-import Voronoi from "./Voronoi";
-import Axis from "./Axis";
-import Tooltip from "./Tooltip";
-import Cursor from "./Cursor";
-import Brush from "./Brush";
+import Voronoi from './Voronoi'
+import Axis from './Axis'
+import Tooltip from './Tooltip'
+import Cursor from './Cursor'
+import Brush from './Brush'
 
 export default React.forwardRef(function ChartInner(
   { className, style = {}, ...rest },
   ref
 ) {
-  const [chartState] = React.useContext(ChartContext);
+  const [chartState] = React.useContext(ChartContext)
   const [
     {
       width,
@@ -31,75 +31,75 @@ export default React.forwardRef(function ChartInner(
       onClick,
       seriesOptions,
       getSeriesOrder,
-      focused
+      focused,
     },
-    setChartState
-  ] = React.useContext(ChartContext);
+    setChartState,
+  ] = React.useContext(ChartContext)
 
-  const svgRef = React.useRef();
+  const svgRef = React.useRef()
 
   React.useLayoutEffect(() => {
     if (!svgRef.current) {
-      return;
+      return
     }
-    const current = svgRef.current.getBoundingClientRect();
+    const current = svgRef.current.getBoundingClientRect()
     if (current.left !== offset.left || current.top !== offset.top) {
       setChartState(state => ({
         ...state,
         offset: {
           left: current.left,
-          top: current.top
-        }
-      }));
+          top: current.top,
+        },
+      }))
     }
-  });
+  })
 
   const onMouseLeave = e => {
     setChartState(state => ({
       ...state,
-      focused: null
-    }));
+      focused: null,
+    }))
     setChartState(state => ({
       ...state,
       pointer: {
         ...state.pointer,
-        active: false
-      }
-    }));
-  };
+        active: false,
+      },
+    }))
+  }
 
-  const rafRef = React.useRef();
+  const rafRef = React.useRef()
 
   const onMouseMove = e => {
     if (rafRef.current) {
-      Raf.cancel(rafRef.current);
+      Raf.cancel(rafRef.current)
     }
     rafRef.current = Raf(() => {
-      rafRef.current = null;
-      const { clientX, clientY } = e;
+      rafRef.current = null
+      const { clientX, clientY } = e
 
       setChartState(state => {
-        const x = clientX - offset.left - gridX;
-        const y = clientY - offset.top - gridY;
+        const x = clientX - offset.left - gridX
+        const y = clientY - offset.top - gridY
 
         const pointer = {
           ...state.pointer,
           active: true,
           x,
           y,
-          dragging: state.pointer && state.pointer.down
-        };
+          dragging: state.pointer && state.pointer.down,
+        }
         return {
           ...state,
-          pointer
-        };
-      });
-    });
-  };
+          pointer,
+        }
+      })
+    })
+  }
 
   const onMouseUp = () => {
-    document.removeEventListener("mouseup", onMouseUp);
-    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp)
+    document.removeEventListener('mousemove', onMouseMove)
 
     setChartState(state => ({
       ...state,
@@ -109,15 +109,15 @@ export default React.forwardRef(function ChartInner(
         dragging: false,
         released: {
           x: state.pointer.x,
-          y: state.pointer.y
-        }
-      }
-    }));
-  };
+          y: state.pointer.y,
+        },
+      },
+    }))
+  }
 
   const onMouseDown = () => {
-    document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener('mouseup', onMouseUp)
+    document.addEventListener('mousemove', onMouseMove)
 
     setChartState(state => ({
       ...state,
@@ -125,27 +125,27 @@ export default React.forwardRef(function ChartInner(
         ...state.pointer,
         sourceX: state.pointer.x,
         sourceY: state.pointer.y,
-        down: true
-      }
-    }));
-  };
+        down: true,
+      },
+    }))
+  }
 
   // Reverse the stack order for proper z-indexing
-  const reversedStackData = [...stackData].reverse();
-  const orderedStackData = getSeriesOrder(reversedStackData);
+  const reversedStackData = [...stackData].reverse()
+  const orderedStackData = getSeriesOrder(reversedStackData)
 
   const focusedSeriesIndex = focused
     ? orderedStackData.findIndex(series => series.id === focused.series.id)
-    : -1;
+    : -1
 
   // Bring focused series to the front
   const focusOrderedStackData = focused
     ? [
         ...orderedStackData.slice(0, focusedSeriesIndex),
         ...orderedStackData.slice(focusedSeriesIndex + 1),
-        orderedStackData[focusedSeriesIndex]
+        orderedStackData[focusedSeriesIndex],
       ]
-    : orderedStackData;
+    : orderedStackData
 
   const stacks = focusOrderedStackData.map(stack => {
     return (
@@ -155,19 +155,19 @@ export default React.forwardRef(function ChartInner(
         series={stack}
         stackData={stackData}
       />
-    );
-  });
+    )
+  })
 
   return (
     <div
       ref={ref}
       {...rest}
-      className={`ReactChart ${className || ""}`}
+      className={`ReactChart ${className || ''}`}
       style={{
         width,
         height,
-        position: "relative",
-        ...style
+        position: 'absolute',
+        ...style,
       }}
     >
       <svg
@@ -175,7 +175,7 @@ export default React.forwardRef(function ChartInner(
         style={{
           width,
           height,
-          overflow: "hidden"
+          overflow: 'hidden',
         }}
         onMouseEnter={e => e.persist() || onMouseMove(e)}
         onMouseMove={e => e.persist() || onMouseMove(e)}
@@ -185,7 +185,7 @@ export default React.forwardRef(function ChartInner(
       >
         <g
           style={{
-            transform: Utils.translate(gridX, gridY)
+            transform: Utils.translate(gridX, gridY),
           }}
         >
           <Rectangle
@@ -195,7 +195,7 @@ export default React.forwardRef(function ChartInner(
             y1={-gridY}
             y2={height - gridY}
             style={{
-              opacity: 0
+              opacity: 0,
             }}
           />
           <Voronoi />
@@ -207,7 +207,7 @@ export default React.forwardRef(function ChartInner(
           <g
             className="Series"
             style={{
-              pointerEvents: "none"
+              pointerEvents: 'none',
             }}
           >
             {stacks}
@@ -216,7 +216,7 @@ export default React.forwardRef(function ChartInner(
         {renderSVG
           ? renderSVG({
               chartState,
-              setChartState
+              setChartState,
             })
           : null}
       </svg>
@@ -225,5 +225,5 @@ export default React.forwardRef(function ChartInner(
       <Brush />
       <Tooltip />
     </div>
-  );
-});
+  )
+})
