@@ -6,20 +6,25 @@ import {
   groupingSingle,
   groupingSeries,
   groupingPrimary,
-  groupingSecondary
+  groupingSecondary,
 } from '../../utils/Constants'
 
 const defaultColors = [
-  '#4ab5eb',
-  '#fc6868',
-  '#DECF3F',
-  '#60BD68',
+  '#ff3465',
+  '#ff5454',
+  '#ff7b3e',
   '#FAA43A',
-  '#c63b89',
-  '#1aaabe',
+  '#ffd000',
+  '#C8DE2B',
+  '#97d114',
+  '#34ce70',
+  '#3cada4',
+  '#14b4d3',
+  '#048cd4',
+  '#3447f1',
   '#734fe9',
-  '#1828bd',
-  '#cd82ad'
+  '#cd82ad',
+  '#c63b89',
 ]
 
 export default ({
@@ -30,7 +35,7 @@ export default ({
   yKey,
   xAxes,
   xKey,
-  grouping
+  grouping,
 }) => {
   // Make stackData
   return React.useMemo(() => {
@@ -50,7 +55,7 @@ export default ({
       series.datums.forEach(datum => {
         scaleTotals[axisIndex][datum.primary] = {
           negative: 0,
-          positive: 0
+          positive: 0,
         }
       })
     })
@@ -79,7 +84,7 @@ export default ({
             secondaryAxis,
             xValue: d[xKey],
             yValue: d[yKey],
-            baseValue: 0
+            baseValue: 0,
           }
           if (secondaryAxis.stacked) {
             const start = scaleTotals[secondaryAxisIndex][d.primary]
@@ -117,7 +122,7 @@ export default ({
             }
           }
           return datum
-        })
+        }),
       }
     })
 
@@ -165,7 +170,7 @@ export default ({
           primaryAxis,
           secondaryAxis,
           xAxis,
-          yAxis
+          yAxis,
         })
 
         return result || d
@@ -236,7 +241,7 @@ export default ({
         )
       }
       const result = series.Component.buildStyles(series, {
-        defaultColors
+        defaultColors,
       })
 
       return result || series
@@ -251,6 +256,6 @@ export default ({
     xKey,
     yKey,
     xAxes,
-    yAxes
+    yAxes,
   ])
 }

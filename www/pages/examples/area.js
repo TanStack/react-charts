@@ -12,7 +12,7 @@ let sourceCode
 
 export default () => {
   const { data, randomizeData } = useChartConfig({
-    series: 10,
+    series: 20,
   })
 
   const series = React.useMemo(

@@ -25,3 +25,4 @@ yarn-debug.log*
 yarn-error.log*
 .history
 stats.html
+size-plugin.json

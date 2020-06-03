@@ -35,7 +35,7 @@ const defaultProps = {
   getR: d => (Array.isArray(d) ? d[2] : d.radius || d.r),
   getPrimaryAxisID: s => s.primaryAxisID,
   getSecondaryAxisID: s => s.secondaryAxisID,
-  getSeriesStyle: series => ({ color: series.originalSeries.color }),
+  getSeriesStyle: () => ({}),
   getDatumStyle: () => ({}),
   getSeriesOrder: d => d,
   onHover: () => {},
@@ -65,7 +65,7 @@ export default function Chart({
   getR,
   getPrimaryAxisID,
   getSecondaryAxisID,
-  getSeriesStyle,
+  getSeriesStyle: getSeriesStyleOriginal,
   getDatumStyle,
   onClick,
   onFocus,
@@ -255,6 +255,14 @@ export default function Chart({
     previousDragging,
     primaryAxes,
   ])
+
+  const getSeriesStyle = React.useCallback(
+    (series, ...args) => ({
+      color: series.originalSeries.color,
+      ...getSeriesStyleOriginal(series, ...args),
+    }),
+    [getSeriesStyleOriginal]
+  )
 
   // Decorate the chartState with computed values (or ones we just
   // want to pass down through context)

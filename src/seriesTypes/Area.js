@@ -2,6 +2,7 @@ import React from 'react'
 import { area, line } from '../../d3'
 //
 
+import ChartContext from '../utils/ChartContext'
 import Utils from '../utils/Utils'
 import { curveLinear } from '../utils/Curves'
 
@@ -10,16 +11,21 @@ import useDatumStyle from '../hooks/useDatumStyle'
 
 import Path from '../primitives/Path'
 import Line from '../primitives/Line'
+import Circle from '../primitives/Circle'
 
 const defaultAreaStyle = {
   strokeWidth: 0,
 }
 
-const lineDefaultStyle = {
-  strokeWidth: 3,
+const defaultLineStyle = {
+  strokeWidth: 2,
 }
 
-export default function Area({ series, showOrphans, curve }) {
+const circleDefaultStyle = {
+  r: 1.5,
+}
+
+export default function Area({ series, showOrphans, showPoints, curve }) {
   const areaFn = React.useMemo(
     () =>
       area()
@@ -40,10 +46,12 @@ export default function Area({ series, showOrphans, curve }) {
         .curve(curve),
     [curve]
   )
+
   const areaPath = React.useMemo(() => areaFn(series.datums), [
     areaFn,
     series.datums,
   ])
+
   const linePath = React.useMemo(() => lineFn(series.datums), [
     lineFn,
     series.datums,
@@ -56,7 +64,6 @@ export default function Area({ series, showOrphans, curve }) {
     style: {
       ...defaultAreaStyle,
       ...style,
-      ...style.line,
       ...style.area,
     },
   }
@@ -64,7 +71,7 @@ export default function Area({ series, showOrphans, curve }) {
   const linePathProps = {
     d: linePath,
     style: {
-      ...defaultAreaStyle,
+      ...defaultLineStyle,
       ...style,
       ...style.line,
       fill: 'none',
@@ -89,12 +96,26 @@ export default function Area({ series, showOrphans, curve }) {
             />
           )
         })}
+      {showPoints &&
+        series.datums.map((datum, i) => {
+          return (
+            <Point
+              {...{
+                key: i,
+                datum,
+                style,
+              }}
+            />
+          )
+        })}
     </g>
   )
 }
 
 Area.defaultProps = {
   showOrphans: true,
+  showLine: true,
+  showPoints: true,
   curve: curveLinear,
 }
 
@@ -168,7 +189,7 @@ const OrphanLine = function OrphanLine({ datum, style, all, index }) {
     x2: !datum || Number.isNaN(datum.x) ? null : datum.x,
     y2: !datum || Number.isNaN(datum.y) ? null : datum.y,
     style: {
-      ...lineDefaultStyle,
+      ...defaultLineStyle,
       ...style,
       ...style.line,
       ...dataStyle,
@@ -181,4 +202,44 @@ const OrphanLine = function OrphanLine({ datum, style, all, index }) {
   }
 
   return <Line {...lineProps} />
+}
+
+function Point({ datum, style }) {
+  const [, setChartState] = React.useContext(ChartContext)
+
+  const dataStyle = useDatumStyle(datum)
+
+  const circleProps = {
+    x: datum ? datum.x : undefined,
+    y: datum ? datum.y : undefined,
+    style: {
+      ...circleDefaultStyle,
+      ...style,
+      ...style.circle,
+      ...dataStyle,
+      ...dataStyle.circle,
+    },
+    onMouseEnter: React.useCallback(
+      e =>
+        setChartState(state => ({
+          ...state,
+          element: datum,
+        })),
+      [datum, setChartState]
+    ),
+    onMouseLeave: React.useCallback(
+      e =>
+        setChartState(state => ({
+          ...state,
+          element: null,
+        })),
+      [setChartState]
+    ),
+  }
+
+  if (!datum.defined) {
+    return null
+  }
+
+  return <Circle {...circleProps} />
 }
