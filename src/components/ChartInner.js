@@ -4,6 +4,8 @@ import Raf from '../utils/Raf'
 import Utils from '../utils/Utils'
 import ChartContext from '../utils/ChartContext'
 
+import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
+
 import Rectangle from '../primitives/Rectangle'
 
 import Voronoi from './Voronoi'
@@ -156,6 +158,16 @@ export default React.forwardRef(function ChartInner(
         stackData={stackData}
       />
     )
+  })
+
+  useIsomorphicLayoutEffect(() => {
+    if (
+      ref.current &&
+      ref.current.parentElement &&
+      !ref.current.parentElement.style.position
+    ) {
+      ref.current.parentElement.style.position = 'relative'
+    }
   })
 
   return (
