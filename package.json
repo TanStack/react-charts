@@ -7,6 +7,10 @@
   "repository": "react-tools/react-charts",
   "main": "index.js",
   "module": "dist/react-charts.mjs",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/tannerlinsley"
+  },
   "scripts": {
     "test": "is-ci \"test:ci\" \"test:dev\"",
     "test:dev": "jest --watch",
