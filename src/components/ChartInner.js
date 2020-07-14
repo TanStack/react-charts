@@ -56,21 +56,27 @@ export default React.forwardRef(function ChartInner(
     }
   })
 
-  const onMouseLeave = e => {
-    setChartState(state => ({
-      ...state,
-      focused: null,
-    }))
-    setChartState(state => ({
-      ...state,
-      pointer: {
-        ...state.pointer,
-        active: false,
-      },
-    }))
-  }
-
   const rafRef = React.useRef()
+
+  const onMouseLeave = e => {
+    if (rafRef.current) {
+      Raf.cancel(rafRef.current)
+    }
+    rafRef.current = Raf(() => {
+      rafRef.current = null
+      setChartState(state => ({
+        ...state,
+        focused: null,
+      }))
+      setChartState(state => ({
+        ...state,
+        pointer: {
+          ...state.pointer,
+          active: false,
+        },
+      }))
+    })
+  }
 
   const onMouseMove = e => {
     if (rafRef.current) {

@@ -71,6 +71,7 @@ export default function Chart({
   onFocus,
   onHover,
   getSeriesOrder,
+  verticalVoronoi,
   ...rest
 }) {
   let [
@@ -301,6 +302,7 @@ export default function Chart({
       getDatumStyle,
       seriesOptions,
       getSeriesOrder,
+      verticalVoronoi,
     }),
     [
       axisDimensions,
@@ -336,6 +338,7 @@ export default function Chart({
       xKey,
       yAxes,
       yKey,
+      verticalVoronoi,
     ]
   )
 

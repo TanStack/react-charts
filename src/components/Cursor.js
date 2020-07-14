@@ -5,12 +5,6 @@ import Utils from '../utils/Utils'
 
 import useLatest from '../hooks/useLatest'
 
-const getLineBackgroundColor = dark =>
-  dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)'
-
-const getBackgroundColor = dark =>
-  dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
-
 export default function Cursor({ primary }) {
   const [
     {
@@ -36,7 +30,33 @@ export default function Cursor({ primary }) {
     axis,
     siblingAxis,
     resolvedShow,
+    lineBackgroundColor,
+    labelBackgroundColor,
+    labelColor,
+    size,
   } = cursor || {}
+
+  const cursorSize = size || 1
+
+  const getLineBackgroundColor = React.useCallback(
+    dark =>
+      lineBackgroundColor
+        ? lineBackgroundColor
+        : dark
+        ? 'rgba(255,255,255,.3)'
+        : 'rgba(0, 26, 39, 0.3)',
+    [lineBackgroundColor]
+  )
+
+  const getBackgroundColor = React.useCallback(
+    dark =>
+      labelBackgroundColor
+        ? labelBackgroundColor
+        : dark
+        ? 'rgba(255,255,255,.9)'
+        : 'rgba(0, 26, 39, 0.9)',
+    [labelBackgroundColor]
+  )
 
   const latestValue = useLatest(
     resolvedValue,
@@ -83,8 +103,8 @@ export default function Cursor({ primary }) {
     }
   } else {
     x = axis.scale(latestValue)
-    x1 = x - 1
-    x2 = x + axis.cursorSize + 1
+    x1 = x - cursorSize
+    x2 = x + axis.cursorSize + cursorSize / 2.0
     y1 = siblingRange[0]
     y2 = siblingRange[1]
     if (axis.position === 'top') {
@@ -186,7 +206,7 @@ export default function Cursor({ primary }) {
               padding: '5px',
               fontSize: '10px',
               background: getBackgroundColor(dark),
-              color: getBackgroundColor(!dark),
+              color: labelColor || getBackgroundColor(!dark),
               borderRadius: '3px',
               position: 'relative',
               transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0)`,

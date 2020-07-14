@@ -29,6 +29,7 @@ export default function Voronoi() {
       tooltip,
       primaryCursor,
       secondaryCursor,
+      verticalVoronoi,
     },
     setChartState,
   ] = React.useContext(ChartContext)
@@ -116,9 +117,6 @@ export default function Voronoi() {
     //   )
     // }
 
-    let vor
-    let polygons = null
-
     const voronoiData = []
     stackData.forEach(series => {
       series.datums
@@ -142,39 +140,74 @@ export default function Voronoi() {
         })
     })
 
-    const delaunay = Delaunay.from(
-      voronoiData,
-      d => d.x,
-      d => d.y
-    )
+    if (verticalVoronoi) {
+      let lastX = 0
 
-    const voronoi = delaunay.voronoi(extent.flat())
+      return (
+        <VoronoiElement>
+          {voronoiData.map((data, i) => {
+            const points = [
+              [lastX, 0],
+              [lastX, gridHeight],
+              [data.x, gridHeight],
+              [data.x, gridHeight],
+            ]
+            const path = lineFn(points)
+            lastX = data.x
+            const { datum } = data
+            return (
+              <Path
+                key={i}
+                d={path}
+                className="action-voronoi"
+                onMouseEnter={e => onHover(datum)}
+                style={{
+                  fill: 'rgba(0,0,0,.2)',
+                  stroke: 'rgba(255,255,255,.5)',
+                  opacity: showVoronoi ? 1 : 0,
+                }}
+              />
+            )
+          })}
+        </VoronoiElement>
+      )
+    } else {
+      let polygons = null
 
-    polygons = [...voronoi.cellPolygons()]
+      const delaunay = Delaunay.from(
+        voronoiData,
+        d => d.x,
+        d => d.y
+      )
 
-    return (
-      <VoronoiElement>
-        {polygons.map((points, i) => {
-          const index = points.index
-          const datum = voronoiData[index].datum
-          const path = lineFn(points)
-          return (
-            <Path
-              key={i}
-              d={path}
-              className="action-voronoi"
-              onMouseEnter={e => onHover(datum)}
-              onMouseLeave={e => onHover(null)}
-              style={{
-                fill: 'rgba(0,0,0,.2)',
-                stroke: 'rgba(255,255,255,.5)',
-                opacity: showVoronoi ? 1 : 0,
-              }}
-            />
-          )
-        })}
-      </VoronoiElement>
-    )
+      const voronoi = delaunay.voronoi(extent.flat())
+
+      polygons = [...voronoi.cellPolygons()]
+
+      return (
+        <VoronoiElement>
+          {polygons.map((points, i) => {
+            const index = points.index
+            const datum = voronoiData[index].datum
+            const path = lineFn(points)
+            return (
+              <Path
+                key={i}
+                d={path}
+                className="action-voronoi"
+                onMouseEnter={e => onHover(datum)}
+                onMouseLeave={e => onHover(null)}
+                style={{
+                  fill: 'rgba(0,0,0,.2)',
+                  stroke: 'rgba(255,255,255,.5)',
+                  opacity: showVoronoi ? 1 : 0,
+                }}
+              />
+            )
+          })}
+        </VoronoiElement>
+      )
+    }
   }, [
     gridHeight,
     gridWidth,
@@ -186,5 +219,6 @@ export default function Voronoi() {
     showVoronoi,
     stackData,
     width,
+    verticalVoronoi,
   ])
 }

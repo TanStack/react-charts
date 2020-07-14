@@ -55,6 +55,9 @@ export default ({ focused, tooltip, pointer, gridWidth, gridHeight }) => {
     if (tooltip.anchor === 'pointer') {
       // Support pointer-bound focus
       anchor = pointer
+    } else if (tooltip.anchor === 'absoluteTop') {
+      anchor = pointer
+      anchor.y = 0
     } else if (tooltip.anchor === 'closest') {
       // Do nothing, this is already calculated
     } else if (focused) {

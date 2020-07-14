@@ -6,9 +6,6 @@ import Utils from '../utils/Utils'
 
 const triangleSize = 7
 
-const getBackgroundColor = dark =>
-  dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
-
 export default function Tooltip() {
   const [chartState] = React.useContext(ChartContext)
 
@@ -40,7 +37,18 @@ export default function Tooltip() {
     render,
     anchor,
     show,
+    backgroundColor: tooltipBackgroundColor,
   } = tooltip || {}
+
+  const getBackgroundColor = React.useCallback(
+    dark =>
+      tooltipBackgroundColor
+        ? tooltipBackgroundColor
+        : dark
+        ? 'rgba(255,255,255,.9)'
+        : 'rgba(0, 26, 39, 0.9)',
+    [tooltipBackgroundColor]
+  )
 
   const [finalAlign, setFinalAlign] = React.useState(align || 'auto')
 
@@ -345,7 +353,7 @@ export default function Tooltip() {
         width: `${gridWidth}px`,
         height: `${gridHeight}px`,
         opacity: show ? 1 : 0,
-        transition: 'all .3s ease',
+        transition: 'opacity .3s ease',
       }}
       ref={el => {
         elRef.current = el
@@ -357,7 +365,7 @@ export default function Tooltip() {
           left: 0,
           top: 0,
           transform: Utils.translate(anchor.x, anchor.y),
-          transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease',
+          transition: 'opacity .2s ease',
         }}
       >
         <div
@@ -367,7 +375,6 @@ export default function Tooltip() {
               resolvedVerticalPadding}px ${tooltipArrowPadding +
               resolvedHorizontalPadding}px`,
             width: 'auto',
-            transition: 'all .2s ease',
           }}
         >
           <div
@@ -389,7 +396,6 @@ export default function Tooltip() {
                 width: 0,
                 height: 0,
                 ...triangleStyles,
-                transition: animateCoords ? 'all .2s ease' : 'none',
               }}
             />
             {renderedChildren}
