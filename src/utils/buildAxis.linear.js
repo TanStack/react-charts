@@ -307,7 +307,7 @@ export default function buildAxisLinear({
       position === positionTop || position === positionLeft ? -1 : 1,
     transform: !vertical ? Utils.translateX : Utils.translateY,
     ticks:
-      tickValues || scale.ticks
+      tickValues || (scale.ticks
         ? scale
             .ticks
             // tickCount === 'auto'
@@ -316,7 +316,7 @@ export default function buildAxisLinear({
             //     : 10
             //   : tickCount
             ()
-        : scale.domain(),
+        : scale.domain()),
     format,
     spacing: Math.max(tickSizeInner, 0) + tickPadding,
   }

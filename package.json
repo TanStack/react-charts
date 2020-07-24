@@ -7,6 +7,10 @@
   "repository": "react-tools/react-charts",
   "main": "index.js",
   "module": "dist/react-charts.mjs",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/tannerlinsley"
+  },
   "scripts": {
     "test": "is-ci \"test:ci\" \"test:dev\"",
     "test:dev": "jest --watch",
@@ -36,7 +40,6 @@
   ],
   "dependencies": {
     "@reach/observe-rect": "^1.1.0",
-    "@scarf/scarf": "^1.0.0",
     "d3-delaunay": "^5.3.0",
     "d3-scale": "^3.2.1",
     "d3-shape": "^1.3.7"
