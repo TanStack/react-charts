@@ -7,7 +7,7 @@ const defaultCursorProps = {
   snap: true,
   showLine: true,
   showLabel: true,
-  axisID: undefined,
+  axisId: undefined,
   onChange: () => {},
 }
 
@@ -41,10 +41,10 @@ export default ({
       let show = false
 
       // Determine the axis to use
-      const axis = Utils.getAxisByAxisID(
+      const axis = Utils.getAxisByAxisId(
         primary ? primaryAxes : secondaryAxes,
-        cursor.axisID || focused
-          ? focused.series[primary ? 'primaryAxisID' : 'secondaryAxisID']
+        cursor.axisId || focused
+          ? focused.series[primary ? 'primaryAxisId' : 'secondaryAxisId']
           : undefined
       )
 

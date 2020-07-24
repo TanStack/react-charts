@@ -32,7 +32,7 @@ export default function buildAxisLinear({
     type,
     invert,
     position,
-    primaryAxisID,
+    primaryAxisId,
     min: userMin = undefined,
     max: userMax = undefined,
     hardMin = undefined,
@@ -54,7 +54,7 @@ export default function buildAxisLinear({
     showTicks = true,
     show = true,
     stacked = false,
-    id: userID,
+    id: userId,
   },
   materializedData,
   gridHeight,
@@ -67,11 +67,11 @@ export default function buildAxisLinear({
   // Detect some settings
   const valueKey = primary ? 'primary' : 'secondary'
   const groupKey = !primary && 'primary'
-  const AxisIDKey = `${valueKey}AxisID`
+  const AxisIdKey = `${valueKey}AxisId`
   const vertical = detectVertical(position)
   const RTL = detectRTL(position) // Right to left OR top to bottom
 
-  const id = userID || `${position}_${type}`
+  const id = userId || `${position}_${type}`
 
   // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
 
@@ -93,8 +93,8 @@ export default function buildAxisLinear({
     seriesIndex++
   ) {
     if (
-      materializedData[seriesIndex][AxisIDKey] &&
-      materializedData[seriesIndex][AxisIDKey] !== id
+      materializedData[seriesIndex][AxisIdKey] &&
+      materializedData[seriesIndex][AxisIdKey] !== id
     ) {
       continue
     }
@@ -265,7 +265,7 @@ export default function buildAxisLinear({
     type,
     invert,
     position,
-    primaryAxisID,
+    primaryAxisId,
     hardMin,
     hardMax,
     base,

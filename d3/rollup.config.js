@@ -1,4 +1,5 @@
 import path from 'path'
+import babel from 'rollup-plugin-babel'
 import node from 'rollup-plugin-node-resolve'
 // import { terser } from 'rollup-plugin-terser'
 
@@ -9,7 +10,7 @@ export default [
       format: 'es',
       file: path.join(__dirname, 'index.js'),
     },
-    plugins: [node()],
+    plugins: [node(), babel()],
     onwarn,
   },
 ]

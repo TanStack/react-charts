@@ -6,8 +6,8 @@ export default {
   getClosestPoint,
   normalizeGetter,
   isValidPoint,
-  getAxisByAxisID,
-  getAxisIndexByAxisID,
+  getAxisByAxisId,
+  getAxisIndexByAxisId,
   sumObjBy,
   translateX,
   translateY,
@@ -31,7 +31,7 @@ function getStatus(item, focused) {
     const length = focused.group.length
     for (let i = 0; i < length; i++) {
       if (
-        focused.group[i].seriesID === item.series.id &&
+        focused.group[i].seriesId === item.series.id &&
         focused.group[i].index === item.index
       ) {
         status.focused = true
@@ -287,12 +287,12 @@ function isValidPoint(d) {
   return true
 }
 
-function getAxisByAxisID(axes, AxisID) {
-  return axes.find(d => d.id === AxisID) || axes[0]
+function getAxisByAxisId(axes, AxisId) {
+  return axes.find(d => d.id === AxisId) || axes[0]
 }
 
-function getAxisIndexByAxisID(axes, AxisID) {
-  const index = axes.findIndex(d => d.id === AxisID)
+function getAxisIndexByAxisId(axes, AxisId) {
+  const index = axes.findIndex(d => d.id === AxisId)
   return index > -1 ? index : 0
 }
 

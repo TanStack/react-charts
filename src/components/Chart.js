@@ -26,53 +26,97 @@ import {
   focusClosest,
 } from '../utils/Constants'
 
-const defaultProps = {
-  getDatums: d => (Array.isArray(d) ? d : d.datums || d.data),
-  getLabel: (d, i) => d.label || `Series ${i + 1}`,
-  getSeriesID: (d, i) => i,
-  getPrimary: d => (Array.isArray(d) ? d[0] : d.primary || d.x),
-  getSecondary: d => (Array.isArray(d) ? d[1] : d.secondary || d.y),
-  getR: d => (Array.isArray(d) ? d[2] : d.radius || d.r),
-  getPrimaryAxisID: s => s.primaryAxisID,
-  getSecondaryAxisID: s => s.secondaryAxisID,
-  getSeriesStyle: () => ({}),
-  getDatumStyle: () => ({}),
-  getSeriesOrder: d => d,
-  onHover: () => {},
-  grouping: groupingPrimary,
-  focus: focusAuto,
-  showVoronoi: false,
-}
+const defaultColorScheme = [
+  '#0f83ab',
+  '#faa43a',
+  '#ff4e4e',
+  '#53cfc9',
+  '#a2d925',
+  '#decf3f',
+  '#734fe9',
+  '#cd82ad',
+  '#006d92',
+  '#de7c00',
+  '#f33232',
+  '#3f9a80',
+  '#53c200',
+  '#d7af00',
+  '#4c26c9',
+  '#d44d99',
+]
 
-export default function Chart({
-  data,
-  grouping,
-  focus,
-  showVoronoi,
-  dark,
-  series,
-  axes,
-  primaryCursor,
-  secondaryCursor,
-  tooltip,
-  brush,
-  renderSVG,
-  getDatums,
-  getLabel,
-  getSeriesID,
-  getPrimary,
-  getSecondary,
-  getR,
-  getPrimaryAxisID,
-  getSecondaryAxisID,
-  getSeriesStyle: getSeriesStyleOriginal,
-  getDatumStyle,
-  onClick,
-  onFocus,
-  onHover,
-  getSeriesOrder,
+function applyDefaults({
+  getDatums = d => (Array.isArray(d) ? d : d.datums || d.data),
+  getLabel = (d, i) => d.label || `Series ${i + 1}`,
+  getSeriesId = (d, i) => i,
+  getPrimary = d => (Array.isArray(d) ? d[0] : d.primary || d.x),
+  getSecondary = d => (Array.isArray(d) ? d[1] : d.secondary || d.y),
+  getR = d => (Array.isArray(d) ? d[2] : d.radius || d.r),
+  getPrimaryAxisId = s => s.primaryAxisId,
+  getSecondaryAxisId = s => s.secondaryAxisId,
+  getSeriesStyle = () => ({}),
+  getDatumStyle = () => ({}),
+  getSeriesOrder = d => d,
+  onHover = () => {},
+  grouping = groupingPrimary,
+  focus = focusAuto,
+  showVoronoi = false,
+  defaultColors = defaultColorScheme,
   ...rest
 }) {
+  return {
+    getDatums,
+    getLabel,
+    getSeriesId,
+    getPrimary,
+    getSecondary,
+    getR,
+    getPrimaryAxisId,
+    getSecondaryAxisId,
+    getSeriesStyle,
+    getDatumStyle,
+    getSeriesOrder,
+    onHover,
+    grouping,
+    focus,
+    showVoronoi,
+    defaultColors,
+    ...rest,
+  }
+}
+
+export default function Chart(options) {
+  let {
+    data,
+    grouping,
+    focus,
+    showVoronoi,
+    dark,
+    series,
+    axes,
+    primaryCursor,
+    secondaryCursor,
+    tooltip,
+    brush,
+    renderSVG,
+    getDatums,
+    getLabel,
+    getSeriesId,
+    getPrimary,
+    getSecondary,
+    getR,
+    getPrimaryAxisId,
+    getSecondaryAxisId,
+    getSeriesStyle: getSeriesStyleOriginal,
+    getDatumStyle,
+    onClick,
+    onFocus,
+    onHover,
+    getSeriesOrder,
+    defaultColors,
+    ...rest
+  } = applyDefaults(options)
+
   let [
     { focused, element, axisDimensions, offset: offsetState, padding, pointer },
     setChartState,
@@ -92,17 +136,17 @@ export default function Chart({
   const responsiveElRef = React.useRef()
   const { width, height } = useHyperResponsive(responsiveElRef)
 
-  getSeriesID = React.useCallback(Utils.normalizeGetter(getSeriesID), [
-    getSeriesID,
+  getSeriesId = React.useCallback(Utils.normalizeGetter(getSeriesId), [
+    getSeriesId,
   ])
   getLabel = React.useCallback(Utils.normalizeGetter(getLabel), [getLabel])
-  getPrimaryAxisID = React.useCallback(
-    Utils.normalizeGetter(getPrimaryAxisID),
-    [getPrimaryAxisID]
+  getPrimaryAxisId = React.useCallback(
+    Utils.normalizeGetter(getPrimaryAxisId),
+    [getPrimaryAxisId]
   )
-  getSecondaryAxisID = React.useCallback(
-    Utils.normalizeGetter(getSecondaryAxisID),
-    [getSecondaryAxisID]
+  getSecondaryAxisId = React.useCallback(
+    Utils.normalizeGetter(getSecondaryAxisId),
+    [getSecondaryAxisId]
   )
   getDatums = React.useCallback(Utils.normalizeGetter(getDatums), [getDatums])
   getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), [
@@ -115,10 +159,10 @@ export default function Chart({
 
   let materializedData = useMaterializeData({
     data,
-    getSeriesID,
+    getSeriesId,
     getLabel,
-    getPrimaryAxisID,
-    getSecondaryAxisID,
+    getPrimaryAxisId,
+    getSecondaryAxisId,
     getDatums,
     getPrimary,
     getSecondary,
@@ -160,6 +204,7 @@ export default function Chart({
     xAxes,
     xKey,
     grouping,
+    defaultColors,
   })
 
   pointer = React.useMemo(() => {
@@ -358,5 +403,3 @@ export default function Chart({
     </ChartContext.Provider>
   )
 }
-
-Chart.defaultProps = defaultProps

@@ -9,24 +9,6 @@ import {
   groupingSecondary,
 } from '../../utils/Constants'
 
-const defaultColors = [
-  '#ff3465',
-  '#ff5454',
-  '#ff7b3e',
-  '#FAA43A',
-  '#ffd000',
-  '#C8DE2B',
-  '#97d114',
-  '#34ce70',
-  '#3cada4',
-  '#14b4d3',
-  '#048cd4',
-  '#3447f1',
-  '#734fe9',
-  '#cd82ad',
-  '#c63b89',
-]
-
 export default ({
   materializedData,
   primaryAxes,
@@ -36,6 +18,7 @@ export default ({
   xAxes,
   xKey,
   grouping,
+  defaultColors,
 }) => {
   // Make stackData
   return React.useMemo(() => {
@@ -48,9 +31,9 @@ export default ({
     // "totals" are kept per secondaryAxis and used for bases if secondaryAxis stacking is enabled
     const scaleTotals = secondaryAxes.map(() => ({}))
     materializedData.forEach(series => {
-      const axisIndex = Utils.getAxisIndexByAxisID(
+      const axisIndex = Utils.getAxisIndexByAxisId(
         secondaryAxes,
-        series.secondaryAxisID
+        series.secondaryAxisId
       )
       series.datums.forEach(datum => {
         scaleTotals[axisIndex][datum.primary] = {
@@ -63,14 +46,14 @@ export default ({
     // Determine the correct primary and secondary values for each axis
     // Also calculate bases and totals if either axis is stacked
     let stackData = materializedData.map(series => {
-      const primaryAxisIndex = Utils.getAxisIndexByAxisID(
+      const primaryAxisIndex = Utils.getAxisIndexByAxisId(
         primaryAxes,
-        series.primaryAxisID
+        series.primaryAxisId
       )
       const primaryAxis = primaryAxes[primaryAxisIndex]
-      const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
+      const secondaryAxisIndex = Utils.getAxisIndexByAxisId(
         secondaryAxes,
-        series.secondaryAxisID
+        series.secondaryAxisId
       )
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
       return {
@@ -140,25 +123,25 @@ export default ({
         )
       }
 
-      const primaryAxisIndex = Utils.getAxisIndexByAxisID(
+      const primaryAxisIndex = Utils.getAxisIndexByAxisId(
         primaryAxes,
-        series.primaryAxisID
+        series.primaryAxisId
       )
-      const secondaryAxisIndex = Utils.getAxisIndexByAxisID(
+      const secondaryAxisIndex = Utils.getAxisIndexByAxisId(
         secondaryAxes,
-        series.secondaryAxisID
+        series.secondaryAxisId
       )
 
       const primaryAxis = primaryAxes[primaryAxisIndex]
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
 
-      const xAxisIndex = Utils.getAxisIndexByAxisID(
+      const xAxisIndex = Utils.getAxisIndexByAxisId(
         xAxes,
-        series[`${xKey}AxisID`]
+        series[`${xKey}AxisId`]
       )
-      const yAxisIndex = Utils.getAxisIndexByAxisID(
+      const yAxisIndex = Utils.getAxisIndexByAxisId(
         yAxes,
-        series[`${yKey}AxisID`]
+        series[`${yKey}AxisId`]
       )
 
       const xAxis = xAxes[xAxisIndex]
@@ -257,5 +240,6 @@ export default ({
     yKey,
     xAxes,
     yAxes,
+    defaultColors,
   ])
 }

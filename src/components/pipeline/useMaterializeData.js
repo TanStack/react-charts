@@ -3,14 +3,14 @@ import React from 'react'
 
 export default ({
   data,
-  getSeriesID,
+  getSeriesId,
   getLabel,
-  getPrimaryAxisID,
-  getSecondaryAxisID,
+  getPrimaryAxisId,
+  getSecondaryAxisId,
   getDatums,
   getPrimary,
   getSecondary,
-  getR
+  getR,
 }) => {
   return React.useMemo(() => {
     const materializedData = []
@@ -18,10 +18,10 @@ export default ({
     // First access the data, and provide it to the context
     for (let seriesIndex = 0; seriesIndex < data.length; seriesIndex++) {
       const originalSeries = data[seriesIndex]
-      const seriesID = getSeriesID(originalSeries, seriesIndex, data)
+      const seriesId = getSeriesId(originalSeries, seriesIndex, data)
       const seriesLabel = getLabel(originalSeries, seriesIndex, data)
-      const primaryAxisID = getPrimaryAxisID(originalSeries, seriesIndex, data)
-      const secondaryAxisID = getSecondaryAxisID(
+      const primaryAxisId = getPrimaryAxisId(originalSeries, seriesIndex, data)
+      const secondaryAxisId = getSecondaryAxisId(
         originalSeries,
         seriesIndex,
         data
@@ -38,7 +38,7 @@ export default ({
         datums[datumIndex] = {
           originalSeries,
           seriesIndex,
-          seriesID,
+          seriesId,
           seriesLabel,
           index: datumIndex,
           originalDatum,
@@ -56,18 +56,18 @@ export default ({
             seriesIndex,
             data
           ),
-          r: getR(originalDatum, datumIndex, originalSeries, seriesIndex, data)
+          r: getR(originalDatum, datumIndex, originalSeries, seriesIndex, data),
         }
       }
 
       materializedData[seriesIndex] = {
         originalSeries,
         index: seriesIndex,
-        id: seriesID,
+        id: seriesId,
         label: seriesLabel,
-        primaryAxisID,
-        secondaryAxisID,
-        datums
+        primaryAxisId,
+        secondaryAxisId,
+        datums,
       }
     }
 
@@ -77,10 +77,10 @@ export default ({
     getDatums,
     getLabel,
     getPrimary,
-    getPrimaryAxisID,
+    getPrimaryAxisId,
     getR,
     getSecondary,
-    getSecondaryAxisID,
-    getSeriesID
+    getSecondaryAxisId,
+    getSeriesId,
   ])
 }

@@ -13,8 +13,8 @@ export default function Bar({ series }) {
 
   const style = useSeriesStyle(series)
 
-  const { barOffset } = series.primaryAxisID
-    ? primaryAxes.find(d => d.id === series.primaryAxisID)
+  const { barOffset } = series.primaryAxisId
+    ? primaryAxes.find(d => d.id === series.primaryAxisId)
     : primaryAxes[0]
 
   return (

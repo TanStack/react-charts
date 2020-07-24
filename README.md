@@ -538,7 +538,7 @@ function MyChart() {
 **`<Chart />` Props**
 
 - `getLabel` - A `memoized` function that returns the series label
-- `getSeriesID` - A `memoized` function that returns the series ID
+- `getSeriesId` - A `memoized` function that returns the series ID
 - `getDatums` - A `memoized` function that returns the series' datums array
 - `getPrimary` - A `memoized` function that returns the datum's primary value
 - `getSecondary` - A `memoized` function that returns the datum's secondary value
