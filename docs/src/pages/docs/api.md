@@ -288,8 +288,6 @@ React Charts supports an `axes` prop that handles both the underlying scale and 
   - `time` - A continuous axis used for plotting localized times and dates on an evenly distributed scale. Works well as a **primary** axis.
   - `utc` - Similar to the `time` scale, but supports UTC datetimes instead of localized datetimes. Works well as a **primary** axis.
   - `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis
-    <!-- - Radial
-  - `pie` - A standalone numerical axis used for plotting arc lengths on a pie chart. Use this as the only axis when plotting a Pie chart. -->
 
 Axes are a required component of a React Chart and can used like so:
 
