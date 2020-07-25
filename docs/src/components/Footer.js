@@ -27,7 +27,7 @@ export const Footer = props => {
                     </Link>
                   </li>
                   <li className="mt-4">
-                    <Link href="/docs/api/overview">
+                    <Link href="/docs/api">
                       <a className="text-base leading-6 text-gray-500 hover:text-gray-900">
                         API Reference
                       </a>

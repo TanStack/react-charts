@@ -28,7 +28,7 @@ export const Nav = () => (
               </Link>
             </div>
             <div>
-              <Link href="/docs/api/overview">
+              <Link href="/docs/api">
                 <a className="leading-6 font-medium">API</a>
               </Link>
             </div>
