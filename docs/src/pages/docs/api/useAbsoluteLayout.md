@@ -51,5 +51,5 @@
 
 ### Example
 
-- [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/absolute-layout)
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/absolute-layout)
+- [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/absolute-layout)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/absolute-layout)

@@ -5,245 +5,132 @@
       "heading": true,
       "routes": [
         {
-          "title": "Getting Started",
-          "open": true,
-          "routes": [
-            {
-              "title": "Overview",
-              "path": "/docs/overview",
-              "editUrl": "/docs/overview.md"
-            },
-            {
-              "title": "Installation",
-              "path": "/docs/installation",
-              "editUrl": "/docs/installation.md"
-            },
-            {
-              "title": "Quick Start",
-              "path": "/docs/quick-start",
-              "editUrl": "/docs/quick-start.md"
-            }
-          ]
+          "title": "Overview",
+          "path": "/docs/overview",
+          "editUrl": "/docs/overview.md"
         },
         {
-          "title": "API Reference",
-          "open": true,
-          "routes": [
-            {
-              "title": "Overview",
-              "path": "/docs/api/overview",
-              "editUrl": "/docs/api/overview.md"
-            },
-            {
-              "title": "useTable",
-              "path": "/docs/api/useTable",
-              "editUrl": "/docs/api/useTable.md"
-            },
-            {
-              "title": "useFilters",
-              "path": "/docs/api/useFilters",
-              "editUrl": "/docs/api/useFilters.md"
-            },
-            {
-              "title": "useGlobalFilter",
-              "path": "/docs/api/useGlobalFilter",
-              "editUrl": "/docs/api/useGlobalFilter.md"
-            },
-            {
-              "title": "useSortBy",
-              "path": "/docs/api/useSortBy",
-              "editUrl": "/docs/api/useSortBy.md"
-            },
-            {
-              "title": "useGroupBy",
-              "path": "/docs/api/useGroupBy",
-              "editUrl": "/docs/api/useGroupBy.md"
-            },
-            {
-              "title": "useExpanded",
-              "path": "/docs/api/useExpanded",
-              "editUrl": "/docs/api/useExpanded.md"
-            },
-            {
-              "title": "usePagination",
-              "path": "/docs/api/usePagination",
-              "editUrl": "/docs/api/usePagination.md"
-            },
-            {
-              "title": "useRowSelect",
-              "path": "/docs/api/useRowSelect",
-              "editUrl": "/docs/api/useRowSelect.md"
-            },
-            {
-              "title": "useRowState",
-              "path": "/docs/api/useRowState",
-              "editUrl": "/docs/api/useRowState.md"
-            },
-            {
-              "title": "useColumnOrder",
-              "path": "/docs/api/useColumnOrder",
-              "editUrl": "/docs/api/useColumnOrder.md"
-            },
-            {
-              "title": "useResizeColumns",
-              "path": "/docs/api/useResizeColumns",
-              "editUrl": "/docs/api/useResizeColumns.md"
-            },
-            {
-              "title": "useBlockLayout",
-              "path": "/docs/api/useBlockLayout",
-              "editUrl": "/docs/api/useBlockLayout.md"
-            },
-            {
-              "title": "useAbsoluteLayout",
-              "path": "/docs/api/useAbsoluteLayout",
-              "editUrl": "/docs/api/useAbsoluteLayout.md"
-            },
-            {
-              "title": "useFlexLayout",
-              "path": "/docs/api/useFlexLayout",
-              "editUrl": "/docs/api/useFlexLayout.md"
-            }
-          ]
+          "title": "Installation",
+          "path": "/docs/installation",
+          "editUrl": "/docs/installation.md"
         },
         {
-          "title": "Examples",
-          "open": true,
-          "routes": [
-            {
-              "title": "Basic",
-              "path": "/docs/examples/basic",
-              "editUrl": "/docs/examples/basic.mdx"
-            },
-            {
-              "title": "Footers",
-              "path": "/docs/examples/footers",
-              "editUrl": "/docs/examples/footers.mdx"
-            },
-            {
-              "title": "Sorting",
-              "path": "/docs/examples/sorting",
-              "editUrl": "/docs/examples/sorting.mdx"
-            },
-            {
-              "title": "Filtering",
-              "path": "/docs/examples/filtering",
-              "editUrl": "/docs/examples/filtering.mdx"
-            },
-            {
-              "title": "Grouping",
-              "path": "/docs/examples/grouping",
-              "editUrl": "/docs/examples/grouping.mdx"
-            },
-            {
-              "title": "Grouping Column",
-              "path": "/docs/examples/grouping-column",
-              "editUrl": "/docs/examples/grouping-column.mdx"
-            },
-            {
-              "title": "Pagination",
-              "path": "/docs/examples/pagination",
-              "editUrl": "/docs/examples/pagination.mdx"
-            },
-            {
-              "title": "Row Selection",
-              "path": "/docs/examples/row-selection",
-              "editUrl": "/docs/examples/row-selection.mdx"
-            },
-            {
-              "title": "Expanding",
-              "path": "/docs/examples/expanding",
-              "editUrl": "/docs/examples/expanding.mdx"
-            },
-            {
-              "title": "Sub Components",
-              "path": "/docs/examples/sub-components",
-              "editUrl": "/docs/examples/sub-components.mdx"
-            },
-            {
-              "title": "Editable Data",
-              "path": "/docs/examples/editable-data",
-              "editUrl": "/docs/examples/editable-data.mdx"
-            },
-            {
-              "title": "Column Ordering",
-              "path": "/docs/examples/column-ordering",
-              "editUrl": "/docs/examples/column-ordering.mdx"
-            },
-            {
-              "title": "Column Hiding",
-              "path": "/docs/examples/column-hiding",
-              "editUrl": "/docs/examples/column-hiding.mdx"
-            },
-            {
-              "title": "Column Resizing",
-              "path": "/docs/examples/column-resizing",
-              "editUrl": "/docs/examples/column-resizing.mdx"
-            },
-            {
-              "title": "Data-Driven Classes and Styles",
-              "path": "/docs/examples/data-driven-classes-and-styles",
-              "editUrl": "/docs/examples/data-driven-classes-and-styles.mdx"
-            },
-            {
-              "title": "Row Drag & Drop",
-              "path": "/docs/examples/row-dnd",
-              "editUrl": "/docs/examples/row-dnd.mdx"
-            },
-            {
-              "title": "Full Width Table",
-              "path": "/docs/examples/full-width-table",
-              "editUrl": "/docs/examples/full-width-table.mdx"
-            },
-            {
-              "title": "Full Width Resizable Table",
-              "path": "/docs/examples/full-width-resizable-table",
-              "editUrl": "/docs/examples/full-width-resizable-table.mdx"
-            },
-            {
-              "title": "Kitchen Sink",
-              "path": "/docs/examples/kitchen-sink",
-              "editUrl": "/docs/examples/kitchen-sink.mdx"
-            },
-            {
-              "title": "Pagination (Controlled)",
-              "path": "/docs/examples/pagination-controlled",
-              "editUrl": "/docs/examples/pagination-controlled.mdx"
-            },
-            {
-              "title": "Virtualized Rows (React-Window)",
-              "path": "/docs/examples/virtualized-rows",
-              "editUrl": "/docs/examples/virtualized-rows.mdx"
-            },
-            {
-              "title": "Animated (Framer-Motion)",
-              "path": "/docs/examples/animated-framer-motion",
-              "editUrl": "/docs/examples/animated-framer-motion.mdx"
-            },
-            {
-              "title": "Material-UI",
-              "path": "/docs/examples/material-ui-components",
-              "editUrl": "/docs/examples/material-ui-components.mdx"
-            },
-            {
-              "title": "Material-UI Kitchen Sink",
-              "path": "/docs/examples/material-ui-kitchen-sink",
-              "editUrl": "/docs/examples/material-ui-kitchen-sink.mdx"
-            },
-            {
-              "title": "RMWC Table",
-              "path": "/docs/examples/rmwc-components",
-              "editUrl": "/docs/examples/rmwc-components.mdx"
-            }
-          ]
+          "title": "API Reference (WIP)",
+          "path": "/docs/api",
+          "editUrl": "/docs/api.md"
         }
       ]
     },
     {
-      "title": "FAQ",
-      "heading": true,
-      "path": "/docs/faq",
-      "editUrl": "/docs/faq.md"
+      "title": "Examples",
+      "open": true,
+      "routes": [
+        {
+          "title": "Line Chart",
+          "path": "/examples/line",
+          "editUrl": "/examples/line.md"
+        },
+        {
+          "title": "Bubble Chart",
+          "path": "/examples/bubble",
+          "editUrl": "/examples/bubble.md"
+        },
+        {
+          "title": "Area Chart",
+          "path": "/examples/area",
+          "editUrl": "/examples/area.md"
+        },
+        {
+          "title": "Bar Chart",
+          "path": "/examples/bar",
+          "editUrl": "/examples/bar.md"
+        },
+        {
+          "title": "Column Chart",
+          "path": "/examples/column",
+          "editUrl": "/examples/column.md"
+        },
+        {
+          "title": "Animated",
+          "path": "/examples/animated",
+          "editUrl": "/examples/animated.md"
+        },
+        {
+          "title": "Axis Options",
+          "path": "/examples/axis-options",
+          "editUrl": "/examples/axis-options.md"
+        },
+        {
+          "title": "Custom Styles",
+          "path": "/examples/custom-styles",
+          "editUrl": "/examples/custom-styles.md"
+        },
+        {
+          "title": "Custom Tooltip",
+          "path": "/examples/custom-tooltip",
+          "editUrl": "/examples/custom-tooltip.md"
+        },
+        {
+          "title": "Cursors",
+          "path": "/examples/cursors",
+          "editUrl": "/examples/cursors.md"
+        },
+        {
+          "title": "Synced Cursors",
+          "path": "/examples/synced-cursors",
+          "editUrl": "/examples/synced-cursors.md"
+        },
+        {
+          "title": "Brushing",
+          "path": "/examples/brushing",
+          "editUrl": "/examples/brushing.md"
+        },
+        {
+          "title": "Custom Cursors",
+          "path": "/examples/custom-cursors",
+          "editUrl": "/examples/custom-cursors.md"
+        },
+        {
+          "title": "Grouping Modes",
+          "path": "/examples/grouping-modes",
+          "editUrl": "/examples/grouping-modes.md"
+        },
+        {
+          "title": "Tooltip Options",
+          "path": "/examples/tooltip-options",
+          "editUrl": "/examples/tooltip-options.md"
+        },
+        {
+          "title": "Dynamic Box",
+          "path": "/examples/dynamic-box",
+          "editUrl": "/examples/dynamic-box.md"
+        },
+        {
+          "title": "Sparklines",
+          "path": "/examples/sparklines",
+          "editUrl": "/examples/sparklines.md"
+        },
+        {
+          "title": "Mixed Types",
+          "path": "/examples/mixed-types",
+          "editUrl": "/examples/mixed-types.md"
+        },
+        {
+          "title": "Multiple Axes",
+          "path": "/examples/multiple-axes",
+          "editUrl": "/examples/multiple-axes.md"
+        },
+        {
+          "title": "Dark Mode",
+          "path": "/examples/dark-mode",
+          "editUrl": "/examples/dark-mode.md"
+        },
+        {
+          "title": "Stress Test",
+          "path": "/examples/stress-test",
+          "editUrl": "/examples/stress-test.md"
+        }
+      ]
     }
   ]
 }

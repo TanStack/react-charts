@@ -124,5 +124,5 @@ The following additional properties are available on every `Cell` object returne
 
 ### Example
 
-- [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/grouping)
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/grouping)
+- [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/grouping)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/grouping)

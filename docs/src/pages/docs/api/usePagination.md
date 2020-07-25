@@ -79,8 +79,8 @@ The following values are provided to the table `instance`:
 ### Example
 
 - Basic Pagination
-  - [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/pagination)
-  - [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/pagination)
+  - [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/pagination)
+  - [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/pagination)
 - Controlled Pagination
-  - [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/pagination-controlled)
-  - [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/pagination-controlled)
+  - [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/pagination-controlled)
+  - [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/pagination-controlled)

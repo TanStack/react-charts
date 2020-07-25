@@ -92,5 +92,5 @@ The following properties are available on every `Column` object returned by the 
 
 ### Example
 
-- [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/filtering)
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/filtering)
+- [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/filtering)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/filtering)

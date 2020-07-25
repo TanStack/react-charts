@@ -68,5 +68,5 @@ The following additional properties are available on every **prepared** `row` ob
 
 ### Example
 
-- [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/row-selection)
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/row-selection)
+- [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/row-selection)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/row-selection)

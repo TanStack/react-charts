@@ -51,5 +51,5 @@
 
 ### Example (Full Width Resizable Table)
 
-- [Source](https://github.com/tannerlinsley/react-charts/tree/master/examples/full-width-resizable-table)
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/master/examples/full-width-resizable-table)
+- [Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/full-width-resizable-table)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/full-width-resizable-table)
