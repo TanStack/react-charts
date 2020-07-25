@@ -43,7 +43,7 @@ const Home = props => {
                   </h1>
                   <p className="mt-3 text-base text-gray-700 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
                     Flexible, declarative, and highly configurable charts
-                    designed to display dynamic data in pragmatic ways.
+                    designed to pragmatically display dynamic data.
                   </p>
 
                   <div className="mt-5  mx-auto sm:flex sm:justify-center lg:justify-start lg:mx-0 md:mt-8">
@@ -293,7 +293,7 @@ const Home = props => {
         <section className="bg-gray-900 body-font">
           <div className="container max-w-7xl px-4  mx-auto -mt-72 relative">
             <iframe
-              src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/master/examples/basic?autoresize=1&fontsize=16&theme=dark"
+              src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/line-chart?autoresize=1&fontsize=16&theme=dark"
               title="tannerlinsley/react-charts: basic"
               sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
               className="shadow-2xl"

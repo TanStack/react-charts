@@ -1,0 +1,14 @@
+.react-resizable {
+  max-width: 100%;
+}
+
+.react-resizable-handle {
+  bottom: -10px;
+  right: -10px;
+}
+
+.lagRadar {
+  position: fixed;
+  bottom: 0.5rem;
+  right: 0.5rem;
+}
