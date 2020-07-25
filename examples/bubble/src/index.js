@@ -12,11 +12,14 @@ export default function App() {
   useLagRadar();
 
   const { data, randomizeData } = useDemoConfig({
-    series: 10
+    dataType: "linear",
+    series: 10,
+    useR: true
   });
 
   const series = React.useMemo(
     () => ({
+      type: "bubble",
       showPoints: false
     }),
     []
@@ -24,7 +27,7 @@ export default function App() {
 
   const axes = React.useMemo(
     () => [
-      { primary: true, type: "time", position: "bottom" },
+      { primary: true, type: "linear", position: "bottom" },
       { type: "linear", position: "left" }
     ],
     []
@@ -36,7 +39,13 @@ export default function App() {
       <br />
       <br />
       <ResizableBox>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart
+          data={data}
+          series={series}
+          axes={axes}
+          grouping="single"
+          tooltip
+        />
       </ResizableBox>
     </>
   );
