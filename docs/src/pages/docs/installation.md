@@ -19,4 +19,4 @@ or
 yarn add react-charts
 ```
 
-React Charts is compatible with React v16.8+ and works with ReactDOM and React Native.
+React Charts is compatible with React v16.8+ and is compatible with ReactDOM only
