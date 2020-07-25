@@ -1,4 +1,4 @@
-![React Charts Header](https://github.com/tannerlinsley/react-charts/raw/master/media/repo-dark.png)
+![React Charts Header](https://github.com/tannerlinsley/react-charts/raw/next/media/repo-dark.png)
 
 Simple, immersive and interactive charts for React
 
