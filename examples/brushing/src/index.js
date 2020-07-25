@@ -11,22 +11,41 @@ import "./styles.css";
 export default function App() {
   useLagRadar();
 
+  const [{ min, max }, setState] = React.useState({
+    min: null,
+    max: null
+  });
+
   const { data, randomizeData } = useDemoConfig({
     series: 10
   });
 
-  const series = React.useMemo(
-    () => ({
-      showPoints: false
-    }),
-    []
-  );
-
   const axes = React.useMemo(
     () => [
-      { primary: true, type: "time", position: "bottom" },
-      { type: "linear", position: "left" }
+      {
+        primary: true,
+        type: "time",
+        position: "bottom",
+        hardMin: min,
+        hardMax: max
+      },
+      {
+        type: "linear",
+        position: "left"
+      }
     ],
+    [max, min]
+  );
+
+  const brush = React.useMemo(
+    () => ({
+      onSelect: brushData => {
+        setState({
+          min: Math.min(brushData.start, brushData.end),
+          max: Math.max(brushData.start, brushData.end)
+        });
+      }
+    }),
     []
   );
 
@@ -34,9 +53,20 @@ export default function App() {
     <>
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
+      <button
+        onClick={() =>
+          setState({
+            min: null,
+            max: null
+          })
+        }
+      >
+        Reset Zoom
+      </button>
+      <br />
       <br />
       <ResizableBox>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart data={data} axes={axes} primaryCursor tooltip brush={brush} />
       </ResizableBox>
     </>
   );

@@ -12,40 +12,29 @@ export default function App() {
   useLagRadar();
 
   const { data, randomizeData } = useDemoConfig({
-    dataType: "linear",
     series: 10,
-    useR: true
+    dataType: "ordinal"
   });
-
   const series = React.useMemo(
     () => ({
-      type: "bubble",
-      showPoints: false
+      type: "bar"
     }),
     []
   );
-
   const axes = React.useMemo(
     () => [
-      { primary: true, type: "linear", position: "bottom" },
-      { type: "linear", position: "left" }
+      { primary: true, type: "ordinal", position: "left" },
+      { position: "bottom", type: "linear", stacked: true }
     ],
     []
   );
-
   return (
     <>
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
       <br />
       <ResizableBox>
-        <Chart
-          data={data}
-          series={series}
-          axes={axes}
-          grouping="single"
-          tooltip
-        />
+        <Chart data={data} series={series} axes={axes} tooltip />
       </ResizableBox>
     </>
   );

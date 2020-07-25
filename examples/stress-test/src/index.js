@@ -106,6 +106,14 @@ export default function App() {
         {chartCount * seriesCount * datumCount} data elements) w/ Synced Cursors
         & Series Highlighting
       </h3>
+      <br />
+
+      <p>
+        NOTE: This example is best views in production for maximum performance.
+      </p>
+
+      <br />
+      <br />
       <label>
         Chart Count:{" "}
         <input
