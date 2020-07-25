@@ -293,8 +293,8 @@ const Home = props => {
         <section className="bg-gray-900 body-font">
           <div className="container max-w-7xl px-4  mx-auto -mt-72 relative">
             <iframe
-              src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/line-chart?autoresize=1&fontsize=16&theme=dark"
-              title="tannerlinsley/react-charts: basic"
+              src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/line?autoresize=1&fontsize=16&theme=dark"
+              title="tannerlinsley/react-charts: line"
               sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
               className="shadow-2xl"
               style={{
