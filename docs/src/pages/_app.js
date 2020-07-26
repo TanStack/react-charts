@@ -18,8 +18,8 @@ function MyApp({ Component, pageProps }) {
   React.useEffect(() => {
     loadScript('https://buttons.github.io/buttons.js')
     // Convert kit slide up form
-    loadScript('https://tanstack.ck.page/84f1bb01b8/index.js', {
-      'data-uid': '84f1bb01b8',
+    loadScript('https://tanstack.ck.page/2e928df461/index.js', {
+      'data-uid': '2e928df461',
     })
   }, [])
 
