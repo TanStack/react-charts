@@ -6,7 +6,7 @@ export const siteConfig = {
   repoUrl: 'https://github.com/tannerlinsley/react-charts',
   algolia: {
     appId: 'BH4D9OD16A',
-    apiKey: '8e6cc6c0a7b77ae1f3b33c6f7b706c09',
+    apiKey: 'f501b7d59335fb8731d2c76764c3fc86',
     indexName: 'tanstack_react-charts', // algoliaOptions: {
     //   facetFilters: ['version:VERSION'],
     // },
