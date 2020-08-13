@@ -77,11 +77,11 @@ const Home = props => {
                 <div>
                   <div>
                     <h3 className="text-xl leading-6 xl:text-2xl font-bold text-gray-900">
-                      Succinct & Decalarative
+                      Succinct & Declarative
                     </h3>
                     <p className="mt-2 lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
                       Time is short for front-end developers as it is, so having
-                      a charting system that is decalarative, succinct and
+                      a charting system that is declarative, succinct and
                       requires as little imperative scripting as possible not
                       only helps you keep moving forward but lets you express
                       your data visualization needs at the speed of your
