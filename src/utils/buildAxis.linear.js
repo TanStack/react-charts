@@ -11,7 +11,8 @@ import {
   axisTypeLinear,
   axisTypeLog,
 } from '../utils/Constants.js'
-import Utils from '../utils/Utils'
+
+import { identity, translateX, translateY } from '../utils/Utils'
 
 import Bar from '../seriesTypes/Bar'
 
@@ -39,19 +40,19 @@ export default function buildAxisLinear({
     hardMax = undefined,
     base = undefined,
     tickCount = 'auto',
-    minTickCount = 0,
-    maxTickCount = Infinity,
+    minTickCount = 1,
+    maxTickCount = 99999999,
     tickValues = null,
     format: userFormat = null,
     tickSizeInner = 6,
     tickSizeOuter = 6,
-    tickPadding = 14,
-    maxLabelRotation = 50,
-    labelRotationStep = 5,
+    tickPadding = 10,
+    labelRotation = 60,
     innerPadding = 0.2,
     outerPadding = 0.1,
     showGrid = null,
     showTicks = true,
+    filterTicks = d => d,
     show = true,
     stacked = false,
     id: userId,
@@ -83,8 +84,8 @@ export default function buildAxisLinear({
   let positiveTotalByKey = {}
   let domain
 
-  // const axisDimension =
-  //   axisDimensions && axisDimensions[position] && axisDimensions[position][id]
+  const axisDimension =
+    axisDimensions && axisDimensions[position] && axisDimensions[position][id]
 
   // Loop through each series
   for (
@@ -252,11 +253,38 @@ export default function buildAxisLinear({
   // Now set the range
   scale.range(range)
 
-  const scaleFormat = scale.tickFormat ? scale.tickFormat() : Utils.identity
+  const scaleFormat = scale.tickFormat ? scale.tickFormat() : identity
 
   const format = userFormat
     ? (value, index) => userFormat(value, index, scaleFormat(value))
     : scaleFormat
+
+  let resolvedTickCount = tickCount
+
+  if (tickCount === 'auto') {
+    resolvedTickCount = axisDimension?.tickCount || 10
+  }
+
+  const ticks = filterTicks(
+    tickValues ||
+      (scale.ticks ? scale.ticks(resolvedTickCount) : scale.domain())
+  )
+
+  const scaleMax =
+    position === positionBottom
+      ? -gridHeight
+      : position === positionLeft
+      ? gridWidth
+      : position === positionTop
+      ? gridHeight
+      : -gridWidth
+
+  const directionMultiplier =
+    position === positionTop || position === positionLeft ? -1 : 1
+
+  const transform = !vertical ? translateX : translateY
+
+  const spacing = Math.max(tickSizeInner, 0) + tickPadding
 
   // Pass down the axis config (including the scale itself) for posterity
   const axis = {
@@ -276,8 +304,7 @@ export default function buildAxisLinear({
     tickSizeInner,
     tickSizeOuter,
     tickPadding,
-    maxLabelRotation,
-    labelRotationStep,
+    labelRotation,
     innerPadding,
     outerPadding,
     showGrid,
@@ -295,30 +322,12 @@ export default function buildAxisLinear({
     seriesBarSize,
     domain,
     range,
-    max:
-      position === positionBottom
-        ? -gridHeight
-        : position === positionLeft
-        ? gridWidth
-        : position === positionTop
-        ? gridHeight
-        : -gridWidth,
-    directionMultiplier:
-      position === positionTop || position === positionLeft ? -1 : 1,
-    transform: !vertical ? Utils.translateX : Utils.translateY,
-    ticks:
-      tickValues || (scale.ticks
-        ? scale
-            .ticks
-            // tickCount === 'auto'
-            //   ? axisDimension
-            //     ? axisDimension.tickCount
-            //     : 10
-            //   : tickCount
-            ()
-        : scale.domain()),
+    max: scaleMax,
+    directionMultiplier,
+    transform,
+    ticks,
     format,
-    spacing: Math.max(tickSizeInner, 0) + tickPadding,
+    spacing,
   }
 
   if (type === axisTypeOrdinal) {

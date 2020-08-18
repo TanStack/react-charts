@@ -83,11 +83,27 @@ While this may feel heavy at first, it gives you, the dev, full control over whe
 
 ## Data Model
 
-React Charts uses a common and very flexible data model based on arrays of **series** and arrays of **datums**. You can either use the model defaults directly, or use **data accessors** to materialize this structure.
+React Charts uses a data shape based on **arrays of series and nested arrays of datums in those series**.
 
-Typical visualization data can come in practically any shape and size. The following examples show data structures that are all reasonably equivalent **at some level** since they each contain an array of **series[]** and **datums[]**. They also show how to parse that data.
+```js
+// series array
+const data = [
+  {
+    // individual series
+    label: 'Purchases',
+    // datum array
+    data: [
+      {
+        // individual datum
+        primary: 'Apples', // primary value
+        secondary: 20, // secondary value
+      },
+    ],
+  },
+]
+```
 
-In the following example, there is no need to use any accessors. The **default** accessors are able to easily understand this format:
+Visualization data can come in practically any shape and size, so **memoization of data into this shape is almost always necessary**.
 
 ```javascript
 function MyChart() {
@@ -96,25 +112,25 @@ function MyChart() {
       {
         label: 'Series 1',
         data: [
-          { x: 1, y: 10 },
-          { x: 2, y: 10 },
-          { x: 3, y: 10 },
+          { primary: 1, secondary: 10 },
+          { primary: 2, secondary: 10 },
+          { primary: 3, secondary: 10 },
         ],
       },
       {
         label: 'Series 2',
         data: [
-          { x: 1, y: 10 },
-          { x: 2, y: 10 },
-          { x: 3, y: 10 },
+          { primary: 1, secondary: 10 },
+          { primary: 2, secondary: 10 },
+          { primary: 3, secondary: 10 },
         ],
       },
       {
         label: 'Series 3',
         data: [
-          { x: 1, y: 10 },
-          { x: 2, y: 10 },
-          { x: 3, y: 10 },
+          { primary: 1, secondary: 10 },
+          { primary: 2, secondary: 10 },
+          { primary: 3, secondary: 10 },
         ],
       },
     ],
@@ -137,142 +153,6 @@ function MyChart() {
       }}
     >
       <Chart data={data} axes={axes} />
-    </div>
-  )
-}
-```
-
-In the following example, there is no need to use any accessors. The **default** accessors are able to easily understand this format, but **please note** that this format limits you from passing any **meta data** about your series and datums.
-
-```javascript
-function MyChart() {
-  const data = React.useMemo(
-    () => [
-      [
-        [1, 10],
-        [2, 10],
-        [3, 10],
-      ],
-      [
-        [1, 10],
-        [2, 10],
-        [3, 10],
-      ],
-      [
-        [1, 10],
-        [2, 10],
-        [3, 10],
-      ],
-    ],
-    []
-  )
-
-  const axes = React.useMemo(
-    () => [
-      { primary: true, type: 'linear', position: 'bottom' },
-      { type: 'linear', position: 'left' },
-    ],
-    []
-  )
-
-  return (
-    <div
-      style={{
-        width: '400px',
-        height: '300px',
-      }}
-    >
-      <Chart data={data} axes={axes} />
-    </div>
-  )
-}
-```
-
-#### Data Accessors
-
-When data isn't in a convenient format for React Charts, **your first instinct will be to transform your data into the above formats**. Don't do that! There is an easier way 🎉 We can use the `Chart` components' **accessor props** to point things in the right direction. **Accessor props** pass the original data and the series/datums you return down the line to form a new data model. See the [`<Chart>` component](#chart) for all available accessors.
-
-In the following example, the data is in a very funky format, but at it's core is the same as the previous examples.
-
-```javascript
-function MyChart() {
-  // Use any data object you want
-  const originalData = React.useMemo(
-    () => ({
-      axis: [1, 2, 3],
-      lines: [
-        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-        { data: [{ value: 10 }, { value: 10 }, { value: 10 }] },
-      ],
-    }),
-    []
-  )
-
-  // Make data.lines represent the different series
-  const data = React.useMemo(data => originalData.lines, [originalData])
-
-  // Use data.lines[n].data to represent the different datums for each series
-  const getDatums = React.useCallback(series => series.data, [])
-
-  // Use the original data object and the datum index to reference the datum's primary value.
-  const getPrimary = React.useCallback(
-    (datum, i, series, seriesIndex, data) => originalData.axis[i],
-    []
-  )
-
-  // Use data.lines[n].data[n].value as each datums secondary value
-  const getSecondary = React.useCallback(datum => datum.value, [])
-
-  return (
-    <div
-      style={{
-        width: '400px',
-        height: '300px',
-      }}
-    >
-      <Chart
-        data={data}
-        getSeries={getSeries}
-        getDatums={getDatums}
-        getPrimary={getPrimary}
-        getSecondary={getSecondary}
-      />
-    </div>
-  )
-}
-```
-
-#### Series Labels
-
-Multiple series are often useless without labels. By default, React Charts looks for the `label` value on the series object you pass it. If not found, it will simply label your series as `Series [n]`, where `[n]` is the zero-based `index` of the series, plus `1`.
-
-If the default label accessor doesn't suit your needs, then you can use the `<Chart>` component's `getLabel` accessor prop:
-
-```javascript
-function MyChart() {
-  const data = React.useMemo(
-    () => [
-      {
-        specialLabel: 'Hello World!',
-        data: [
-          //...
-        ],
-      },
-    ],
-    []
-  )
-
-  const getLabel = React.useCallback(series => series.specialLabel, [])
-
-  return (
-    <div
-      style={{
-        width: '400px',
-        height: '300px',
-      }}
-    >
-      <Chart data={data} getLabel={getLabel} />
     </div>
   )
 }

@@ -1,15 +1,16 @@
 import React from 'react'
 //
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import { isValidPoint, buildStyleGetters } from '../utils/Utils'
 
 import useSeriesStyle from '../hooks/useSeriesStyle'
 import useDatumStyle from '../hooks/useDatumStyle'
 
 import Rectangle from '../primitives/Rectangle'
+import useChartContext from '../hooks/useChartContext'
+import useChartState from '../hooks/useChartState'
 
 export default function Bar({ series }) {
-  const [{ primaryAxes }] = React.useContext(ChartContext)
+  const { primaryAxes } = useChartContext()
 
   const style = useSeriesStyle(series)
 
@@ -36,12 +37,13 @@ export default function Bar({ series }) {
 }
 
 function BarPiece({ datum, barOffset, style }) {
-  const [{ primaryAxes }, setChartState] = React.useContext(ChartContext)
+  const { primaryAxes } = useChartContext()
+  const [, setChartState] = useChartState(() => null)
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
   const base = datum ? datum.base : 0
-  const size = datum ? datum.size : 0
+  const size = Math.max(datum ? datum.size : 1, 1)
   let x1
   let y1
   let x2
@@ -101,8 +103,7 @@ Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
   datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
-  datum.defined =
-    Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
+  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
   datum.base = secondaryAxis.scale(datum.baseValue)
   datum.size = primaryAxis.barSize
 
@@ -163,5 +164,5 @@ Bar.buildStyles = (series, { defaultColors }) => {
     color: defaultColors[series.index % (defaultColors.length - 1)],
   }
 
-  Utils.buildStyleGetters(series, defaults)
+  buildStyleGetters(series, defaults)
 }

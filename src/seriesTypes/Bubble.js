@@ -1,13 +1,13 @@
 import React from 'react'
 //
 
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import { isValidPoint, buildStyleGetters } from '../utils/Utils'
 
 import useSeriesStyle from '../hooks/useSeriesStyle'
 import useDatumStyle from '../hooks/useDatumStyle'
 
 import Circle from '../primitives/Circle'
+import useChartState from '../hooks/useChartState'
 
 const circleDefaultStyle = {
   r: 2,
@@ -38,8 +38,7 @@ Bubble.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
   datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
-  datum.defined =
-    Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
+  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
   datum.base = primaryAxis.vertical
     ? xAxis.scale(datum.baseValue)
     : yAxis.scale(datum.baseValue)
@@ -69,21 +68,21 @@ Bubble.buildStyles = (series, { defaultColors }) => {
     color: defaultColors[series.index % (defaultColors.length - 1)],
   }
 
-  Utils.buildStyleGetters(series, defaults)
+  buildStyleGetters(series, defaults)
 }
 
 function Point({ datum, style }) {
   const dataStyle = useDatumStyle(datum)
-  const [, setChartState] = React.useContext(ChartContext)
+  const [, setChartState] = useChartState(() => null)
 
   const circleProps = {
     x: datum ? datum.x : undefined,
     y: datum ? datum.y : undefined,
     style: {
       ...circleDefaultStyle,
-      ...(typeof datum.r !== 'undefined'
+      ...(typeof datum.radius !== 'undefined'
         ? {
-            r: datum.r,
+            r: datum.radius,
           }
         : {}),
       ...style,

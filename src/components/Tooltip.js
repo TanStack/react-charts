@@ -1,7 +1,8 @@
 import React from 'react'
+import useChartContext from '../hooks/useChartContext'
+import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
 //
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import { getAxisByAxisId, translate } from '../utils/Utils'
 //
 
 const triangleSize = 7
@@ -10,7 +11,7 @@ const getBackgroundColor = dark =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
 export default function Tooltip() {
-  const [chartState] = React.useContext(ChartContext)
+  const chartContext = useChartContext()
 
   const {
     primaryAxes,
@@ -24,7 +25,7 @@ export default function Tooltip() {
     latestFocused,
     getDatumStyle,
     tooltip,
-  } = chartState
+  } = chartContext
 
   const elRef = React.useRef()
   const tooltipElRef = React.useRef()
@@ -48,7 +49,7 @@ export default function Tooltip() {
     previousShowRef.current = show
   }, [show])
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (align !== 'auto' || !elRef.current || !show || !anchor) {
       return
     }
@@ -306,11 +307,11 @@ export default function Tooltip() {
     }
   }
 
-  const primaryAxis = Utils.getAxisByAxisId(
+  const primaryAxis = getAxisByAxisId(
     primaryAxes,
     resolvedFocused ? resolvedFocused.series.primaryAxisId : null
   )
-  const secondaryAxis = Utils.getAxisByAxisId(
+  const secondaryAxis = getAxisByAxisId(
     secondaryAxes,
     resolvedFocused ? resolvedFocused.series.secondaryAxisId : null
   )
@@ -319,8 +320,8 @@ export default function Tooltip() {
   const resolvedVerticalPadding = padding + anchor.verticalPadding
 
   const renderProps = {
-    ...chartState,
-    ...chartState.tooltip,
+    ...chartContext,
+    ...chartContext.tooltip,
     datum: resolvedFocused,
     getStyle: datum => datum.getStatusStyle(resolvedFocused, getDatumStyle),
     primaryAxis,
@@ -356,7 +357,7 @@ export default function Tooltip() {
           position: 'absolute',
           left: 0,
           top: 0,
-          transform: Utils.translate(anchor.x, anchor.y),
+          transform: translate(anchor.x, anchor.y),
           transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease',
         }}
       >

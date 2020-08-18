@@ -8,18 +8,19 @@
   },
   "dependencies": {
     "@react-hook/window-size": "3.0.7",
-    "react": "^16.8.6",
+    "d3": "^5.16.0",
+    "react": "^16.13.1",
     "react-charts": "next",
-    "react-dom": "^16.8.6",
+    "react-dom": "^16.13.1",
     "react-resizable": "^1.10.1",
-    "react-scripts": "3.0.1",
-    "styled-components": "^4.3.2"
+    "react-scripts": "3.4.3",
+    "styled-components": "^5.1.1"
   },
   "devDependencies": {
-    "@rescripts/cli": "^0.0.11",
-    "@rescripts/rescript-use-babel-config": "^0.0.8",
-    "@rescripts/rescript-use-eslint-config": "^0.0.9",
-    "babel-eslint": "10.0.1"
+    "@rescripts/cli": "^0.0.14",
+    "@rescripts/rescript-use-babel-config": "^0.0.10",
+    "@rescripts/rescript-use-eslint-config": "^0.0.11",
+    "babel-eslint": "10.1.0"
   },
   "browserslist": {
     "production": [

@@ -1,12 +1,13 @@
 import React from 'react'
 //
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import { functionalUpdate, getClosestPoint } from '../utils/Utils'
 
 import useHyperResponsive from '../hooks/useHyperResponsive'
-import useLatestRef from '../hooks/useLatestRef'
+import useGetLatest from '../hooks/useGetLatest'
 import useLatest from '../hooks/useLatest'
 import usePrevious from '../hooks/usePrevious'
+import useChartState, { createChartState } from '../hooks/useChartState'
+import { ChartContextProvider } from '../hooks/useChartContext'
 
 import ChartInner from './ChartInner'
 
@@ -46,14 +47,6 @@ const defaultColorScheme = [
 ]
 
 function applyDefaults({
-  getDatums = d => (Array.isArray(d) ? d : d.datums || d.data),
-  getLabel = (d, i) => d.label || `Series ${i + 1}`,
-  getSeriesId = (d, i) => i,
-  getPrimary = d => (Array.isArray(d) ? d[0] : d.primary || d.x),
-  getSecondary = d => (Array.isArray(d) ? d[1] : d.secondary || d.y),
-  getR = d => (Array.isArray(d) ? d[2] : d.radius || d.r),
-  getPrimaryAxisId = s => s.primaryAxisId,
-  getSecondaryAxisId = s => s.secondaryAxisId,
   getSeriesStyle = () => ({}),
   getDatumStyle = () => ({}),
   getSeriesOrder = d => d,
@@ -65,14 +58,6 @@ function applyDefaults({
   ...rest
 }) {
   return {
-    getDatums,
-    getLabel,
-    getSeriesId,
-    getPrimary,
-    getSecondary,
-    getR,
-    getPrimaryAxisId,
-    getSecondaryAxisId,
     getSeriesStyle,
     getDatumStyle,
     getSeriesOrder,
@@ -85,7 +70,49 @@ function applyDefaults({
   }
 }
 
-export default function Chart(options) {
+function useCreateStore(initialState) {
+  const storeRef = React.useRef()
+
+  if (!storeRef.current) {
+    storeRef.current = createChartState(initialState)
+  }
+
+  return storeRef.current
+}
+
+export default function ChartState(options) {
+  let { Provider: StateProvider } = useCreateStore(setState => {
+    const setOffset = updater =>
+      setState(old => {
+        const newOffset = functionalUpdate(updater, old.offset)
+
+        return {
+          ...old,
+          offset: {
+            left: newOffset.left ?? 0,
+            top: newOffset.top ?? 0,
+          },
+        }
+      })
+
+    return {
+      hovered: null,
+      element: null,
+      axisDimensions: {},
+      offset: {},
+      pointer: {},
+      setOffset,
+    }
+  })
+
+  return (
+    <StateProvider>
+      <Chart {...options} />
+    </StateProvider>
+  )
+}
+
+export function Chart(options) {
   let {
     data,
     grouping,
@@ -99,14 +126,6 @@ export default function Chart(options) {
     tooltip,
     brush,
     renderSVG,
-    getDatums,
-    getLabel,
-    getSeriesId,
-    getPrimary,
-    getSecondary,
-    getR,
-    getPrimaryAxisId,
-    getSecondaryAxisId,
     getSeriesStyle: getSeriesStyleOriginal,
     getDatumStyle,
     onClick,
@@ -117,57 +136,25 @@ export default function Chart(options) {
     ...rest
   } = applyDefaults(options)
 
-  let [
-    { focused, element, axisDimensions, offset: offsetState, padding, pointer },
-    setChartState,
-  ] = React.useState({
-    focused: null,
-    element: null,
-    axisDimensions: {},
-    padding: {},
-    offset: {},
-    pointer: {},
-  })
-
-  const onClickRef = useLatestRef(onClick)
-  const onFocusRef = useLatestRef(onFocus)
-  const onHoverRef = useLatestRef(onHover)
+  const [{ hovered, element, axisDimensions, pointer }] = useChartState(
+    d => ({
+      hovered: d.hovered,
+      element: d.element,
+      axisDimensions: d.axisDimensions,
+      pointer: d.pointer,
+    }),
+    'shallow'
+  )
 
   const responsiveElRef = React.useRef()
+
   const { width, height } = useHyperResponsive(responsiveElRef)
 
-  getSeriesId = React.useCallback(Utils.normalizeGetter(getSeriesId), [
-    getSeriesId,
-  ])
-  getLabel = React.useCallback(Utils.normalizeGetter(getLabel), [getLabel])
-  getPrimaryAxisId = React.useCallback(
-    Utils.normalizeGetter(getPrimaryAxisId),
-    [getPrimaryAxisId]
-  )
-  getSecondaryAxisId = React.useCallback(
-    Utils.normalizeGetter(getSecondaryAxisId),
-    [getSecondaryAxisId]
-  )
-  getDatums = React.useCallback(Utils.normalizeGetter(getDatums), [getDatums])
-  getPrimary = React.useCallback(Utils.normalizeGetter(getPrimary), [
-    getPrimary,
-  ])
-  getSecondary = React.useCallback(Utils.normalizeGetter(getSecondary), [
-    getSecondary,
-  ])
-  getR = React.useCallback(Utils.normalizeGetter(getR), [getR])
+  const getOnClick = useGetLatest(onClick)
+  const getOnFocus = useGetLatest(onFocus)
+  const getOnHover = useGetLatest(onHover)
 
-  let materializedData = useMaterializeData({
-    data,
-    getSeriesId,
-    getLabel,
-    getPrimaryAxisId,
-    getSecondaryAxisId,
-    getDatums,
-    getPrimary,
-    getSecondary,
-    getR,
-  })
+  let materializedData = useMaterializeData({ data })
 
   const seriesOptions = useSeriesOptions({
     materializedData,
@@ -179,12 +166,10 @@ export default function Chart(options) {
     seriesOptions,
   })
 
-  const { offset, gridX, gridY, gridWidth, gridHeight } = useDimensions({
+  const { gridX, gridY, gridWidth, gridHeight } = useDimensions({
     width,
     height,
     axisDimensions,
-    padding,
-    offset: offsetState,
   })
 
   const { primaryAxes, secondaryAxes, xKey, yKey, xAxes, yAxes } = useAxes({
@@ -207,21 +192,9 @@ export default function Chart(options) {
     defaultColors,
   })
 
-  pointer = React.useMemo(() => {
-    return {
-      ...pointer,
-      axisValues: [...primaryAxes, ...secondaryAxes].map(axis => ({
-        axis,
-        value: axis.scale.invert
-          ? axis.scale.invert(pointer[axis.vertical ? 'y' : 'x'])
-          : null,
-      })),
-    }
-  }, [pointer, primaryAxes, secondaryAxes])
-
-  focused = React.useMemo(() => {
+  const focused = React.useMemo(() => {
     // Get the closest focus datum out of the datum group
-    if (focused || element) {
+    if (hovered || element) {
       let resolvedFocus = focus
 
       if (focus === focusAuto) {
@@ -235,11 +208,11 @@ export default function Chart(options) {
       if (resolvedFocus === focusElement && element) {
         return element
       } else if (resolvedFocus === focusClosest) {
-        return Utils.getClosestPoint(pointer, focused.group)
+        return getClosestPoint(pointer, hovered.group)
       }
     }
     return null
-  }, [element, focus, focused, pointer])
+  }, [element, focus, hovered, pointer])
 
   // keep the previous focused value around for animations
   const latestFocused = useLatest(focused, focused)
@@ -266,17 +239,56 @@ export default function Chart(options) {
     stackData,
   })
 
-  React.useEffect(() => {
-    if (onFocusRef.current) {
-      onFocusRef.current(focused)
-    }
-  }, [onFocusRef, focused])
+  const getSeriesStyle = React.useCallback(
+    (series, ...args) => ({
+      color: series.originalSeries.color,
+      ...getSeriesStyleOriginal(series, ...args),
+    }),
+    [getSeriesStyleOriginal]
+  )
+
+  const contextValue = {
+    latestFocused,
+    tooltip,
+    width,
+    height,
+    brush,
+    grouping,
+    showVoronoi,
+    materializedData,
+    stackData,
+    primaryAxes,
+    secondaryAxes,
+    primaryCursor,
+    secondaryCursor,
+    gridX,
+    gridY,
+    gridWidth,
+    gridHeight,
+    dark,
+    renderSVG,
+    xKey,
+    yKey,
+    xAxes,
+    yAxes,
+    getOnClick,
+    getSeriesStyle,
+    getDatumStyle,
+    seriesOptions,
+    getSeriesOrder,
+  }
 
   React.useEffect(() => {
-    if (onHoverRef.current) {
-      onHoverRef.current(pointer)
+    if (getOnFocus()) {
+      getOnFocus()(focused)
     }
-  }, [onHoverRef, pointer])
+  }, [focused, getOnFocus])
+
+  React.useEffect(() => {
+    if (getOnHover()) {
+      getOnHover()(focused)
+    }
+  }, [focused, getOnHover])
 
   const previousDragging = usePrevious(pointer.dragging)
 
@@ -293,7 +305,7 @@ export default function Chart(options) {
     }
   }, [
     brush,
-    pointer,
+    pointer.dragging,
     pointer.released,
     pointer.sourceX,
     pointer.x,
@@ -301,105 +313,9 @@ export default function Chart(options) {
     primaryAxes,
   ])
 
-  const getSeriesStyle = React.useCallback(
-    (series, ...args) => ({
-      color: series.originalSeries.color,
-      ...getSeriesStyleOriginal(series, ...args),
-    }),
-    [getSeriesStyleOriginal]
-  )
-
-  // Decorate the chartState with computed values (or ones we just
-  // want to pass down through context)
-  const chartState = React.useMemo(
-    () => ({
-      focused,
-      latestFocused,
-      pointer,
-      tooltip,
-      axisDimensions,
-      offset,
-      padding,
-      width,
-      height,
-      brush,
-      grouping,
-      showVoronoi,
-      materializedData,
-      stackData,
-      primaryAxes,
-      secondaryAxes,
-      primaryCursor,
-      secondaryCursor,
-      gridX,
-      gridY,
-      gridWidth,
-      gridHeight,
-      dark,
-      renderSVG,
-      xKey,
-      yKey,
-      xAxes,
-      yAxes,
-      onClickRef,
-      getSeriesStyle,
-      getDatumStyle,
-      seriesOptions,
-      getSeriesOrder,
-    }),
-    [
-      axisDimensions,
-      brush,
-      dark,
-      focused,
-      getDatumStyle,
-      getSeriesOrder,
-      getSeriesStyle,
-      gridHeight,
-      gridWidth,
-      gridX,
-      gridY,
-      grouping,
-      height,
-      latestFocused,
-      materializedData,
-      offset,
-      onClickRef,
-      padding,
-      pointer,
-      primaryAxes,
-      primaryCursor,
-      renderSVG,
-      secondaryAxes,
-      secondaryCursor,
-      seriesOptions,
-      showVoronoi,
-      stackData,
-      tooltip,
-      width,
-      xAxes,
-      xKey,
-      yAxes,
-      yKey,
-    ]
-  )
-
-  const chartStateContextValue = React.useMemo(
-    () => [chartState, setChartState],
-    [chartState, setChartState]
-  )
-
   return (
-    <ChartContext.Provider value={chartStateContextValue}>
-      <ChartInner
-        ref={responsiveElRef}
-        {...rest}
-        onClick={e => {
-          if (onClickRef.current) {
-            onClickRef.current(focused)
-          }
-        }}
-      />
-    </ChartContext.Provider>
+    <ChartContextProvider value={contextValue}>
+      <ChartInner ref={responsiveElRef} {...rest} />
+    </ChartContextProvider>
   )
 }

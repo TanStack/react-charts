@@ -16,8 +16,8 @@ export default ({ materializedData, seriesOptions }) =>
           seriesTypeIndex,
           datums: series.datums.map(datum => ({
             ...datum,
-            seriesTypeIndex
-          }))
+            seriesTypeIndex,
+          })),
         }
       })
   }, [materializedData, seriesOptions])

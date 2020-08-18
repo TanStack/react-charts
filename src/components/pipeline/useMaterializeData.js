@@ -1,32 +1,18 @@
 import React from 'react'
 //
 
-export default ({
-  data,
-  getSeriesId,
-  getLabel,
-  getPrimaryAxisId,
-  getSecondaryAxisId,
-  getDatums,
-  getPrimary,
-  getSecondary,
-  getR,
-}) => {
+export default ({ data }) => {
   return React.useMemo(() => {
     const materializedData = []
 
     // First access the data, and provide it to the context
     for (let seriesIndex = 0; seriesIndex < data.length; seriesIndex++) {
       const originalSeries = data[seriesIndex]
-      const seriesId = getSeriesId(originalSeries, seriesIndex, data)
-      const seriesLabel = getLabel(originalSeries, seriesIndex, data)
-      const primaryAxisId = getPrimaryAxisId(originalSeries, seriesIndex, data)
-      const secondaryAxisId = getSecondaryAxisId(
-        originalSeries,
-        seriesIndex,
-        data
-      )
-      const originalDatums = getDatums(originalSeries, seriesIndex, data)
+      const seriesId = originalSeries.id ?? seriesIndex
+      const seriesLabel = originalSeries.label ?? `Series ${seriesIndex + 1}`
+      const primaryAxisId = originalSeries.primaryAxisId
+      const secondaryAxisId = originalSeries.secondaryAxisId
+      const originalDatums = originalSeries.data
       const datums = []
 
       for (
@@ -42,21 +28,9 @@ export default ({
           seriesLabel,
           index: datumIndex,
           originalDatum,
-          primary: getPrimary(
-            originalDatum,
-            datumIndex,
-            originalSeries,
-            seriesIndex,
-            data
-          ),
-          secondary: getSecondary(
-            originalDatum,
-            datumIndex,
-            originalSeries,
-            seriesIndex,
-            data
-          ),
-          r: getR(originalDatum, datumIndex, originalSeries, seriesIndex, data),
+          primary: originalDatum.primary,
+          secondary: originalDatum.secondary,
+          radius: originalDatum.radius,
         }
       }
 
@@ -72,15 +46,5 @@ export default ({
     }
 
     return materializedData
-  }, [
-    data,
-    getDatums,
-    getLabel,
-    getPrimary,
-    getPrimaryAxisId,
-    getR,
-    getSecondary,
-    getSecondaryAxisId,
-    getSeriesId,
-  ])
+  }, [data])
 }

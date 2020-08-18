@@ -13,7 +13,6 @@ const seriesTypes = {
   bubble: Bubble,
   area: Area,
   bar: Bar,
-  // pie: Pie
 }
 
 const defaultSeries = {

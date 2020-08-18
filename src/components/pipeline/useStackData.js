@@ -1,6 +1,6 @@
 import React from 'react'
 //
-import Utils from '../../utils/Utils'
+import { getAxisIndexByAxisId, isValidPoint } from '../../utils/Utils'
 
 import {
   groupingSingle,
@@ -31,7 +31,7 @@ export default ({
     // "totals" are kept per secondaryAxis and used for bases if secondaryAxis stacking is enabled
     const scaleTotals = secondaryAxes.map(() => ({}))
     materializedData.forEach(series => {
-      const axisIndex = Utils.getAxisIndexByAxisId(
+      const axisIndex = getAxisIndexByAxisId(
         secondaryAxes,
         series.secondaryAxisId
       )
@@ -46,12 +46,12 @@ export default ({
     // Determine the correct primary and secondary values for each axis
     // Also calculate bases and totals if either axis is stacked
     let stackData = materializedData.map(series => {
-      const primaryAxisIndex = Utils.getAxisIndexByAxisId(
+      const primaryAxisIndex = getAxisIndexByAxisId(
         primaryAxes,
         series.primaryAxisId
       )
       const primaryAxis = primaryAxes[primaryAxisIndex]
-      const secondaryAxisIndex = Utils.getAxisIndexByAxisId(
+      const secondaryAxisIndex = getAxisIndexByAxisId(
         secondaryAxes,
         series.secondaryAxisId
       )
@@ -74,7 +74,7 @@ export default ({
             // Stack the x or y values (according to axis positioning)
             if (primaryAxis.vertical) {
               // Is this a valid point?
-              const validPoint = Utils.isValidPoint(datum.xValue)
+              const validPoint = isValidPoint(datum.xValue)
               // Should we use positive or negative base?
               const totalKey = datum.xValue >= 0 ? 'positive' : 'negative'
               // Assign the base
@@ -89,7 +89,7 @@ export default ({
               datum.xValue = validPoint ? datum.totalValue : null
             } else {
               // Is this a valid point?
-              const validPoint = Utils.isValidPoint(datum.yValue)
+              const validPoint = isValidPoint(datum.yValue)
               // Should we use positive or negative base?
               const totalKey = datum.yValue >= 0 ? 'positive' : 'negative'
               // Assign the base
@@ -123,11 +123,11 @@ export default ({
         )
       }
 
-      const primaryAxisIndex = Utils.getAxisIndexByAxisId(
+      const primaryAxisIndex = getAxisIndexByAxisId(
         primaryAxes,
         series.primaryAxisId
       )
-      const secondaryAxisIndex = Utils.getAxisIndexByAxisId(
+      const secondaryAxisIndex = getAxisIndexByAxisId(
         secondaryAxes,
         series.secondaryAxisId
       )
@@ -135,14 +135,8 @@ export default ({
       const primaryAxis = primaryAxes[primaryAxisIndex]
       const secondaryAxis = secondaryAxes[secondaryAxisIndex]
 
-      const xAxisIndex = Utils.getAxisIndexByAxisId(
-        xAxes,
-        series[`${xKey}AxisId`]
-      )
-      const yAxisIndex = Utils.getAxisIndexByAxisId(
-        yAxes,
-        series[`${yKey}AxisId`]
-      )
+      const xAxisIndex = getAxisIndexByAxisId(xAxes, series[`${xKey}AxisId`])
+      const yAxisIndex = getAxisIndexByAxisId(yAxes, series[`${yKey}AxisId`])
 
       const xAxis = xAxes[xAxisIndex]
       const yAxis = yAxes[yAxisIndex]

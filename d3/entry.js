@@ -29,6 +29,8 @@ export {
   curveStepBefore,
 } from 'd3-shape'
 
+export * from 'd3-time'
+
 // export const schemeTableau10 = preval`
 //   module.exports = require('d3-scale-chromatic').schemeTableau10
 // `

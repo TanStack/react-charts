@@ -2,8 +2,7 @@ import React from 'react'
 import { line } from '../../d3'
 
 //
-import ChartContext from '../utils/ChartContext'
-import Utils from '../utils/Utils'
+import { isValidPoint, buildStyleGetters } from '../utils/Utils'
 import { curveMonotoneX } from '../utils/Curves'
 
 import useSeriesStyle from '../hooks/useSeriesStyle'
@@ -11,6 +10,7 @@ import useDatumStyle from '../hooks/useDatumStyle'
 
 import Path from '../primitives/Path'
 import Circle from '../primitives/Circle'
+import useChartState from '../hooks/useChartState'
 
 const pathDefaultStyle = {
   strokeWidth: 2,
@@ -75,8 +75,7 @@ Line.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
   datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
   datum.x = xAxis.scale(datum.xValue)
   datum.y = yAxis.scale(datum.yValue)
-  datum.defined =
-    Utils.isValidPoint(datum.xValue) && Utils.isValidPoint(datum.yValue)
+  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
   datum.base = primaryAxis.vertical
     ? xAxis.scale(datum.baseValue)
     : yAxis.scale(datum.baseValue)
@@ -105,11 +104,11 @@ Line.buildStyles = (series, { defaultColors }) => {
     color: defaultColors[series.index % (defaultColors.length - 1)],
   }
 
-  Utils.buildStyleGetters(series, defaults)
+  buildStyleGetters(series, defaults)
 }
 
 function Point({ datum, style }) {
-  const [, setChartState] = React.useContext(ChartContext)
+  const [, setChartState] = useChartState(() => null)
 
   const dataStyle = useDatumStyle(datum)
 

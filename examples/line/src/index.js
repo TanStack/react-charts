@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { timeDay } from "d3";
 
 import { Chart } from "react-charts";
 
@@ -24,7 +25,13 @@ export default function App() {
 
   const axes = React.useMemo(
     () => [
-      { primary: true, type: "time", position: "bottom" },
+      {
+        primary: true,
+        type: "time",
+        position: "bottom",
+        filterTicks: ticks =>
+          ticks.filter(date => +timeDay.floor(date) === +date)
+      },
       { type: "linear", position: "left" }
     ],
     []

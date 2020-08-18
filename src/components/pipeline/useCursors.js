@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Utils from '../../utils/Utils'
+import { getAxisByAxisId } from '../../utils/Utils'
 
 const defaultCursorProps = {
   render: ({ formattedValue }) => <span>{formattedValue}</span>,
@@ -41,7 +41,7 @@ export default ({
       let show = false
 
       // Determine the axis to use
-      const axis = Utils.getAxisByAxisId(
+      const axis = getAxisByAxisId(
         primary ? primaryAxes : secondaryAxes,
         cursor.axisId || focused
           ? focused.series[primary ? 'primaryAxisId' : 'secondaryAxisId']

@@ -1,9 +1,10 @@
 import React from 'react'
 //
 import Raf from '../utils/Raf'
-import Utils from '../utils/Utils'
-import ChartContext from '../utils/ChartContext'
+import { translate } from '../utils/Utils'
 
+import useChartContext from '../hooks/useChartContext'
+import useChartState from '../hooks/useChartState'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
 
 import Rectangle from '../primitives/Rectangle'
@@ -18,53 +19,47 @@ export default React.forwardRef(function ChartInner(
   { className, style = {}, ...rest },
   ref
 ) {
-  const [chartState] = React.useContext(ChartContext)
-  const [
-    {
-      width,
-      height,
-      offset,
-      gridX,
-      gridY,
-      stackData,
-      primaryAxes,
-      secondaryAxes,
-      renderSVG,
-      onClick,
-      seriesOptions,
-      getSeriesOrder,
-      focused,
-    },
-    setChartState,
-  ] = React.useContext(ChartContext)
-
   const svgRef = React.useRef()
 
-  React.useLayoutEffect(() => {
+  const {
+    width,
+    height,
+    gridX,
+    gridY,
+    stackData,
+    primaryAxes,
+    secondaryAxes,
+    renderSVG,
+    seriesOptions,
+    getSeriesOrder,
+    focused,
+    getOnClick,
+  } = useChartContext()
+
+  const [offset] = useChartState(d => d.offset)
+  const [setOffset, setChartState] = useChartState(d => d.setOffset)
+
+  useIsomorphicLayoutEffect(() => {
     if (!svgRef.current) {
       return
     }
+
     const current = svgRef.current.getBoundingClientRect()
+
     if (current.left !== offset.left || current.top !== offset.top) {
-      setChartState(state => ({
-        ...state,
-        offset: {
-          left: current.left,
-          top: current.top,
-        },
-      }))
+      setOffset({
+        left: current.left,
+        top: current.top,
+      })
     }
   })
 
   const onMouseLeave = e => {
-    setChartState(state => ({
-      ...state,
-      focused: null,
-    }))
-    setChartState(state => ({
-      ...state,
+    setChartState(old => ({ ...old, hovered: null }))
+    setChartState(old => ({
+      ...old,
       pointer: {
-        ...state.pointer,
+        ...old.pointer,
         active: false,
       },
     }))
@@ -80,19 +75,20 @@ export default React.forwardRef(function ChartInner(
       rafRef.current = null
       const { clientX, clientY } = e
 
-      setChartState(state => {
+      setChartState(old => {
         const x = clientX - offset.left - gridX
         const y = clientY - offset.top - gridY
 
         const pointer = {
-          ...state.pointer,
+          ...old.pointer,
           active: true,
           x,
           y,
-          dragging: state.pointer && state.pointer.down,
+          dragging: old.pointer?.down,
         }
+
         return {
-          ...state,
+          ...old,
           pointer,
         }
       })
@@ -103,30 +99,32 @@ export default React.forwardRef(function ChartInner(
     document.removeEventListener('mouseup', onMouseUp)
     document.removeEventListener('mousemove', onMouseMove)
 
-    setChartState(state => ({
-      ...state,
-      pointer: {
-        ...state.pointer,
-        down: false,
-        dragging: false,
-        released: {
-          x: state.pointer.x,
-          y: state.pointer.y,
+    setChartState(old => {
+      return {
+        ...old,
+        pointer: {
+          ...old.pointer,
+          down: false,
+          dragging: false,
+          released: {
+            x: old.pointer.x,
+            y: old.pointer.y,
+          },
         },
-      },
-    }))
+      }
+    })
   }
 
   const onMouseDown = () => {
     document.addEventListener('mouseup', onMouseUp)
     document.addEventListener('mousemove', onMouseMove)
 
-    setChartState(state => ({
-      ...state,
+    setChartState(old => ({
+      ...old,
       pointer: {
-        ...state.pointer,
-        sourceX: state.pointer.x,
-        sourceY: state.pointer.y,
+        ...old.pointer,
+        sourceX: old.x,
+        sourceY: old.y,
         down: true,
       },
     }))
@@ -181,56 +179,56 @@ export default React.forwardRef(function ChartInner(
         position: 'absolute',
         ...style,
       }}
+      onClick={getOnClick() ? e => getOnClick()(focused, e) : undefined}
     >
       <svg
         ref={svgRef}
         style={{
           width,
           height,
-          overflow: 'hidden',
+          overflow: 'visible',
+          border: '1px solid red',
         }}
         onMouseEnter={e => e.persist() || onMouseMove(e)}
         onMouseMove={e => e.persist() || onMouseMove(e)}
         onMouseLeave={e => e.persist() || onMouseLeave(e)}
         onMouseDown={e => e.persist() || onMouseDown(e)}
-        onClick={onClick}
       >
-        <g
-          style={{
-            transform: Utils.translate(gridX, gridY),
-          }}
-        >
-          <Rectangle
-            // To ensure the pointer always has something to hit
-            x1={-gridX}
-            x2={width - gridX}
-            y1={-gridY}
-            y2={height - gridY}
-            style={{
-              opacity: 0,
-            }}
-          />
-          <Voronoi />
-          <g className="axes">
-            {[...primaryAxes, ...secondaryAxes].map(axis => (
-              <Axis key={axis.id} {...axis} />
-            ))}
-          </g>
-          <g
-            className="Series"
-            style={{
-              pointerEvents: 'none',
-            }}
-          >
-            {stacks}
-          </g>
-        </g>
-        {renderSVG
-          ? renderSVG({
-              chartState,
-              setChartState,
-            })
-          : null}
+        {width && height ? (
+          <>
+            <g
+              style={{
+                transform: translate(gridX, gridY),
+              }}
+            >
+              <Rectangle
+                // To ensure the pointer always has something to hit
+                x1={-gridX}
+                x2={width - gridX}
+                y1={-gridY}
+                y2={height - gridY}
+                style={{
+                  opacity: 0,
+                }}
+              />
+              <Voronoi />
+              <g className="axes">
+                {[...primaryAxes, ...secondaryAxes].map(axis => (
+                  <Axis key={axis.id} {...axis} />
+                ))}
+              </g>
+              <g
+                className="Series"
+                style={{
+                  pointerEvents: 'none',
+                }}
+              >
+                {stacks}
+              </g>
+            </g>
+            {renderSVG ? renderSVG() : null}
+          </>
+        ) : null}
       </svg>
       <Cursor primary />
       <Cursor />

@@ -1,7 +1,8 @@
 import React from 'react'
 import { Delaunay, line } from '../../d3'
+import useChartContext from '../hooks/useChartContext'
+import useChartState from '../hooks/useChartState'
 //
-import ChartContext from '../utils/ChartContext'
 import Path from '../primitives/Path'
 
 const lineFn = line()
@@ -13,31 +14,29 @@ const VoronoiElement = ({ children, ...rest }) => (
 )
 
 export default function Voronoi() {
-  const [
-    {
-      // type,
-      stackData,
-      primaryAxes,
-      secondaryAxes,
-      showVoronoi,
-      width,
-      height,
-      gridWidth,
-      gridHeight,
-      onFocus,
-      onClick,
-      tooltip,
-      primaryCursor,
-      secondaryCursor,
-    },
-    setChartState,
-  ] = React.useContext(ChartContext)
+  const {
+    stackData,
+    primaryAxes,
+    secondaryAxes,
+    showVoronoi,
+    width,
+    height,
+    gridWidth,
+    gridHeight,
+    onFocus,
+    onClick,
+    tooltip,
+    primaryCursor,
+    secondaryCursor,
+  } = useChartContext()
+
+  const [, setChartState] = useChartState(() => null)
 
   const onHover = React.useCallback(
     datum => {
       return setChartState(state => ({
         ...state,
-        focused: datum,
+        hovered: datum,
       }))
     },
     [setChartState]
@@ -70,7 +69,7 @@ export default function Voronoi() {
     //   return (
     //     <VoronoiElement
     //       style={{
-    //         transform: Utils.translate(primaryAxis.width /
+    //         transform: translate(primaryAxis.width /
     //           2, primaryAxis.height / 2)
     //       }}
     //     >
@@ -116,7 +115,6 @@ export default function Voronoi() {
     //   )
     // }
 
-    let vor
     let polygons = null
 
     const voronoiData = []
@@ -144,11 +142,13 @@ export default function Voronoi() {
 
     const delaunay = Delaunay.from(
       voronoiData,
-      d => d.x,
-      d => d.y
+      d => Math.max(d.x, 0),
+      d => Math.max(d.y, 0)
     )
 
-    const voronoi = delaunay.voronoi(extent.flat())
+    const flatExtent = extent.flat().map(d => Math.max(d, 0))
+
+    const voronoi = delaunay.voronoi(flatExtent)
 
     polygons = [...voronoi.cellPolygons()]
 

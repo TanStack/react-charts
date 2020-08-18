@@ -1,91 +1,60 @@
 import React from 'react'
 
-import Utils from '../../utils/Utils'
+const sumAllDimensionProperties = (side = {}, prop) =>
+  Object.keys(side).reduce(
+    (sum, subside) => sum + side[subside]?.[prop] || 0,
+    0
+  )
 
-export default ({ width, height, axisDimensions, padding, offset }) => {
-  offset = React.useMemo(() => {
-    return {
-      left: offset.left || 0,
-      top: offset.top || 0
-    }
-  }, [offset])
-
+export default ({ width, height, axisDimensions }) => {
   const { gridX, gridY, gridWidth, gridHeight } = React.useMemo(() => {
     // Left
-    const axesLeftWidth =
-      (axisDimensions.left && Utils.sumObjBy(axisDimensions.left, 'width')) || 0
-    const axesLeftTop =
-      (axisDimensions.left && Utils.sumObjBy(axisDimensions.left, 'top')) || 0
-    const axesLeftBottom =
-      (axisDimensions.left && Utils.sumObjBy(axisDimensions.left, 'bottom')) ||
-      0
+    const [axesLeftWidth, axesLeftTop, axesLeftBottom] = [
+      'width',
+      'top',
+      'bottom',
+    ].map(prop => sumAllDimensionProperties(axisDimensions.left, prop))
 
-    // Right
-    const axesRightWidth =
-      (axisDimensions.right && Utils.sumObjBy(axisDimensions.right, 'width')) ||
-      0
-    const axesRightTop =
-      (axisDimensions.right && Utils.sumObjBy(axisDimensions.right, 'top')) || 0
-    const axesRightBottom =
-      (axisDimensions.right &&
-        Utils.sumObjBy(axisDimensions.right, 'bottom')) ||
-      0
+    const [axesRightWidth, axesRightTop, axesRightBottom] = [
+      'width',
+      'top',
+      'bottom',
+    ].map(prop => sumAllDimensionProperties(axisDimensions.right, prop))
 
-    // Top
-    const axesTopHeight =
-      (axisDimensions.top && Utils.sumObjBy(axisDimensions.top, 'height')) || 0
-    const axesTopLeft =
-      (axisDimensions.top && Utils.sumObjBy(axisDimensions.top, 'left')) || 0
-    const axesTopRight =
-      (axisDimensions.top && Utils.sumObjBy(axisDimensions.top, 'right')) || 0
+    const [axesTopHeight, axesTopLeft, axesTopRight] = [
+      'height',
+      'left',
+      'right',
+    ].map(prop => sumAllDimensionProperties(axisDimensions.top, prop))
 
-    // Bottom
-    const axesBottomHeight =
-      (axisDimensions.bottom &&
-        Utils.sumObjBy(axisDimensions.bottom, 'height')) ||
-      0
-    const axesBottomLeft =
-      (axisDimensions.bottom &&
-        Utils.sumObjBy(axisDimensions.bottom, 'left')) ||
-      0
-    const axesBottomRight =
-      (axisDimensions.bottom &&
-        Utils.sumObjBy(axisDimensions.bottom, 'right')) ||
-      0
+    const [axesBottomHeight, axesBottomLeft, axesBottomRight] = [
+      'height',
+      'left',
+      'right',
+    ].map(prop => sumAllDimensionProperties(axisDimensions.bottom, prop))
 
-    const paddingLeft = padding.left || 0
-    const paddingRight = padding.right || 0
-    const paddingTop = padding.top || 0
-    const paddingBottom = padding.bottom || 0
-
-    const gridX =
-      paddingLeft + Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
-
-    const gridY =
-      paddingTop + Math.max(axesTopHeight, axesLeftTop, axesRightTop)
-
-    const gridWidth =
+    const gridX = Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
+    const gridY = Math.max(axesTopHeight, axesLeftTop, axesRightTop)
+    const gridWidth = Math.max(
+      0,
       width -
-      paddingLeft -
-      paddingRight -
-      Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
-      Math.max(axesRightWidth, axesTopRight, axesBottomRight)
-
-    const gridHeight =
+        Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
+        Math.max(axesRightWidth, axesTopRight, axesBottomRight)
+    )
+    const gridHeight = Math.max(
+      0,
       height -
-      paddingTop -
-      paddingBottom -
-      Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
-      Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
+        Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
+        Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
+    )
 
     return { gridX, gridY, gridWidth, gridHeight }
-  }, [width, height, axisDimensions, padding])
+  }, [width, height, axisDimensions])
 
   return {
-    offset,
     gridX,
     gridY,
     gridWidth,
-    gridHeight
+    gridHeight,
   }
 }
