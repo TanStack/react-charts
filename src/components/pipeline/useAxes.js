@@ -7,7 +7,7 @@ export default ({
   materializedData,
   gridHeight,
   gridWidth,
-  axisDimensions,
+  estimatedTickCounts,
 }) => {
   // Detect axes changes and build axes
   let prePrimaryAxes = axes.filter(d => d.primary)
@@ -25,7 +25,7 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          axisDimensions,
+          estimatedTickCounts,
         })
       })
     },
@@ -42,7 +42,7 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          axisDimensions,
+          estimatedTickCounts,
         })
       })
     },

@@ -1,11 +1,8 @@
 import React from 'react'
 import useChartState from '../hooks/useChartState'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import usePrevious from '../hooks/usePrevious'
+import { axisTypeOrdinal } from '../utils/Constants'
 import { round } from '../utils/Utils'
-
-const radiansToDegrees = r => r * (180 / Math.PI)
-const degreesToRadians = d => d * (Math.PI / 180)
 
 const getElBox = el => {
   var rect = el.getBoundingClientRect()
@@ -30,8 +27,6 @@ export default function useMeasure({
   position,
   tickSizeInner,
   tickSizeOuter,
-  transform,
-  barSize,
   labelRotation,
   tickPadding,
   tickCount,
@@ -40,19 +35,20 @@ export default function useMeasure({
   vertical,
   gridWidth,
   gridHeight,
-  ticks,
-  scale,
 }) {
-  const disallowListRef = React.useRef([])
-  const axisDimensionsHistoryRef = React.useRef([])
-
-  const [axisDimensions, setChartState] = useChartState(
-    state => state.axisDimensions
+  const [estimatedTickCount, setChartState] = useChartState(
+    state => state.estimatedTickCounts[id]
+  )
+  const [tickLabelSkipRatio] = useChartState(
+    state => state.tickLabelSkipRatios[id]
+  )
+  const [axisDimension] = useChartState(
+    state => state.axisDimensions?.[position]?.[id]
   )
 
   const measureDimensions = React.useCallback(() => {
     if (!elRef.current) {
-      if (axisDimensions[position]?.[id]) {
+      if (axisDimension) {
         // If the entire axis is hidden, then we need to remove the axis dimensions
         setChartState(state => {
           const newAxes = state.axisDimensions[position] || {}
@@ -70,29 +66,12 @@ export default function useMeasure({
     }
 
     let gridSize = !vertical ? gridWidth : gridHeight
-    let calculatedTickCount = tickCount
     let width = 0
     let height = 0
     let top = 0
     let bottom = 0
     let left = 0
     let right = 0
-
-    // Measure the distances between ticks
-    let smallestTickGap = gridSize // This is just a ridiculously large tick spacing that would never happen (hopefully)
-
-    Array(...elRef.current.querySelectorAll('.tick'))
-      .map(el => getElBox(el))
-      .reduce((prev, current) => {
-        if (prev) {
-          smallestTickGap = Math.min(
-            smallestTickGap,
-            vertical ? current.top - prev.top : current.left - prev.left
-          )
-        }
-
-        return current
-      }, false)
 
     const domainDims = getElBox(elRef.current.querySelector('.domain'))
 
@@ -134,26 +113,70 @@ export default function useMeasure({
       []
     )
 
-    // Auto-fit ticks in "auto" tick mode
-    if (tickCount === 'auto' && type !== 'ordinal') {
-      const largestMeasureLabelSize = !vertical
-        ? widestMeasureLabel?.width || 0
-        : tallestMeasureLabel?.height || 0
+    let smallestTickGap = gridSize
 
+    if (measureLabelDims.length > 1) {
+      measureLabelDims.reduce((prev, current) => {
+        if (prev) {
+          smallestTickGap = Math.min(
+            smallestTickGap,
+            vertical ? current.top - prev.top : current.left - prev.left
+          )
+        }
+
+        return current
+      }, false)
+    }
+
+    const largestMeasureLabelSize = !vertical
+      ? widestMeasureLabel?.width || 0
+      : tallestMeasureLabel?.height || 0
+
+    // Auto-fit ticks in "auto" tick mode for non-ordinal scales
+    if (tickCount === 'auto' && type !== 'ordinal') {
       // if it's on, determine how many ticks we could display if they were all flat
       // How many ticks can we fit in the available axis space?
-      const estimatedTickCount = Math.floor(
-        (gridSize + largestMeasureLabelSize + tickPadding) /
-          (largestMeasureLabelSize + tickPadding)
+      let calculatedTickCount = Math.floor(
+        (gridSize + largestMeasureLabelSize + tickPadding * 2) /
+          (largestMeasureLabelSize + tickPadding * 2)
       )
 
       calculatedTickCount = Math.max(
-        Math.min(estimatedTickCount, maxTickCount),
+        Math.min(calculatedTickCount, maxTickCount),
         minTickCount
       )
+
+      if (calculatedTickCount !== estimatedTickCount) {
+        setChartState(old => ({
+          ...old,
+          estimatedTickCounts: {
+            ...old.estimatedTickCounts,
+            [id]: calculatedTickCount,
+          },
+        }))
+      }
     }
 
-    if (!vertical) {
+    // Visual Skipping of axis labels if they overlap (rotation not included)
+    const newTickLabelSkipRatio = !rotation
+      ? Math.max(
+          1,
+          Math.ceil((largestMeasureLabelSize + tickPadding) / smallestTickGap)
+        )
+      : 1
+
+    if (newTickLabelSkipRatio !== tickLabelSkipRatio) {
+      setChartState(old => ({
+        ...old,
+        tickLabelSkipRatios: {
+          ...old.tickLabelSkipRatios,
+          [id]: newTickLabelSkipRatio,
+        },
+      }))
+    }
+
+    // Rotate ticks for non-time horizontal axes
+    if (!vertical && type === axisTypeOrdinal) {
       const newRotation =
         (widestMeasureLabel?.width || 0) + tickPadding > smallestTickGap
           ? labelRotation
@@ -166,12 +189,16 @@ export default function useMeasure({
 
     // Axis overflow measurements
     if (!vertical) {
-      const leftMostLabelDim = realLabelDims.reduce((d, labelDim) =>
-        labelDim.left < d.left ? labelDim : d
-      )
-      const rightMostLabelDim = realLabelDims.reduce((d, labelDim) =>
-        labelDim.right > d.right ? labelDim : d
-      )
+      const leftMostLabelDim = realLabelDims.length
+        ? realLabelDims.reduce((d, labelDim) =>
+            labelDim.left < d.left ? labelDim : d
+          )
+        : null
+      const rightMostLabelDim = realLabelDims.length
+        ? realLabelDims.reduce((d, labelDim) =>
+            labelDim.right > d.right ? labelDim : d
+          )
+        : null
 
       left = round(
         Math.max(0, domainDims.left - leftMostLabelDim?.left),
@@ -229,14 +256,13 @@ export default function useMeasure({
       bottom,
       left,
       right,
-      tickCount: calculatedTickCount,
     }
 
     // Only update the axisDimensions if something has changed
     if (
-      !axisDimensions?.[position]?.[id] ||
+      !axisDimension ||
       Object.keys(newDimensions).some(key => {
-        return newDimensions[key] !== axisDimensions[position][id][key]
+        return newDimensions[key] !== axisDimension[key]
       })
     ) {
       setChartState(state => ({
@@ -251,8 +277,9 @@ export default function useMeasure({
       }))
     }
   }, [
-    axisDimensions,
+    axisDimension,
     elRef,
+    estimatedTickCount,
     gridHeight,
     gridWidth,
     id,
@@ -264,6 +291,7 @@ export default function useMeasure({
     setChartState,
     setRotation,
     tickCount,
+    tickLabelSkipRatio,
     tickPadding,
     tickSizeInner,
     tickSizeOuter,

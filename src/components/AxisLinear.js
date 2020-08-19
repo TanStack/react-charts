@@ -16,6 +16,7 @@ import {
 } from '../utils/Constants.js'
 import useChartContext from '../hooks/useChartContext'
 import useMeasure from './AxisLinear.useMeasure'
+import useChartState from '../hooks/useChartState'
 
 const defaultStyles = {
   line: {
@@ -49,6 +50,7 @@ export default function AxisLinear(axis) {
     tickOffset,
     gridOffset,
     spacing,
+    id,
   } = axis
   const [rotation, setRotation] = React.useState(0)
   const { gridWidth, gridHeight, dark } = useChartContext()
@@ -56,6 +58,10 @@ export default function AxisLinear(axis) {
   const elRef = React.useRef()
 
   useMeasure({ ...axis, elRef, rotation, gridWidth, gridHeight, setRotation })
+
+  const [tickLabelSkipRatio] = useChartState(
+    state => state.tickLabelSkipRatios[id]
+  )
 
   // Not ready? Render null
   if (!show) {
@@ -184,6 +190,11 @@ export default function AxisLinear(axis) {
                       vertical ? directionMultiplier * spacing : tickOffset,
                       vertical ? tickOffset : directionMultiplier * spacing
                     )} rotate(${-rotation}deg)`,
+                    opacity:
+                      !tickLabelSkipRatio ||
+                      (tickLabelSkipRatio > 0 && i % tickLabelSkipRatio === 0)
+                        ? 1
+                        : 0,
                   }}
                   dominantBaseline={
                     rotation

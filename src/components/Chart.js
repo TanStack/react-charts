@@ -99,6 +99,8 @@ export default function ChartState(options) {
       hovered: null,
       element: null,
       axisDimensions: {},
+      estimatedTickCounts: {},
+      tickLabelSkipRatios: {},
       offset: {},
       pointer: {},
       setOffset,
@@ -136,11 +138,14 @@ export function Chart(options) {
     ...rest
   } = applyDefaults(options)
 
-  const [{ hovered, element, axisDimensions, pointer }] = useChartState(
+  const [
+    { hovered, element, axisDimensions, estimatedTickCounts, pointer },
+  ] = useChartState(
     d => ({
       hovered: d.hovered,
       element: d.element,
       axisDimensions: d.axisDimensions,
+      estimatedTickCounts: d.estimatedTickCounts,
       pointer: d.pointer,
     }),
     'shallow'
@@ -177,7 +182,7 @@ export function Chart(options) {
     materializedData,
     gridHeight,
     gridWidth,
-    axisDimensions,
+    estimatedTickCounts,
   })
 
   const stackData = useStackData({

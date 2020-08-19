@@ -60,7 +60,7 @@ export default function buildAxisLinear({
   materializedData,
   gridHeight,
   gridWidth,
-  axisDimensions,
+  estimatedTickCounts,
 }) {
   if (!position) {
     throw new Error(`Chart axes must have a valid 'position' property`)
@@ -83,9 +83,6 @@ export default function buildAxisLinear({
   let negativeTotalByKey = {}
   let positiveTotalByKey = {}
   let domain
-
-  const axisDimension =
-    axisDimensions && axisDimensions[position] && axisDimensions[position][id]
 
   // Loop through each series
   for (
@@ -262,7 +259,7 @@ export default function buildAxisLinear({
   let resolvedTickCount = tickCount
 
   if (tickCount === 'auto') {
-    resolvedTickCount = axisDimension?.tickCount || 10
+    resolvedTickCount = estimatedTickCounts[id] ?? 10
   }
 
   const ticks = filterTicks(

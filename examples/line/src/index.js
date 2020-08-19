@@ -13,12 +13,12 @@ export default function App() {
   useLagRadar();
 
   const { data, randomizeData } = useDemoConfig({
-    series: 10
+    series: 10,
   });
 
   const series = React.useMemo(
     () => ({
-      showPoints: false
+      showPoints: false,
     }),
     []
   );
@@ -29,10 +29,10 @@ export default function App() {
         primary: true,
         type: "time",
         position: "bottom",
-        filterTicks: ticks =>
-          ticks.filter(date => +timeDay.floor(date) === +date)
+        filterTicks: (ticks) =>
+          ticks.filter((date) => +timeDay.floor(date) === +date),
       },
-      { type: "linear", position: "left" }
+      { type: "linear", position: "left" },
     ],
     []
   );
