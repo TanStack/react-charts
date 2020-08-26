@@ -165,7 +165,11 @@ export default function useMeasure({
     let newTickLabelSkipIndices = []
 
     // Visual Skipping of time-based axis labels if they overlap (rotation not included)
-    if (!rotation && [axisTypeTime, axisTypeUtc].includes(type)) {
+    if (
+      !rotation &&
+      [axisTypeTime, axisTypeUtc].includes(type) &&
+      realLabelDims?.length
+    ) {
       realLabelDims.reduce((last, d) => {
         if (
           round(last.right, 5, Math.ceil) >

@@ -5,76 +5,6 @@ title: API
 
 > Complete documentation is **coming soon**. For now, please refer to the examples for any missing documentation.
 
-React Charts exposes these top-level exports:
-
-- `Chart` - The Chart component used to render charts
-- Series Type Components
-  - `Line`
-  - `Bar`
-  - `Bubble`
-  - `Area`
-- Curve Functions
-  - `curveBasisClosed`
-  - `curveBasisOpen`
-  - `curveBasis`
-  - `curveBundle`
-  - `curveCardinalClosed`
-  - `curveCardinalOpen`
-  - `curveCardinal`
-  - `curveCatmullRomClosed`
-  - `curveCatmullRomOpen`
-  - `curveCatmullRom`
-  - `curveLinearClosed`
-  - `curveLinear`
-  - `curveMonotoneX`
-  - `curveMonotoneY`
-  - `curveNatural`
-  - `curveStep`
-  - `curveStepAfter`
-  - `curveStepBefore`
-- Position Constants
-  - `positionTop`
-  - `positionRight`
-  - `positionBottom`
-  - `positionLeft`
-- Grouping Constants
-  - `groupingSingle`
-  - `groupingSeries`
-  - `groupingPrimary`
-  - `groupingSecondary`
-- Tooltip Alignment Constants
-  - `alignAuto`
-  - `alignRight`
-  - `alignTopRight`
-  - `alignBottomRight`
-  - `alignLeft`
-  - `alignTopLeft`
-  - `alignBottomLeft`
-  - `alignTop`
-  - `alignBottom`
-- Axis Type Constants
-  - `axisTypeOrdinal`
-  - `axisTypeTime`
-  - `axisTypeUtc`
-  - `axisTypeLinear`
-  - `axisTypeLog`
-- Tooltip Anchor Constants
-  - `anchorPointer`
-  - `anchorClosest`
-  - `anchorCenter`
-  - `anchorTop`
-  - `anchorBottom`
-  - `anchorLeft`
-  - `anchorRight`
-  - `anchorGridTop`
-  - `anchorGridBottom`
-  - `anchorGridLeft`
-  - `anchorGridRight`
-- Focus Mode Constants
-  - `focusAuto`
-  - `focusClosest`
-  - `focusElement`
-
 ## Memoize your Props!
 
 As you'll see in every example, the React Charts `<Chart>` component expects all props and options to be memoized using either `React.useMemo` or `React.useCallback`. While passing an unmemoized option/prop to the `<Chart>` component won't severly break any visible functionality, your charts will be severly non-performant. Internally, React Charts uses the immutable nature of thes options/props to detect changes to the configuration and update accordingly.
@@ -158,16 +88,17 @@ function MyChart() {
 }
 ```
 
-## Axes & Scales
+## Axes
 
-React Charts supports an `axes` prop that handles both the underlying scale and visual rendering. These axes can be combined and configured to plot data in many ways. To date, we have the following scale types available:
+React Charts supports an `axes` prop that handles both the underlying scale and visual rendering of all axes. Multiple axes can be combined and configured to plot data however you'd like.
 
-- Cartesian
-  - `linear` - A continuous axis used for plotting numerical data on an evenly distributed scale. Works well both as a **primary and secondary** axis.
-  - `ordinal` - A banded axis commonly used to plot categories or ordinal information. Works well as the **primary** axis for bar charts.
-  - `time` - A continuous axis used for plotting localized times and dates on an evenly distributed scale. Works well as a **primary** axis.
-  - `utc` - Similar to the `time` scale, but supports UTC datetimes instead of localized datetimes. Works well as a **primary** axis.
-  - `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis
+To date, we have the following scale types available:
+
+- `linear` - A continuous axis used for plotting numerical data on an evenly distributed scale. Works well both as a **primary and secondary** axis.
+- `ordinal` - A banded axis commonly used to plot categories or ordinal information. Works well as the **primary** axis for bar charts.
+- `time` - A continuous axis used for plotting localized times and dates on an evenly distributed scale. Works well as a **primary** axis.
+- `utc` - Similar to the `time` scale, but supports UTC datetimes instead of localized datetimes. Works well as a **primary** axis.
+- `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis
 
 Axes are a required component of a React Chart and can used like so:
 
@@ -196,8 +127,6 @@ function MyChart() {
 }
 ```
 
-For more information on usage and API, see the [`axes` prop](#axes)
-
 ## Series Types
 
 - Cartesian
@@ -222,12 +151,6 @@ function MyChart() {
 
 **`<Chart />` Props**
 
-- `getLabel` - A `memoized` function that returns the series label
-- `getSeriesId` - A `memoized` function that returns the series ID
-- `getDatums` - A `memoized` function that returns the series' datums array
-- `getPrimary` - A `memoized` function that returns the datum's primary value
-- `getSecondary` - A `memoized` function that returns the datum's secondary value
-- `getR` - A `memoized` function that returns the datum's radius value (where applicable)
 - `series({} or function)` - A `memoized` object (or function that returns an object) of series options that correspond to all or each of the series in the dataset.
   `type` - **string** - The series type (Line, Bar, Bubble, Area, etc)
   `showPoints` - **bool** - If true, will show points for datums where applicable
@@ -237,18 +160,18 @@ function MyChart() {
   - `axis{}` - An axis object
     - `primary` **bool** - Denotes whether this axis is the primary axis
     - `type` **oneOf, required** - The type of scale for this axis
-      - `axisTypeOrdinal`
-      - `axisTypeTime`
-      - `axisTypeUtc`
-      - `axisTypeLinear`
-      - `axisTypeLog`
+      - `ordinal`
+      - `time`
+      - `utc`
+      - `linear`
+      - `log`
     - `position` **oneOf, required** - The cartesian position of this axis
-      - `positionTop`
-      - `positionRight`
-      - `positionBottom`
-      - `positionLeft`
+      - `top`
+      - `right`
+      - `bottom`
+      - `left`
     - `invert` **bool** - Whether this axis's scale should be inverted
-    - `primaryAxisID` **string** - If multiple secondary axes are used, which primary axis ID does this axis refer to?
+    - `primaryAxisID` **string** - If multiple primary axes are used, which primary axis ID does this axis refer to?
     - `min` **number** - The suggested minimum for this axis
     - `max` **number** - The suggested maximum for this axis
     - `hardMin` **number** - The hard/forced minimum for this axis
