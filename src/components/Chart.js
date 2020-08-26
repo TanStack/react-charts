@@ -100,7 +100,7 @@ export default function ChartState(options) {
       element: null,
       axisDimensions: {},
       estimatedTickCounts: {},
-      tickLabelSkipRatios: {},
+      tickLabelSkipIndices: {},
       offset: {},
       pointer: {},
       setOffset,
@@ -298,7 +298,7 @@ export function Chart(options) {
   const previousDragging = usePrevious(pointer.dragging)
 
   React.useEffect(() => {
-    if (brush && previousDragging && !pointer.dragging) {
+    if (brush?.onSelect && previousDragging && !pointer.dragging) {
       if (Math.abs(pointer.sourceX - pointer.x) < 20) {
         return
       }

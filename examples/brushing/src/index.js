@@ -13,11 +13,11 @@ export default function App() {
 
   const [{ min, max }, setState] = React.useState({
     min: null,
-    max: null
+    max: null,
   });
 
   const { data, randomizeData } = useDemoConfig({
-    series: 10
+    series: 10,
   });
 
   const axes = React.useMemo(
@@ -27,27 +27,32 @@ export default function App() {
         type: "time",
         position: "bottom",
         hardMin: min,
-        hardMax: max
+        hardMax: max,
       },
       {
         type: "linear",
-        position: "left"
-      }
+        position: "left",
+      },
     ],
     [max, min]
   );
 
   const brush = React.useMemo(
     () => ({
-      onSelect: brushData => {
+      onSelect: (brushData) => {
+        console.log(brushData);
         setState({
           min: Math.min(brushData.start, brushData.end),
-          max: Math.max(brushData.start, brushData.end)
+          max: Math.max(brushData.start, brushData.end),
         });
-      }
+      },
     }),
     []
   );
+
+  const series = React.useMemo(() => ({
+    showPoints: true,
+  }));
 
   return (
     <>
@@ -57,7 +62,7 @@ export default function App() {
         onClick={() =>
           setState({
             min: null,
-            max: null
+            max: null,
           })
         }
       >
@@ -66,7 +71,14 @@ export default function App() {
       <br />
       <br />
       <ResizableBox>
-        <Chart data={data} axes={axes} primaryCursor tooltip brush={brush} />
+        <Chart
+          data={data}
+          axes={axes}
+          primaryCursor
+          tooltip
+          brush={brush}
+          series={series}
+        />
       </ResizableBox>
     </>
   );

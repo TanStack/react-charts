@@ -12,7 +12,7 @@ export default function App() {
   useLagRadar();
 
   let { data, randomizeData } = useDemoConfig({
-    series: 10
+    series: 10,
   });
 
   data = React.useMemo(
@@ -21,15 +21,15 @@ export default function App() {
         i % 2 === 0
           ? {
               ...d,
-              secondaryAxisID: "First Metric"
+              secondaryAxisID: "First Metric",
             }
           : {
               ...d,
-              datums: d.datums.map(f => ({
+              data: d.data.map((f) => ({
                 ...f,
-                y: f.y * 5
+                secondary: f.secondary * 5,
               })),
-              secondaryAxisID: "Second Metric"
+              secondaryAxisID: "Second Metric",
             }
       ),
     [data]
@@ -37,7 +37,7 @@ export default function App() {
 
   const series = React.useMemo(
     () => ({
-      showPoints: false
+      showPoints: false,
     }),
     []
   );
@@ -49,15 +49,15 @@ export default function App() {
         type: "linear",
         id: "First Metric",
         min: 0,
-        position: "left"
+        position: "left",
       },
       {
         type: "linear",
         id: "Second Metric",
         min: 0,
         position: "right",
-        format: d => `$${d}`
-      }
+        format: (d) => `$${d}`,
+      },
     ],
     []
   );

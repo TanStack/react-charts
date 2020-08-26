@@ -123,8 +123,8 @@ export default React.forwardRef(function ChartInner(
       ...old,
       pointer: {
         ...old.pointer,
-        sourceX: old.x,
-        sourceY: old.y,
+        sourceX: old.pointer.x,
+        sourceY: old.pointer.y,
         down: true,
       },
     }))

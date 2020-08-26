@@ -59,8 +59,8 @@ export default function AxisLinear(axis) {
 
   useMeasure({ ...axis, elRef, rotation, gridWidth, gridHeight, setRotation })
 
-  const [tickLabelSkipRatio] = useChartState(
-    state => state.tickLabelSkipRatios[id]
+  const [tickLabelSkipIndices] = useChartState(
+    state => state.tickLabelSkipIndices[id]
   )
 
   // Not ready? Render null
@@ -191,10 +191,10 @@ export default function AxisLinear(axis) {
                       vertical ? tickOffset : directionMultiplier * spacing
                     )} rotate(${-rotation}deg)`,
                     opacity:
-                      !tickLabelSkipRatio ||
-                      (tickLabelSkipRatio > 0 && i % tickLabelSkipRatio === 0)
-                        ? 1
-                        : 0,
+                      tickLabelSkipIndices?.length &&
+                      tickLabelSkipIndices.includes(i)
+                        ? 0
+                        : 1,
                   }}
                   dominantBaseline={
                     rotation

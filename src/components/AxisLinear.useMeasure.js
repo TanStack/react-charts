@@ -1,7 +1,7 @@
 import React from 'react'
 import useChartState from '../hooks/useChartState'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import { axisTypeOrdinal } from '../utils/Constants'
+import { axisTypeOrdinal, axisTypeTime, axisTypeUtc } from '../utils/Constants'
 import { round } from '../utils/Utils'
 
 const getElBox = el => {
@@ -35,18 +35,23 @@ export default function useMeasure({
   vertical,
   gridWidth,
   gridHeight,
+  show,
 }) {
   const [estimatedTickCount, setChartState] = useChartState(
     state => state.estimatedTickCounts[id]
   )
-  const [tickLabelSkipRatio] = useChartState(
-    state => state.tickLabelSkipRatios[id]
+  const [tickLabelSkipIndices] = useChartState(
+    state => state.tickLabelSkipIndices[id]
   )
   const [axisDimension] = useChartState(
     state => state.axisDimensions?.[position]?.[id]
   )
 
   const measureDimensions = React.useCallback(() => {
+    if (show) {
+      // Remeasure when show changes
+    }
+
     if (!elRef.current) {
       if (axisDimension) {
         // If the entire axis is hidden, then we need to remove the axis dimensions
@@ -157,20 +162,31 @@ export default function useMeasure({
       }
     }
 
-    // Visual Skipping of axis labels if they overlap (rotation not included)
-    const newTickLabelSkipRatio = !rotation
-      ? Math.max(
-          1,
-          Math.ceil((largestMeasureLabelSize + tickPadding) / smallestTickGap)
-        )
-      : 1
+    let newTickLabelSkipIndices = []
 
-    if (newTickLabelSkipRatio !== tickLabelSkipRatio) {
+    // Visual Skipping of time-based axis labels if they overlap (rotation not included)
+    if (!rotation && [axisTypeTime, axisTypeUtc].includes(type)) {
+      realLabelDims.reduce((last, d) => {
+        if (
+          round(last.right, 5, Math.ceil) >
+          round(d.left - tickPadding, 5, Math.ceil)
+        ) {
+          newTickLabelSkipIndices.push(realLabelDims.indexOf(d))
+          return last
+        }
+        return d
+      })
+    }
+
+    if (
+      JSON.stringify(newTickLabelSkipIndices) !==
+      JSON.stringify(tickLabelSkipIndices)
+    ) {
       setChartState(old => ({
         ...old,
-        tickLabelSkipRatios: {
-          ...old.tickLabelSkipRatios,
-          [id]: newTickLabelSkipRatio,
+        tickLabelSkipIndices: {
+          ...old.tickLabelSkipIndices,
+          [id]: newTickLabelSkipIndices,
         },
       }))
     }
@@ -290,8 +306,9 @@ export default function useMeasure({
     rotation,
     setChartState,
     setRotation,
+    show,
     tickCount,
-    tickLabelSkipRatio,
+    tickLabelSkipIndices,
     tickPadding,
     tickSizeInner,
     tickSizeOuter,

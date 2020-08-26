@@ -11,7 +11,7 @@ export default function useLagRadar() {
       speed: 0.0017, // how fast the sweep moves (rads per ms)
       size: Math.min(width, height) / 3, // outer frame px
       inset: 3, // circle inset px
-      parent: document.body // DOM node to attach to
+      parent: document.body, // DOM node to attach to
     });
   }, [width, height]);
 }
@@ -27,13 +27,16 @@ function lagRadar(config = {}) {
     speed = 0.0017, // how fast the sweep moves (rads per ms)
     size = 300, // outer frame px
     inset = 3, // circle inset px
-    parent = document.body // DOM node to attach to
+    parent = document.body, // DOM node to attach to
   } = config;
 
   const svgns = "http://www.w3.org/2000/svg";
 
   const styles = document.createTextNode(`
-    .lagRadar-sweep > * {
+    .lagRadar {
+  pointer-events: none;
+}
+.lagRadar-sweep > * {
       shape-rendering: crispEdges;
     }
     .lagRadar-face {
@@ -47,8 +50,8 @@ function lagRadar(config = {}) {
 
   function $svg(tag, props = {}, children = []) {
     const el = document.createElementNS(svgns, tag);
-    Object.keys(props).forEach(prop => el.setAttribute(prop, props[prop]));
-    children.forEach(child => el.appendChild(child));
+    Object.keys(props).forEach((prop) => el.setAttribute(prop, props[prop]));
+    children.forEach((child) => el.appendChild(child));
     return el;
   }
 
@@ -57,7 +60,7 @@ function lagRadar(config = {}) {
   const radius = middle - inset;
 
   const $hand = $svg("path", { class: "lagRadar-hand" });
-  const $arcs = new Array(frames).fill("path").map(t => $svg(t));
+  const $arcs = new Array(frames).fill("path").map((t) => $svg(t));
   const $root = $svg("svg", { class: "lagRadar", height: size, width: size }, [
     $svg("style", { type: "text/css" }, [styles]),
     $svg("g", { class: "lagRadar-sweep" }, $arcs),
@@ -66,8 +69,8 @@ function lagRadar(config = {}) {
       class: "lagRadar-face",
       cx: middle,
       cy: middle,
-      r: radius
-    })
+      r: radius,
+    }),
   ]);
 
   parent.appendChild($root);
@@ -78,7 +81,7 @@ function lagRadar(config = {}) {
     rotation: 0,
     now: Date.now(),
     tx: middle + radius,
-    ty: middle
+    ty: middle,
   };
 
   const calcHue = (() => {
@@ -86,7 +89,7 @@ function lagRadar(config = {}) {
     const max_ms = 1000;
     const log_f = 10;
     const mult = max_hue / Math.log(max_ms / log_f);
-    return function(ms_delta) {
+    return function (ms_delta) {
       return (
         max_hue -
         Math.max(0, Math.min(mult * Math.log(ms_delta / log_f), max_hue))
@@ -119,7 +122,7 @@ function lagRadar(config = {}) {
       now,
       rotation,
       tx,
-      ty
+      ty,
     };
 
     frame = window.requestAnimationFrame(animate);
