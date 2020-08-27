@@ -1,7 +1,6 @@
 import React from 'react'
 import useChartState from '../hooks/useChartState'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import { axisTypeOrdinal, axisTypeTime, axisTypeUtc } from '../utils/Constants'
 import { round } from '../utils/Utils'
 
 const getElBox = el => {
@@ -23,24 +22,17 @@ export default function useMeasure({
   rotation,
   setRotation,
   id,
-  type,
   position,
   tickSizeInner,
   tickSizeOuter,
   labelRotation,
   tickPadding,
-  tickCount,
-  minTickCount,
-  maxTickCount,
   vertical,
   gridWidth,
   gridHeight,
   show,
 }) {
-  const [estimatedTickCount, setChartState] = useChartState(
-    state => state.estimatedTickCounts[id]
-  )
-  const [tickLabelSkipIndices] = useChartState(
+  const [tickLabelSkipIndices, setChartState] = useChartState(
     state => state.tickLabelSkipIndices[id]
   )
   const [axisDimension] = useChartState(
@@ -71,12 +63,6 @@ export default function useMeasure({
     }
 
     let gridSize = !vertical ? gridWidth : gridHeight
-    let width = 0
-    let height = 0
-    let top = 0
-    let bottom = 0
-    let left = 0
-    let right = 0
 
     const domainDims = getElBox(elRef.current.querySelector('.domain'))
 
@@ -89,19 +75,13 @@ export default function useMeasure({
     ).map(el => getElBox(el))
 
     // Determine the largest labels on the axis
-    const [widestMeasureLabel, tallestMeasureLabel] = measureLabelDims.reduce(
-      (labels, d) => {
-        let [largestW = d, largestH = d] = labels
-        if (d.width > 0 && d.width > largestW.width) {
-          largestW = d
-        }
-        if (d.height > 0 && d.height > largestH.height) {
-          largestH = d
-        }
-        return [largestW, largestH]
-      },
-      []
-    )
+    const widestMeasureLabel = measureLabelDims.reduce((label, d) => {
+      label = label || d
+      if (d.width > 0 && d.width > label.width) {
+        label = d
+      }
+      return label
+    }, null)
 
     // Determine the largest labels on the axis
     const [widestRealLabel, tallestRealLabel] = realLabelDims.reduce(
@@ -133,54 +113,7 @@ export default function useMeasure({
       }, false)
     }
 
-    const largestMeasureLabelSize = !vertical
-      ? widestMeasureLabel?.width || 0
-      : tallestMeasureLabel?.height || 0
-
-    // Auto-fit ticks in "auto" tick mode for non-ordinal scales
-    if (tickCount === 'auto' && type !== 'ordinal') {
-      // if it's on, determine how many ticks we could display if they were all flat
-      // How many ticks can we fit in the available axis space?
-      let calculatedTickCount = Math.floor(
-        (gridSize + largestMeasureLabelSize + tickPadding * 2) /
-          (largestMeasureLabelSize + tickPadding * 2)
-      )
-
-      calculatedTickCount = Math.max(
-        Math.min(calculatedTickCount, maxTickCount),
-        minTickCount
-      )
-
-      if (calculatedTickCount !== estimatedTickCount) {
-        setChartState(old => ({
-          ...old,
-          estimatedTickCounts: {
-            ...old.estimatedTickCounts,
-            [id]: calculatedTickCount,
-          },
-        }))
-      }
-    }
-
     let newTickLabelSkipIndices = []
-
-    // Visual Skipping of time-based axis labels if they overlap (rotation not included)
-    if (
-      !rotation &&
-      [axisTypeTime, axisTypeUtc].includes(type) &&
-      realLabelDims?.length
-    ) {
-      realLabelDims.reduce((last, d) => {
-        if (
-          round(last.right, 5, Math.ceil) >
-          round(d.left - tickPadding, 5, Math.ceil)
-        ) {
-          newTickLabelSkipIndices.push(realLabelDims.indexOf(d))
-          return last
-        }
-        return d
-      })
-    }
 
     if (
       JSON.stringify(newTickLabelSkipIndices) !==
@@ -196,7 +129,7 @@ export default function useMeasure({
     }
 
     // Rotate ticks for non-time horizontal axes
-    if (!vertical && type === axisTypeOrdinal) {
+    if (!vertical) {
       const newRotation =
         (widestMeasureLabel?.width || 0) + tickPadding > smallestTickGap
           ? labelRotation
@@ -205,6 +138,15 @@ export default function useMeasure({
       if (newRotation !== rotation) {
         setRotation(position === 'top' ? -newRotation : newRotation)
       }
+    }
+
+    const newDimensions = {
+      width: 0,
+      height: 0,
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
     }
 
     // Axis overflow measurements
@@ -220,23 +162,23 @@ export default function useMeasure({
           )
         : null
 
-      left = round(
+      newDimensions.left = round(
         Math.max(0, domainDims.left - leftMostLabelDim?.left),
-        10,
+        5,
         Math.ceil
       )
 
-      right = round(
+      newDimensions.right = round(
         Math.max(0, rightMostLabelDim?.right - domainDims.right),
-        10,
+        5,
         Math.ceil
       )
 
-      height = round(
+      newDimensions.height = round(
         Math.max(tickSizeInner, tickSizeOuter) +
           tickPadding +
           (tallestRealLabel?.height || 0),
-        10,
+        5,
         Math.ceil
       )
     } else {
@@ -248,34 +190,25 @@ export default function useMeasure({
         labelDim.bottom > d.bottom ? labelDim : d
       )
 
-      top = round(
+      newDimensions.top = round(
         Math.max(0, domainDims.top - topMostLabelDim?.top),
-        10,
+        5,
         Math.ceil
       )
 
-      bottom = round(
+      newDimensions.bottom = round(
         Math.max(0, bottomMostLabelDim?.bottom - domainDims.bottom),
-        10,
+        5,
         Math.ceil
       )
 
-      width = round(
+      newDimensions.width = round(
         Math.max(tickSizeInner, tickSizeOuter) +
           tickPadding +
           (widestRealLabel?.width || 0),
-        10,
+        5,
         Math.ceil
       )
-    }
-
-    const newDimensions = {
-      width,
-      height,
-      top,
-      bottom,
-      left,
-      right,
     }
 
     // Only update the axisDimensions if something has changed
@@ -297,27 +230,22 @@ export default function useMeasure({
       }))
     }
   }, [
-    axisDimension,
     elRef,
-    estimatedTickCount,
     gridHeight,
     gridWidth,
     id,
     labelRotation,
-    maxTickCount,
-    minTickCount,
     position,
     rotation,
     setChartState,
     setRotation,
     show,
-    tickCount,
     tickLabelSkipIndices,
     tickPadding,
     tickSizeInner,
     tickSizeOuter,
-    type,
     vertical,
+    axisDimension,
   ])
 
   // Measure after if needed

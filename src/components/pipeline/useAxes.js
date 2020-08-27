@@ -2,13 +2,7 @@ import React from 'react'
 //
 import buildAxis from '../../utils/buildAxis'
 
-export default ({
-  axes,
-  materializedData,
-  gridHeight,
-  gridWidth,
-  estimatedTickCounts,
-}) => {
+export default ({ axes, materializedData, gridHeight, gridWidth }) => {
   // Detect axes changes and build axes
   let prePrimaryAxes = axes.filter(d => d.primary)
   let preSecondaryAxes = axes.filter(d => !d.primary)
@@ -25,7 +19,6 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          estimatedTickCounts,
         })
       })
     },
@@ -42,7 +35,6 @@ export default ({
           materializedData,
           gridWidth,
           gridHeight,
-          estimatedTickCounts,
         })
       })
     },

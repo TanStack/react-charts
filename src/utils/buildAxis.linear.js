@@ -39,7 +39,7 @@ export default function buildAxisLinear({
     hardMin = undefined,
     hardMax = undefined,
     base = undefined,
-    tickCount = 'auto',
+    tickCount = 10,
     minTickCount = 1,
     maxTickCount = 99999999,
     tickValues = null,
@@ -56,6 +56,7 @@ export default function buildAxisLinear({
     show = true,
     stacked = false,
     id: userId,
+    estimatedTickSize: userEstimatedTickSize,
   },
   materializedData,
   gridHeight,
@@ -71,8 +72,10 @@ export default function buildAxisLinear({
   const AxisIdKey = `${valueKey}AxisId`
   const vertical = detectVertical(position)
   const RTL = detectRTL(position) // Right to left OR top to bottom
+  const estimatedTickSize = userEstimatedTickSize ?? vertical ? 20 : 50
 
   const id = userId || `${position}_${type}`
+  const isTimeType = [axisTypeTime, axisTypeUtc].includes(type)
 
   // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
 
@@ -258,10 +261,6 @@ export default function buildAxisLinear({
 
   let resolvedTickCount = tickCount
 
-  if (tickCount === 'auto') {
-    resolvedTickCount = estimatedTickCounts[id] ?? 10
-  }
-
   const ticks = filterTicks(
     tickValues ||
       (scale.ticks ? scale.ticks(resolvedTickCount) : scale.domain())
@@ -294,6 +293,7 @@ export default function buildAxisLinear({
     hardMin,
     hardMax,
     base,
+    isTimeType,
     tickCount,
     minTickCount,
     maxTickCount,
@@ -325,6 +325,7 @@ export default function buildAxisLinear({
     ticks,
     format,
     spacing,
+    estimatedTickSize,
   }
 
   if (type === axisTypeOrdinal) {
