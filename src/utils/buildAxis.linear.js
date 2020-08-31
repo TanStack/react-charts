@@ -61,7 +61,6 @@ export default function buildAxisLinear({
   materializedData,
   gridHeight,
   gridWidth,
-  estimatedTickCounts,
 }) {
   if (!position) {
     throw new Error(`Chart axes must have a valid 'position' property`)

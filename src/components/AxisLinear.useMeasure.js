@@ -32,10 +32,7 @@ export default function useMeasure({
   gridHeight,
   show,
 }) {
-  const [tickLabelSkipIndices, setChartState] = useChartState(
-    state => state.tickLabelSkipIndices[id]
-  )
-  const [axisDimension] = useChartState(
+  const [axisDimension, setChartState] = useChartState(
     state => state.axisDimensions?.[position]?.[id]
   )
 
@@ -46,6 +43,7 @@ export default function useMeasure({
 
     if (!elRef.current) {
       if (axisDimension) {
+        console.log('remove axis')
         // If the entire axis is hidden, then we need to remove the axis dimensions
         setChartState(state => {
           const newAxes = state.axisDimensions[position] || {}
@@ -113,21 +111,6 @@ export default function useMeasure({
       }, false)
     }
 
-    let newTickLabelSkipIndices = []
-
-    if (
-      JSON.stringify(newTickLabelSkipIndices) !==
-      JSON.stringify(tickLabelSkipIndices)
-    ) {
-      setChartState(old => ({
-        ...old,
-        tickLabelSkipIndices: {
-          ...old.tickLabelSkipIndices,
-          [id]: newTickLabelSkipIndices,
-        },
-      }))
-    }
-
     // Rotate ticks for non-time horizontal axes
     if (!vertical) {
       const newRotation =
@@ -136,6 +119,7 @@ export default function useMeasure({
           : 0
 
       if (newRotation !== rotation) {
+        console.log('rotation')
         setRotation(position === 'top' ? -newRotation : newRotation)
       }
     }
@@ -151,63 +135,51 @@ export default function useMeasure({
 
     // Axis overflow measurements
     if (!vertical) {
-      const leftMostLabelDim = realLabelDims.length
-        ? realLabelDims.reduce((d, labelDim) =>
-            labelDim.left < d.left ? labelDim : d
-          )
-        : null
-      const rightMostLabelDim = realLabelDims.length
-        ? realLabelDims.reduce((d, labelDim) =>
-            labelDim.right > d.right ? labelDim : d
-          )
-        : null
+      if (realLabelDims.length) {
+        const leftMostLabelDim = realLabelDims.reduce((d, labelDim) =>
+          labelDim.left < d.left ? labelDim : d
+        )
+        const rightMostLabelDim = realLabelDims.reduce((d, labelDim) =>
+          labelDim.right > d.right ? labelDim : d
+        )
 
-      newDimensions.left = round(
-        Math.max(0, domainDims.left - leftMostLabelDim?.left),
-        5,
-        Math.ceil
-      )
+        newDimensions.left = Math.round(
+          Math.max(0, domainDims.left - leftMostLabelDim?.left)
+        )
 
-      newDimensions.right = round(
-        Math.max(0, rightMostLabelDim?.right - domainDims.right),
-        5,
-        Math.ceil
-      )
+        newDimensions.right = Math.round(
+          Math.max(0, rightMostLabelDim?.right - domainDims.right)
+        )
+      }
 
-      newDimensions.height = round(
+      newDimensions.height = Math.round(
         Math.max(tickSizeInner, tickSizeOuter) +
           tickPadding +
-          (tallestRealLabel?.height || 0),
-        5,
-        Math.ceil
+          (tallestRealLabel?.height ?? 0)
       )
     } else {
-      const topMostLabelDim = realLabelDims.reduce((d, labelDim) =>
-        labelDim.top < d.top ? labelDim : d
-      )
+      if (realLabelDims.length) {
+        const topMostLabelDim = realLabelDims.reduce((d, labelDim) =>
+          labelDim.top < d.top ? labelDim : d
+        )
 
-      const bottomMostLabelDim = realLabelDims.reduce((d, labelDim) =>
-        labelDim.bottom > d.bottom ? labelDim : d
-      )
+        const bottomMostLabelDim = realLabelDims.reduce((d, labelDim) =>
+          labelDim.bottom > d.bottom ? labelDim : d
+        )
 
-      newDimensions.top = round(
-        Math.max(0, domainDims.top - topMostLabelDim?.top),
-        5,
-        Math.ceil
-      )
+        newDimensions.top = Math.round(
+          Math.max(0, domainDims.top - topMostLabelDim?.top)
+        )
 
-      newDimensions.bottom = round(
-        Math.max(0, bottomMostLabelDim?.bottom - domainDims.bottom),
-        5,
-        Math.ceil
-      )
+        newDimensions.bottom = Math.round(
+          Math.max(0, bottomMostLabelDim?.bottom - domainDims.bottom)
+        )
+      }
 
-      newDimensions.width = round(
+      newDimensions.width = Math.round(
         Math.max(tickSizeInner, tickSizeOuter) +
           tickPadding +
-          (widestRealLabel?.width || 0),
-        5,
-        Math.ceil
+          (widestRealLabel?.width ?? 0)
       )
     }
 
@@ -216,6 +188,8 @@ export default function useMeasure({
       !axisDimension ||
       Object.keys(newDimensions).some(key => {
         return newDimensions[key] !== axisDimension[key]
+          ? console.log(id, key, newDimensions[key], axisDimension[key]) || true
+          : false
       })
     ) {
       setChartState(state => ({
@@ -230,6 +204,7 @@ export default function useMeasure({
       }))
     }
   }, [
+    axisDimension,
     elRef,
     gridHeight,
     gridWidth,
@@ -240,16 +215,14 @@ export default function useMeasure({
     setChartState,
     setRotation,
     show,
-    tickLabelSkipIndices,
     tickPadding,
     tickSizeInner,
     tickSizeOuter,
     vertical,
-    axisDimension,
   ])
 
   // Measure after if needed
-  useIsomorphicLayoutEffect(() => {
+  React.useEffect(() => {
     measureDimensions()
   }, [measureDimensions])
 }

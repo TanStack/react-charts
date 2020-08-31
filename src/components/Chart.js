@@ -99,7 +99,6 @@ export default function ChartState(options) {
       hovered: null,
       element: null,
       axisDimensions: {},
-      tickLabelSkipIndices: {},
       offset: {},
       pointer: {},
       setOffset,
