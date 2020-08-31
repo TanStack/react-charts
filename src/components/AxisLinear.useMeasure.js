@@ -43,7 +43,6 @@ export default function useMeasure({
 
     if (!elRef.current) {
       if (axisDimension) {
-        console.log('remove axis')
         // If the entire axis is hidden, then we need to remove the axis dimensions
         setChartState(state => {
           const newAxes = state.axisDimensions[position] || {}
@@ -119,7 +118,6 @@ export default function useMeasure({
           : 0
 
       if (newRotation !== rotation) {
-        console.log('rotation')
         setRotation(position === 'top' ? -newRotation : newRotation)
       }
     }
@@ -188,8 +186,6 @@ export default function useMeasure({
       !axisDimension ||
       Object.keys(newDimensions).some(key => {
         return newDimensions[key] !== axisDimension[key]
-          ? console.log(id, key, newDimensions[key], axisDimension[key]) || true
-          : false
       })
     ) {
       setChartState(state => ({
