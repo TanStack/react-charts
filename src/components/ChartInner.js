@@ -186,7 +186,7 @@ export default React.forwardRef(function ChartInner(
         style={{
           width,
           height,
-          overflow: 'visible',
+          overflow: 'hidden',
         }}
         onMouseEnter={e => e.persist() || onMouseMove(e)}
         onMouseMove={e => e.persist() || onMouseMove(e)}
