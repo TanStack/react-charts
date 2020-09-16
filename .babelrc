@@ -3,10 +3,12 @@
     [
       "@babel/env",
       {
-        "modules": false
+        "modules": false,
+        "loose": true,
+        "exclude": ["@babel/plugin-transform-regenerator"]
       }
     ],
     "@babel/react"
   ],
-  "plugins": ["babel-plugin-macros"]
+  "plugins": ["babel-plugin-transform-async-to-promises"]
 }
