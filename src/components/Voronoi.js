@@ -150,7 +150,9 @@ export default function Voronoi() {
 
     const voronoi = delaunay.voronoi(flatExtent)
 
-    polygons = [...voronoi.cellPolygons()]
+    polygons = voronoi.cellPolygons()
+
+    polygons = Array.from(polygons)
 
     return (
       <VoronoiElement>
