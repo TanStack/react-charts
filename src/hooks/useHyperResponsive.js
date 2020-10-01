@@ -6,8 +6,17 @@ import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
 export default function useRect(nodeRef) {
   const [element, setElement] = React.useState(nodeRef.current?.parentElement)
-  const [rect, setRect] = React.useState({ width: 0, height: 0 })
+  const [rect, _setRect] = React.useState({ width: 0, height: 0 })
   const initialRectSet = React.useRef(false)
+
+  const setRect = React.useCallback(value => {
+    _setRect(old => {
+      if (old.width !== value.width || old.height !== value.height) {
+        return value
+      }
+      return old
+    })
+  }, [])
 
   useIsomorphicLayoutEffect(() => {
     if (nodeRef.current?.parentElement !== element) {
@@ -34,7 +43,7 @@ export default function useRect(nodeRef) {
     return () => {
       observer.unobserve()
     }
-  }, [element])
+  }, [element, setRect])
 
   return { width: rect.width, height: rect.height }
 }

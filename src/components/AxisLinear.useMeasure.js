@@ -1,7 +1,6 @@
 import React from 'react'
 import useChartState from '../hooks/useChartState'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import { round } from '../utils/Utils'
 
 const getElBox = el => {
   var rect = el.getBoundingClientRect()
@@ -218,7 +217,7 @@ export default function useMeasure({
   ])
 
   // Measure after if needed
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     measureDimensions()
-  }, [measureDimensions])
+  })
 }
