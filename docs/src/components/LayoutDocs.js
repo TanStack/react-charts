@@ -124,6 +124,7 @@ export const LayoutDocs = props => {
       <style jsx>{`
         .docs {
           min-width: calc(100% - 300px - 1rem - 200px);
+          word-wrap: break-word;
         }
       `}</style>
     </>
