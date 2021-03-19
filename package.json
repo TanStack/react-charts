@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": "react-tools/react-charts",
   "main": "index.js",
-  "module": "dist/react-charts.mjs",
+  "module": "dist/react-charts.min.mjs",
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/tannerlinsley"
