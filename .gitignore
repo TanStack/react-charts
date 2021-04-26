@@ -1,28 +1,24 @@
-
-# See https://help.github.com/ignore-files/ for more about ignoring files.
-
-# dependencies
-node_modules
-
-# builds
-build
-dist
-artifacts
-.rpt2_cache
-d3/index.js
-
-# misc
+.cache
+.DS_Store
 .DS_Store
 .env
-.env.local
 .env.development.local
-.env.test.local
+.env.local
 .env.production.local
+.env.test.local
+.history
 .next
-
+.rpt2_cache
+*.log
+artifacts
+build
+d3/index.js
+dist
+dist
+node_modules
+node_modules
 npm-debug.log*
+size-plugin.json
+stats.html
 yarn-debug.log*
 yarn-error.log*
-.history
-stats.html
-size-plugin.json

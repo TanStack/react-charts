@@ -6,23 +6,23 @@ on:
   pull_request:
 
 jobs:
-  # test:
-  #   name: 'node ${{ matrix.node }} ${{ matrix.os }} '
-  #   runs-on: '${{ matrix.os }}'
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest]
-  #       node: [12]
-  #   steps:
-  #     - uses: actions/setup-node@v1
-  #       with:
-  #         node-version: ${{ matrix.node }}
-  #     - uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 1
-  #     - run: npm i -g yarn
-  #     - run: yarn --frozen-lockfile
-  #     - run: yarn test:ci
+  test:
+    name: 'node ${{ matrix.node }} ${{ matrix.os }} '
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node: [12, 14, 16]
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - run: npm i -g yarn
+      - run: yarn --frozen-lockfile
+      - run: yarn test:ci
 
   publish-module:
     name: 'Publish Module to NPM'

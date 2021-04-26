@@ -4,11 +4,8 @@
       "@babel/env",
       {
         "modules": false,
-        "loose": true,
-        "exclude": ["@babel/plugin-transform-regenerator"]
+        "loose": true
       }
-    ],
-    "@babel/react"
-  ],
-  "plugins": ["babel-plugin-transform-async-to-promises"]
+    ]
+  ]
 }

@@ -1,4 +1,0 @@
-{
-  "extends": ["react-app", "prettier"]
-  // "parser": "babel-eslint"
-}

@@ -1,7 +1,6 @@
-import path from 'path'
-import babel from 'rollup-plugin-babel'
-import node from 'rollup-plugin-node-resolve'
-// import { terser } from 'rollup-plugin-terser'
+import path from 'path';
+import babel from 'rollup-plugin-babel';
+import node from 'rollup-plugin-node-resolve';
 
 export default [
   {
@@ -13,11 +12,11 @@ export default [
     plugins: [node(), babel()],
     onwarn,
   },
-]
+];
 
 function onwarn(message) {
   if (message.code === 'CIRCULAR_DEPENDENCY') {
-    return
+    return;
   }
-  console.error(message)
+  console.error(message);
 }
