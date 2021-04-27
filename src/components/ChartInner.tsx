@@ -1,25 +1,25 @@
-import React from 'react'
+import React from 'react';
 //
-import Raf from '../utils/Raf'
-import { translate } from '../utils/Utils'
+import Raf from '../utils/Raf';
+import { translate } from '../utils/Utils';
 
-import useChartContext from '../hooks/useChartContext'
-import useChartState from '../hooks/useChartState'
-import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
+import useChartContext from '../hooks/useChartContext';
+import useChartState from '../hooks/useChartState';
+import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect';
 
-import Rectangle from '../primitives/Rectangle'
+import Rectangle from '../primitives/Rectangle';
 
-import Voronoi from './Voronoi'
-import Axis from './Axis'
-import Tooltip from './Tooltip'
-import Cursor from './Cursor'
-import Brush from './Brush'
+import Voronoi from './Voronoi';
+import Axis from './Axis';
+import Tooltip from './Tooltip';
+import Cursor from './Cursor';
+import Brush from './Brush';
 
 export default React.forwardRef(function ChartInner(
   { className, style = {}, ...rest },
   ref
 ) {
-  const svgRef = React.useRef()
+  const svgRef = React.useRef();
 
   const {
     width,
@@ -33,51 +33,52 @@ export default React.forwardRef(function ChartInner(
     seriesOptions,
     getSeriesOrder,
     focused,
+    focusedElement,
     getOnClick,
-  } = useChartContext()
+  } = useChartContext();
 
-  const [offset] = useChartState(d => d.offset)
-  const [setOffset, setChartState] = useChartState(d => d.setOffset)
+  const [offset] = useChartState((d) => d.offset);
+  const [setOffset, setChartState] = useChartState((d) => d.setOffset);
 
   useIsomorphicLayoutEffect(() => {
     if (!svgRef.current) {
-      return
+      return;
     }
 
-    const current = svgRef.current.getBoundingClientRect()
+    const current = svgRef.current.getBoundingClientRect();
 
     if (current.left !== offset.left || current.top !== offset.top) {
       setOffset({
         left: current.left,
         top: current.top,
-      })
+      });
     }
-  })
+  });
 
-  const onMouseLeave = e => {
-    setChartState(old => ({ ...old, hovered: null }))
-    setChartState(old => ({
+  const onMouseLeave = (e) => {
+    setChartState((old) => ({ ...old, focused: null }));
+    setChartState((old) => ({
       ...old,
       pointer: {
         ...old.pointer,
         active: false,
       },
-    }))
-  }
+    }));
+  };
 
-  const rafRef = React.useRef()
+  const rafRef = React.useRef();
 
-  const onMouseMove = e => {
+  const onMouseMove = (e) => {
     if (rafRef.current) {
-      Raf.cancel(rafRef.current)
+      Raf.cancel(rafRef.current);
     }
     rafRef.current = Raf(() => {
-      rafRef.current = null
-      const { clientX, clientY } = e
+      rafRef.current = null;
+      const { clientX, clientY } = e;
 
-      setChartState(old => {
-        const x = clientX - offset.left - gridX
-        const y = clientY - offset.top - gridY
+      setChartState((old) => {
+        const x = clientX - offset.left - gridX;
+        const y = clientY - offset.top - gridY;
 
         const pointer = {
           ...old.pointer,
@@ -85,21 +86,21 @@ export default React.forwardRef(function ChartInner(
           x,
           y,
           dragging: old.pointer?.down,
-        }
+        };
 
         return {
           ...old,
           pointer,
-        }
-      })
-    })
-  }
+        };
+      });
+    });
+  };
 
   const onMouseUp = () => {
-    document.removeEventListener('mouseup', onMouseUp)
-    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('mousemove', onMouseMove);
 
-    setChartState(old => {
+    setChartState((old) => {
       return {
         ...old,
         pointer: {
@@ -111,15 +112,15 @@ export default React.forwardRef(function ChartInner(
             y: old.pointer.y,
           },
         },
-      }
-    })
-  }
+      };
+    });
+  };
 
   const onMouseDown = () => {
-    document.addEventListener('mouseup', onMouseUp)
-    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
 
-    setChartState(old => ({
+    setChartState((old) => ({
       ...old,
       pointer: {
         ...old.pointer,
@@ -127,16 +128,16 @@ export default React.forwardRef(function ChartInner(
         sourceY: old.pointer.y,
         down: true,
       },
-    }))
-  }
+    }));
+  };
 
   // Reverse the stack order for proper z-indexing
-  const reversedStackData = [...stackData].reverse()
-  const orderedStackData = getSeriesOrder(reversedStackData)
+  const reversedStackData = [...stackData].reverse();
+  const orderedStackData = getSeriesOrder(reversedStackData);
 
   const focusedSeriesIndex = focused
-    ? orderedStackData.findIndex(series => series.id === focused.series.id)
-    : -1
+    ? orderedStackData.findIndex((series) => series.id === focused.series.id)
+    : -1;
 
   // Bring focused series to the front
   const focusOrderedStackData = focused
@@ -145,9 +146,9 @@ export default React.forwardRef(function ChartInner(
         ...orderedStackData.slice(focusedSeriesIndex + 1),
         orderedStackData[focusedSeriesIndex],
       ]
-    : orderedStackData
+    : orderedStackData;
 
-  const stacks = focusOrderedStackData.map(stack => {
+  const stacks = focusOrderedStackData.map((stack) => {
     return (
       <stack.Component
         key={stack.id}
@@ -155,8 +156,8 @@ export default React.forwardRef(function ChartInner(
         series={stack}
         stackData={stackData}
       />
-    )
-  })
+    );
+  });
 
   useIsomorphicLayoutEffect(() => {
     if (
@@ -164,9 +165,9 @@ export default React.forwardRef(function ChartInner(
       ref.current.parentElement &&
       !ref.current.parentElement.style.position
     ) {
-      ref.current.parentElement.style.position = 'relative'
+      ref.current.parentElement.style.position = 'relative';
     }
-  })
+  });
 
   return (
     <div
@@ -179,7 +180,9 @@ export default React.forwardRef(function ChartInner(
         position: 'absolute',
         ...style,
       }}
-      onClick={getOnClick() ? e => getOnClick()(focused, e) : undefined}
+      onClick={
+        getOnClick() ? (e) => getOnClick()(focusedElement, e) : undefined
+      }
     >
       <svg
         ref={svgRef}
@@ -188,10 +191,10 @@ export default React.forwardRef(function ChartInner(
           height,
           overflow: 'hidden',
         }}
-        onMouseEnter={e => e.persist() || onMouseMove(e)}
-        onMouseMove={e => e.persist() || onMouseMove(e)}
-        onMouseLeave={e => e.persist() || onMouseLeave(e)}
-        onMouseDown={e => e.persist() || onMouseDown(e)}
+        onMouseEnter={(e) => e.persist() || onMouseMove(e)}
+        onMouseMove={(e) => e.persist() || onMouseMove(e)}
+        onMouseLeave={(e) => e.persist() || onMouseLeave(e)}
+        onMouseDown={(e) => e.persist() || onMouseDown(e)}
       >
         {width && height ? (
           <>
@@ -212,7 +215,7 @@ export default React.forwardRef(function ChartInner(
               />
               <Voronoi />
               <g className="axes">
-                {[...primaryAxes, ...secondaryAxes].map(axis => (
+                {[...primaryAxes, ...secondaryAxes].map((axis) => (
                   <Axis key={axis.id} {...axis} />
                 ))}
               </g>
@@ -234,5 +237,5 @@ export default React.forwardRef(function ChartInner(
       <Brush />
       <Tooltip />
     </div>
-  )
-})
+  );
+});

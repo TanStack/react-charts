@@ -32,11 +32,11 @@ export default function Voronoi() {
 
   const [, setChartState] = useChartState(() => null);
 
-  const onHover = React.useCallback(
+  const handleFocus = React.useCallback(
     (datum) => {
       return setChartState((state) => ({
         ...state,
-        hovered: datum,
+        focused: datum,
       }));
     },
     [setChartState]
@@ -100,7 +100,7 @@ export default function Voronoi() {
     //                 key={i}
     //                 d={arc()}
     //                 className='action-voronoi'
-    //                 onMouseEnter={() => onHover([datum])}
+    //                 onMouseEnter={() => handleFocus([datum])}
     //                 style={{
     //                   fill: 'rgba(0,0,0,.2)',
     //                   stroke: 'rgba(255,255,255,.5)',
@@ -165,8 +165,8 @@ export default function Voronoi() {
               key={i}
               d={path}
               className="action-voronoi"
-              onMouseEnter={(e) => onHover(datum)}
-              onMouseLeave={(e) => onHover(null)}
+              onMouseEnter={(e) => handleFocus(datum)}
+              onMouseLeave={(e) => handleFocus(null)}
               style={{
                 fill: 'rgba(0,0,0,.2)',
                 stroke: 'rgba(255,255,255,.5)',
@@ -182,7 +182,7 @@ export default function Voronoi() {
     gridWidth,
     height,
     needsVoronoi,
-    onHover,
+    handleFocus,
     primaryAxes.length,
     secondaryAxes.length,
     showVoronoi,

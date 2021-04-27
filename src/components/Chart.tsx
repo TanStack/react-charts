@@ -50,7 +50,6 @@ function applyDefaults({
   getSeriesStyle = () => ({}),
   getDatumStyle = () => ({}),
   getSeriesOrder = (d) => d,
-  onHover = () => {},
   grouping = groupingPrimary,
   focus = focusAuto,
   showVoronoi = false,
@@ -61,7 +60,6 @@ function applyDefaults({
     getSeriesStyle,
     getDatumStyle,
     getSeriesOrder,
-    onHover,
     grouping,
     focus,
     showVoronoi,
@@ -96,7 +94,7 @@ export default function ChartState(options) {
       });
 
     return {
-      hovered: null,
+      focused: null,
       element: null,
       axisDimensions: {},
       offset: {},
@@ -138,15 +136,14 @@ export function Chart(options) {
     getDatumStyle,
     onClick,
     onFocus,
-    onHover,
     getSeriesOrder,
     defaultColors,
     ...rest
   } = applyDefaults(options);
 
-  const [{ hovered, element, axisDimensions, pointer }] = useChartState(
+  let [{ focused, element, axisDimensions, pointer }] = useChartState(
     (d) => ({
-      hovered: d.hovered,
+      focused: d.focused,
       element: d.element,
       axisDimensions: d.axisDimensions,
       pointer: d.pointer,
@@ -158,7 +155,6 @@ export function Chart(options) {
 
   const getOnClick = useGetLatest(onClick);
   const getOnFocus = useGetLatest(onFocus);
-  const getOnHover = useGetLatest(onHover);
 
   let materializedData = useMaterializeData({ data });
 
@@ -197,9 +193,9 @@ export function Chart(options) {
     defaultColors,
   });
 
-  const focused = React.useMemo(() => {
+  const focusedElement = React.useMemo(() => {
     // Get the closest focus datum out of the datum group
-    if (hovered || element) {
+    if (focused || element) {
       let resolvedFocus = focus;
 
       if (focus === focusAuto) {
@@ -213,11 +209,12 @@ export function Chart(options) {
       if (resolvedFocus === focusElement && element) {
         return element;
       } else if (resolvedFocus === focusClosest) {
-        return getClosestPoint(pointer, hovered.group);
+        return getClosestPoint(pointer, focused.group);
       }
     }
+
     return null;
-  }, [element, focus, hovered, pointer]);
+  }, [element, focus, focused, pointer]);
 
   // keep the previous focused value around for animations
   const latestFocused = useLatest(focused, focused);
@@ -254,6 +251,7 @@ export function Chart(options) {
 
   const contextValue = {
     latestFocused,
+    focusedElement,
     tooltip,
     width,
     height,
@@ -288,12 +286,6 @@ export function Chart(options) {
       getOnFocus()(focused);
     }
   }, [focused, getOnFocus]);
-
-  React.useEffect(() => {
-    if (getOnHover()) {
-      getOnHover()(focused);
-    }
-  }, [focused, getOnHover]);
 
   const previousDragging = usePrevious(pointer.dragging);
 
