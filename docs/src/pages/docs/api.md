@@ -7,7 +7,7 @@ title: API
 
 ## Memoize your Props!
 
-As you'll see in every example, the React Charts `<Chart>` component expects all props and options to be memoized using either `React.useMemo` or `React.useCallback`. While passing an unmemoized option/prop to the `<Chart>` component won't severly break any visible functionality, your charts will be severly non-performant. Internally, React Charts uses the immutable nature of thes options/props to detect changes to the configuration and update accordingly.
+As you'll see in every example, the React Charts `<Chart>` component expects all props and options to be memoized using either `React.useMemo` or `React.useCallback`. While passing an unmemoized option/prop to the `<Chart>` component won't severly break any visible functionality, your charts will be severly non-performant. Internally, React Charts uses the immutable nature of these options/props to detect changes to the configuration and update accordingly.
 
 While this may feel heavy at first, it gives you, the dev, full control over when you want to update your charts. To trigger and update, simply trigger one of your `React.useMemo` or `React.useCallback` hooks on the part of the config that you would like to update!
 
