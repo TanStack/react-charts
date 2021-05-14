@@ -1,18 +1,26 @@
-import React from "react";
+import React from 'react';
 //
 
 const defaultStyle = {
   strokeWidth: 0,
-  fill: "#333",
+  fill: '#333',
   opacity: 1,
   rx: 0,
-  ry: 0
+  ry: 0,
 };
 
-export default function Rectangle ({ style, opacity = 1, x1, y1, x2, y2, ...rest }) {
+export default function Rectangle({
+  style,
+  opacity = 1,
+  x1,
+  y1,
+  x2,
+  y2,
+  ...rest
+}) {
   const resolvedStyle = {
     ...defaultStyle,
-    ...style
+    ...style,
   };
 
   const xStart = Math.min(x1, x2);
@@ -26,10 +34,10 @@ export default function Rectangle ({ style, opacity = 1, x1, y1, x2, y2, ...rest
   return (
     <rect
       {...rest}
-      x={xStart}
-      y={yStart}
-      width={width}
-      height={height}
+      x={Number.isNaN(xStart) ? 0 : xStart}
+      y={Number.isNaN(yStart) ? 0 : yStart}
+      width={Number.isNaN(width) ? 0 : width}
+      height={Number.isNaN(height) ? 0 : height}
       style={resolvedStyle}
     />
   );
