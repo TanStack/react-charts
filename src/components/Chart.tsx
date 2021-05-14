@@ -49,7 +49,7 @@ const defaultColorScheme = [
 function applyDefaults({
   getSeriesStyle = () => ({}),
   getDatumStyle = () => ({}),
-  getSeriesOrder = (d) => d,
+  getSeriesOrder = d => d,
   grouping = groupingPrimary,
   focus = focusAuto,
   showVoronoi = false,
@@ -79,9 +79,9 @@ function useCreateStore(initialState) {
 }
 
 export default function ChartState(options) {
-  let { Provider: StateProvider } = useCreateStore((setState) => {
-    const setOffset = (updater) =>
-      setState((old) => {
+  let { Provider: StateProvider } = useCreateStore(setState => {
+    const setOffset = updater =>
+      setState(old => {
         const newOffset = functionalUpdate(updater, old.offset);
 
         return {
@@ -142,7 +142,7 @@ export function Chart(options) {
   } = applyDefaults(options);
 
   let [{ focused, element, axisDimensions, pointer }] = useChartState(
-    (d) => ({
+    d => ({
       focused: d.focused,
       element: d.element,
       axisDimensions: d.axisDimensions,
@@ -193,7 +193,7 @@ export function Chart(options) {
     defaultColors,
   });
 
-  const focusedElement = React.useMemo(() => {
+  focused = React.useMemo(() => {
     // Get the closest focus datum out of the datum group
     if (focused || element) {
       let resolvedFocus = focus;
@@ -251,7 +251,7 @@ export function Chart(options) {
 
   const contextValue = {
     latestFocused,
-    focusedElement,
+    focused,
     tooltip,
     width,
     height,
