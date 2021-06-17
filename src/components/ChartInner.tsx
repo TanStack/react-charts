@@ -33,7 +33,6 @@ export default React.forwardRef(function ChartInner(
     seriesOptions,
     getSeriesOrder,
     focused,
-    focused,
     getOnClick,
   } = useChartContext();
 
