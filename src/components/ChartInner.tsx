@@ -33,12 +33,12 @@ export default React.forwardRef(function ChartInner(
     seriesOptions,
     getSeriesOrder,
     focused,
-    focusedElement,
+    focused,
     getOnClick,
   } = useChartContext();
 
-  const [offset] = useChartState((d) => d.offset);
-  const [setOffset, setChartState] = useChartState((d) => d.setOffset);
+  const [offset] = useChartState(d => d.offset);
+  const [setOffset, setChartState] = useChartState(d => d.setOffset);
 
   useIsomorphicLayoutEffect(() => {
     if (!svgRef.current) {
@@ -55,9 +55,9 @@ export default React.forwardRef(function ChartInner(
     }
   });
 
-  const onMouseLeave = (e) => {
-    setChartState((old) => ({ ...old, focused: null }));
-    setChartState((old) => ({
+  const onMouseLeave = e => {
+    setChartState(old => ({ ...old, focused: null }));
+    setChartState(old => ({
       ...old,
       pointer: {
         ...old.pointer,
@@ -68,7 +68,7 @@ export default React.forwardRef(function ChartInner(
 
   const rafRef = React.useRef();
 
-  const onMouseMove = (e) => {
+  const onMouseMove = e => {
     if (rafRef.current) {
       Raf.cancel(rafRef.current);
     }
@@ -76,7 +76,7 @@ export default React.forwardRef(function ChartInner(
       rafRef.current = null;
       const { clientX, clientY } = e;
 
-      setChartState((old) => {
+      setChartState(old => {
         const x = clientX - offset.left - gridX;
         const y = clientY - offset.top - gridY;
 
@@ -100,7 +100,7 @@ export default React.forwardRef(function ChartInner(
     document.removeEventListener('mouseup', onMouseUp);
     document.removeEventListener('mousemove', onMouseMove);
 
-    setChartState((old) => {
+    setChartState(old => {
       return {
         ...old,
         pointer: {
@@ -120,7 +120,7 @@ export default React.forwardRef(function ChartInner(
     document.addEventListener('mouseup', onMouseUp);
     document.addEventListener('mousemove', onMouseMove);
 
-    setChartState((old) => ({
+    setChartState(old => ({
       ...old,
       pointer: {
         ...old.pointer,
@@ -136,7 +136,7 @@ export default React.forwardRef(function ChartInner(
   const orderedStackData = getSeriesOrder(reversedStackData);
 
   const focusedSeriesIndex = focused
-    ? orderedStackData.findIndex((series) => series.id === focused.series.id)
+    ? orderedStackData.findIndex(series => series.id === focused.series.id)
     : -1;
 
   // Bring focused series to the front
@@ -148,7 +148,7 @@ export default React.forwardRef(function ChartInner(
       ]
     : orderedStackData;
 
-  const stacks = focusOrderedStackData.map((stack) => {
+  const stacks = focusOrderedStackData.map(stack => {
     return (
       <stack.Component
         key={stack.id}
@@ -180,9 +180,7 @@ export default React.forwardRef(function ChartInner(
         position: 'absolute',
         ...style,
       }}
-      onClick={
-        getOnClick() ? (e) => getOnClick()(focusedElement, e) : undefined
-      }
+      onClick={getOnClick() ? e => getOnClick()(focused, e) : undefined}
     >
       <svg
         ref={svgRef}
@@ -191,10 +189,10 @@ export default React.forwardRef(function ChartInner(
           height,
           overflow: 'hidden',
         }}
-        onMouseEnter={(e) => e.persist() || onMouseMove(e)}
-        onMouseMove={(e) => e.persist() || onMouseMove(e)}
-        onMouseLeave={(e) => e.persist() || onMouseLeave(e)}
-        onMouseDown={(e) => e.persist() || onMouseDown(e)}
+        onMouseEnter={e => e.persist() || onMouseMove(e)}
+        onMouseMove={e => e.persist() || onMouseMove(e)}
+        onMouseLeave={e => e.persist() || onMouseLeave(e)}
+        onMouseDown={e => e.persist() || onMouseDown(e)}
       >
         {width && height ? (
           <>
@@ -215,7 +213,7 @@ export default React.forwardRef(function ChartInner(
               />
               <Voronoi />
               <g className="axes">
-                {[...primaryAxes, ...secondaryAxes].map((axis) => (
+                {[...primaryAxes, ...secondaryAxes].map(axis => (
                   <Axis key={axis.id} {...axis} />
                 ))}
               </g>
