@@ -73,13 +73,9 @@ export default function Cursor({ primary }) {
     if (axis.position === 'left') {
       x1 = siblingRange[0];
       x2 = siblingRange[1];
-      alignPctX = -100;
-      alignPctY = -50;
     } else {
       x1 = siblingRange[1];
       x2 = siblingRange[0];
-      alignPctX = 0;
-      alignPctY = -50;
     }
   } else {
     x = axis.scale(latestValue);
@@ -88,12 +84,62 @@ export default function Cursor({ primary }) {
     if (axis.position === 'top') {
       y1 = siblingRange[0];
       y2 = siblingRange[1];
-      alignPctX = -500;
-      alignPctY = -100;
     } else {
       y1 = siblingRange[1];
       y2 = siblingRange[0];
-      alignPctX = -50;
+    }
+  }
+
+  const lineStartX = Math.min(x1, x2);
+  const lineStartY = Math.min(y1, y2);
+  const lineEndX = Math.max(x1, x2);
+  const lineEndY = Math.max(y1, y2);
+  const lineHeight = Math.max(lineEndY - lineStartY, 0);
+  const lineWidth = Math.max(lineEndX - lineStartX, 0);
+
+  let bubbleX;
+  let bubbleY;
+
+  // Bubble placement
+  if (axis.vertical) {
+    if (axis.position === 'left') {
+      if (!axis.RTL) {
+        bubbleX = lineStartX;
+      } else {
+        bubbleX = lineEndX;
+      }
+    } else {
+      if (!axis.RTL) {
+        bubbleX = lineEndX;
+      } else {
+        bubbleX = lineStartX;
+      }
+    }
+
+    bubbleY = lineStartY + lineHeight / 2;
+  } else {
+    bubbleX = lineStartX + lineWidth / 2;
+
+    if (axis.position === 'top') {
+      bubbleY = lineStartY;
+    } else {
+      bubbleY = lineEndY;
+    }
+  }
+
+  // Bubble anchoring
+  if (axis.vertical) {
+    alignPctY = -50;
+    if (axis.position === 'left') {
+      alignPctX = -100;
+    } else {
+      alignPctX = 0;
+    }
+  } else {
+    alignPctX = -50;
+    if (axis.position === 'top') {
+      alignPctY = -100;
+    } else {
       alignPctY = 0;
     }
   }
@@ -118,25 +164,9 @@ export default function Cursor({ primary }) {
       : ''
   );
 
-  const lineStartX = Math.min(x1, x2);
-  const lineStartY = Math.min(y1, y2);
-  const lineEndX = Math.max(x1, x2);
-  const lineEndY = Math.max(y1, y2);
-  const bubbleX =
-    axis.vertical && axis.RTL
-      ? lineEndX
-      : x1 + (!axis.vertical ? (x2 - x1) / 2 : 0) + (!axis.vertical ? 1 : 0);
-  const bubbleY =
-    !axis.vertical && axis.RTL
-      ? lineStartY
-      : y1 + (axis.vertical ? (y2 - y1) / 2 : 0) + (axis.vertical ? 1 : 0);
-
   // if (!axis.vertical) {
   // console.log({ bubbleX, bubbleY });
   // }
-
-  const lineHeight = Math.max(lineEndY - lineStartY, 0);
-  const lineWidth = Math.max(lineEndX - lineStartX, 0);
 
   let animateCoords;
   if (previousShowRef.current === resolvedShow) {
