@@ -17,8 +17,8 @@ const getElBox = el => {
 };
 
 function useIsLooping() {
-  const callThreshold = 60;
-  const timeLimit = 1000;
+  const callThreshold = 30;
+  const timeLimit = 500;
   const now = Date.now();
 
   const ref = React.useRef([now]);
@@ -32,7 +32,7 @@ function useIsLooping() {
   }
 
   const isLooping =
-    ref.current.length >= callThreshold && now - ref.current[0] < timeLimit;
+    ref.current.length === callThreshold && now - ref.current[0] < timeLimit;
 
   return isLooping;
 }
