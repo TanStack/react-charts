@@ -1,17 +1,21 @@
-import React from 'react'
+import React from 'react';
 //
 
 const defaultStyle = {
   fontFamily: 'Helvetica',
   fontSize: 10,
   opacity: 1,
-}
+};
 
-export default function Text({ style, opacity = 1, ...rest }) {
-  const resolvedStyle = {
-    ...defaultStyle,
-    ...style,
+const Text = React.forwardRef<SVGTextElement, React.ComponentProps<'text'>>(
+  ({ style, ...rest }, ref) => {
+    const resolvedStyle = {
+      ...defaultStyle,
+      ...style,
+    };
+
+    return <text ref={ref} {...rest} style={resolvedStyle} />;
   }
+);
 
-  return <text {...rest} style={resolvedStyle} />
-}
+export default Text;

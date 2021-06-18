@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 //
 
 const defaultStyle = {
@@ -6,13 +6,17 @@ const defaultStyle = {
   stroke: '#6b6b6b',
   fill: 'transparent',
   opacity: 1,
-}
+};
 
-export default function Path({ style, ...rest }) {
-  const resolvedStyle = {
-    ...defaultStyle,
-    ...style,
+const Path = React.forwardRef<SVGPathElement, React.ComponentProps<'path'>>(
+  ({ style, ...rest }, ref) => {
+    const resolvedStyle = {
+      ...defaultStyle,
+      ...style,
+    };
+
+    return <path ref={ref} {...rest} style={resolvedStyle} />;
   }
+);
 
-  return <path {...rest} style={resolvedStyle} />
-}
+export default Path;

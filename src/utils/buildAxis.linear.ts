@@ -30,8 +30,8 @@ const scales = {
   [axisTypeOrdinal]: scaleBand,
 };
 
-const detectVertical = (d) => [positionLeft, positionRight].indexOf(d) > -1;
-const detectRTL = (d) => [positionTop, positionRight].indexOf(d) > -1;
+const detectVertical = d => [positionLeft, positionRight].indexOf(d) > -1;
+const detectRTL = d => [positionTop, positionRight].indexOf(d) > -1;
 
 export default function buildAxisLinear({
   axis: {
@@ -58,7 +58,7 @@ export default function buildAxisLinear({
     outerPadding = 0.1,
     showGrid = null,
     showTicks = true,
-    filterTicks = (d) => d,
+    filterTicks = d => d,
     show = true,
     stacked = false,
     id: userId,
@@ -174,7 +174,7 @@ export default function buildAxisLinear({
   let cursorSize = 0;
   let stepSize = 0;
 
-  let seriesBandScale = (d) => d;
+  let seriesBandScale = d => d;
   let seriesBarSize = 1;
 
   if (type === axisTypeOrdinal || primary) {
@@ -188,7 +188,7 @@ export default function buildAxisLinear({
               current.datums.length > prev.length ? current.datums : prev,
             []
           )
-          .map((d) => d.primary)
+          .map(d => d.primary)
       )
       .rangeRound(range, 0.1)
       .padding(0);
@@ -207,7 +207,7 @@ export default function buildAxisLinear({
     seriesBandScale = scaleBand()
       .paddingInner(innerPadding / 2)
       .domain(
-        materializedData.filter((d) => d.Component === Bar).map((d, i) => i)
+        materializedData.filter(d => d.Component === Bar).map((d, i) => i)
       )
       .rangeRound([0, barSize]);
 

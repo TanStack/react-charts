@@ -1,5 +1,9 @@
-import React from 'react'
+import React from 'react';
 
-export default React.forwardRef(function Group(props, ref) {
-  return <g {...props} ref={ref} />
-})
+const Group = React.forwardRef<SVGGElement, React.ComponentProps<'g'>>(
+  (props, ref) => {
+    return <g ref={ref} {...props} />;
+  }
+);
+
+export default Group;

@@ -1,11 +1,11 @@
-import React from 'react'
+import React from 'react';
 //
-import { translateX, translateY, translate } from '../utils/Utils'
+import { translateX, translateY, translate } from '../utils/Utils';
 
-import Path from '../primitives/Path'
-import Line from '../primitives/Line'
-import Text from '../primitives/Text'
-import Group from '../primitives/Group'
+import Path from '../primitives/Path';
+import Line from '../primitives/Line';
+import Text from '../primitives/Text';
+import Group from '../primitives/Group';
 
 import {
   positionTop,
@@ -13,9 +13,9 @@ import {
   positionBottom,
   positionLeft,
   axisTypeOrdinal,
-} from '../utils/Constants.js'
-import useChartContext from '../hooks/useChartContext'
-import useMeasure from './AxisLinear.useMeasure'
+} from '../utils/Constants.js';
+import useChartContext from '../hooks/useChartContext';
+import useMeasure from './AxisLinear.useMeasure';
 
 const defaultStyles = {
   line: {
@@ -26,7 +26,7 @@ const defaultStyles = {
     fontSize: 10,
     fontFamily: 'sans-serif',
   },
-}
+};
 
 export default function AxisLinear(axis) {
   const {
@@ -49,21 +49,31 @@ export default function AxisLinear(axis) {
     tickOffset,
     gridOffset,
     spacing,
-    id,
-  } = axis
-  const [rotation, setRotation] = React.useState(0)
-  const { gridWidth, gridHeight, dark } = useChartContext()
+    labelRotation,
+  } = axis;
+  const [showRotated, setShowRotated] = React.useState(false);
+  const [rotation, setRotation] = React.useState(0);
+  const { gridWidth, gridHeight, dark } = useChartContext();
 
-  const elRef = React.useRef()
+  const elRef = React.useRef();
 
-  useMeasure({ ...axis, elRef, rotation, gridWidth, gridHeight, setRotation })
+  useMeasure({
+    ...axis,
+    elRef,
+    rotation,
+    gridWidth,
+    gridHeight,
+    setRotation,
+    showRotated,
+    setShowRotated,
+  });
 
   // Not ready? Render null
   if (!show) {
-    return null
+    return null;
   }
 
-  let axisPath
+  let axisPath;
   if (vertical) {
     if (position === positionLeft) {
       axisPath = `
@@ -71,14 +81,14 @@ export default function AxisLinear(axis) {
         H 0
         V ${range1}
         H ${-tickSizeOuter}
-      `
+      `;
     } else {
       axisPath = `
         M ${tickSizeOuter}, ${range0}
         H 0
         V ${range1}
         H ${tickSizeOuter}
-      `
+      `;
     }
   } else if (position === positionBottom) {
     axisPath = `
@@ -86,165 +96,164 @@ export default function AxisLinear(axis) {
         V 0
         H ${range1}
         V ${tickSizeOuter}
-      `
+      `;
   } else {
     axisPath = `
         M 0, ${-tickSizeOuter}
         V 0
         H ${range1}
         V ${-tickSizeOuter}
-              `
+              `;
   }
 
-  let showGridLine
+  let showGridLine;
   if (typeof showGrid === 'boolean') {
-    showGridLine = showGrid
+    showGridLine = showGrid;
   } else if (type === axisTypeOrdinal) {
-    showGridLine = false
+    showGridLine = false;
   } else {
-    showGridLine = true
+    showGridLine = true;
   }
 
   // Combine default styles with style props
   const axisStyles = {
     ...defaultStyles,
     ...styles,
-  }
+  };
 
-  return (
-    <Group
-      ref={elRef}
-      className="Axis"
-      style={{
-        pointerEvents: 'none',
-        transform:
-          position === positionRight
-            ? translateX(gridWidth)
-            : position === positionBottom
-            ? translateY(gridHeight)
-            : undefined,
-      }}
-    >
-      <Path
-        className="domain"
-        d={axisPath}
+  const renderAxis = (isRotated: boolean) => {
+    const show = isRotated ? showRotated : !showRotated;
+
+    return (
+      <Group
+        className={`Axis ${isRotated ? 'rotated' : 'unrotated'}`}
         style={{
-          stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
-          ...axisStyles.line,
+          transform:
+            position === positionRight
+              ? translateX(gridWidth)
+              : position === positionBottom
+              ? translateY(gridHeight)
+              : undefined,
+          ...(show
+            ? {
+                opacity: 1,
+                pointerEvents: 'all',
+              }
+            : {
+                opacity: 0,
+                pointerEvents: 'none',
+              }),
         }}
-      />
-      <Group className="ticks">
-        {ticks.map((tick, i) => (
-          <Group
-            key={[String(tick), i].join('_')}
-            className="tick"
-            style={{
-              transform: transform(scale(tick) || 0),
-            }}
-          >
-            {/* Render the grid line */}
-            {showGridLine && (
-              <Line
-                className="gridLine"
-                x1={vertical ? 0 : gridOffset}
-                x2={vertical ? scaleMax : gridOffset}
-                y1={vertical ? gridOffset : 0}
-                y2={vertical ? gridOffset : scaleMax}
-                style={{
-                  stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
-                  strokeWidth: 1,
-                  ...axisStyles.line,
-                }}
-              />
-            )}
-            {/* Render the tick line  */}
-            {showTicks ? (
-              <g className="labelGroup">
+      >
+        <Path
+          className="domain"
+          d={axisPath}
+          style={{
+            stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
+            ...axisStyles.line,
+          }}
+        />
+        <Group className="ticks">
+          {ticks.map((tick, i) => (
+            <Group
+              key={[String(tick), i].join('_')}
+              className="tick"
+              style={{
+                transform: transform(scale(tick) || 0),
+              }}
+            >
+              {/* Render the grid line */}
+              {showGridLine && (
                 <Line
-                  className="tickline"
-                  x1={vertical ? 0 : tickOffset}
-                  x2={
-                    vertical ? directionMultiplier * tickSizeInner : tickOffset
-                  }
-                  y1={vertical ? tickOffset : 0}
-                  y2={
-                    vertical ? tickOffset : directionMultiplier * tickSizeInner
-                  }
+                  className="gridLine"
+                  x1={vertical ? 0 : gridOffset}
+                  x2={vertical ? scaleMax : gridOffset}
+                  y1={vertical ? gridOffset : 0}
+                  y2={vertical ? gridOffset : scaleMax}
                   style={{
-                    stroke: dark ? 'rgba(255,255,255, .1)' : 'rgba(0,0,0, .1)',
+                    stroke: dark
+                      ? 'rgba(255,255,255, .05)'
+                      : 'rgba(0,0,0, .05)',
                     strokeWidth: 1,
                     ...axisStyles.line,
                   }}
                 />
-                <Text
-                  className="tickLabel"
-                  style={{
-                    fill: dark ? 'white' : 'black',
-                    ...axisStyles.tick,
-                    transform: `${translate(
-                      vertical ? directionMultiplier * spacing : tickOffset,
-                      vertical ? tickOffset : directionMultiplier * spacing
-                    )} rotate(${-rotation}deg)`,
-                  }}
-                  dominantBaseline={
-                    rotation
-                      ? 'central'
-                      : position === positionBottom
-                      ? 'hanging'
-                      : position === positionTop
-                      ? 'alphabetic'
-                      : 'central'
-                  }
-                  textAnchor={
-                    rotation
-                      ? 'end'
-                      : position === positionRight
-                      ? 'start'
-                      : position === positionLeft
-                      ? 'end'
-                      : 'middle'
-                  }
-                >
-                  {format(tick, i)}
-                </Text>
-                <Text
-                  className="tickLabel-measurer"
-                  style={{
-                    ...axisStyles.tick,
-                    transform: `${translate(
-                      vertical ? directionMultiplier * spacing : tickOffset,
-                      vertical ? tickOffset : directionMultiplier * spacing
-                    )}`,
-                    fill: 'red',
-                    opacity: 0,
-                    pointerEvents: 'none',
-                  }}
-                  dominantBaseline={
-                    rotation
-                      ? 'central'
-                      : position === positionBottom
-                      ? 'hanging'
-                      : position === positionTop
-                      ? 'alphabetic'
-                      : 'central'
-                  }
-                  textAnchor={
-                    rotation
-                      ? 'end'
-                      : position === positionRight
-                      ? 'start'
-                      : position === positionLeft
-                      ? 'end'
-                      : 'middle'
-                  }
-                >
-                  {format(tick, i)}
-                </Text>
-              </g>
-            ) : null}
-          </Group>
-        ))}
+              )}
+              {/* Render the tick line  */}
+              {showTicks ? (
+                <g className="labelGroup">
+                  <Line
+                    className="tickline"
+                    x1={vertical ? 0 : tickOffset}
+                    x2={
+                      vertical
+                        ? directionMultiplier * tickSizeInner
+                        : tickOffset
+                    }
+                    y1={vertical ? tickOffset : 0}
+                    y2={
+                      vertical
+                        ? tickOffset
+                        : directionMultiplier * tickSizeInner
+                    }
+                    style={{
+                      stroke: dark
+                        ? 'rgba(255,255,255, .1)'
+                        : 'rgba(0,0,0, .1)',
+                      strokeWidth: 1,
+                      ...axisStyles.line,
+                    }}
+                  />
+                  <Text
+                    className="tickLabel"
+                    style={{
+                      fill: dark ? 'white' : 'black',
+                      ...axisStyles.tick,
+                      transform: `${translate(
+                        vertical ? directionMultiplier * spacing : tickOffset,
+                        vertical ? tickOffset : directionMultiplier * spacing
+                      )} rotate(${
+                        isRotated
+                          ? position === 'top'
+                            ? labelRotation
+                            : -labelRotation
+                          : 0
+                      }deg)`,
+                    }}
+                    dominantBaseline={
+                      isRotated
+                        ? 'central'
+                        : position === positionBottom
+                        ? 'hanging'
+                        : position === positionTop
+                        ? 'alphabetic'
+                        : 'central'
+                    }
+                    textAnchor={
+                      isRotated
+                        ? 'end'
+                        : position === positionRight
+                        ? 'start'
+                        : position === positionLeft
+                        ? 'end'
+                        : 'middle'
+                    }
+                  >
+                    {format(tick, i)}
+                  </Text>
+                </g>
+              ) : null}
+            </Group>
+          ))}
+        </Group>
       </Group>
+    );
+  };
+
+  return (
+    <Group ref={elRef}>
+      {renderAxis(false)}
+      {renderAxis(true)}
     </Group>
-  )
+  );
 }
