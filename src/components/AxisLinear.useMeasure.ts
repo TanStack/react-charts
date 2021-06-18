@@ -126,14 +126,7 @@ export default function useMeasure({
 
   // Measure after if needed
   useIsomorphicLayoutEffect(() => {
-    // React.useEffect(() => {
-    // let timeout = setTimeout(() => {
     measureDimensions();
-    // }, 100);
-
-    // return () => {
-    //   clearTimeout(timeout);
-    // };
   });
 
   useIsomorphicLayoutEffect(() => {
