@@ -1,9 +1,10 @@
-// import buildAxisPie from './buildAxis.pie'
-import buildAxisLinear from "./buildAxis.linear";
+import { AxisOptions, GridDimensions, SeriesWithComponentIndex } from '../types'
+import buildAxisLinear from './buildAxis.linear'
 
-export default function(config) {
-  // if (config.type === 'pie') {
-  // return buildAxisPie(config)
-  // }
-  return buildAxisLinear(config);
+export default function (
+  options: AxisOptions,
+  materializedData: SeriesWithComponentIndex[],
+  gridDimensions: GridDimensions
+) {
+  return buildAxisLinear(options, materializedData, gridDimensions)
 }

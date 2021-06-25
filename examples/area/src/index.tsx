@@ -1,23 +1,21 @@
-import React from "react";
-import ReactDOM from "react-dom";
-
-import { Chart } from "react-charts";
-
-import useDemoConfig from "./useDemoConfig";
-import useLagRadar from "./useLagRadar";
 import ResizableBox from "./ResizableBox";
 import "./styles.css";
+import useDemoConfig from "./useDemoConfig";
+import useLagRadar from "./useLagRadar";
+import React from "react";
+import { Chart } from "react-charts";
+import ReactDOM from "react-dom";
 
 export default function App() {
   useLagRadar();
 
   const { data, randomizeData } = useDemoConfig({
-    series: 20
+    series: 20,
   });
 
-  const series = React.useMemo(
+  const getSeriesOptions = React.useCallback(
     () => ({
-      type: "area"
+      type: "area" as const,
     }),
     []
   );
@@ -25,7 +23,7 @@ export default function App() {
   const axes = React.useMemo(
     () => [
       { primary: true, position: "bottom", type: "time" },
-      { position: "left", type: "linear", stacked: true }
+      { position: "left", type: "linear", stacked: true },
     ],
     []
   );
@@ -36,7 +34,14 @@ export default function App() {
       <br />
       <br />
       <ResizableBox>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart
+          options={{
+            data,
+            getSeriesOptions,
+            axes,
+            tooltip: true,
+          }}
+        />
       </ResizableBox>
     </>
   );

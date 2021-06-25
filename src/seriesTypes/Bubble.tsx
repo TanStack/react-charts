@@ -1,20 +1,19 @@
-import React from 'react';
+import { useAtom } from 'jotai'
+import React, { CSSProperties } from 'react'
+
+import { focusedDatumAtom } from '../atoms'
+import Circle from '../primitives/Circle'
+import { AxisLinear, Datum, Series } from '../types'
 //
-
-import { isValidPoint, buildStyleGetters } from '../utils/Utils';
-
-import useSeriesStyle from '../hooks/useSeriesStyle';
-import useDatumStyle from '../hooks/useDatumStyle';
-
-import Circle from '../primitives/Circle';
-import useChartState from '../hooks/useChartState';
+import { isValidPoint } from '../utils/Utils'
 
 const circleDefaultStyle = {
   r: 2,
-};
+}
 
-export default function Bubble({ series }) {
-  const style = useSeriesStyle(series);
+export default function Bubble({ series }: { series: Series }) {
+  const [focusedDatum] = useAtom(focusedDatumAtom)
+  const style = series.getStatusStyle(focusedDatum)
 
   return (
     <g>
@@ -27,27 +26,33 @@ export default function Bubble({ series }) {
               style,
             }}
           />
-        );
+        )
       })}
     </g>
-  );
+  )
 }
 
-Bubble.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
-  datum.primaryCoord = primaryAxis.scale(datum.primary);
-  datum.secondaryCoord = secondaryAxis.scale(datum.secondary);
-  datum.x = xAxis.scale(datum.xValue);
-  datum.y = yAxis.scale(datum.yValue);
-  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue);
-  datum.base = primaryAxis.vertical
-    ? xAxis.scale(datum.baseValue)
-    : yAxis.scale(datum.baseValue);
+Bubble.plotDatum = (
+  datum: Datum,
+  primaryAxis: AxisLinear,
+  secondaryAxis: AxisLinear,
+  xAxis: AxisLinear,
+  yAxis: AxisLinear
+) => {
+  datum.primaryCoord = primaryAxis.scale(datum.primary)
+  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
+  datum.x = xAxis.scale(datum.xValue as any)
+  datum.y = yAxis.scale(datum.yValue as any)
+  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
+  datum.base = primaryAxis.isVertical
+    ? xAxis.scale(datum.baseValue as any)
+    : yAxis.scale(datum.baseValue as any)
   // Adjust non-bar elements for ordinal scales
   if (xAxis.type === 'ordinal') {
-    datum.x += xAxis.tickOffset;
+    datum.x! += xAxis.tickOffset
   }
   if (yAxis.type === 'ordinal') {
-    datum.y += yAxis.tickOffset;
+    datum.y! += yAxis.tickOffset
   }
 
   // Set the default anchor point
@@ -56,28 +61,25 @@ Bubble.plotDatum = (datum, { primaryAxis, secondaryAxis, xAxis, yAxis }) => {
     y: datum.y,
     verticalPadding: datum.r,
     horizontalPadding: datum.r,
-  };
+  }
 
   // Set the pointer points (used in voronoi)
-  datum.boundingPoints = [datum.anchor];
-};
+  datum.boundingPoints = [datum.anchor]
+}
 
-Bubble.buildStyles = (series, { defaultColors }) => {
-  const defaults = {
-    // Pass some sane defaults
-    color: defaultColors[series.index % (defaultColors.length - 1)],
-  };
-
-  buildStyleGetters(series, defaults);
-};
-
-function Point({ datum, style }) {
-  const dataStyle = useDatumStyle(datum);
-  const [, setChartState] = useChartState(() => null);
+function Point({
+  datum,
+  style,
+}: {
+  datum: Datum
+  style: CSSProperties & { circle?: CSSProperties }
+}) {
+  const [focusedDatum] = useAtom(focusedDatumAtom)
+  const dataStyle = datum.getStatusStyle(focusedDatum)
 
   const circleProps = {
-    x: datum ? datum.x : undefined,
-    y: datum ? datum.y : undefined,
+    cx: datum ? datum.x : undefined,
+    cy: datum ? datum.y : undefined,
     style: {
       ...circleDefaultStyle,
       ...(typeof datum.radius !== 'undefined'
@@ -90,26 +92,10 @@ function Point({ datum, style }) {
       ...dataStyle,
       ...dataStyle.circle,
     },
-    onMouseEnter: React.useCallback(
-      (e) =>
-        setChartState((state) => ({
-          ...state,
-          element: datum,
-        })),
-      [datum, setChartState]
-    ),
-    onMouseLeave: React.useCallback(
-      (e) =>
-        setChartState((state) => ({
-          ...state,
-          element: null,
-        })),
-      [setChartState]
-    ),
-  };
+  }
 
   if (!datum.defined) {
-    return null;
+    return null
   }
-  return <Circle {...circleProps} />;
+  return <Circle {...circleProps} />
 }

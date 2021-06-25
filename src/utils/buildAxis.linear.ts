@@ -4,93 +4,68 @@ import {
   scaleTime,
   scaleUtc,
   scaleBand,
-} from '../../d3';
-//
+  ScaleLinear,
+  ScaleTime,
+} from 'd3-scale'
+
 import {
-  positionTop,
-  positionRight,
-  positionBottom,
-  positionLeft,
-  axisTypeOrdinal,
-  axisTypeTime,
-  axisTypeUtc,
-  axisTypeLinear,
-  axisTypeLog,
-} from './Constants.js';
+  AxisLinear,
+  AxisLinearOptions,
+  GridDimensions,
+  ResolvedAxisLinearOptions,
+  SeriesWithComponentIndex,
+} from '../types'
+//
+import { translateX, translateY } from './Utils'
 
-import { identity, translateX, translateY } from './Utils';
-
-import Bar from '../seriesTypes/Bar';
-
-const scales = {
-  [axisTypeLinear]: scaleLinear,
-  [axisTypeLog]: scaleLog,
-  [axisTypeTime]: scaleTime,
-  [axisTypeUtc]: scaleUtc,
-  [axisTypeOrdinal]: scaleBand,
-};
-
-const detectVertical = d => [positionLeft, positionRight].indexOf(d) > -1;
-const detectRTL = d => [positionTop, positionRight].indexOf(d) > -1;
-
-export default function buildAxisLinear({
-  axis: {
-    primary,
-    type,
-    invert,
-    position,
-    primaryAxisId,
-    min: userMin = undefined,
-    max: userMax = undefined,
-    hardMin = undefined,
-    hardMax = undefined,
-    base = undefined,
-    tickCount = 10,
-    minTickCount = 1,
-    maxTickCount = 99999999,
-    tickValues = null,
-    format: userFormat = null,
-    tickSizeInner = 6,
-    tickSizeOuter = 6,
-    tickPadding = 10,
-    labelRotation = 60,
-    innerPadding = 0.2,
-    outerPadding = 0.1,
-    showGrid = null,
-    showTicks = true,
-    filterTicks = d => d,
-    show = true,
-    stacked = false,
-    id: userId,
-    estimatedTickSize: userEstimatedTickSize,
-  },
-  materializedData,
-  gridHeight,
-  gridWidth,
-}) {
-  if (!position) {
-    throw new Error(`Chart axes must have a valid 'position' property`);
+function defaultAxisOptions(
+  options: AxisLinearOptions
+): ResolvedAxisLinearOptions {
+  return {
+    ...options,
+    tickCount: options.tickCount ?? 10,
+    minTickCount: options.minTickCount ?? 1,
+    maxTickCount: options.maxTickCount ?? 99999999,
+    tickSizeInner: options.tickSizeInner ?? 6,
+    tickSizeOuter: options.tickSizeOuter ?? 6,
+    tickPadding: options.tickPadding ?? 10,
+    labelRotation: options.labelRotation ?? 60,
+    innerPadding: options.innerPadding ?? 0.2,
+    outerPadding: options.outerPadding ?? 0.1,
+    showTicks: options.showTicks ?? true,
+    filterTicks: options.filterTicks ?? (d => d),
+    show: options.show ?? true,
+    stacked: options.stacked ?? false,
   }
+}
+
+export default function buildAxisLinear(
+  userOptions: AxisLinearOptions,
+  materializedData: SeriesWithComponentIndex[],
+  gridDimensions: GridDimensions
+): AxisLinear {
+  const options = defaultAxisOptions(userOptions)
+
+  if (!options.position) {
+    throw new Error(`Chart axes must have a valid 'position' property`)
+  }
+
   // Detect some settings
-  const valueKey = primary ? 'primary' : 'secondary';
-  const groupKey = !primary && 'primary';
-  const AxisIdKey = `${valueKey}AxisId`;
-  const vertical = detectVertical(position);
-  const RTL = detectRTL(position); // Right to left OR top to bottom
-  const estimatedTickSize = userEstimatedTickSize ?? vertical ? 20 : 50;
+  const valueKey = options.primary ? 'primary' : 'secondary'
+  const groupKey = !options.primary && 'primary'
+  const AxisIdKey = `${valueKey}AxisId` as const
+  const isVertical = ['left', 'right'].indexOf(options.position) > -1
 
-  const id = userId || `${position}_${type}`;
-  const isTimeType = [axisTypeTime, axisTypeUtc].includes(type);
-
-  // TODO: Any sorting needs to happen here, else the min/max's might not line up correctly
+  const id = options.id || `${options.position}_${options.type}`
+  const isTimeType = ['time', 'utc'].includes(options.type)
 
   // First we need to find unique values, min/max values and negative/positive totals
-  const uniqueVals = [];
-  let min;
-  let max;
-  let negativeTotalByKey = {};
-  let positiveTotalByKey = {};
-  let domain;
+  const uniquePrimariesSet = new Set<any>()
+  let min
+  let max
+  const negativeTotalByKey: Record<any, number> = {}
+  const positiveTotalByKey: Record<any, number> = {}
+  let domain: [any, any] | any[]
 
   // Loop through each series
   for (
@@ -102,7 +77,7 @@ export default function buildAxisLinear({
       materializedData[seriesIndex][AxisIdKey] &&
       materializedData[seriesIndex][AxisIdKey] !== id
     ) {
-      continue;
+      continue
     }
     // Loop through each datum
     for (
@@ -110,213 +85,206 @@ export default function buildAxisLinear({
       datumIndex < materializedData[seriesIndex].datums.length;
       datumIndex++
     ) {
-      const datum = materializedData[seriesIndex].datums[datumIndex];
-      let value;
-      const key = groupKey ? datum[groupKey] : datumIndex;
+      const datum = materializedData[seriesIndex].datums[datumIndex]
+      let value = 0
+      const key: any = groupKey ? datum[groupKey] : datumIndex
       // For ordinal scales, unique the values
-      if (type === axisTypeOrdinal) {
-        if (uniqueVals.indexOf() === -1) {
-          uniqueVals.push(
-            materializedData[seriesIndex].datums[datumIndex][valueKey]
-          );
-        }
-      } else if (type === axisTypeTime || type === axisTypeUtc) {
-        value = +datum[valueKey];
+      if (options.type === 'ordinal') {
+        uniquePrimariesSet.add(
+          materializedData[seriesIndex].datums[datumIndex][valueKey]
+        )
+      } else if (isTimeType) {
+        value = +(datum[valueKey] as number)
       } else {
-        value = datum[valueKey];
+        value = datum[valueKey] as number
       }
 
       // Add to stack total
-      if (stacked) {
+      if (options.stacked) {
         if (value > 0) {
-          positiveTotalByKey[key] =
-            typeof positiveTotalByKey[key] !== 'undefined'
-              ? positiveTotalByKey[key] + value
-              : value;
+          positiveTotalByKey[key] = (positiveTotalByKey[key] ?? 0) + value
         } else {
-          negativeTotalByKey[key] =
-            typeof negativeTotalByKey[key] !== 'undefined'
-              ? negativeTotalByKey[key] + value
-              : value;
+          negativeTotalByKey[key] = (negativeTotalByKey[key] ?? 0) + value
         }
       } else {
         // Find min/max
-        min = typeof min !== 'undefined' ? Math.min(min, value) : value;
-        max = typeof max !== 'undefined' ? Math.max(max, value) : value;
+        min = typeof min !== 'undefined' ? Math.min(min, value) : value
+        max = typeof max !== 'undefined' ? Math.max(max, value) : value
       }
     }
   }
 
-  if (type === axisTypeOrdinal) {
-    domain = uniqueVals;
-  } else if (stacked) {
+  if (options.type === 'ordinal') {
+    domain = Array.from(uniquePrimariesSet.values())
+  } else if (options.stacked) {
     domain = [
       Math.min(0, ...Object.values(negativeTotalByKey)),
       Math.max(0, ...Object.values(positiveTotalByKey)),
-    ];
+    ]
   } else {
-    domain = [min, max];
+    domain = [min, max]
   }
 
   // Now we need to figure out the range
-  let range = [0, vertical ? gridHeight : gridWidth]; // axes by default read from top to bottom and left to right
-  if (vertical && !primary) {
+  const range: [number, number] = [
+    0,
+    isVertical ? gridDimensions.gridHeight : gridDimensions.gridWidth,
+  ] // axes by default read from top to bottom and left to right: ;
+  if (isVertical && !options.primary) {
     // Vertical secondary ranges get inverted by default
-    range.reverse();
+    range.reverse()
   }
 
   // Give the scale a home
-  let scale;
+  let scale
 
   // If this is an ordinal or other primary axis, it needs to be able to display bars.
-  let bandScale;
-  let barSize = 0;
-  let cursorSize = 0;
-  let stepSize = 0;
+  let bandScale
+  let barSize = 0
+  let cursorSize = 0
+  let stepSize = 0
 
-  let seriesBandScale = d => d;
-  let seriesBarSize = 1;
+  let seriesBandScale
+  let seriesBarSize = 1
 
-  if (type === axisTypeOrdinal || primary) {
+  if (options.type === 'ordinal' || options.primary) {
     // Calculate a band axis that is similar and pass down the bandwidth
     // just in case.
+
     bandScale = scaleBand()
-      .domain(
-        materializedData
-          .reduce(
-            (prev, current) =>
-              current.datums.length > prev.length ? current.datums : prev,
-            []
-          )
-          .map(d => d.primary)
-      )
-      .rangeRound(range, 0.1)
-      .padding(0);
+      .domain(Array.from(uniquePrimariesSet.values()))
+      .rangeRound(range)
+      .padding(0)
 
-    bandScale.paddingOuter(outerPadding).paddingInner(innerPadding);
-    barSize = bandScale.bandwidth();
+    bandScale
+      .paddingOuter(options.outerPadding)
+      .paddingInner(options.innerPadding)
+    barSize = bandScale.bandwidth()
 
-    if (type === axisTypeOrdinal) {
-      cursorSize = barSize;
+    if (options.type === 'ordinal') {
+      cursorSize = barSize
     }
 
     // barSize = bandScale.bandwidth()
-    stepSize = bandScale.step();
+    stepSize = bandScale.step()
 
     // Create a seriesBandScale in case this axis isn't stacked
     seriesBandScale = scaleBand()
-      .paddingInner(innerPadding / 2)
+      .paddingInner(options.innerPadding / 2)
       .domain(
-        materializedData.filter(d => d.Component === Bar).map((d, i) => i)
+        materializedData
+          .filter(d => (d.Component as any).isBar)
+          .map((_, i) => `${i}`)
       )
-      .rangeRound([0, barSize]);
+      .rangeRound([0, barSize])
 
-    seriesBarSize = seriesBandScale.bandwidth();
+    seriesBarSize = seriesBandScale.bandwidth()
   }
 
-  if (type === axisTypeOrdinal) {
+  if (options.type === 'ordinal') {
     // If it's ordinal, just assign the bandScale we made
-    scale = bandScale;
+    scale = bandScale
   } else {
     // Otherwise, create a new scale of the appropriate type
-    scale = scales[type]();
+    if (options.type === 'linear') {
+      scale = scaleLinear()
+    } else if (options.type === 'log') {
+      scale = scaleLog()
+    } else if (options.type === 'time') {
+      scale = scaleTime()
+    } else if (options.type === 'utc') {
+      scale = scaleUtc()
+    } else if (options.type === 'ordinal') {
+      scale = scaleBand()
+    }
+  }
+
+  if (!scale) {
+    console.info(userOptions)
+    throw new Error('invalid axis type for axis above ☝️')
   }
 
   // Set base, min, and max
-  if (typeof base === 'number') {
-    domain[0] = Math.min(domain[0], base);
-    domain[1] = Math.max(domain[1], base);
+  if (typeof options.base === 'number') {
+    domain[0] = Math.min(domain[0], options.base)
+    domain[1] = Math.max(domain[1], options.base)
   }
-  if (typeof defaultMin === 'number') {
-    domain[0] = Math.min(domain[0], userMin);
+  if (typeof options.min === 'number') {
+    domain[0] = Math.min(domain[0], options.min)
   }
-  if (typeof defaultMax === 'number') {
-    domain[1] = Math.max(domain[1], userMax);
+  if (typeof options.max === 'number') {
+    domain[1] = Math.max(domain[1], options.max)
   }
 
   // Set the domain
-  scale.domain(domain);
+  scale.domain(domain)
 
   // If we're not using an ordinal scale, round the ticks to "nice" values
-  if (type !== axisTypeOrdinal) {
-    scale.nice();
+  if (options.type !== 'ordinal') {
+    ;(scale as
+      | ScaleLinear<number, number, never>
+      | ScaleTime<number, number, never>).nice()
   }
 
   // If hard min and max are set, override any "nice" rounding values
-  if (typeof hardMin === 'number') {
-    scale.domain([hardMin, scale.domain()[1]]);
+  if (typeof options.hardMin === 'number') {
+    scale.domain([options.hardMin, Number(scale.domain()[1])])
   }
-  if (typeof hardMax === 'number') {
-    scale.domain([scale.domain()[0], hardMax]);
+  if (typeof options.hardMax === 'number') {
+    scale.domain([Number(scale.domain()[0]), options.hardMax])
   }
 
   // Invert if necessary
-  if (invert) {
-    scale.domain([...scale.domain()].reverse());
+  if (options.invert) {
+    // @ts-ignore
+    scale.domain(Array.from(scale.domain()).reverse())
   }
 
   // Now set the range
-  scale.range(range);
+  scale.range(range)
 
-  const scaleFormat = scale.tickFormat ? scale.tickFormat() : identity;
+  // @ts-ignore
+  const scaleFormat = scale.tickFormat ? scale.tickFormat() : d => d
+
+  const userFormat = options?.format
 
   const format = userFormat
-    ? (value, index) => userFormat(value, index, scaleFormat(value))
-    : scaleFormat;
+    ? (value: unknown, index: number) =>
+        userFormat(value, index, scaleFormat(value))
+    : scaleFormat
 
-  let resolvedTickCount = tickCount;
+  const resolvedTickCount = options.tickCount
 
-  const ticks = filterTicks(
-    tickValues ||
+  const ticks = options.filterTicks(
+    options.tickValues ||
+      // @ts-ignore
       (scale.ticks ? scale.ticks(resolvedTickCount) : scale.domain())
-  );
+  )
 
   const scaleMax =
-    position === positionBottom
-      ? -gridHeight
-      : position === positionLeft
-      ? gridWidth
-      : position === positionTop
-      ? gridHeight
-      : -gridWidth;
+    options.position === 'bottom'
+      ? -gridDimensions.gridHeight
+      : options.position === 'left'
+      ? gridDimensions.gridWidth
+      : options.position === 'top'
+      ? gridDimensions.gridHeight
+      : -gridDimensions.gridWidth
 
   const directionMultiplier =
-    position === positionTop || position === positionLeft ? -1 : 1;
+    options.position === 'top' || options.position === 'left' ? -1 : 1
 
-  const transform = !vertical ? translateX : translateY;
+  const transform = !isVertical ? translateX : translateY
 
-  const spacing = Math.max(tickSizeInner, 0) + tickPadding;
+  const tickSpacing = Math.max(options.tickSizeInner, 0) + options.tickPadding
 
   // Pass down the axis config (including the scale itself) for posterity
-  const axis = {
+  const axis: AxisLinear = {
+    ...options,
     id,
-    primary,
-    type,
-    invert,
-    position,
-    primaryAxisId,
-    hardMin,
-    hardMax,
-    base,
     isTimeType,
-    tickCount,
-    minTickCount,
-    maxTickCount,
-    tickValues,
-    tickSizeInner,
-    tickSizeOuter,
-    tickPadding,
-    labelRotation,
-    innerPadding,
-    outerPadding,
-    showGrid,
-    showTicks,
-    show,
-    stacked,
     scale,
-    uniqueVals,
-    vertical,
-    RTL,
+    uniquePrimariesSet,
+    isVertical,
     barSize,
     cursorSize,
     stepSize,
@@ -329,18 +297,17 @@ export default function buildAxisLinear({
     transform,
     ticks,
     format,
-    spacing,
-    estimatedTickSize,
-  };
-
-  if (type === axisTypeOrdinal) {
-    axis.gridOffset = -(axis.stepSize * innerPadding) / 2;
-    axis.tickOffset = axis.barSize / 2;
-    axis.barOffset = 0;
-  } else {
-    axis.tickOffset = 0;
-    axis.barOffset = -axis.barSize / 2;
+    tickSpacing,
+    gridOffset: 0,
+    tickOffset: 0,
+    barOffset: -barSize / 2,
   }
 
-  return axis;
+  if (options.type === 'ordinal') {
+    axis.gridOffset = -(axis.stepSize * options.innerPadding) / 2
+    axis.tickOffset = axis.barSize / 2
+    axis.barOffset = 0
+  }
+
+  return axis
 }

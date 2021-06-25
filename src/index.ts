@@ -1,3 +1,4 @@
-export { default as Chart } from './components/Chart';
-export { default as useChartState } from './hooks/useChartState';
-export * from './utils/Constants';
+import { Chart } from './components/Chart'
+
+export { Chart }
+export * from './types'

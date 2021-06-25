@@ -1,70 +1,48 @@
-export function buildStyleGetters(series, defaults) {
-  series.getStatusStyle = (focused, decorator) => {
-    const status = getStatus(series, focused)
-    series.style = getStatusStyle(series, status, decorator, defaults)
-    return series.style
+import {
+  AxisLinear,
+  Datum,
+  DatumFocusStatus,
+  DatumStyles,
+  Series,
+  SeriesFocusStatus,
+  SeriesStyles,
+} from '../types'
+
+export function getSeriesStatus(
+  series: Series,
+  focusedDatum: Datum | null
+): SeriesFocusStatus {
+  if (focusedDatum?.series.id === series.id) {
+    return 'focused'
   }
 
-  // We also need to decorate each datum in the same fashion
-  series.datums.forEach(datum => {
-    datum.getStatusStyle = (focused, decorator) => {
-      const status = getStatus(datum, focused)
-      datum.style = getStatusStyle(datum, status, decorator, defaults)
-      return datum.style
-    }
-  })
+  return 'none'
 }
 
-function getStatusStyle(item, status, decorator, defaults) {
-  if (item.series) {
-    defaults = {
-      ...defaults,
-      ...item.series.style,
-    }
+export function getDatumStatus(
+  datum: Datum,
+  focusedDatum: Datum | null
+): DatumFocusStatus {
+  if (datum === focusedDatum) {
+    return 'focused'
   }
 
-  return materializeStyles(
-    decorator({
-      ...item,
-      ...status,
-    }),
-    defaults
-  )
+  if (
+    datum.group.some(groupDatum => {
+      groupDatum.seriesId === focusedDatum?.series.id &&
+        groupDatum.index === focusedDatum?.index
+    })
+  ) {
+    return 'groupFocused'
+  }
+
+  return 'none'
 }
 
-function getStatus(item, focused) {
-  const status = {
-    focused: false,
-    otherFocused: false,
-  }
-
-  if (!focused) {
-    return status
-  }
-
-  // If the item is a datum
-  if (typeof item.primary !== 'undefined') {
-    const length = focused.group.length
-    for (let i = 0; i < length; i++) {
-      if (
-        focused.group[i].seriesId === item.series.id &&
-        focused.group[i].index === item.index
-      ) {
-        status.focused = true
-        break
-      }
-    }
-    status.otherFocused = !status.focused
-    // For series
-  } else if (focused.series) {
-    status.focused = focused.series.id === item.id
-    status.otherFocused = !status.focused
-  }
-
-  return status
-}
-
-function normalizeColor(style, defaults) {
+function normalizeColor(
+  style: SeriesStyles | DatumStyles,
+  defaults: SeriesStyles | DatumStyles
+): SeriesStyles | DatumStyles {
   return {
     ...style,
     stroke: style.stroke || style.color || defaults.stroke || defaults.color,
@@ -72,8 +50,12 @@ function normalizeColor(style, defaults) {
   }
 }
 
-const elementTypes = ['area', 'line', 'rectangle', 'circle']
-function materializeStyles(style = {}, defaults = {}) {
+const elementTypes = ['area', 'line', 'rectangle', 'circle'] as const
+
+export function materializeStyles(
+  style: SeriesStyles | DatumStyles = {},
+  defaults: SeriesStyles | DatumStyles = {}
+) {
   style = normalizeColor(style, defaults)
   for (let i = 0; i < elementTypes.length; i++) {
     const type = elementTypes[i]
@@ -84,7 +66,7 @@ function materializeStyles(style = {}, defaults = {}) {
   return style
 }
 
-export function isValidPoint(d) {
+export function isValidPoint(d: any) {
   if (d === null) {
     return false
   }
@@ -97,55 +79,23 @@ export function isValidPoint(d) {
   return true
 }
 
-export function getClosestPoint(position, datums) {
-  if (!datums || !position || !datums.length) {
-    return
-  }
-  let closestDistance = Infinity
-  let closestDatum = datums[0]
-  datums.forEach(datum => {
-    datum.boundingPoints.forEach(pointerPoint => {
-      const distance = Math.sqrt(
-        (pointerPoint.x - position.x) ** 2 + (pointerPoint.y - position.y) ** 2
-      )
-      if (distance < closestDistance) {
-        closestDistance = distance
-        closestDatum = datum
-      }
-    })
-  })
-  return closestDatum
+export function getAxisByAxisId(axes: AxisLinear[], id?: string): AxisLinear {
+  return axes.find(d => d.id === id) || axes[0]
 }
 
-export function getAxisByAxisId(axes, AxisId) {
-  return axes.find(d => d.id === AxisId) || axes[0]
-}
-
-export function getAxisIndexByAxisId(axes, AxisId) {
-  const index = axes.findIndex(d => d.id === AxisId)
+export function getAxisIndexByAxisId(axes: AxisLinear[], id?: string): number {
+  const index = axes.findIndex(d => d.id === id)
   return index > -1 ? index : 0
 }
 
-export function translateX(x) {
+export function translateX(x: number) {
   return `translate3d(${Math.round(x)}px, 0, 0)`
 }
 
-export function translateY(y) {
+export function translateY(y: number) {
   return `translate3d(0, ${Math.round(y)}px, 0)`
 }
 
-export function translate(x, y) {
+export function translate(x: number, y: number) {
   return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
-}
-
-export function identity(d) {
-  return d
-}
-
-export function functionalUpdate(updater, old) {
-  return typeof updater === 'function' ? updater(old) : updater
-}
-
-export function round(num, step, rounder = Math.round) {
-  return rounder(rounder(num / step) * step)
 }

@@ -1,21 +1,14 @@
-import React from 'react';
+import React from 'react'
+
+import Group from '../primitives/Group'
+import Line from '../primitives/Line'
+import Path from '../primitives/Path'
+import Text from '../primitives/Text'
+import { AxisLinear } from '../types'
 //
-import { translateX, translateY, translate } from '../utils/Utils';
-
-import Path from '../primitives/Path';
-import Line from '../primitives/Line';
-import Text from '../primitives/Text';
-import Group from '../primitives/Group';
-
-import {
-  positionTop,
-  positionRight,
-  positionBottom,
-  positionLeft,
-  axisTypeOrdinal,
-} from '../utils/Constants.js';
-import useChartContext from '../hooks/useChartContext';
-import useMeasure from './AxisLinear.useMeasure';
+import { translateX, translateY, translate } from '../utils/Utils'
+import useMeasure from './AxisLinear.useMeasure'
+import useChartContext from './Chart'
 
 const defaultStyles = {
   line: {
@@ -26,113 +19,89 @@ const defaultStyles = {
     fontSize: 10,
     fontFamily: 'sans-serif',
   },
-};
+}
 
-export default function AxisLinear(axis) {
-  const {
-    type,
-    position,
-    tickSizeInner,
-    tickSizeOuter,
-    show,
-    showGrid,
-    showTicks,
-    styles,
-    ticks,
-    scale,
-    max: scaleMax,
-    transform,
-    vertical,
-    format,
-    range: [range0, range1],
-    directionMultiplier,
-    tickOffset,
-    gridOffset,
-    spacing,
-    labelRotation,
-  } = axis;
-  const [showRotated, setShowRotated] = React.useState(false);
-  const [rotation, setRotation] = React.useState(0);
-  const { gridWidth, gridHeight, dark } = useChartContext();
+export default function AxisLinear(axis: AxisLinear) {
+  const [showRotated, setShowRotated] = React.useState(false)
+  const { getOptions, gridDimensions } = useChartContext()
 
-  const elRef = React.useRef();
+  const { dark } = getOptions()
+
+  const elRef = React.useRef<SVGGElement>(null)
 
   useMeasure({
-    ...axis,
+    axis,
     elRef,
-    rotation,
-    gridWidth,
-    gridHeight,
-    setRotation,
+    gridDimensions,
     showRotated,
     setShowRotated,
-  });
+  })
 
   // Not ready? Render null
-  if (!show) {
-    return null;
+  if (!axis.show) {
+    return null
   }
 
-  let axisPath;
-  if (vertical) {
-    if (position === positionLeft) {
+  let axisPath: string
+
+  if (axis.isVertical) {
+    if (axis.position === 'left') {
       axisPath = `
-        M ${-tickSizeOuter}, ${range0}
+        M ${-axis.tickSizeOuter}, ${axis.range[0]}
         H 0
-        V ${range1}
-        H ${-tickSizeOuter}
-      `;
+        V ${axis.range[1]}
+        H ${-axis.tickSizeOuter}
+      `
     } else {
       axisPath = `
-        M ${tickSizeOuter}, ${range0}
+        M ${axis.tickSizeOuter}, ${axis.range[0]}
         H 0
-        V ${range1}
-        H ${tickSizeOuter}
-      `;
+        V ${axis.range[1]}
+        H ${axis.tickSizeOuter}
+      `
     }
-  } else if (position === positionBottom) {
+  } else if (axis.position === 'bottom') {
     axisPath = `
-        M 0, ${tickSizeOuter}
+        M 0, ${axis.tickSizeOuter}
         V 0
-        H ${range1}
-        V ${tickSizeOuter}
-      `;
+        H ${axis.range[1]}
+        V ${axis.tickSizeOuter}
+      `
   } else {
     axisPath = `
-        M 0, ${-tickSizeOuter}
+        M 0, ${-axis.tickSizeOuter}
         V 0
-        H ${range1}
-        V ${-tickSizeOuter}
-              `;
+        H ${axis.range[1]}
+        V ${-axis.tickSizeOuter}
+              `
   }
 
-  let showGridLine;
-  if (typeof showGrid === 'boolean') {
-    showGridLine = showGrid;
-  } else if (type === axisTypeOrdinal) {
-    showGridLine = false;
-  } else {
-    showGridLine = true;
+  let showGridLine = true
+
+  if (typeof axis.showGrid === 'boolean') {
+    showGridLine = axis.showGrid
+  } else if (axis.type === 'ordinal') {
+    showGridLine = false
   }
 
   // Combine default styles with style props
   const axisStyles = {
     ...defaultStyles,
-    ...styles,
-  };
+    ...(axis.styles ?? {}),
+  }
 
   const renderAxis = (isRotated: boolean) => {
-    const show = isRotated ? showRotated : !showRotated;
+    const show = isRotated ? showRotated : !showRotated
 
     return (
       <Group
         className={`Axis ${isRotated ? 'rotated' : 'unrotated'}`}
         style={{
           transform:
-            position === positionRight
-              ? translateX(gridWidth)
-              : position === positionBottom
-              ? translateY(gridHeight)
+            axis.position === 'right'
+              ? translateX(gridDimensions.gridWidth)
+              : axis.position === 'bottom'
+              ? translateY(gridDimensions.gridHeight)
               : undefined,
           ...(show
             ? {
@@ -154,22 +123,22 @@ export default function AxisLinear(axis) {
           }}
         />
         <Group className="ticks">
-          {ticks.map((tick, i) => (
+          {axis.ticks.map((tick, i) => (
             <Group
               key={[String(tick), i].join('_')}
               className="tick"
               style={{
-                transform: transform(scale(tick) || 0),
+                transform: axis.transform(axis.scale(tick as any) || 0),
               }}
             >
               {/* Render the grid line */}
               {showGridLine && (
                 <Line
                   className="gridLine"
-                  x1={vertical ? 0 : gridOffset}
-                  x2={vertical ? scaleMax : gridOffset}
-                  y1={vertical ? gridOffset : 0}
-                  y2={vertical ? gridOffset : scaleMax}
+                  x1={axis.isVertical ? 0 : axis.gridOffset}
+                  x2={axis.isVertical ? axis.max : axis.gridOffset}
+                  y1={axis.isVertical ? axis.gridOffset : 0}
+                  y2={axis.isVertical ? axis.gridOffset : axis.max}
                   style={{
                     stroke: dark
                       ? 'rgba(255,255,255, .05)'
@@ -180,21 +149,21 @@ export default function AxisLinear(axis) {
                 />
               )}
               {/* Render the tick line  */}
-              {showTicks ? (
+              {axis.showTicks ? (
                 <g className="labelGroup">
                   <Line
                     className="tickline"
-                    x1={vertical ? 0 : tickOffset}
+                    x1={axis.isVertical ? 0 : axis.tickOffset}
                     x2={
-                      vertical
-                        ? directionMultiplier * tickSizeInner
-                        : tickOffset
+                      axis.isVertical
+                        ? axis.directionMultiplier * axis.tickSizeInner
+                        : axis.tickOffset
                     }
-                    y1={vertical ? tickOffset : 0}
+                    y1={axis.isVertical ? axis.tickOffset : 0}
                     y2={
-                      vertical
-                        ? tickOffset
-                        : directionMultiplier * tickSizeInner
+                      axis.isVertical
+                        ? axis.tickOffset
+                        : axis.directionMultiplier * axis.tickSizeInner
                     }
                     style={{
                       stroke: dark
@@ -210,36 +179,40 @@ export default function AxisLinear(axis) {
                       fill: dark ? 'white' : 'black',
                       ...axisStyles.tick,
                       transform: `${translate(
-                        vertical ? directionMultiplier * spacing : tickOffset,
-                        vertical ? tickOffset : directionMultiplier * spacing
+                        axis.isVertical
+                          ? axis.directionMultiplier * axis.tickSpacing
+                          : axis.tickOffset,
+                        axis.isVertical
+                          ? axis.tickOffset
+                          : axis.directionMultiplier * axis.tickSpacing
                       )} rotate(${
                         isRotated
-                          ? position === 'top'
-                            ? labelRotation
-                            : -labelRotation
+                          ? axis.position === 'top'
+                            ? axis.labelRotation
+                            : -axis.labelRotation
                           : 0
                       }deg)`,
                     }}
                     dominantBaseline={
                       isRotated
                         ? 'central'
-                        : position === positionBottom
+                        : axis.position === 'bottom'
                         ? 'hanging'
-                        : position === positionTop
+                        : axis.position === 'top'
                         ? 'alphabetic'
                         : 'central'
                     }
                     textAnchor={
                       isRotated
                         ? 'end'
-                        : position === positionRight
+                        : axis.position === 'right'
                         ? 'start'
-                        : position === positionLeft
+                        : axis.position === 'left'
                         ? 'end'
                         : 'middle'
                     }
                   >
-                    {format(tick, i)}
+                    {axis.format(tick, i)}
                   </Text>
                 </g>
               ) : null}
@@ -247,13 +220,13 @@ export default function AxisLinear(axis) {
           ))}
         </Group>
       </Group>
-    );
-  };
+    )
+  }
 
   return (
     <Group ref={elRef}>
       {renderAxis(false)}
-      {renderAxis(true)}
+      {showRotated ? renderAxis(true) : null}
     </Group>
-  );
+  )
 }

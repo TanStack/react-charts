@@ -16,21 +16,12 @@ export default function App() {
     series: 10,
   });
 
-  const series = React.useMemo(
-    () => ({
-      showPoints: false,
-    }),
-    []
-  );
-
   const axes = React.useMemo(
     () => [
       {
         primary: true,
         type: "time",
         position: "bottom",
-        // filterTicks: (ticks) =>
-        //   ticks.filter((date) => +timeDay.floor(date) === +date),
       },
       { type: "linear", position: "left" },
     ],
@@ -43,7 +34,11 @@ export default function App() {
       <br />
       <br />
       <ResizableBox>
-        <Chart data={data} series={series} axes={axes} tooltip />
+        <Chart options={{
+          data,
+          axes,
+          tooltip: true,
+        }} />
       </ResizableBox>
     </>
   );

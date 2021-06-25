@@ -1,12 +1,17 @@
+import { useAtom } from 'jotai'
 import React from 'react'
+
+import { pointerAtom } from '../atoms'
 import { translate } from '../utils/Utils'
+import useChartContext from './Chart'
+
 //
-import useChartContext from '../hooks/useChartContext'
-import useChartState from '../hooks/useChartState'
 
 export default function Brush() {
-  const { brush, gridX, gridY, gridHeight, dark } = useChartContext()
-  const [pointer] = useChartState(d => d.pointer)
+  const { getOptions, gridDimensions } = useChartContext()
+  const [pointer] = useAtom(pointerAtom)
+
+  const brush = getOptions().brush
 
   if (!brush) {
     return null
@@ -20,9 +25,9 @@ export default function Brush() {
         position: 'absolute',
         left: 0,
         top: 0,
-        transform: translate(gridX, gridY),
+        transform: translate(gridDimensions.gridX, gridDimensions.gridY),
         opacity: pointer.dragging
-          ? Math.abs(pointer.sourceX - pointer.x) < 20
+          ? Math.abs(pointer.startX - pointer.x) < 20
             ? 0.5
             : 1
           : 0,
@@ -31,10 +36,16 @@ export default function Brush() {
       <div
         style={{
           position: 'absolute',
-          transform: translate(Math.min(pointer.x, pointer.sourceX), 0),
-          width: `${Math.abs(pointer.x - pointer.sourceX)}px`,
-          height: `${gridHeight}px`,
-          background: dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)',
+          transform: pointer.dragging
+            ? translate(Math.min(pointer.x, pointer.startX), 0)
+            : ``,
+          width: pointer.dragging
+            ? `${Math.abs(pointer.x - pointer.startX)}px`
+            : 0,
+          height: `${gridDimensions.gridHeight}px`,
+          background: getOptions().dark
+            ? 'rgba(255,255,255,.3)'
+            : 'rgba(0, 26, 39, 0.3)',
           ...brush.style,
         }}
       />

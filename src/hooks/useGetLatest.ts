@@ -1,8 +1,8 @@
 import React from 'react'
 
-export default function useGetLatest(obj) {
-  const ref = React.useRef()
-  const getterRef = React.useRef()
+export default function useGetLatest<T>(obj: T) {
+  const ref = React.useRef<T>(obj)
+  const getterRef = React.useRef<() => T>()
 
   ref.current = obj
   if (!getterRef.current) {

@@ -1,22 +1,23 @@
-import React from 'react'
-//
-import { isValidPoint, buildStyleGetters } from '../utils/Utils'
+import { ScaleLinear } from 'd3-scale'
+import { useAtom } from 'jotai'
+import React, { CSSProperties } from 'react'
 
-import useSeriesStyle from '../hooks/useSeriesStyle'
-import useDatumStyle from '../hooks/useDatumStyle'
-
+import { focusedDatumAtom } from '../atoms'
+import useChartContext from '../components/Chart'
 import Rectangle from '../primitives/Rectangle'
-import useChartContext from '../hooks/useChartContext'
-import useChartState from '../hooks/useChartState'
+import { AxisLinear, Datum, Series } from '../types'
+//
+import { isValidPoint } from '../utils/Utils'
 
-export default function Bar({ series }) {
-  const { primaryAxes } = useChartContext()
+export default function Bar({ series }: { series: Series }) {
+  const { axesInfo } = useChartContext()
 
-  const style = useSeriesStyle(series)
+  const [focusedDatum] = useAtom(focusedDatumAtom)
+  const style = series.getStatusStyle(focusedDatum)
 
-  const { barOffset } = series.primaryAxisId
-    ? primaryAxes.find(d => d.id === series.primaryAxisId)
-    : primaryAxes[0]
+  const primaryAxis = series.primaryAxisId
+    ? axesInfo.primaryAxes.find(d => d.id === series.primaryAxisId)
+    : axesInfo.primaryAxes[0]
 
   return (
     <g className="series bar">
@@ -26,7 +27,7 @@ export default function Bar({ series }) {
             key={i}
             {...{
               datum,
-              barOffset,
+              barOffset: primaryAxis?.barOffset,
               style,
             }}
           />
@@ -36,31 +37,47 @@ export default function Bar({ series }) {
   )
 }
 
-function BarPiece({ datum, barOffset, style }) {
-  const { primaryAxes } = useChartContext()
-  const [, setChartState] = useChartState(() => null)
+Bar.isBar = true
+
+function BarPiece({
+  datum,
+  barOffset,
+  style,
+}: {
+  datum: Datum
+  barOffset?: number
+  style: CSSProperties & { rectangle?: CSSProperties }
+}) {
+  const { axesInfo } = useChartContext()
 
   const x = datum ? datum.x : 0
   const y = datum ? datum.y : 0
   const base = datum ? datum.base : 0
   const size = Math.max(datum ? datum.size : 1, 1)
-  let x1
-  let y1
-  let x2
-  let y2
-  if (primaryAxes.find(d => d.vertical)) {
+
+  let x1: number | undefined
+  let y1: number | undefined
+  let x2: number | undefined
+  let y2: number | undefined
+
+  if (axesInfo.primaryAxes.find(d => d.isVertical)) {
     x1 = base
     x2 = x
-    y1 = y + barOffset
+    y1 = (y ?? 0) + (barOffset ?? 0)
     y2 = y1 + size
   } else {
-    x1 = x + barOffset
+    x1 = (x ?? 0) + (barOffset ?? 0)
     x2 = x1 + size
     y1 = y
     y2 = base
   }
 
-  const dataStyle = useDatumStyle(datum)
+  const [focusedDatum] = useAtom(focusedDatumAtom)
+  const dataStyle = datum.getStatusStyle(focusedDatum)
+
+  if ([x1, y1, x2, y2].some(d => Number.isNaN(d) || typeof d === 'undefined')) {
+    return null
+  }
 
   const rectangleProps = {
     style: {
@@ -70,56 +87,47 @@ function BarPiece({ datum, barOffset, style }) {
       ...dataStyle,
       ...dataStyle.rectangle,
     },
-    x1: Number.isNaN(x1) ? null : x1,
-    y1: Number.isNaN(y1) ? null : y1,
-    x2: Number.isNaN(x2) ? null : x2,
-    y2: Number.isNaN(y2) ? null : y2,
-    onMouseEnter: React.useCallback(
-      e =>
-        setChartState(state => ({
-          ...state,
-          element: datum,
-        })),
-      [datum, setChartState]
-    ),
-    onMouseLeave: React.useCallback(
-      e =>
-        setChartState(state => ({
-          ...state,
-          element: null,
-        })),
-      [setChartState]
-    ),
+    x1,
+    y1,
+    x2,
+    y2,
   }
 
+  // @ts-ignore
   return <Rectangle {...rectangleProps} />
 }
 
-Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
+Bar.plotDatum = (
+  datum: Datum,
+  xAxis: AxisLinear,
+  yAxis: AxisLinear,
+  primaryAxis: AxisLinear,
+  secondaryAxis: AxisLinear
+) => {
   // Turn clamping on for secondaryAxis
-  secondaryAxis.scale.clamp(true)
+  ;(secondaryAxis.scale as ScaleLinear<number, number>).clamp(true)
 
   datum.primaryCoord = primaryAxis.scale(datum.primary)
   datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
-  datum.x = xAxis.scale(datum.xValue)
-  datum.y = yAxis.scale(datum.yValue)
+  datum.x = xAxis.scale(datum.xValue as any)
+  datum.y = yAxis.scale(datum.yValue as any)
   datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
-  datum.base = secondaryAxis.scale(datum.baseValue)
+  datum.base = secondaryAxis.scale(datum.baseValue as any)
   datum.size = primaryAxis.barSize
 
   // Turn clamping back off for secondaryAxis
-  secondaryAxis.scale.clamp(false)
+  ;(secondaryAxis.scale as ScaleLinear<number, number>).clamp(false)
 
   if (!secondaryAxis.stacked) {
     datum.size = primaryAxis.seriesBarSize
     // Use the seriesTypeIndex here in case we have mixed types.
-    const seriesBandScaleOffset = primaryAxis.seriesBandScale(
-      datum.seriesTypeIndex
+    const seriesBandScaleOffset = primaryAxis.seriesBandScale?.(
+      `${datum.seriesTypeIndex}`
     )
-    if (secondaryAxis.vertical) {
-      datum.x += seriesBandScaleOffset
+    if (secondaryAxis.isVertical) {
+      datum.x! += seriesBandScaleOffset ?? 0
     } else {
-      datum.y += seriesBandScaleOffset
+      datum.y! += seriesBandScaleOffset ?? 0
     }
   }
 
@@ -127,15 +135,15 @@ Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
   datum.anchor = {
     x: datum.x,
     y: datum.y,
-    horizontalPadding: secondaryAxis.vertical ? datum.size / 2 : 0,
-    verticalPadding: secondaryAxis.vertical ? 0 : datum.size / 2,
+    horizontalPadding: secondaryAxis.isVertical ? datum.size / 2 : 0,
+    verticalPadding: secondaryAxis.isVertical ? 0 : datum.size / 2,
   }
 
   // Adjust the anchor point for bars
-  if (!primaryAxis.vertical) {
-    datum.anchor.x += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
+  if (!primaryAxis.isVertical) {
+    datum.anchor.x! += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
   } else {
-    datum.anchor.y += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
+    datum.anchor.y! += primaryAxis.type !== 'ordinal' ? 0 : datum.size / 2
   }
 
   // Set the pointer points (used in voronoi)
@@ -144,25 +152,16 @@ Bar.plotDatum = (datum, { xAxis, yAxis, primaryAxis, secondaryAxis }) => {
     datum.anchor,
     // Start of bar
     {
-      x: primaryAxis.vertical
+      x: primaryAxis.isVertical
         ? primaryAxis.position === 'left'
-          ? datum.base + 1
+          ? (datum.base ?? 0) + 1
           : datum.base
         : datum.anchor.x,
-      y: !primaryAxis.vertical
+      y: !primaryAxis.isVertical
         ? primaryAxis.position === 'bottom'
-          ? datum.base - 1
+          ? (datum.base ?? 0) - 1
           : datum.base
         : datum.anchor.y,
     },
   ]
-}
-
-Bar.buildStyles = (series, { defaultColors }) => {
-  const defaults = {
-    // Pass some sane defaults
-    color: defaultColors[series.index % (defaultColors.length - 1)],
-  }
-
-  buildStyleGetters(series, defaults)
 }
