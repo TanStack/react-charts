@@ -9,7 +9,7 @@ export default function ResizableBox({
   height = 300,
   resizable = true,
   style = {},
-  className
+  className = ''
 }) {
   return (
     <div>

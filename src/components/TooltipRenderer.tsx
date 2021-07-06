@@ -1,9 +1,9 @@
 import React, { CSSProperties } from 'react'
 
 import {
+  Axis,
   AxisLinear,
   Datum,
-  GroupingMode,
   RequiredChartOptions,
   ResolvedTooltipOptions,
 } from '../types'
@@ -13,8 +13,8 @@ import {
 
 const showCount = 10
 
-function getSecondaryFormatter(
-  datum: Datum,
+function getSecondaryFormatter<TDatum>(
+  datum: Datum<TDatum>,
   formatSecondary?: (d: any) => any
 ) {
   return (
@@ -24,16 +24,18 @@ function getSecondaryFormatter(
   )
 }
 
-export type TooltipRendererProps = {
-  focusedDatum: Datum | null
-  tooltipOptions: ResolvedTooltipOptions
-  getOptions: () => RequiredChartOptions
-  primaryAxis: AxisLinear
-  secondaryAxis: AxisLinear
-  getDatumStyle: (datum: Datum) => CSSProperties
+export type TooltipRendererProps<TDatum> = {
+  focusedDatum: Datum<TDatum> | null
+  tooltipOptions: ResolvedTooltipOptions<TDatum>
+  getOptions: () => RequiredChartOptions<TDatum>
+  primaryAxis: Axis<TDatum>
+  secondaryAxis: Axis<TDatum>
+  getDatumStyle: (datum: Datum<TDatum>) => CSSProperties
 }
 
-export default function TooltipRenderer(props: TooltipRendererProps) {
+export default function TooltipRenderer<TDatum>(
+  props: TooltipRendererProps<TDatum>
+) {
   if (!props.focusedDatum) {
     return null
   }
@@ -52,43 +54,25 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
     tooltipOptions.formatTertiary ||
     ((val: any) => (Math.floor(val) < val ? Math.round(val * 100) / 100 : val))
 
-  const sortedGroupDatums = [...props.focusedDatum.group].sort((a, b) => {
-    if (
-      (!primaryAxis.stacked && groupingMode === 'series') ||
-      groupingMode === 'secondary'
-    ) {
-      if (a.primaryCoord > b.primaryCoord) {
-        return -1
-      } else if (a.primaryCoord < b.primaryCoord) {
-        return 1
-      }
-    } else if (!secondaryAxis.stacked) {
-      if (a.secondaryCoord > b.secondaryCoord) {
-        return -1
-      } else if (a.secondaryCoord < b.secondaryCoord) {
-        return 1
-      }
-    }
-    return a.seriesIndex > b.seriesIndex ? 1 : -1
-  })
+  const groupDatums = props.focusedDatum?.group ?? []
 
-  if (groupingMode === 'primary') {
-    sortedGroupDatums.reverse()
-  }
+  // if (groupingMode === 'primary') {
+  //   groupDatums.reverse()
+  // }
 
-  if (secondaryAxis.invert) {
-    sortedGroupDatums.reverse()
-  }
+  // if (secondaryAxis.invert) {
+  //   groupDatums.reverse()
+  // }
 
-  if (tooltipOptions.invert) {
-    sortedGroupDatums.reverse()
-  }
+  // if (tooltipOptions.invert) {
+  //   groupDatums.reverse()
+  // }
 
   const resolvedShowCount = showCount % 2 === 0 ? showCount : showCount + 1
-  const length = sortedGroupDatums.length
+  const length = groupDatums.length
 
   // Get the focused series' index
-  const activeIndex = sortedGroupDatums.findIndex(d => d === focusedDatum)
+  const activeIndex = groupDatums.findIndex(d => d === focusedDatum)
   // Get the start by going back half of the showCount
   let start = activeIndex > -1 ? activeIndex - resolvedShowCount / 2 : 0
   // Make sure it's at least 0
@@ -100,7 +84,7 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
   // Double check we aren't clipping the start
   start = Math.max(end - resolvedShowCount, 0)
   // Slice the datums by start and end
-  const visibleSortedGroupDatums = sortedGroupDatums.slice(start, end)
+  const visibleSortedGroupDatums = groupDatums.slice(start, end)
   // Detect if we have previous items
   const hasPrevious = start > 0
   // Or next items
@@ -118,17 +102,18 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
           <strong>{focusedDatum.seriesLabel}</strong>
         ) : groupingMode === 'secondary' ? (
           <strong>
-            {focusedDatum.secondaryAxis.format(
-              focusedDatum.secondary,
-              focusedDatum.index
-            )}
+            {secondaryAxis.getValue(focusedDatum.originalDatum).toString()}
+            {/* {secondaryAxis.format(focusedDatum.secondary, focusedDatum.index)} */}
           </strong>
         ) : (
           <strong>
-            {focusedDatum.primaryAxis.format(
+            {primaryAxis.format(
+              primaryAxis.getValue(focusedDatum.originalDatum)
+            )}
+            {/* {focusedDatum.primaryAxis.format(
               focusedDatum.primary,
               focusedDatum.index
-            )}
+            )} */}
           </strong>
         )}
       </div>
@@ -188,10 +173,13 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
                 {groupingMode === 'series' ? (
                   <React.Fragment>
                     <td>
-                      {primaryAxis.format(
+                      {/* {primaryAxis.format(
                         sortedDatum.primary,
                         sortedDatum.index
-                      )}
+                      )} */}
+                      {primaryAxis
+                        .getValue(sortedDatum.originalDatum)
+                        .toString()}
                       : &nbsp;
                     </td>
                     <td
@@ -199,13 +187,16 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
                         textAlign: 'right',
                       }}
                     >
-                      {resolvedSecondaryFormat(
+                      {/* {resolvedSecondaryFormat(
                         sortedDatum.secondary,
                         sortedDatum.index
-                      )}
-                      {sortedDatum.r
+                      )} */}
+                      {secondaryAxis
+                        .getValue(sortedDatum.originalDatum)
+                        .toString()}
+                      {/* {sortedDatum.r
                         ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
-                        : null}
+                        : null} */}
                     </td>
                   </React.Fragment>
                 ) : groupingMode === 'secondary' ? (
@@ -216,13 +207,16 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
                         textAlign: 'right',
                       }}
                     >
-                      {primaryAxis.format(
+                      {/* {primaryAxis.format(
                         sortedDatum.primary,
                         sortedDatum.index
-                      )}
-                      {sortedDatum.r
+                      )} */}
+                      {primaryAxis
+                        .getValue(sortedDatum.originalDatum)
+                        .toString()}
+                      {/* {sortedDatum.r
                         ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
-                        : null}
+                        : null} */}
                     </td>
                   </React.Fragment>
                 ) : (
@@ -233,13 +227,16 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
                         textAlign: 'right',
                       }}
                     >
-                      {resolvedSecondaryFormat(
+                      {/* {resolvedSecondaryFormat(
                         sortedDatum.secondary,
                         sortedDatum.index
-                      )}
-                      {sortedDatum.r
+                      )} */}
+                      {/* {sortedDatum.r
                         ? ` (${resolvedFormatTertiary(sortedDatum.r)})`
-                        : null}
+                        : null} */}
+                      {secondaryAxis
+                        .getValue(sortedDatum.originalDatum)
+                        .toString()}
                     </td>
                   </React.Fragment>
                 )}
@@ -259,7 +256,7 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
           ) : null}
           {secondaryAxis &&
           secondaryAxis.stacked &&
-          focusedDatum.group.length > 1 ? (
+          (focusedDatum.group ?? []).length > 1 ? (
             <tr>
               <td
                 style={{
@@ -289,10 +286,11 @@ export default function TooltipRenderer(props: TooltipRendererProps) {
                   paddingTop: '5px',
                 }}
               >
-                {secondaryAxis.format(
+                {/* {secondaryAxis.format(
                   [...focusedDatum.group].reverse()[0].totalValue,
                   -1
-                )}
+                )} */}
+                {[...(focusedDatum.group ?? [])].reverse()[0].stackData?.[1]}
               </td>
             </tr>
           ) : null}

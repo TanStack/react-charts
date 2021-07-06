@@ -1,9 +1,8 @@
-import { atom, useAtom } from 'jotai'
 import React, { MutableRefObject } from 'react'
 
-import { axisDimensionsAtom } from '../atoms'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import { AxisLinear, GridDimensions, Position } from '../types'
+import { Axis, GridDimensions, Position } from '../types'
+import useChartContext from './Chart'
 
 const getElBox = (el: Element) => {
   var rect = el.getBoundingClientRect()
@@ -19,52 +18,29 @@ const getElBox = (el: Element) => {
   }
 }
 
-function useIsLooping() {
-  const callThreshold = 30
-  const timeLimit = 500
-  const now = Date.now()
-
-  const ref = React.useRef([now])
-
-  ref.current.push(now)
-
-  ref.current = ref.current.filter(d => d > now - timeLimit)
-
-  while (ref.current.length > callThreshold) {
-    ref.current.shift()
-  }
-
-  const isLooping =
-    ref.current.length === callThreshold && now - ref.current[0] < timeLimit
-
-  return isLooping
-}
-
-export default function useMeasure({
+export default function useMeasure<TDatum>({
   axis,
   elRef,
   gridDimensions,
-  showRotated,
   setShowRotated,
 }: {
-  axis: AxisLinear
+  axis: Axis<TDatum>
   elRef: MutableRefObject<SVGGElement | null>
   gridDimensions: GridDimensions
   showRotated: boolean
   setShowRotated: (value: boolean) => void
 }) {
-  const axisDimensionAtom = React.useMemo(() => {
-    return atom(get => {
-      return get(axisDimensionsAtom)[axis.position as Position]?.[axis.id!]
-    })
-  }, [axis.position, axis.id])
+  const { useAxisDimensionsAtom } = useChartContext<TDatum>()
 
-  const [axisDimensions, setAxisDimensions] = useAtom(axisDimensionsAtom)
-  const [axisDimension] = useAtom(axisDimensionAtom)
+  const [axisDimensions, setAxisDimensions] = useAxisDimensionsAtom()
 
-  const isLooping = useIsLooping()
+  const axisDimension = React.useMemo(() => {
+    return axisDimensions[axis.position as Position]?.[axis.id!]
+  }, [axisDimensions, axis.position, axis.id])
 
-  const measureDimensions = React.useCallback(() => {
+  // const isLooping = useIsLooping()
+
+  const measureRotation = React.useCallback(() => {
     if (!elRef.current) {
       return
     }
@@ -73,15 +49,15 @@ export default function useMeasure({
       ? gridDimensions.gridWidth
       : gridDimensions.gridHeight
 
-    const unrotatedLabelDims = Array.from(
-      elRef.current.querySelectorAll('.Axis.unrotated .tickLabel')
+    const staticLabelDims = Array.from(
+      elRef.current.querySelectorAll('.Axis-Group.outer .tickLabel')
     ).map(el => getElBox(el))
 
     // Determine the largest labels on the axis
-    let widestLabel: typeof unrotatedLabelDims[number] | undefined
+    let widestLabel: typeof staticLabelDims[number] | undefined
 
-    unrotatedLabelDims.forEach(label => {
-      let resolvedLabel = label ?? unrotatedLabelDims[0]
+    staticLabelDims.forEach(label => {
+      let resolvedLabel = widestLabel ?? { width: 0 }
       if (label.width > 0 && label.width > resolvedLabel.width) {
         widestLabel = label
       }
@@ -89,9 +65,9 @@ export default function useMeasure({
 
     let smallestTickGap = gridSize
 
-    if (unrotatedLabelDims.length > 1) {
-      unrotatedLabelDims.forEach((current, i) => {
-        const prev = unrotatedLabelDims[i - 1]
+    if (staticLabelDims.length > 1) {
+      staticLabelDims.forEach((current, i) => {
+        const prev = staticLabelDims[i - 1]
 
         if (prev) {
           smallestTickGap = Math.min(
@@ -105,28 +81,22 @@ export default function useMeasure({
     const shouldRotate =
       (widestLabel?.width || 0) + axis.tickPadding > smallestTickGap
 
-    if (!isLooping) {
-      // Rotate ticks for non-time horizontal axes
-      if (!axis.isVertical) {
-        setShowRotated(shouldRotate)
-      }
+    // if (!isLooping) {
+    // Rotate ticks for non-time horizontal axes
+    if (!axis.isVertical) {
+      setShowRotated(shouldRotate)
     }
+    // }
   }, [
     elRef,
     axis.isVertical,
     axis.tickPadding,
     gridDimensions.gridWidth,
     gridDimensions.gridHeight,
-    isLooping,
     setShowRotated,
   ])
 
-  // Measure after if needed
-  useIsomorphicLayoutEffect(() => {
-    measureDimensions()
-  })
-
-  useIsomorphicLayoutEffect(() => {
+  const measureDimensions = React.useCallback(() => {
     if (!elRef.current) {
       if (axisDimension) {
         // If the entire axis is hidden, then we need to remove the axis dimensions
@@ -153,9 +123,7 @@ export default function useMeasure({
       right: 0,
     }
 
-    const domainEl = elRef.current.querySelector(
-      `.Axis.${showRotated ? 'rotated' : 'unrotated'} .domain`
-    )
+    const domainEl = elRef.current.querySelector(`.Axis-Group.inner .domain`)
 
     if (!domainEl) {
       return
@@ -163,13 +131,9 @@ export default function useMeasure({
 
     const domainDims = getElBox(domainEl)
 
-    const measureDims = showRotated
-      ? Array.from(
-          elRef.current.querySelectorAll('.Axis.rotated .tickLabel')
-        ).map(el => getElBox(el))
-      : Array.from(
-          elRef.current.querySelectorAll('.Axis.unrotated .tickLabel')
-        ).map(el => getElBox(el))
+    const measureDims = Array.from(
+      elRef.current.querySelectorAll('.Axis-Group.inner .tickLabel')
+    ).map(el => getElBox(el))
 
     // Determine the largest labels on the axis
     let widestRealLabel = measureDims[0]
@@ -237,6 +201,7 @@ export default function useMeasure({
 
     // Only update the axisDimensions if something has changed
     if (
+      // !isLooping &&
       !axisDimensions ||
       !axisDimension ||
       Object.keys(newDimensions).some(key => {
@@ -252,5 +217,25 @@ export default function useMeasure({
         },
       }))
     }
+  }, [
+    axis.id,
+    axis.isVertical,
+    axis.position,
+    axis.tickPadding,
+    axis.tickSizeInner,
+    axis.tickSizeOuter,
+    axisDimension,
+    axisDimensions,
+    elRef,
+    setAxisDimensions,
+  ])
+
+  // Measure after if needed
+  useIsomorphicLayoutEffect(() => {
+    measureRotation()
+  })
+
+  useIsomorphicLayoutEffect(() => {
+    measureDimensions()
   })
 }

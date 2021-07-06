@@ -44,7 +44,7 @@ const optionKeys = Object.keys(options);
 
 export default function useChartConfig({
   series,
-  useR,
+  useR = undefined,
   show = [],
   count = 1,
   resizable = true,

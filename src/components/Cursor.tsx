@@ -39,7 +39,7 @@ export default function Cursor(props: { isPrimary?: boolean }) {
   const [pointer] = useAtom(pointerAtom)
   const [focusedDatum] = useAtom(focusedDatumAtom)
 
-  const { getOptions, axesInfo, gridDimensions } = useChartContext()
+  const { getOptions, axesInfo, gridDimensions } = useChartContext<TDatum>()
 
   const preCursorOptions = props.isPrimary
     ? getOptions().primaryCursor
@@ -289,10 +289,6 @@ export default function Cursor(props: { isPrimary?: boolean }) {
         : ''
     ),
   }
-
-  // if (!axis.isVertical) {
-  // console.log({ bubbleX, bubbleY });
-  // }
 
   let animateCoords
   if (previousShowRef.current === cursorInfo.resolvedShow) {

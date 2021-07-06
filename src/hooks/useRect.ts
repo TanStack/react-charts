@@ -5,9 +5,9 @@ import observeRect from '@reach/observe-rect'
 import { RequiredChartOptions } from '../types'
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
-export default function useRect(
+export default function useRect<TDatum>(
   node: HTMLElement | null | undefined,
-  options: RequiredChartOptions
+  options: RequiredChartOptions<TDatum>
 ) {
   const [element, setElement] = React.useState(node)
 

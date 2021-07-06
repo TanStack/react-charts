@@ -1,43 +1,14 @@
-import { Delaunay } from 'd3-delaunay'
-import { line } from 'd3-shape'
-import { useAtom } from 'jotai'
-import React, { ComponentPropsWithoutRef } from 'react'
+import React from 'react'
 
-import { focusedDatumAtom } from '../atoms'
 //
-import Path from '../primitives/Path'
-import Rectangle from '../primitives/Rectangle'
-import { AxisLinear, Datum, GroupingMode, Series } from '../types'
+import { Datum } from '../types'
+import { translate } from '../utils/Utils'
 import useChartContext from './Chart'
 
-type DatumBoundary = {
-  start?: number
-  end?: number
-  datum: Datum
-}
+export default function Voronoi<TDatum>() {
+  const { getOptions, useFocusedDatumAtom } = useChartContext<TDatum>()
 
-const lineFn = line()
-
-const VoronoiElement = ({
-  children,
-  ...rest
-}: ComponentPropsWithoutRef<'g'>) => (
-  <g className="Voronoi" {...rest}>
-    {children}
-  </g>
-)
-
-export default function Voronoi() {
-  const {
-    getOptions,
-    stackData,
-    axesInfo,
-    width,
-    height,
-    gridDimensions,
-  } = useChartContext()
-
-  const [, setFocusedDatum] = useAtom(focusedDatumAtom)
+  const [, setFocusedDatum] = useFocusedDatumAtom()
 
   const {
     onFocusDatum,
@@ -50,7 +21,7 @@ export default function Voronoi() {
   } = getOptions()
 
   const handleFocus = React.useCallback(
-    (datum: Datum | null) => {
+    (datum: Datum<TDatum> | null) => {
       onFocusDatum?.(datum)
       setFocusedDatum(datum)
     },
@@ -58,304 +29,296 @@ export default function Voronoi() {
   )
 
   const needsVoronoi =
-    onFocusDatum || onClickDatum || tooltip || primaryCursor || secondaryCursor
+    onFocusDatum ||
+    onClickDatum ||
+    tooltip ||
+    primaryCursor ||
+    secondaryCursor ||
+    showVoronoi
+
+  // Don't render until we have all dependencies
+  if (!needsVoronoi) {
+    return null
+  }
+
+  const props = {
+    handleFocus,
+  }
+
+  if (groupingMode === 'primary') {
+    return <PrimaryVoronoi {...props} />
+  }
+
+  return null
+
+  // return <ClosestVoronoi {...props} />
+}
+
+function PrimaryVoronoi<TDatum>({
+  handleFocus,
+}: {
+  handleFocus: (datum: Datum<TDatum> | null) => void
+}) {
+  const {
+    primaryAxis,
+    series,
+    secondaryAxes,
+    getOptions,
+    gridDimensions,
+    groupedDatums,
+  } = useChartContext<TDatum>()
 
   return React.useMemo(() => {
-    // Don't render until we have all dependencies
-    if (
-      !stackData ||
-      !axesInfo.primaryAxes.length ||
-      !axesInfo.secondaryAxes.length ||
-      !width ||
-      !height ||
-      !needsVoronoi
-    ) {
-      return null
-    }
+    const columns = series[0].datums.map((datum, i) => {
+      const prev = series[0].datums[i - 1]
+      const next = series[0].datums[i + 1]
 
-    const extent = [
-      [0, 0],
-      [gridDimensions.gridWidth, gridDimensions.gridHeight],
-    ]
+      const primaryValue = primaryAxis.getValue(datum.originalDatum)
+      const primaryPx = primaryAxis?.scale(primaryValue) ?? NaN
 
-    const props = {
-      stackData,
-      extent,
-      handleFocus,
-      showVoronoi,
-      primaryAxes: axesInfo.primaryAxes,
-    }
+      let range = primaryAxis?.scale.range() ?? [0, 0]
 
-    if (groupingMode === 'primary') {
-      return <PrimaryVoronoi {...props} />
-    }
+      if (primaryAxis?.isVertical) {
+        range.reverse()
+      }
 
-    return <ClosestVoronoi {...props} />
+      let [primaryStart, primaryEnd] = range
+
+      if (prev) {
+        const prevPx =
+          primaryAxis?.scale(primaryAxis.getValue(prev.originalDatum)) ?? NaN
+        primaryStart = primaryPx - (primaryPx - prevPx) / 2
+      }
+
+      if (next) {
+        const nextPx =
+          primaryAxis?.scale(primaryAxis.getValue(next.originalDatum)) ?? NaN
+        primaryEnd = primaryPx + (nextPx - primaryPx) / 2
+      }
+
+      const datums = groupedDatums.get(`${primaryValue}`) ?? []
+
+      datums.sort((a, b) => {
+        const aAxis = secondaryAxes.find(d => d.id === a.secondaryAxisId)
+        const bAxis = secondaryAxes.find(d => d.id === b.secondaryAxisId)
+
+        const aPx =
+          aAxis?.scale(
+            aAxis.stacked ? a.stackData?.[1] : aAxis?.getValue(a.originalDatum)
+          ) ?? NaN
+        const bPx =
+          bAxis?.scale(
+            bAxis.stacked ? b.stackData?.[1] : bAxis?.getValue(b.originalDatum)
+          ) ?? NaN
+
+        return aPx - bPx
+      })
+
+      return {
+        primaryStart,
+        primaryEnd,
+        primaryPx,
+        datumBoundaries: datums.map((datum, i) => {
+          const prev = datums[i - 1]
+          const next = datums[i + 1]
+
+          const secondaryAxis = secondaryAxes.find(
+            d => d.id === datum.secondaryAxisId
+          )
+
+          const value =
+            secondaryAxis?.scale(
+              secondaryAxis.stacked
+                ? datum.stackData?.[1]
+                : secondaryAxis?.getValue(datum.originalDatum)
+            ) ?? NaN
+
+          let range = secondaryAxis?.scale.range() ?? [0, 0]
+
+          if (secondaryAxis?.isVertical) {
+            range.reverse()
+          }
+
+          let [secondaryStart, secondaryEnd] = range
+
+          if (prev) {
+            const prevAxis = secondaryAxes.find(
+              d => d.id === prev?.secondaryAxisId
+            )
+            const prevValue =
+              prevAxis?.scale(
+                prevAxis.stacked
+                  ? prev.stackData?.[1]
+                  : prevAxis?.getValue(prev.originalDatum)
+              ) ?? NaN
+            secondaryStart = value - (value - prevValue) / 2
+          }
+
+          if (next) {
+            const nextAxis = secondaryAxes.find(
+              d => d.id === next?.secondaryAxisId
+            )
+            const nextValue =
+              nextAxis?.scale(
+                nextAxis.stacked
+                  ? next.stackData?.[1]
+                  : nextAxis?.getValue(next.originalDatum)
+              ) ?? NaN
+            secondaryEnd = value + (nextValue - value) / 2
+          }
+
+          return {
+            secondaryStart,
+            secondaryEnd,
+            datum,
+          }
+        }),
+      }
+    })
+
+    return (
+      <g
+        {...{
+          onMouseLeave: () => handleFocus(null),
+          style: {
+            transform: translate(gridDimensions.gridX, gridDimensions.gridY),
+          },
+        }}
+      >
+        {columns.map(column => {
+          return (
+            <React.Fragment key={column.primaryPx}>
+              {column.datumBoundaries.map(datumBoundary => {
+                const x1 = !primaryAxis.isVertical
+                  ? column.primaryStart
+                  : datumBoundary.secondaryStart
+                const x2 = !primaryAxis.isVertical
+                  ? column.primaryEnd
+                  : datumBoundary.secondaryEnd
+                const y1 = !primaryAxis.isVertical
+                  ? datumBoundary.secondaryStart
+                  : column.primaryStart
+                const y2 = !primaryAxis.isVertical
+                  ? datumBoundary.secondaryEnd
+                  : column.primaryEnd
+
+                const x = Math.min(x1, x2)
+                const y = Math.min(y1, y2)
+                const xEnd = Math.max(x1, x2)
+                const yEnd = Math.max(y1, y2)
+
+                const height = Math.max(yEnd - y, 0)
+                const width = Math.max(xEnd - x, 0)
+
+                return (
+                  <rect
+                    {...{
+                      key: `${column.primaryPx}_${datumBoundary.datum.seriesIndex}`,
+                      x,
+                      y,
+                      width,
+                      height,
+                      className: 'action-voronoi',
+                      onMouseEnter: () => handleFocus(datumBoundary.datum),
+                      style: {
+                        fill: randomFill(),
+                        opacity: getOptions().showVoronoi ? 1 : 0,
+                      },
+                    }}
+                  />
+                )
+              })}
+            </React.Fragment>
+          )
+        })}
+      </g>
+    )
   }, [
-    stackData,
-    axesInfo.primaryAxes,
-    axesInfo.secondaryAxes.length,
-    width,
-    height,
-    needsVoronoi,
-    gridDimensions.gridWidth,
-    gridDimensions.gridHeight,
+    getOptions,
+    gridDimensions.gridX,
+    gridDimensions.gridY,
+    groupedDatums,
     handleFocus,
-    showVoronoi,
-    groupingMode,
+    primaryAxis,
+    secondaryAxes,
+    series,
   ])
 }
 
-function PrimaryVoronoi({
-  stackData,
-  extent,
-  handleFocus,
-  showVoronoi,
-  primaryAxes,
-}: {
-  stackData: Series[]
-  extent: number[][]
-  handleFocus: (datum: Datum | null) => void
-  showVoronoi: boolean
-  primaryAxes: AxisLinear[]
-}) {
-  const primaryAxis = primaryAxes[0]
-  const isVertical = primaryAxis.isVertical
+// function ClosestVoronoi({
+//   stackData,
+//   extent,
+//   handleFocus,
+//   showVoronoi,
+// }: {
+//   stackData: Series[]
+//   extent: number[][]
+//   handleFocus: (datum: Datum | null) => void
+//   showVoronoi: boolean
+// }) {
+//   let polygons = null
 
-  const datumBoundaries: DatumBoundary[] = []
+//   const voronoiData: { x: number; y: number; datum: Datum }[] = []
 
-  stackData.forEach(series => {
-    series.datums
-      .filter(d => d.defined)
-      .forEach(datum => {
-        let start: number | undefined
-        let end: number | undefined
+//   stackData.forEach(series => {
+//     series.datums
+//       .filter(d => d.defined)
+//       .forEach(datum => {
+//         datum.boundingPoints.forEach(boundingPoint => {
+//           if (
+//             typeof datum.x !== 'number' ||
+//             typeof datum.y !== 'number' ||
+//             Number.isNaN(datum.y) ||
+//             Number.isNaN(datum.x)
+//           ) {
+//             return
+//           }
+//           voronoiData.push({
+//             x: boundingPoint.x,
+//             y: boundingPoint.y,
+//             datum,
+//           })
+//         })
+//       })
+//   })
 
-        datum.boundingPoints.forEach(boundingPoint => {
-          if (
-            typeof datum.primaryCoord !== 'number' ||
-            typeof datum.secondaryCoord !== 'number' ||
-            Number.isNaN(datum.secondaryCoord) ||
-            Number.isNaN(datum.primaryCoord)
-          ) {
-            return
-          }
+//   const delaunay = Delaunay.from(
+//     voronoiData,
+//     d => Math.max(d.x, 0),
+//     d => Math.max(d.y, 0)
+//   )
 
-          start = Math.min(
-            start ?? boundingPoint.secondaryCoord,
-            boundingPoint.secondaryCoord
-          )
-          end = Math.max(
-            end ?? boundingPoint.secondaryCoord,
-            boundingPoint.secondaryCoord
-          )
-        })
+//   const flatExtent = extent.flat().map(d => Math.max(d, 0))
 
-        if (typeof start !== 'undefined' && typeof end !== 'undefined') {
-          datumBoundaries.push({
-            start,
-            end,
-            datum,
-          })
-        }
-      })
-  })
+//   const voronoi = delaunay.voronoi(flatExtent)
 
-  console.log(datumBoundaries)
+//   polygons = voronoi.cellPolygons()
 
-  const groupedBoundaries = new Map<any, DatumBoundary[]>()
+//   polygons = Array.from(polygons)
 
-  datumBoundaries.forEach(datumBoundary => {
-    if (!groupedBoundaries.has(datumBoundary.datum.primaryCoord)) {
-      groupedBoundaries.set(datumBoundary.datum.primaryCoord, [])
-    }
-
-    const previous =
-      groupedBoundaries.get(datumBoundary.datum.primaryCoord) ?? []
-
-    groupedBoundaries.set(datumBoundary.datum.primaryCoord, [
-      ...previous,
-      datumBoundary,
-    ])
-  })
-
-  const sortedPrimaryKeys = Array.from(groupedBoundaries.keys()).sort(
-    (a, b) => a - b
-  )
-
-  const columns = sortedPrimaryKeys.map((primaryKey, i) => {
-    const prev = sortedPrimaryKeys[i - 1]
-    const next = sortedPrimaryKeys[i + 1]
-
-    let primaryStart = 0
-    let primaryEnd = extent[1][isVertical ? 1 : 0]
-
-    if (prev) {
-      primaryStart = primaryKey - (primaryKey - prev) / 2
-    }
-
-    if (next) {
-      primaryEnd = primaryKey + (next - primaryKey) / 2
-    }
-
-    const datumBoundaries = (groupedBoundaries.get(primaryKey) ?? []).sort(
-      (a, b) => {
-        return a.start - b.start
-      }
-    )
-
-    return {
-      primaryStart,
-      primaryEnd,
-      primaryKey,
-      datumBoundaries: datumBoundaries.map((datumBoundary, i) => {
-        const datum = datumBoundary.datum
-        const prev = datumBoundaries[i - 1]
-        const next = datumBoundaries[i + 1]
-
-        let secondaryStart = 0
-        let secondaryEnd = extent[1][isVertical ? 0 : 1]
-
-        if (prev) {
-          secondaryStart =
-            datumBoundary.start! - (datumBoundary.start! - prev.end!) / 2
-        }
-
-        if (next) {
-          secondaryEnd =
-            datumBoundary.end! + (next.start! - datumBoundary.end!) / 2
-        }
-
-        return {
-          secondaryStart,
-          secondaryEnd,
-          datum,
-        }
-      }),
-    }
-  })
-
-  console.log(columns)
-
-  return (
-    <VoronoiElement>
-      {columns.map(column => {
-        return (
-          <React.Fragment key={column.primaryKey}>
-            {column.datumBoundaries.map(datumBoundary => {
-              const x1 = !isVertical
-                ? column.primaryStart
-                : datumBoundary.secondaryStart
-              const x2 = !isVertical
-                ? column.primaryEnd
-                : datumBoundary.secondaryEnd
-              const y1 = !isVertical
-                ? datumBoundary.secondaryStart
-                : column.primaryStart
-              const y2 = !isVertical
-                ? datumBoundary.secondaryEnd
-                : column.primaryEnd
-
-              return (
-                <Rectangle
-                  {...{
-                    key: `${column.primaryKey}_${datumBoundary.datum.seriesIndex}`,
-                    x1,
-                    x2,
-                    y1,
-                    y2,
-                    className: 'action-voronoi',
-                    onMouseEnter: () => handleFocus(datumBoundary.datum),
-                    onMouseLeave: () => handleFocus(null),
-                    style: {
-                      fill: randomFill(),
-                      opacity: showVoronoi ? 1 : 0,
-                    },
-                  }}
-                />
-              )
-            })}
-          </React.Fragment>
-        )
-      })}
-    </VoronoiElement>
-  )
-}
-
-function ClosestVoronoi({
-  stackData,
-  extent,
-  handleFocus,
-  showVoronoi,
-}: {
-  stackData: Series[]
-  extent: number[][]
-  handleFocus: (datum: Datum | null) => void
-  showVoronoi: boolean
-}) {
-  let polygons = null
-
-  const voronoiData: { x: number; y: number; datum: Datum }[] = []
-
-  stackData.forEach(series => {
-    series.datums
-      .filter(d => d.defined)
-      .forEach(datum => {
-        datum.boundingPoints.forEach(boundingPoint => {
-          if (
-            typeof datum.x !== 'number' ||
-            typeof datum.y !== 'number' ||
-            Number.isNaN(datum.y) ||
-            Number.isNaN(datum.x)
-          ) {
-            return
-          }
-          voronoiData.push({
-            x: boundingPoint.x,
-            y: boundingPoint.y,
-            datum,
-          })
-        })
-      })
-  })
-
-  const delaunay = Delaunay.from(
-    voronoiData,
-    d => Math.max(d.x, 0),
-    d => Math.max(d.y, 0)
-  )
-
-  const flatExtent = extent.flat().map(d => Math.max(d, 0))
-
-  const voronoi = delaunay.voronoi(flatExtent)
-
-  polygons = voronoi.cellPolygons()
-
-  polygons = Array.from(polygons)
-
-  return (
-    <VoronoiElement>
-      {polygons.map((points, i) => {
-        const index = points.index
-        const datum = voronoiData[index].datum
-        const path = lineFn(points as any) || undefined
-        return (
-          <Path
-            key={i}
-            d={path}
-            className="action-voronoi"
-            onMouseEnter={() => handleFocus(datum)}
-            onMouseLeave={() => handleFocus(null)}
-            style={{
-              fill: randomFill(),
-              opacity: showVoronoi ? 1 : 0,
-            }}
-          />
-        )
-      })}
-    </VoronoiElement>
-  )
-}
+//   return (
+//     <g>
+//       {polygons.map((points, i) => {
+//         const index = points.index
+//         const datum = voronoiData[index].datum
+//         const path = lineFn(points as any) || undefined
+//         return (
+//           <Path
+//             key={i}
+//             d={path}
+//             className="action-voronoi"
+//             onMouseEnter={() => handleFocus(datum)}
+//             onMouseLeave={() => handleFocus(null)}
+//             style={{
+//               fill: randomFill(),
+//               opacity: showVoronoi ? 1 : 0,
+//             }}
+//           />
+//         )
+//       })}
+//     </g>
+//   )
+// }
 
 function randomFill() {
   const r = randomHue(100, 200)

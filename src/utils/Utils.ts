@@ -1,4 +1,5 @@
 import {
+  Axis,
   AxisLinear,
   Datum,
   DatumFocusStatus,
@@ -8,33 +9,33 @@ import {
   SeriesStyles,
 } from '../types'
 
-export function getSeriesStatus(
-  series: Series,
-  focusedDatum: Datum | null
+export function getSeriesStatus<TDatum>(
+  series: Series<TDatum>,
+  focusedDatum: Datum<TDatum> | null
 ): SeriesFocusStatus {
-  if (focusedDatum?.series.id === series.id) {
-    return 'focused'
-  }
+  // if (focusedDatum?.series.id === series.id) {
+  //   return 'focused'
+  // }
 
   return 'none'
 }
 
-export function getDatumStatus(
-  datum: Datum,
-  focusedDatum: Datum | null
+export function getDatumStatus<TDatum>(
+  datum: Datum<TDatum>,
+  focusedDatum: Datum<TDatum> | null
 ): DatumFocusStatus {
   if (datum === focusedDatum) {
     return 'focused'
   }
 
-  if (
-    datum.group.some(groupDatum => {
-      groupDatum.seriesId === focusedDatum?.series.id &&
-        groupDatum.index === focusedDatum?.index
-    })
-  ) {
-    return 'groupFocused'
-  }
+  // if (
+  //   datum.group.some(groupDatum => {
+  //     groupDatum.seriesId === focusedDatum?.series.id &&
+  //       groupDatum.index === focusedDatum?.index
+  //   })
+  // ) {
+  //   return 'groupFocused'
+  // }
 
   return 'none'
 }
@@ -79,15 +80,6 @@ export function isValidPoint(d: any) {
   return true
 }
 
-export function getAxisByAxisId(axes: AxisLinear[], id?: string): AxisLinear {
-  return axes.find(d => d.id === id) || axes[0]
-}
-
-export function getAxisIndexByAxisId(axes: AxisLinear[], id?: string): number {
-  const index = axes.findIndex(d => d.id === id)
-  return index > -1 ? index : 0
-}
-
 export function translateX(x: number) {
   return `translate3d(${Math.round(x)}px, 0, 0)`
 }
@@ -98,4 +90,103 @@ export function translateY(y: number) {
 
 export function translate(x: number, y: number) {
   return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
+}
+
+export function getSecondaries<TDatum>(
+  datum: Datum<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): [number, number] {
+  if (secondaryAxis.stacked) {
+    return [
+      secondaryAxis.scale(datum.stackData?.[0] ?? NaN) ?? NaN,
+      secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN,
+    ]
+  }
+
+  return [
+    secondaryAxis.scale(0) ?? NaN,
+    secondaryAxis.scale(secondaryAxis.getValue(datum.originalDatum)) ?? NaN,
+  ]
+}
+
+export function getPrimary<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>
+): number {
+  let primary: number
+
+  if (primaryAxis.stacked) {
+    primary =
+      primaryAxis.scale(datum.stackData?.[primaryAxis.invert ? 1 : 0] ?? NaN) ??
+      NaN
+  } else {
+    primary =
+      primaryAxis.scale(primaryAxis.getValue(datum.originalDatum)) ?? NaN
+  }
+
+  if (primaryAxis.axisFamily !== 'band') {
+    primary = primary - getPrimaryLength(datum, primaryAxis) / 2
+  }
+
+  return primary
+}
+
+export function getPrimaryLength<TDatum>(
+  _datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>
+) {
+  if (primaryAxis.axisFamily === 'band') {
+    return Math.max(primaryAxis.scale.bandwidth(), primaryAxis.minBandSize ?? 1)
+  }
+
+  return Math.max(primaryAxis.bandScale.bandwidth(), 1)
+}
+
+export function getSecondaryLength<TDatum>(
+  datum: Datum<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  const secondary = getSecondaries(datum, secondaryAxis).sort()
+  return Math.abs(secondary[1] - secondary[0])
+}
+
+export function getX<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getSecondaries(datum, secondaryAxis)[secondaryAxis.invert ? 1 : 0]
+    : getPrimary(datum, primaryAxis)
+}
+
+export function getY<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getPrimary(datum, primaryAxis)
+    : getSecondaries(datum, secondaryAxis)[secondaryAxis.invert ? 1 : 0] -
+        getSecondaryLength(datum, secondaryAxis)
+}
+
+export function getWidth<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getSecondaryLength(datum, secondaryAxis)
+    : getPrimaryLength(datum, primaryAxis)
+}
+
+export function getHeight<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getPrimaryLength(datum, primaryAxis)
+    : getSecondaryLength(datum, secondaryAxis)
 }

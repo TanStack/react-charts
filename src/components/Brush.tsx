@@ -8,7 +8,7 @@ import useChartContext from './Chart'
 //
 
 export default function Brush() {
-  const { getOptions, gridDimensions } = useChartContext()
+  const { getOptions, gridDimensions } = useChartContext<TDatum>()
   const [pointer] = useAtom(pointerAtom)
 
   const brush = getOptions().brush

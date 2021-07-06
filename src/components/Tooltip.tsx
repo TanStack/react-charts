@@ -1,23 +1,31 @@
-import { useAtom } from 'jotai'
 import React from 'react'
+import ReactDOM from 'react-dom'
 
-import { focusedDatumAtom, pointerAtom } from '../atoms'
+import { useSpring, animated } from '@react-spring/web'
+
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
 import useLatestWhen from '../hooks/useLatestWhen'
+import usePrevious from '../hooks/usePrevious'
 import {
   AlignMode,
   AlignPosition,
   AnchorMode,
   Datum,
-  DatumAnchor,
   GridDimensions,
   ResolvedTooltipOptions,
   TooltipOptions,
 } from '../types'
 //
-import { getAxisByAxisId, translate } from '../utils/Utils'
+import { getWidth, getX, getY, translate, getWidth } from '../utils/Utils'
 import useChartContext from './Chart'
-import TooltipRenderer from './TooltipRenderer'
+import TooltipRenderer, { TooltipRendererProps } from './TooltipRenderer'
+
+//
+
+type Anchor = {
+  x: number
+  y: number
+}
 
 //
 
@@ -26,7 +34,9 @@ const triangleSize = 7
 const getBackgroundColor = (dark?: boolean) =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
 
-function defaultTooltip(options: TooltipOptions = {}): ResolvedTooltipOptions {
+function defaultTooltip<TDatum>(
+  options: TooltipOptions<TDatum> = {}
+): ResolvedTooltipOptions<TDatum> {
   return {
     ...options,
     align: options.align ?? 'auto',
@@ -47,14 +57,31 @@ function defaultTooltip(options: TooltipOptions = {}): ResolvedTooltipOptions {
   }
 }
 
-export default function Tooltip() {
-  const [focusedDatum] = useAtom(focusedDatumAtom)
-  const [pointer] = useAtom(pointerAtom)
-  const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
+export default function Tooltip<TDatum>() {
+  const {
+    useFocusedDatumAtom,
+    usePointerAtom,
+    getOptions,
+    gridDimensions,
+    useChartOffsetAtom,
+    axesInfo,
+    primaryAxis,
+    secondaryAxes,
+    getDatumStatusStyle,
+    getSeriesStatusStyle,
+  } = useChartContext<TDatum>()
 
-  const { getOptions, gridDimensions, axesInfo } = useChartContext()
+  const [focusedDatum] = useFocusedDatumAtom()
+  const [pointer] = usePointerAtom()
+  const [offset] = useChartOffsetAtom()
+
+  // const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
   const preTooltipOptions = getOptions().tooltip
+
+  const secondaryAxis =
+    secondaryAxes.find(d => d.id === focusedDatum?.secondaryAxisId) ??
+    secondaryAxes[0]
 
   const tooltipOptions = React.useMemo(
     () =>
@@ -64,83 +91,58 @@ export default function Tooltip() {
     [preTooltipOptions]
   )
 
-  const tooltipInfo = React.useMemo(() => {
-    if (!preTooltipOptions) {
-      return null
-    }
-    // Default tooltip props
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-
-    let anchor = {} as DatumAnchor
-    let show = true
-
-    // If there is a focused datum, default the focus to its x and y
-    if (focusedDatum) {
-      anchor = focusedDatum.anchor
-    } else {
-      show = false
-    }
-
-    if (tooltipOptions.anchor === 'pointer') {
-      // Support pointer-bound focus
-      anchor = { x: pointer.x, y: pointer.y } as DatumAnchor
-    } else if (tooltipOptions.anchor === 'closest') {
-      // Do nothing, this is already calculated
-    } else if (focusedDatum) {
-      // Support manual definition of focus point using relative multiFocus strategy
-      const multiFocus: AnchorMode[] = Array.isArray(tooltipOptions.anchor)
-        ? [...tooltipOptions.anchor]
-        : [tooltipOptions.anchor]
-      anchor = getMultiAnchor(
-        multiFocus,
-        focusedDatum.group,
-        gridDimensions
-      ) as DatumAnchor
-    }
-
-    anchor = anchor
-      ? {
-          horizontalPadding: anchor.horizontalPadding || 0,
-          verticalPadding: anchor.verticalPadding || 0,
-          ...anchor,
-        }
-      : anchor
-
-    return {
-      anchor,
-      show,
-    }
-  }, [
-    focusedDatum,
-    gridDimensions,
-    pointer,
-    preTooltipOptions,
-    tooltipOptions.anchor,
-  ])
-
   const [finalAlign, setFinalAlign] = React.useState<AlignMode | null>(
     tooltipOptions.align || 'auto'
   )
 
-  const previousShowRef = React.useRef<boolean>()
-  React.useEffect(() => {
-    previousShowRef.current = tooltipInfo?.show
-  }, [tooltipInfo?.show])
+  // If there is a focused datum, default the focus to its x and y
+  let show = !!focusedDatum
+
+  let anchor = {
+    x: NaN,
+    y: NaN,
+    paddingX: 0,
+    paddingY: 0,
+  }
+
+  if (focusedDatum) {
+    anchor = {
+      x: getX(focusedDatum, primaryAxis, secondaryAxis),
+      y: getY(focusedDatum, primaryAxis, secondaryAxis),
+      paddingX: getWidth(focusedDatum, primaryAxis, secondaryAxis),
+      paddingY: 0,
+    }
+  }
+
+  if (tooltipOptions.anchor === 'pointer') {
+    // Support pointer-bound focus
+    // anchor = { x: pointer.x, y: pointer.y, paddingX: 0, paddingY: 0 }
+  } else if (tooltipOptions.anchor === 'closest') {
+    // Do nothing, this is already calculated
+  }
+  // else if (focusedDatum) {
+  //   // Support manual definition of focus point using relative multiFocus strategy
+  //   const multiFocus: AnchorMode[] = Array.isArray(tooltipOptions.anchor)
+  //     ? [...tooltipOptions.anchor]
+  //     : [tooltipOptions.anchor]
+  //   anchor = {
+  //     paddingX: 0,
+  //     paddingY: 0,
+  //     ...getMultiAnchor(multiFocus, focusedDatum.group ?? [], gridDimensions),
+  //   }
+  // }
+
+  const previousShow = usePrevious(show)
 
   const elRef = React.useRef<HTMLDivElement | null>(null)
   const tooltipElRef = React.useRef<HTMLDivElement | null>(null)
 
   useIsomorphicLayoutEffect(() => {
-    if (!tooltipInfo) {
+    if (!show) {
       return
     }
 
-    if (
-      tooltipOptions.align !== 'auto' ||
-      !elRef.current ||
-      !tooltipInfo.show ||
-      !tooltipInfo.anchor
-    ) {
+    if (tooltipOptions.align !== 'auto' || !elRef.current || !show || !anchor) {
       return
     }
 
@@ -167,10 +169,8 @@ export default function Tooltip() {
         [overflowX, overflowY].find(d => ['auto', 'hidden'].includes(d))
       ) {
         const containerDims = container.getBoundingClientRect()
-        const left =
-          gridDims.left - containerDims.left + (tooltipInfo.anchor.x ?? 0)
-        const top =
-          gridDims.top - containerDims.top + (tooltipInfo.anchor.y ?? 0)
+        const left = gridDims.left - containerDims.left + (anchor.x ?? 0)
+        const top = gridDims.top - containerDims.top + (anchor.y ?? 0)
         const right = containerDims.width - left
         const bottom = containerDims.height - top
 
@@ -193,25 +193,25 @@ export default function Tooltip() {
           space.left -
             tooltipOptions.tooltipArrowPadding -
             tooltipOptions.padding -
-            (tooltipInfo.anchor.horizontalPadding ?? 0) >
+            (anchor.paddingX ?? 0) >
           tooltipDims.width,
         right:
           space.right -
             tooltipOptions.tooltipArrowPadding -
             tooltipOptions.padding -
-            (tooltipInfo.anchor.horizontalPadding ?? 0) >
+            (anchor.paddingX ?? 0) >
           tooltipDims.width,
         top:
           space.top -
             tooltipOptions.tooltipArrowPadding -
             tooltipOptions.padding -
-            (tooltipInfo.anchor.verticalPadding ?? 0) >
+            (anchor.paddingY ?? 0) >
             tooltipDims.height && space.left > tooltipDims.width / 2,
         bottom:
           space.bottom -
             tooltipOptions.tooltipArrowPadding -
             tooltipOptions.padding -
-            (tooltipInfo.anchor.verticalPadding ?? 0) >
+            (anchor.paddingY ?? 0) >
           tooltipDims.height,
         centeredFromLeft: space.left > tooltipDims.width / 2,
         centeredFromRight: space.right > tooltipDims.width / 2,
@@ -255,12 +255,6 @@ export default function Tooltip() {
 
     setFinalAlign(resolvedAlign)
   }, [])
-
-  if (!tooltipInfo) {
-    return null
-  }
-
-  const resolvedFocusedDatum = focusedDatum || latestFocusedDatum
 
   let alignX = 0
   let alignY = -50
@@ -399,21 +393,12 @@ export default function Tooltip() {
     }
   }
 
-  const primaryAxis = getAxisByAxisId(
-    axesInfo.primaryAxes,
-    resolvedFocusedDatum?.series.primaryAxisId
-  )
-  const secondaryAxis = getAxisByAxisId(
-    axesInfo.secondaryAxes,
-    resolvedFocusedDatum?.series.secondaryAxisId
-  )
-
   const resolvedHorizontalPadding =
-    tooltipOptions.padding + (tooltipInfo.anchor.horizontalPadding ?? 0)
+    tooltipOptions.padding + (anchor.paddingX ?? 0)
   const resolvedVerticalPadding =
-    tooltipOptions.padding + (tooltipInfo.anchor.verticalPadding ?? 0)
+    tooltipOptions.padding + (anchor.paddingY ?? 0)
 
-  const renderProps = {
+  const renderProps: TooltipRendererProps<TDatum> = {
     axesInfo,
     getOptions,
     useChartContext,
@@ -422,86 +407,106 @@ export default function Tooltip() {
     primaryAxis,
     secondaryAxis,
     tooltipOptions,
-    getDatumStyle: (datum: Datum) => datum.getStatusStyle(resolvedFocusedDatum),
+    getDatumStyle: (datum: Datum<TDatum>) =>
+      getDatumStatusStyle(datum, focusedDatum),
   }
 
   const renderedChildren = tooltipOptions.render(renderProps)
 
-  let animateCoords
-  if (previousShowRef.current === tooltipInfo.show) {
-    animateCoords = true
-  }
+  // let animateCoords
+  // if (previousShow === show) {
+  //   animateCoords = true
+  // }
 
-  return (
-    <div
-      className="tooltip-wrap"
-      style={{
-        pointerEvents: 'none',
-        position: 'absolute',
-        left: `${gridDimensions.gridX}px`,
-        top: `${gridDimensions.gridY}px`,
-        width: `${gridDimensions.gridWidth}px`,
-        height: `${gridDimensions.gridHeight}px`,
-        opacity: tooltipInfo.show ? 1 : 0,
-        transition: 'all .3s ease',
-      }}
-      ref={elRef}
-    >
-      <div
-        style={{
-          position: 'absolute',
+  const [container, setContainer] = React.useState<HTMLDivElement>()
+
+  useIsomorphicLayoutEffect(() => {
+    if (!container) {
+      let element = document.getElementById(
+        'react-charts-portal'
+      ) as HTMLDivElement
+
+      if (!element) {
+        element = document.createElement('div')
+
+        Object.assign(element.style, {
+          pointerEvents: 'none',
+          position: 'fixed',
           left: 0,
+          right: 0,
           top: 0,
-          transform: translate(
-            tooltipInfo.anchor.x ?? 0,
-            tooltipInfo.anchor.y ?? 0
-          ),
-          transition: animateCoords ? 'all .2s ease' : 'opacity .2s ease',
-        }}
-      >
-        <div
+          bottom: 0,
+        })
+
+        document.body.append(element)
+      }
+
+      setContainer(element)
+    }
+  })
+
+  const translateX = offset.left + gridDimensions.gridX + anchor.x ?? 0
+  const translateY = offset.top + gridDimensions.gridY + anchor.y ?? 0
+
+  const springProps = useSpring({
+    translateX: Number.isNaN(translateX) ? 0 : translateX,
+    translateY: Number.isNaN(translateY) ? 0 : translateY,
+    config: { mass: 1, tension: 210, friction: 30 },
+  })
+
+  return container
+    ? ReactDOM.createPortal(
+        <animated.div
           style={{
-            transform: `translate3d(${alignX}%, ${alignY}%, 0)`,
-            padding: `${
-              tooltipOptions.tooltipArrowPadding + resolvedVerticalPadding
-            }px ${
-              tooltipOptions.tooltipArrowPadding + resolvedHorizontalPadding
-            }px`,
-            width: 'auto',
-            transition: 'all .2s ease',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            ...springProps,
           }}
-        >
-          <div
-            ref={tooltipElRef}
-            style={{
-              fontSize: '12px',
-              padding: '5px',
-              background: getBackgroundColor(dark),
-              color: dark ? 'black' : 'white',
-              borderRadius: '3px',
-              position: 'relative',
-            }}
           >
+          <div
+            style={{
+              // transform: `translate3d(${alignX}%, ${alignY}%, 0)`,
+              paddingTop: tooltipOptions.tooltipArrowPadding + resolvedVerticalPadding,
+              paddingBottom: tooltipOptions.tooltipArrowPadding + resolvedVerticalPadding,
+              paddingLeft: tooltipOptions.tooltipArrowPadding + resolvedHorizontalPadding,
+              paddingRight: tooltipOptions.tooltipArrowPadding + resolvedHorizontalPadding,
+              // width: 'auto',
+              transition: 'all .2s ease',
+            }}
+            >
             <div
+              ref={tooltipElRef}
               style={{
-                position: 'absolute',
-                width: 0,
-                height: 0,
-                ...triangleStyles,
-                transition: animateCoords ? 'all .2s ease' : 'none',
+                fontSize: '12px',
+                padding: '5px',
+                background: getBackgroundColor(dark),
+                color: dark ? 'black' : 'white',
+                borderRadius: '3px',
+                position: 'relative',
               }}
-            />
-            {renderedChildren}
+            >
+              {/* <div
+                style={{
+                  position: 'absolute',
+                  width: 0,
+                  height: 0,
+                  ...triangleStyles,
+                  transition: animateCoords ? 'all .2s ease' : 'none',
+                }}
+              />
+              {renderedChildren} */}
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  )
+        </animated.div>,
+        container
+      )
+    : null
 }
 
-function getMultiAnchor(
+function getMultiAnchor<TDatum>(
   anchor: AnchorMode[],
-  datums: Datum[],
+  datums: Datum<TDatum>[],
   gridDimensions: GridDimensions
 ) {
   const invalid = () => {

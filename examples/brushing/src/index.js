@@ -40,7 +40,6 @@ export default function App() {
   const brush = React.useMemo(
     () => ({
       onSelect: (brushData) => {
-        console.log(brushData);
         setState({
           min: Math.min(brushData.start, brushData.end),
           max: Math.max(brushData.start, brushData.end),

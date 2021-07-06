@@ -44,7 +44,7 @@ const optionKeys = Object.keys(options);
 
 export default function useChartConfig({
   series,
-  useR,
+  useR = undefined,
   show = [],
   count = 1,
   resizable = true,
@@ -143,9 +143,10 @@ function makeDataFrom(dataType, series, useR, datums) {
 function makeSeries(i, dataType, useR, datums) {
   const start = 0;
   const startDate = new Date();
-  startDate.setMinutes(0);
-  startDate.setSeconds(0);
-  startDate.setMilliseconds(0);
+  startDate.setUTCHours(0);
+  startDate.setUTCMinutes(0);
+  startDate.setUTCSeconds(0);
+  startDate.setUTCMilliseconds(0);
   // const length = 5 + Math.round(Math.random() * 15)
   const length = datums;
   const min = 0;

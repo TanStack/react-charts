@@ -1,25 +1,29 @@
-import { ScaleBand, ScaleLinear, ScaleTime } from 'd3-scale'
-import { CurveFactory } from 'd3-shape'
+import { ScaleBand, ScaleLinear, ScaleOrdinal, ScaleTime } from 'd3-scale'
+import { CurveFactory, stackOffsetNone } from 'd3-shape'
+import { SetStateAction } from 'jotai'
 import { CSSProperties } from 'react'
 import * as TSTB from 'ts-toolbelt'
 
 import { TooltipRendererProps } from './components/TooltipRenderer'
-import Area from './seriesTypes/Area'
-import Bar from './seriesTypes/Bar'
-import Bubble from './seriesTypes/Bubble'
-import Line from './seriesTypes/Line'
-import { translateX, translateY } from './utils/Utils'
+import { SetAtom } from 'jotai/core/atom'
 
-export type ChartOptions = {
-  data: UserSerie[]
-  axes: AxisOptions[]
-  getSeriesStyle?: (series: Series, status: SeriesFocusStatus) => SeriesStyles
-  getDatumStyle?: (series: Datum, status: DatumFocusStatus) => DatumStyles
-  getSeriesOrder?: (series: Series[]) => Series[]
+export type ChartOptions<TDatum> = {
+  data: UserSerie<TDatum>[]
+  primaryAxis: AxisOptions<TDatum>
+  secondaryAxes: AxisOptions<TDatum>[]
+  getSeriesStyle?: (
+    series: Series<TDatum>,
+    status: SeriesFocusStatus
+  ) => SeriesStyles
+  getDatumStyle?: (
+    series: Datum<TDatum>,
+    status: DatumFocusStatus
+  ) => DatumStyles
+  getSeriesOrder?: (series: Series<TDatum>[]) => Series<TDatum>[]
   groupingMode?: GroupingMode
   showVoronoi?: boolean
+  showDebugAxes?: boolean
   defaultColors?: string[]
-  getSeriesOptions?: (serie: SeriesBase, index: number) => SeriesOptions
   initialWidth?: number
   initialHeight?: number
   brush?: {
@@ -30,9 +34,9 @@ export type ChartOptions = {
       end: unknown
     }) => void
   }
-  onFocusDatum?: (datum: Datum | null) => void
+  onFocusDatum?: (datum: Datum<TDatum> | null) => void
   onClickDatum?: (
-    datum: Datum | null,
+    datum: Datum<TDatum> | null,
     event: React.MouseEvent<SVGSVGElement, MouseEvent>
   ) => void
   dark?: boolean
@@ -42,31 +46,64 @@ export type ChartOptions = {
   tooltip?: boolean | TooltipOptions
 }
 
-export type RequiredChartOptions = TSTB.Object.Required<
-  ChartOptions,
+export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
+  ChartOptions<TDatum>,
   | 'getSeriesStyle'
   | 'getDatumStyle'
   | 'getSeriesOrder'
   | 'groupingMode'
   | 'showVoronoi'
   | 'defaultColors'
+  | 'initialWidth'
+  | 'initialHeight'
 >
 
-export type TooltipOptions = {
+export type ChartContextValue<TDatum> = {
+  getOptions: () => RequiredChartOptions<TDatum>
+  gridDimensions: GridDimensions
+  primaryAxis: Axis<TDatum>
+  secondaryAxes: Axis<TDatum>[]
+  axesInfo: AxesInfo
+  series: Series<TDatum>[]
+  orderedSeries: Series<TDatum>[]
+  groupedDatums: Map<any, Datum<TDatum>[]>
+  width: number
+  height: number
+  getSeriesStatusStyle: (
+    series: Series<TDatum>,
+    focusedDatum: Datum<TDatum> | null
+  ) => SeriesStyles
+  getDatumStatusStyle: (
+    datum: Datum<TDatum>,
+    focusedDatum: Datum<TDatum> | null
+  ) => DatumStyles
+  usePointerAtom: () => [Pointer, SetAtom<SetStateAction<Pointer>>]
+  useChartOffsetAtom: () => [ChartOffset, SetAtom<SetStateAction<ChartOffset>>]
+  useAxisDimensionsAtom: () => [
+    AxisDimensions,
+    SetAtom<SetStateAction<AxisDimensions>>
+  ]
+  useFocusedDatumAtom: () => [
+    Datum<TDatum> | null,
+    SetAtom<SetStateAction<Datum<TDatum> | null>>
+  ]
+}
+
+export type TooltipOptions<TDatum> = {
   align?: AlignMode
   alignPriority?: AlignPosition[]
   padding?: number
   tooltipArrowPadding?: number
   anchor?: AnchorMode
   arrowPosition?: AlignPosition
-  render?: (props: TooltipRendererProps) => React.ReactNode
+  render?: (props: TooltipRendererProps<TDatum>) => React.ReactNode
   formatSecondary?: (d: unknown) => string | number
   formatTertiary?: (d: unknown) => string | number
   invert?: boolean
 }
 
-export type ResolvedTooltipOptions = TSTB.Object.Required<
-  TooltipOptions,
+export type ResolvedTooltipOptions<TDatum> = TSTB.Object.Required<
+  TooltipOptions<TDatum>,
   | 'align'
   | 'alignPriority'
   | 'padding'
@@ -115,7 +152,7 @@ export type AlignPosition =
   | 'top'
   | 'bottom'
 
-export type AxisType = 'ordinal' | 'time' | 'utc' | 'linear' | 'log'
+export type AxisType = 'ordinal' | 'time' | 'localTime' | 'linear' | 'log'
 
 export type AnchorMode =
   | 'pointer'
@@ -172,17 +209,15 @@ export type AxisDimensions = {
   bottom: Record<string, AxisDimension>
 }
 
-export type AxisOptions = AxisLinearOptions
-
-export type AxisLinearOptionsBase = {
-  type: AxisType
+export type AxisOptionsBase = {
+  isPrimary?: boolean
+  primaryAxisId?: string
+  elementType?: 'line' | 'area' | 'bar'
+  showDatumElements?: boolean
+  showOrphanDatumElements?: boolean
+  curve?: CurveFactory
   invert?: boolean
   position: Position
-  min?: number
-  max?: number
-  hardMin?: number
-  hardMax?: number
-  base?: number
   tickCount?: number
   minTickCount?: number
   maxTickCount?: number
@@ -199,6 +234,7 @@ export type AxisLinearOptionsBase = {
   filterTicks?: <T extends string>(ticks: T[]) => T[]
   show?: boolean
   stacked?: boolean
+  stackOffset?: typeof stackOffsetNone
   id?: string
   styles?: CSSProperties & {
     line?: CSSProperties
@@ -206,21 +242,45 @@ export type AxisLinearOptionsBase = {
   }
 }
 
-export type AxisLinearOptionsPrimary = AxisLinearOptionsBase & {
-  primary: true
+export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
+  scaleType: 'time' | 'localTime'
+  getValue: (datum: TDatum) => ChartValue<Date>
+  min?: number
+  max?: number
+  hardMin?: number
+  hardMax?: number
+  base?: number
 }
 
-export type AxisLinearOptionsSecondary = AxisLinearOptionsBase & {
-  primary?: false
-  primaryAxisId?: string
+export type AxisOrdinalOptions<TDatum> = AxisOptionsBase & {
+  scaleType: 'ordinal'
+  getValue: (datum: TDatum) => ChartValue<any>
 }
 
-export type AxisLinearOptions =
-  | AxisLinearOptionsPrimary
-  | AxisLinearOptionsSecondary
+export type AxisBandOptions<TDatum> = AxisOptionsBase & {
+  scaleType: 'band'
+  getValue: (datum: TDatum) => ChartValue<any>
+  minBandSize?: number
+}
 
-export type ResolvedAxisLinearOptions = TSTB.Object.Required<
-  AxisLinearOptions,
+export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
+  scaleType: 'linear' | 'log'
+  getValue: (datum: TDatum) => ChartValue<number>
+  min?: number
+  max?: number
+  hardMin?: number
+  hardMax?: number
+  base?: number
+}
+
+export type AxisOptions<TDatum> =
+  | AxisTimeOptions<TDatum>
+  | AxisOrdinalOptions<TDatum>
+  | AxisBandOptions<TDatum>
+  | AxisLinearOptions<TDatum>
+
+export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
+  TAxisOptions & {},
   | 'tickCount'
   | 'minTickCount'
   | 'maxTickCount'
@@ -236,35 +296,71 @@ export type ResolvedAxisLinearOptions = TSTB.Object.Required<
   | 'stacked'
 >
 
-export type AxisLinear = ResolvedAxisLinearOptions & {
-  primary?: boolean
-  primaryAxisId?: string
-  isTimeType: boolean
+export type ChartValue<T> = T | null | undefined
+
+export type AxisBase<TDatum> = {
+  _?: TDatum
   isVertical: boolean
-  scale:
-    | ScaleBand<string>
-    | ScaleLinear<number, number, never>
-    | ScaleTime<number, number, never>
-  uniquePrimariesSet: Set<unknown>
-  barSize: number
-  cursorSize: number
-  stepSize: number
-  seriesBandScale?: ScaleBand<string>
-  seriesBarSize: number
-  domain: [unknown, unknown] | unknown[]
   range: [number, number]
-  directionMultiplier: -1 | 1
-  transform: typeof translateX | typeof translateY
-  ticks: unknown[]
-  format: (value: unknown, index: number) => string
-  tickSpacing: number
-  tickOffset: number
-  barOffset: number
-  gridOffset: number
+  // isPrimary?: boolean
+  // primaryAxisId?: string
+  // isTimeType: boolean
+  // uniquePrimariesSet: Set<unknown>
+  // barSize: number
+  // cursorSize: number
+  // stepSize: number
+  // seriesBandScale?: ScaleBand<string>
+  // seriesBarSize: number
+  // domain: [unknown, unknown] | unknown[]
+  // directionMultiplier: -1 | 1
+  // transform: typeof translateX | typeof translateY
+  // ticks: unknown[]
+  // format: (value: unknown, index: number) => string
+  // tickSpacing: number
+  // tickOffset: number
+  // barOffset: number
+  // gridOffset: number
 }
 
-export type UserSerie = {
-  data: UserDatum[]
+export type AxisTime<TDatum> = Omit<
+  AxisBase<TDatum> & ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
+  'format'
+> & {
+  axisFamily: 'time'
+  scale: ScaleTime<number, number, never>
+  outerScale: ScaleTime<number, number, never>
+  bandScale: ScaleBand<number>
+  format: ReturnType<ScaleTime<number, number, never>['tickFormat']>
+}
+
+export type AxisLinear<TDatum> = Omit<
+  AxisBase<TDatum> & ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
+  'format'
+> & {
+  axisFamily: 'linear'
+  scale: ScaleLinear<number, number, never>
+  outerScale: ScaleLinear<number, number, never>
+  bandScale: ScaleBand<number>
+  format: ReturnType<ScaleLinear<number, number, never>['tickFormat']>
+}
+
+export type AxisBand<TDatum> = Omit<
+  AxisBase<TDatum> & ResolvedAxisOptions<AxisBandOptions<TDatum>>,
+  'format'
+> & {
+  axisFamily: 'band'
+  scale: ScaleBand<any>
+  outerScale: ScaleBand<any>
+  format: (value: ChartValue<any>) => string
+}
+
+export type Axis<TDatum> =
+  | AxisTime<TDatum>
+  | AxisLinear<TDatum>
+  | AxisBand<TDatum>
+
+export type UserSerie<TDatum> = {
+  data: TDatum[]
   id?: string
   label?: string
   color?: string
@@ -272,110 +368,38 @@ export type UserSerie = {
   secondaryAxisId?: string
 }
 
-export type UserDatum = {
-  primary: unknown
-  secondary: unknown
-  radius?: number
-  color?: string
-}
-
 //
 
-export type SeriesOptions = {
-  type: 'line' | 'bubble' | 'area' | 'bar'
-  showPoints?: boolean
-  showOrphans?: boolean
-  curve?: CurveFactory
-}
-
-export type SeriesBase = {
-  originalSeries: UserSerie
+export type Series<TDatum> = {
+  originalSeries: UserSerie<TDatum>
   index: number
   id: string
   label: string
-  primaryAxisId?: string
   secondaryAxisId?: string
-  datums: DatumBase[]
+  datums: Datum<TDatum>[]
+  style?: CSSProperties
 }
 
-export type DatumBase = {
-  originalSeries: UserSerie
+export type Datum<TDatum> = {
+  originalSeries: UserSerie<TDatum>
   seriesIndex: number
   seriesId: string
   seriesLabel: string
   index: number
-  originalDatum: UserDatum
-  primary: any
-  secondary: any
-  radius?: number
-}
-
-export type SeriesWithComponent = SeriesBase &
-  SeriesOptions & {
-    Component: typeof Line | typeof Bubble | typeof Area | typeof Bar
-  }
-
-//
-
-export type SeriesWithComponentIndex = Omit<SeriesWithComponent, 'datums'> & {
-  datums: DatumWithSeriesTypeIndex[]
-  seriesTypeIndex: number
-}
-
-export type DatumWithSeriesTypeIndex = DatumBase & {
-  seriesTypeIndex: number
-}
-
-//
-
-export type SeriesUnplotted = Omit<SeriesWithComponentIndex, 'datums'> & {
-  datums: DatumUnplotted[]
-  primaryAxis: AxisLinear
-  secondaryAxis: AxisLinear
-  getStatusStyle: (focusedDatum: Datum | null) => SeriesStyles
+  originalDatum: TDatum
+  secondaryAxisId?: string
+  stackData?: StackDatum<TDatum>
+  group?: Datum<TDatum>[]
   style?: CSSProperties
 }
 
-export type DatumUnplotted = DatumWithSeriesTypeIndex & {
-  group: Datum[]
-  totalValue: number
-  xValue: any
-  yValue: any
-  baseValue: any
-  getStatusStyle: (focusedDatum: Datum | null) => DatumStyles
-  style?: CSSProperties
-  primaryAxis: AxisLinear
-  secondaryAxis: AxisLinear
+export type StackDatum<TDatum> = {
+  0: number
+  1: number
+  data: Datum<TDatum>
 }
 
 //
-
-export type Series = Omit<SeriesUnplotted, 'datums'> & {
-  datums: Datum[]
-}
-
-export type Datum = DatumUnplotted & {
-  series: Series
-  size: number
-  x: number | null
-  y: number | null
-  r: number | null
-  base: number | null
-  primaryCoord: number | null
-  secondaryCoord: number | null
-  defined: boolean
-  anchor: DatumAnchor
-  boundingPoints: DatumAnchor[]
-}
-
-export type DatumAnchor = {
-  x: number | null
-  y: number | null
-  primaryCoord: number | null
-  secondaryCoord: number | null
-  horizontalPadding?: number
-  verticalPadding?: number
-}
 
 export type Measurement = Side | 'width' | 'height'
 
@@ -387,13 +411,8 @@ export type GridDimensions = {
 }
 
 export type AxesInfo = {
-  axes: AxisLinear[]
-  primaryAxes: AxisLinear[]
-  secondaryAxes: AxisLinear[]
   xKey: 'primary' | 'secondary'
   yKey: 'primary' | 'secondary'
-  xAxes: AxisLinear[]
-  yAxes: AxisLinear[]
 }
 
 export type CursorOptions = {

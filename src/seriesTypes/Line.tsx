@@ -1,14 +1,11 @@
-import { useAtom } from 'jotai'
 import React from 'react'
 
 import { LinePath } from '@visx/shape'
 
-import { focusedDatumAtom } from '../atoms'
 import useChartContext from '../components/Chart'
-import Circle from '../primitives/Circle'
-import { AxisLinear, Datum, Series } from '../types'
+import { Axis, Series, Datum } from '../types'
+import { translate } from '../utils/Utils'
 //
-import { isValidPoint } from '../utils/Utils'
 import { monotoneX } from '../utils/curveMonotone'
 
 const pathDefaultStyle = {
@@ -17,99 +14,96 @@ const pathDefaultStyle = {
 
 const circleDefaultStyle = {
   r: 2,
+  strokeWidth: '1',
+  stroke: '#000000',
+  fill: '#000000',
+  opacity: 1,
 }
 
-export default function Line<TDatum extends Datum>({
-  series,
+export default function Line<TDatum>({
+  primaryAxis,
+  secondaryAxis,
+  series: allSeries,
 }: {
-  series: Series
+  primaryAxis: Axis<TDatum>
+  secondaryAxis: Axis<TDatum>
+  series: Series<TDatum>[]
 }) {
-  const { getX, getY } = useChartContext()
-  const curve = series.curve ?? monotoneX
+  const {
+    getSeriesStatusStyle,
+    getDatumStatusStyle,
+    useFocusedDatumAtom,
+    gridDimensions,
+  } = useChartContext<TDatum>()
 
-  const [focusedDatum] = useAtom(focusedDatumAtom)
-  const style = series.getStatusStyle(focusedDatum)
+  const curve = secondaryAxis.curve ?? monotoneX
 
-  const lineStyle = {
-    ...pathDefaultStyle,
-    ...style,
-    ...style.line,
-    fill: 'none',
-  }
+  const [focusedDatum] = useFocusedDatumAtom()
+
+  const xAxis = primaryAxis.isVertical ? secondaryAxis : primaryAxis
+  const yAxis = !primaryAxis.isVertical ? secondaryAxis : primaryAxis
+
+  const getX = (datum: Datum<TDatum>) =>
+    xAxis.scale(
+      xAxis.stacked ? datum.stackData?.[1] : xAxis.getValue(datum.originalDatum)
+    )
+
+  const getY = (datum: Datum<TDatum>) =>
+    yAxis.scale(
+      yAxis.stacked ? datum.stackData?.[1] : yAxis.getValue(datum.originalDatum)
+    )
 
   return (
-    <g>
-      <LinePath<TDatum>
-        curve={curve}
-        data={series.datums}
-        x={d => series.xScale(getX(d)) ?? 0}
-        y={d => series.yScale(getY(d)) ?? 0}
-        shapeRendering="geometricPrecision"
-        // markerMid="url(#marker-circle)"
-        // markerStart={markerStart}
-        // markerEnd={markerEnd}
-        style={lineStyle}
-      />
-      {series.showPoints ?? true
-        ? series.datums.map((datum, i) => {
-            const dataStyle = datum.getStatusStyle(focusedDatum)
+    <g
+      style={{
+        transform: translate(gridDimensions.gridX, gridDimensions.gridY),
+      }}
+    >
+      {allSeries.map((series, i) => {
+        const style = getSeriesStatusStyle(series, focusedDatum)
 
-            const circleProps = {
-              key: i,
-              cx: series.xScale(getX(datum)),
-              cy: series.yScale(getY(datum)),
-              style: {
-                ...circleDefaultStyle,
-                ...style,
-                ...style.circle,
-                ...dataStyle,
-                ...dataStyle.circle,
-              },
-            }
+        const lineStyle = {
+          ...pathDefaultStyle,
+          ...style,
+          ...style.line,
+          fill: 'none',
+        }
 
-            if (!datum.defined) {
-              return null
-            }
+        return (
+          <g key={`lines-${i}`}>
+            {(secondaryAxis.showDatumElements ?? true) &&
+              series.datums.map((datum, i) => {
+                const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 
-            return <Circle {...circleProps} />
-          })
-        : null}
+                return (
+                  <circle
+                    key={i}
+                    r={2}
+                    cx={getX(datum)}
+                    cy={getY(datum)}
+                    stroke="rgba(33,33,33,0.5)"
+                    fill="transparent"
+                    style={{
+                      ...circleDefaultStyle,
+                      ...style,
+                      ...style.circle,
+                      ...dataStyle,
+                      ...dataStyle.circle,
+                    }}
+                  />
+                )
+              })}
+            <LinePath<Datum<TDatum>>
+              curve={curve}
+              data={series.datums}
+              x={datum => getX(datum) ?? NaN}
+              y={datum => getY(datum) ?? NaN}
+              stroke="#333"
+              style={lineStyle}
+            />
+          </g>
+        )
+      })}
     </g>
   )
-}
-
-Line.plotDatum = (
-  datum: Datum,
-  primaryAxis: AxisLinear,
-  secondaryAxis: AxisLinear,
-  xAxis: AxisLinear,
-  yAxis: AxisLinear
-) => {
-  datum.primaryCoord = primaryAxis.scale(datum.primary)
-  datum.secondaryCoord = secondaryAxis.scale(datum.secondary)
-  datum.x = xAxis.scale(datum.xValue as any)
-  datum.y = yAxis.scale(datum.yValue as any)
-  datum.defined = isValidPoint(datum.xValue) && isValidPoint(datum.yValue)
-  datum.base = primaryAxis.isVertical
-    ? xAxis.scale(datum.baseValue as any)
-    : yAxis.scale(datum.baseValue as any)
-
-  // Adjust non-bar elements for ordinal scales
-  if (xAxis.type === 'ordinal') {
-    datum.x! += xAxis.tickOffset
-  }
-  if (yAxis.type === 'ordinal') {
-    datum.y! += yAxis.tickOffset
-  }
-
-  // Set the default anchor point
-  datum.anchor = {
-    primaryCoord: datum.primaryCoord,
-    secondaryCoord: datum.secondaryCoord,
-    x: datum.x,
-    y: datum.y,
-  }
-
-  // Set the pointer points (used in voronoi)
-  datum.boundingPoints = [datum.anchor]
 }
