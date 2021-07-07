@@ -34,15 +34,6 @@
   "peerDependencies": {
     "react": ">=16"
   },
-  "release": {
-    "branches": [
-      "master",
-      {
-        "name": "next",
-        "prerelease": true
-      }
-    ]
-  },
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint"
