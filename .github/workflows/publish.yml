@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'next'
+      - 'beta'
   pull_request:
 
 jobs:
@@ -27,7 +28,7 @@ jobs:
   publish-module:
     name: 'Publish Module to NPM'
     # needs: test
-    if: github.ref == 'refs/heads/next' #publish only when merged in master, not on PR
+    if: github.ref == 'refs/heads/next' || github.ref == 'refs/heads/beta' #publish only when merged in master, not on PR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
