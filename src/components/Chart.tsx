@@ -16,7 +16,6 @@ import {
   AxisDimension,
   AxisDimensions,
   ChartContextValue,
-  ChartOffset,
   ChartOptions,
   Datum,
   GridDimensions,
@@ -142,6 +141,7 @@ function ChartInner<TDatum>({
   }
 
   const svgRef = React.useRef<SVGSVGElement>(null)
+  const svgRect = useRect(svgRef.current)
   const getOptions = useGetLatest(options)
 
   const pointerAtom = React.useMemo(
@@ -155,14 +155,6 @@ function ChartInner<TDatum>({
     []
   )
 
-  const chartOffsetAtom = React.useMemo(
-    () =>
-      atom<ChartOffset>({
-        left: 0,
-        top: 0,
-      }),
-    []
-  )
   const axisDimensionsAtom = React.useMemo(
     () =>
       atom<AxisDimensions>({
@@ -183,10 +175,6 @@ function ChartInner<TDatum>({
     // eslint-disable-next-line
     return useAtom(pointerAtom)
   }, [pointerAtom])
-  const useChartOffsetAtom = React.useCallback(() => {
-    // eslint-disable-next-line
-    return useAtom(chartOffsetAtom)
-  }, [chartOffsetAtom])
   const useAxisDimensionsAtom = React.useCallback(() => {
     // eslint-disable-next-line
     return useAtom(axisDimensionsAtom)
@@ -196,12 +184,11 @@ function ChartInner<TDatum>({
     return useAtom(focusedDatumAtom)
   }, [focusedDatumAtom])
 
-  useAtom<Datum<TDatum> | null>(focusedDatumAtom)
+  // useAtom<Datum<TDatum> | null>(focusedDatumAtom)
 
-  const [axisDimensions] = useAtom(axisDimensionsAtom)
-  const [offset, setOffset] = useAtom(chartOffsetAtom)
-  const [focusedDatum] = useAtom(focusedDatumAtom)
-  const [, setPointer] = useAtom(pointerAtom)
+  const [axisDimensions] = useAxisDimensionsAtom()
+  const [focusedDatum] = useFocusedDatumAtom()
+  const [, setPointer] = usePointerAtom()
 
   const gridDimensions = React.useMemo((): GridDimensions => {
     // Left
@@ -439,22 +426,6 @@ function ChartInner<TDatum>({
     [getOptions, series]
   )
 
-  // Measure SVG element to detect grid offset in screen
-  useIsomorphicLayoutEffect(() => {
-    if (!svgRef.current) {
-      return
-    }
-
-    const current = svgRef.current.getBoundingClientRect()
-
-    if (current.left !== offset.left || current.top !== offset.top) {
-      setOffset({
-        left: current.left,
-        top: current.top,
-      })
-    }
-  })
-
   const mouseMoveRafRef = React.useRef<number | null>()
 
   const onMouseMove = (
@@ -469,8 +440,8 @@ function ChartInner<TDatum>({
       const { clientX, clientY } = e
 
       setPointer(old => {
-        const x = clientX - offset.left - gridDimensions.gridX
-        const y = clientY - offset.top - gridDimensions.gridY
+        const x = clientX - svgRect.left - gridDimensions.gridX
+        const y = clientY - svgRect.top - gridDimensions.gridY
 
         return {
           ...old,
@@ -537,13 +508,13 @@ function ChartInner<TDatum>({
     : -1
 
   // Bring focused series to the front
-  orderedSeries = focusedDatum
-    ? [
-        ...orderedSeries.slice(0, focusedSeriesIndex),
-        ...orderedSeries.slice(focusedSeriesIndex + 1),
-        orderedSeries[focusedSeriesIndex],
-      ]
-    : orderedSeries
+  // orderedSeries = focusedDatum
+  //   ? [
+  //       ...orderedSeries.slice(0, focusedSeriesIndex),
+  //       ...orderedSeries.slice(focusedSeriesIndex + 1),
+  //       orderedSeries[focusedSeriesIndex],
+  //     ]
+  //   : orderedSeries
 
   useIsomorphicLayoutEffect(() => {
     if (
@@ -569,9 +540,9 @@ function ChartInner<TDatum>({
     getSeriesStatusStyle,
     getDatumStatusStyle,
     usePointerAtom,
-    useChartOffsetAtom,
     useAxisDimensionsAtom,
     useFocusedDatumAtom,
+    svgRect,
   }
 
   const seriesByAxisId = sort(
@@ -650,7 +621,7 @@ function ChartInner<TDatum>({
         </g>
         <g className="axes">
           {[primaryAxis, ...secondaryAxes].map(axis => (
-            <AxisLinear key={axis.id} {...axis} />
+            <AxisLinear key={[axis.position, axis.id].join('')} {...axis} />
           ))}
         </g>
         <Voronoi />

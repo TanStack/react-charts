@@ -30,17 +30,17 @@ function defaultAxisOptions<TDatum>(
   return {
     ...options,
     elementType: options.elementType ?? 'line',
-    tickCount: options.tickCount ?? 10,
-    minTickCount: options.minTickCount ?? 1,
-    maxTickCount: options.maxTickCount ?? 99999999,
-    tickSizeInner: options.tickSizeInner ?? 6,
-    tickSizeOuter: options.tickSizeOuter ?? 6,
-    tickPadding: options.tickPadding ?? 10,
-    labelRotation: options.labelRotation ?? 60,
-    innerPadding: options.innerPadding ?? 0.6,
-    outerPadding: options.outerPadding ?? 0.2,
-    showTicks: options.showTicks ?? true,
-    filterTicks: options.filterTicks ?? (d => d),
+    // tickCount: options.tickCount ?? 10,
+    // minTickCount: options.minTickCount ?? 1,
+    // maxTickCount: options.maxTickCount ?? 99999999,
+    // tickSizeInner: options.tickSizeInner ?? 6,
+    // tickSizeOuter: options.tickSizeOuter ?? 6,
+    minTickPaddingForRotation: options.minTickPaddingForRotation ?? 10,
+    tickLabelRotationDeg: options.tickLabelRotationDeg ?? 60,
+    innerBandPadding: options.innerBandPadding ?? 0.6,
+    outerBandPadding: options.outerBandPadding ?? 0.2,
+    // showTicks: options.showTicks ?? true,
+    // filterTicks: options.filterTicks ?? (d => d),
     show: options.show ?? true,
     stacked: options.stacked ?? false,
   }
@@ -254,8 +254,8 @@ function buildBandAxis<TDatum>(
 
   const scale = scaleBand(domain, range)
     .round(false)
-    .paddingOuter(options.outerPadding ?? 0)
-    .paddingInner(options.innerPadding ?? 0)
+    .paddingOuter(options.outerBandPadding ?? 0)
+    .paddingInner(options.innerBandPadding ?? 0)
 
   // Invert if necessary
   if (options.invert) {
@@ -352,8 +352,8 @@ function buildImpliedBandScale<TDatum>(
 
   const bandScale = scaleBand(bandDomain, range)
     .round(false)
-    .paddingOuter(options.outerPadding ?? 0)
-    .paddingInner(options.innerPadding ?? 0)
+    .paddingOuter(options.outerBandPadding ?? 0)
+    .paddingInner(options.innerBandPadding ?? 0)
 
   return bandScale
 }

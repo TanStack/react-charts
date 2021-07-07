@@ -2,18 +2,32 @@ import React from 'react'
 
 import observeRect from '@reach/observe-rect'
 
-import { RequiredChartOptions } from '../types'
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
-export default function useRect<TDatum>(
-  node: HTMLElement | null | undefined,
-  options: RequiredChartOptions<TDatum>
+export type ClientRect = Omit<
+  ReturnType<Element['getBoundingClientRect']>,
+  'x' | 'y' | 'toJSON'
+>
+
+export type HasBoundingClientRect = {
+  getBoundingClientRect: () => ClientRect
+}
+
+export default function useRect(
+  node: HasBoundingClientRect | null | undefined,
+  options?: {
+    enabled?: boolean
+    initialWidth?: number
+    initialHeight?: number
+  }
 ) {
+  const enabled = options?.enabled ?? true
+
   const [element, setElement] = React.useState(node)
 
-  const [rect, setRect] = React.useState<DOMRect>({
-    width: options.initialWidth ?? 0,
-    height: options.initialHeight ?? 0,
+  const [rect, setRect] = React.useState<ClientRect>({
+    width: options?.initialWidth ?? 0,
+    height: options?.initialHeight ?? 0,
   } as DOMRect)
 
   const initialRectSet = React.useRef(false)
@@ -32,18 +46,18 @@ export default function useRect<TDatum>(
   }, [element])
 
   React.useEffect(() => {
-    if (!element) {
+    if (!element || !enabled) {
       return
     }
 
-    const observer = observeRect(element, setRect)
+    const observer = observeRect(element as Element, setRect)
 
     observer.observe()
 
     return () => {
       observer.unobserve()
     }
-  }, [element])
+  }, [element, enabled])
 
   return rect
 }

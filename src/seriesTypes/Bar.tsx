@@ -40,6 +40,9 @@ export default function BarComponent<TDatum>({
 
               return (
                 <rect
+                  ref={el => {
+                    datum.element = el
+                  }}
                   key={i}
                   x={getX(datum, primaryAxis, secondaryAxis) ?? NaN}
                   y={getY(datum, primaryAxis, secondaryAxis) ?? NaN}

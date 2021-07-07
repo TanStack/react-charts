@@ -62,9 +62,9 @@ export default function AreaComponent<TDatum>({
 
         const lineStyle = {
           strokeWidth: 2,
-          fill: 'none',
           ...style,
           ...style.line,
+          fill: 'none',
         }
 
         const areaStyle = {
@@ -76,28 +76,36 @@ export default function AreaComponent<TDatum>({
 
         return (
           <g key={`lines-${i}`}>
-            {secondaryAxis.showDatumElements &&
-              series.datums.map((datum, i) => {
-                const dataStyle = getDatumStatusStyle(datum, focusedDatum)
+            {series.datums.map((datum, i) => {
+              const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 
-                return (
-                  <circle
-                    key={i}
-                    r={2}
-                    cx={getX(datum)}
-                    cy={getY(datum, 1) ?? NaN}
-                    stroke="rgba(33,33,33,0.5)"
-                    fill="transparent"
-                    style={{
-                      ...circleDefaultStyle,
-                      ...style,
-                      ...style.circle,
-                      ...dataStyle,
-                      ...dataStyle.circle,
-                    }}
-                  />
-                )
-              })}
+              return (
+                <circle
+                  key={i}
+                  ref={el => {
+                    datum.element = el
+                  }}
+                  r={2}
+                  cx={getX(datum)}
+                  cy={getY(datum, 1) ?? NaN}
+                  stroke="rgba(33,33,33,0.5)"
+                  fill="transparent"
+                  style={{
+                    ...circleDefaultStyle,
+                    ...style,
+                    ...style.circle,
+                    ...dataStyle,
+                    ...dataStyle.circle,
+                    ...(!secondaryAxis.showDatumElements
+                      ? {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                        }
+                      : {}),
+                  }}
+                />
+              )
+            })}
             <Area<Datum<TDatum>>
               curve={curve}
               data={series.datums}

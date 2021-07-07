@@ -78,6 +78,9 @@ export default function Line<TDatum>({
                 return (
                   <circle
                     key={i}
+                    ref={el => {
+                      datum.element = el
+                    }}
                     r={2}
                     cx={getX(datum)}
                     cy={getY(datum)}

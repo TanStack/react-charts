@@ -79,7 +79,8 @@ export default function useMeasure<TDatum>({
     }
 
     const shouldRotate =
-      (widestLabel?.width || 0) + axis.tickPadding > smallestTickGap
+      (widestLabel?.width || 0) + axis.minTickPaddingForRotation >
+      smallestTickGap
 
     // if (!isLooping) {
     // Rotate ticks for non-time horizontal axes
@@ -90,7 +91,7 @@ export default function useMeasure<TDatum>({
   }, [
     elRef,
     axis.isVertical,
-    axis.tickPadding,
+    axis.minTickPaddingForRotation,
     gridDimensions.gridWidth,
     gridDimensions.gridHeight,
     setShowRotated,
@@ -169,9 +170,8 @@ export default function useMeasure<TDatum>({
       }
 
       newDimensions.height = Math.round(
-        Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-          axis.tickPadding +
-          (tallestRealLabel?.height ?? 0)
+        // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
+        axis.minTickPaddingForRotation + (tallestRealLabel?.height ?? 0)
       )
     } else {
       if (measureDims.length) {
@@ -193,9 +193,8 @@ export default function useMeasure<TDatum>({
       }
 
       newDimensions.width = Math.round(
-        Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-          axis.tickPadding +
-          (widestRealLabel?.width ?? 0)
+        // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
+        axis.minTickPaddingForRotation + (widestRealLabel?.width ?? 0)
       )
     }
 
@@ -221,9 +220,7 @@ export default function useMeasure<TDatum>({
     axis.id,
     axis.isVertical,
     axis.position,
-    axis.tickPadding,
-    axis.tickSizeInner,
-    axis.tickSizeOuter,
+    axis.minTickPaddingForRotation,
     axisDimension,
     axisDimensions,
     elRef,

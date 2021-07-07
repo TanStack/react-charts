@@ -5,6 +5,7 @@ import { CSSProperties } from 'react'
 import * as TSTB from 'ts-toolbelt'
 
 import { TooltipRendererProps } from './components/TooltipRenderer'
+import { ClientRect, HasBoundingClientRect } from './hooks/useRect'
 import { SetAtom } from 'jotai/core/atom'
 
 export type ChartOptions<TDatum> = {
@@ -43,7 +44,7 @@ export type ChartOptions<TDatum> = {
   renderSVG?: () => React.ReactSVGElement
   primaryCursor?: boolean | CursorOptions
   secondaryCursor?: boolean | CursorOptions
-  tooltip?: boolean | TooltipOptions
+  tooltip?: boolean | TooltipOptions<TDatum>
 }
 
 export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
@@ -69,6 +70,7 @@ export type ChartContextValue<TDatum> = {
   groupedDatums: Map<any, Datum<TDatum>[]>
   width: number
   height: number
+  svgRect: ClientRect
   getSeriesStatusStyle: (
     series: Series<TDatum>,
     focusedDatum: Datum<TDatum> | null
@@ -78,7 +80,6 @@ export type ChartContextValue<TDatum> = {
     focusedDatum: Datum<TDatum> | null
   ) => DatumStyles
   usePointerAtom: () => [Pointer, SetAtom<SetStateAction<Pointer>>]
-  useChartOffsetAtom: () => [ChartOffset, SetAtom<SetStateAction<ChartOffset>>]
   useAxisDimensionsAtom: () => [
     AxisDimensions,
     SetAtom<SetStateAction<AxisDimensions>>
@@ -94,11 +95,11 @@ export type TooltipOptions<TDatum> = {
   alignPriority?: AlignPosition[]
   padding?: number
   tooltipArrowPadding?: number
-  anchor?: AnchorMode
-  arrowPosition?: AlignPosition
+  // anchor?: AnchorMode
+  // arrowPosition?: AlignPosition
   render?: (props: TooltipRendererProps<TDatum>) => React.ReactNode
-  formatSecondary?: (d: unknown) => string | number
-  formatTertiary?: (d: unknown) => string | number
+  // formatSecondary?: (d: unknown) => string | number
+  // formatTertiary?: (d: unknown) => string | number
   invert?: boolean
 }
 
@@ -191,6 +192,8 @@ export type Pointer = PointerUnpressed | PointerPressed
 export type ChartOffset = {
   left: number
   top: number
+  width: number
+  height: number
 }
 
 export type AxisDimension = {
@@ -218,20 +221,20 @@ export type AxisOptionsBase = {
   curve?: CurveFactory
   invert?: boolean
   position: Position
-  tickCount?: number
-  minTickCount?: number
-  maxTickCount?: number
-  tickValues?: unknown[]
-  format?: (value: unknown, index: number, scaleLabel: string) => string
-  tickSizeInner?: number
-  tickSizeOuter?: number
-  tickPadding?: number
-  labelRotation?: number
-  innerPadding?: number
-  outerPadding?: number
+  // tickCount?: number
+  // minTickCount?: number
+  // maxTickCount?: number
+  // tickValues?: unknown[]
+  // format?: (value: unknown, index: number, scaleLabel: string) => string
+  // tickSizeInner?: number
+  // tickSizeOuter?: number
+  minTickPaddingForRotation?: number
+  tickLabelRotationDeg?: number
+  innerBandPadding?: number
+  outerBandPadding?: number
   showGrid?: boolean
-  showTicks?: boolean
-  filterTicks?: <T extends string>(ticks: T[]) => T[]
+  // showTicks?: boolean
+  // filterTicks?: <T extends string>(ticks: T[]) => T[]
   show?: boolean
   stacked?: boolean
   stackOffset?: typeof stackOffsetNone
@@ -281,17 +284,17 @@ export type AxisOptions<TDatum> =
 
 export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
   TAxisOptions & {},
-  | 'tickCount'
-  | 'minTickCount'
-  | 'maxTickCount'
-  | 'tickSizeInner'
-  | 'tickSizeOuter'
-  | 'tickPadding'
-  | 'labelRotation'
-  | 'innerPadding'
-  | 'outerPadding'
-  | 'showTicks'
-  | 'filterTicks'
+  // | 'tickCount'
+  // | 'minTickCount'
+  // | 'maxTickCount'
+  // | 'tickSizeInner'
+  // | 'tickSizeOuter'
+  | 'minTickPaddingForRotation'
+  | 'tickLabelRotationDeg'
+  | 'innerBandPadding'
+  | 'outerBandPadding'
+  // | 'showTicks'
+  // | 'filterTicks'
   | 'show'
   | 'stacked'
 >
@@ -391,6 +394,7 @@ export type Datum<TDatum> = {
   stackData?: StackDatum<TDatum>
   group?: Datum<TDatum>[]
   style?: CSSProperties
+  element?: Element | null
 }
 
 export type StackDatum<TDatum> = {

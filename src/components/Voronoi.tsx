@@ -126,11 +126,35 @@ function PrimaryVoronoi<TDatum>({
             d => d.id === datum.secondaryAxisId
           )
 
+          if (secondaryAxis?.stacked) {
+            let range = secondaryAxis?.scale.range() ?? [0, 0]
+
+            if (secondaryAxis?.isVertical) {
+              range.reverse()
+            }
+
+            let [secondaryStart, secondaryEnd] = range
+
+            if (prev) {
+              secondaryStart =
+                secondaryAxis?.scale(datum.stackData?.[1] ?? NaN) ?? NaN
+            }
+
+            if (next) {
+              secondaryEnd =
+                secondaryAxis?.scale(datum.stackData?.[0] ?? NaN) ?? NaN
+            }
+
+            return {
+              secondaryStart,
+              secondaryEnd,
+              datum,
+            }
+          }
+
           const value =
             secondaryAxis?.scale(
-              secondaryAxis.stacked
-                ? datum.stackData?.[1]
-                : secondaryAxis?.getValue(datum.originalDatum)
+              secondaryAxis?.getValue(datum.originalDatum)
             ) ?? NaN
 
           let range = secondaryAxis?.scale.range() ?? [0, 0]
@@ -146,11 +170,7 @@ function PrimaryVoronoi<TDatum>({
               d => d.id === prev?.secondaryAxisId
             )
             const prevValue =
-              prevAxis?.scale(
-                prevAxis.stacked
-                  ? prev.stackData?.[1]
-                  : prevAxis?.getValue(prev.originalDatum)
-              ) ?? NaN
+              prevAxis?.scale(prevAxis?.getValue(prev.originalDatum)) ?? NaN
             secondaryStart = value - (value - prevValue) / 2
           }
 
@@ -159,11 +179,7 @@ function PrimaryVoronoi<TDatum>({
               d => d.id === next?.secondaryAxisId
             )
             const nextValue =
-              nextAxis?.scale(
-                nextAxis.stacked
-                  ? next.stackData?.[1]
-                  : nextAxis?.getValue(next.originalDatum)
-              ) ?? NaN
+              nextAxis?.scale(nextAxis?.getValue(next.originalDatum)) ?? NaN
             secondaryEnd = value + (nextValue - value) / 2
           }
 
