@@ -150,52 +150,6 @@ export function useAnchor(options: {
   }
 }
 
-// Sticker.propTypes = {
-//   show: PropTypes.bool,
-//   portalId: PropTypes.string,
-//   side: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
-//   unmountDelay: PropTypes.number,
-//   allowOverflow: PropTypes.bool,
-// }
-
-// function useRect(ref, enable) {
-//   let [rect, setRect] = React.useState(null)
-
-//   useIsomorphicLayoutEffect(() => {
-//     if (enable && ref.current) {
-//       const observer = observeRect(ref.current, setRect)
-//       observer.observe()
-//       return () => {
-//         observer.unobserve()
-//       }
-//     }
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [ref.current, enable])
-
-//   rect = React.useMemo(() => {
-//     if (!ref.current || !rect) {
-//       return null
-//     }
-//     const styles = window.getComputedStyle(ref.current)
-//     return {
-//       x: rect.x,
-//       y: rect.y,
-//       width:
-//         rect.width + parseInt(styles.marginLeft) + parseInt(styles.marginRight),
-//       height:
-//         rect.height +
-//         parseInt(styles.marginTop) +
-//         parseInt(styles.marginBottom),
-//       top: rect.top,
-//       right: rect.right,
-//       bottom: rect.bottom,
-//       left: rect.left,
-//     }
-//   }, [rect, ref])
-
-//   return rect
-// }
-
 // This function selects the best side for the tooltip by using
 // the ranked fits.
 function fitOnBestSide({

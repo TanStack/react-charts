@@ -74,7 +74,7 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
                   ? width
                   : gridDimensions.gridWidth
                 : undefined,
-            tickLength: axis.tickSizeOuter,
+            // tickLength: axis.tickSizeOuter,
           }}
         >
           {props => {
@@ -130,7 +130,6 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
                         className="tickLabel"
                         style={{
                           fontSize: 10,
-                          fontFamily: 'sans-serif',
                           fill: dark
                             ? 'rgba(255,255,255, .7)'
                             : 'rgba(0,0,0, .7)',
@@ -166,10 +165,10 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
     )
   }
 
-  return (
+  return axis.show ? (
     <g ref={elRef}>
       {renderAxis(false)}
       {renderAxis(true)}
     </g>
-  )
+  ) : null
 }

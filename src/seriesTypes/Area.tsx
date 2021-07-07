@@ -8,14 +8,6 @@ import { translate } from '../utils/Utils'
 //
 import { monotoneX } from '../utils/curveMonotone'
 
-const circleDefaultStyle = {
-  r: 2,
-  strokeWidth: '1',
-  stroke: '#000000',
-  fill: '#000000',
-  opacity: 1,
-}
-
 export default function AreaComponent<TDatum>({
   primaryAxis,
   secondaryAxis,
@@ -76,36 +68,6 @@ export default function AreaComponent<TDatum>({
 
         return (
           <g key={`lines-${i}`}>
-            {series.datums.map((datum, i) => {
-              const dataStyle = getDatumStatusStyle(datum, focusedDatum)
-
-              return (
-                <circle
-                  key={i}
-                  ref={el => {
-                    datum.element = el
-                  }}
-                  r={2}
-                  cx={getX(datum)}
-                  cy={getY(datum, 1) ?? NaN}
-                  stroke="rgba(33,33,33,0.5)"
-                  fill="transparent"
-                  style={{
-                    ...circleDefaultStyle,
-                    ...style,
-                    ...style.circle,
-                    ...dataStyle,
-                    ...dataStyle.circle,
-                    ...(!secondaryAxis.showDatumElements
-                      ? {
-                          opacity: 0,
-                          pointerEvents: 'none',
-                        }
-                      : {}),
-                  }}
-                />
-              )
-            })}
             <Area<Datum<TDatum>>
               curve={curve}
               data={series.datums}
@@ -121,6 +83,38 @@ export default function AreaComponent<TDatum>({
               y={datum => getY(datum, 1) ?? NaN}
               style={lineStyle}
             />
+            {series.datums.map((datum, i) => {
+              const dataStyle = getDatumStatusStyle(datum, focusedDatum)
+
+              return (
+                <circle
+                  key={i}
+                  ref={el => {
+                    datum.element = el
+                  }}
+                  r={2}
+                  cx={getX(datum)}
+                  cy={getY(datum, 1) ?? NaN}
+                  stroke="rgba(33,33,33,0.5)"
+                  fill="transparent"
+                  style={{
+                    // @ts-ignore
+                    r: 2,
+                    opacity: 1,
+                    ...(!secondaryAxis.showDatumElements
+                      ? {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                        }
+                      : {}),
+                    ...style,
+                    ...style.circle,
+                    ...dataStyle,
+                    ...dataStyle.circle,
+                  }}
+                />
+              )
+            })}
           </g>
         )
       })}

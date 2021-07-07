@@ -1,11 +1,10 @@
-import { ScaleBand, ScaleLinear, ScaleOrdinal, ScaleTime } from 'd3-scale'
+import { ScaleBand, ScaleLinear, ScaleTime } from 'd3-scale'
 import { CurveFactory, stackOffsetNone } from 'd3-shape'
 import { SetStateAction } from 'jotai'
-import { CSSProperties } from 'react'
+import React, { CSSProperties } from 'react'
 import * as TSTB from 'ts-toolbelt'
 
 import { TooltipRendererProps } from './components/TooltipRenderer'
-import { ClientRect, HasBoundingClientRect } from './hooks/useRect'
 import { SetAtom } from 'jotai/core/atom'
 
 export type ChartOptions<TDatum> = {
@@ -17,7 +16,7 @@ export type ChartOptions<TDatum> = {
     status: SeriesFocusStatus
   ) => SeriesStyles
   getDatumStyle?: (
-    series: Datum<TDatum>,
+    datum: Datum<TDatum>,
     status: DatumFocusStatus
   ) => DatumStyles
   getSeriesOrder?: (series: Series<TDatum>[]) => Series<TDatum>[]
@@ -41,7 +40,7 @@ export type ChartOptions<TDatum> = {
     event: React.MouseEvent<SVGSVGElement, MouseEvent>
   ) => void
   dark?: boolean
-  renderSVG?: () => React.ReactSVGElement
+  renderSVG?: () => React.ReactNode
   primaryCursor?: boolean | CursorOptions
   secondaryCursor?: boolean | CursorOptions
   tooltip?: boolean | TooltipOptions<TDatum>
@@ -79,7 +78,6 @@ export type ChartContextValue<TDatum> = {
     datum: Datum<TDatum>,
     focusedDatum: Datum<TDatum> | null
   ) => DatumStyles
-  usePointerAtom: () => [Pointer, SetAtom<SetStateAction<Pointer>>]
   useAxisDimensionsAtom: () => [
     AxisDimensions,
     SetAtom<SetStateAction<AxisDimensions>>
@@ -422,8 +420,6 @@ export type AxesInfo = {
 export type CursorOptions = {
   value?: unknown
   show?: boolean
-  render?: (meta: { formattedValue: string }) => React.ReactNode
-  snap?: boolean
   showLine?: boolean
   showLabel?: boolean
   axisId?: string

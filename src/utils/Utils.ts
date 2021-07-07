@@ -1,6 +1,5 @@
 import {
   Axis,
-  AxisLinear,
   Datum,
   DatumFocusStatus,
   DatumStyles,
@@ -13,9 +12,9 @@ export function getSeriesStatus<TDatum>(
   series: Series<TDatum>,
   focusedDatum: Datum<TDatum> | null
 ): SeriesFocusStatus {
-  // if (focusedDatum?.series.id === series.id) {
-  //   return 'focused'
-  // }
+  if (focusedDatum?.seriesId === series.id) {
+    return 'focused'
+  }
 
   return 'none'
 }
@@ -28,14 +27,14 @@ export function getDatumStatus<TDatum>(
     return 'focused'
   }
 
-  // if (
-  //   datum.group.some(groupDatum => {
-  //     groupDatum.seriesId === focusedDatum?.series.id &&
-  //       groupDatum.index === focusedDatum?.index
-  //   })
-  // ) {
-  //   return 'groupFocused'
-  // }
+  if (
+    datum.group?.some(groupDatum => {
+      groupDatum.seriesId === focusedDatum?.seriesId &&
+        groupDatum.index === focusedDatum?.index
+    })
+  ) {
+    return 'groupFocused'
+  }
 
   return 'none'
 }

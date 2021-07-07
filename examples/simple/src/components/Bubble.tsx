@@ -3,10 +3,11 @@ import useDemoConfig from "../useDemoConfig";
 import React from "react";
 import { AxisOptions, Chart } from "react-charts";
 
-export default function Line() {
+export default function Bubble() {
   const { data, randomizeData } = useDemoConfig({
     series: 10,
-    dataType: "time",
+    dataType: "linear",
+    useR: true,
   });
 
   const primaryAxis = React.useMemo<
@@ -46,8 +47,13 @@ export default function Line() {
             data,
             primaryAxis,
             secondaryAxes,
+            groupingMode: "single",
+            getSeriesStyle: () => ({ line: { opacity: 0 } }),
+            getDatumStyle: (datum) =>
+              ({
+                circle: { r: datum.originalDatum.radius },
+              } as any),
             tooltip: true,
-            primaryCursor: true,
           }}
         />
       </ResizableBox>

@@ -171,7 +171,7 @@ export default function useMeasure<TDatum>({
 
       newDimensions.height = Math.round(
         // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        axis.minTickPaddingForRotation + (tallestRealLabel?.height ?? 0)
+        8 + axis.minTickPaddingForRotation + (tallestRealLabel?.height ?? 0)
       )
     } else {
       if (measureDims.length) {
@@ -194,7 +194,7 @@ export default function useMeasure<TDatum>({
 
       newDimensions.width = Math.round(
         // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        axis.minTickPaddingForRotation + (widestRealLabel?.width ?? 0)
+        8 + axis.minTickPaddingForRotation + (widestRealLabel?.width ?? 0)
       )
     }
 

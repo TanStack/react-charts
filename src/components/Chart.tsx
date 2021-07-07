@@ -1,7 +1,6 @@
 import { groups, sort } from 'd3-array'
 import { stack, stackOffsetNone } from 'd3-shape'
 import { atom, useAtom } from 'jotai'
-import Raf from 'raf'
 import React, { ComponentPropsWithoutRef } from 'react'
 
 import useGetLatest from '../hooks/useGetLatest'
@@ -20,7 +19,6 @@ import {
   Datum,
   GridDimensions,
   Measurement,
-  Pointer,
   RequiredChartOptions,
   Series,
   StackDatum,
@@ -33,7 +31,7 @@ import {
 import buildAxisLinear from '../utils/buildAxis.linear'
 import AxisLinear from './AxisLinear'
 // import Brush from './Brush'
-// import Cursor from './Cursor'
+import Cursors from './Cursors'
 import Tooltip from './Tooltip'
 import Voronoi from './Voronoi'
 
@@ -144,17 +142,6 @@ function ChartInner<TDatum>({
   const svgRect = useRect(svgRef.current)
   const getOptions = useGetLatest(options)
 
-  const pointerAtom = React.useMemo(
-    () =>
-      atom<Pointer>({
-        x: 0,
-        y: 0,
-        dragging: false,
-        svgHovered: false,
-      }),
-    []
-  )
-
   const axisDimensionsAtom = React.useMemo(
     () =>
       atom<AxisDimensions>({
@@ -171,10 +158,6 @@ function ChartInner<TDatum>({
     []
   )
 
-  const usePointerAtom = React.useCallback(() => {
-    // eslint-disable-next-line
-    return useAtom(pointerAtom)
-  }, [pointerAtom])
   const useAxisDimensionsAtom = React.useCallback(() => {
     // eslint-disable-next-line
     return useAtom(axisDimensionsAtom)
@@ -188,7 +171,6 @@ function ChartInner<TDatum>({
 
   const [axisDimensions] = useAxisDimensionsAtom()
   const [focusedDatum] = useFocusedDatumAtom()
-  const [, setPointer] = usePointerAtom()
 
   const gridDimensions = React.useMemo((): GridDimensions => {
     // Left
@@ -426,86 +408,86 @@ function ChartInner<TDatum>({
     [getOptions, series]
   )
 
-  const mouseMoveRafRef = React.useRef<number | null>()
+  // const mouseMoveRafRef = React.useRef<number | null>()
 
-  const onMouseMove = (
-    e: React.MouseEvent<SVGSVGElement, MouseEvent> | MouseEvent
-  ) => {
-    if (mouseMoveRafRef.current) {
-      Raf.cancel(mouseMoveRafRef.current)
-    }
+  // const onMouseMove = (
+  //   e: React.MouseEvent<SVGSVGElement, MouseEvent> | MouseEvent
+  // ) => {
+  //   if (mouseMoveRafRef.current) {
+  //     Raf.cancel(mouseMoveRafRef.current)
+  //   }
 
-    mouseMoveRafRef.current = Raf(() => {
-      mouseMoveRafRef.current = null
-      const { clientX, clientY } = e
+  //   mouseMoveRafRef.current = Raf(() => {
+  //     mouseMoveRafRef.current = null
+  //     const { clientX, clientY } = e
 
-      setPointer(old => {
-        const x = clientX - svgRect.left - gridDimensions.gridX
-        const y = clientY - svgRect.top - gridDimensions.gridY
+  //     setPointer(old => {
+  //       const x = clientX - svgRect.left - gridDimensions.gridX
+  //       const y = clientY - svgRect.top - gridDimensions.gridY
 
-        return {
-          ...old,
-          svgHovered: true,
-          x,
-          y,
-        }
-      })
-    })
-  }
+  //       return {
+  //         ...old,
+  //         svgHovered: true,
+  //         x,
+  //         y,
+  //       }
+  //     })
+  //   })
+  // }
 
-  const onMouseUp = () => {
-    document.removeEventListener('mouseup', onMouseUp)
-    document.removeEventListener('mousemove', onMouseMove)
+  // const onMouseUp = () => {
+  //   document.removeEventListener('mouseup', onMouseUp)
+  //   document.removeEventListener('mousemove', onMouseMove)
 
-    // if (options.brush?.onSelect && pointer.dragging) {
-    //   if (Math.abs(pointer.startX - pointer.x) >= 20) {
-    //     options.brush.onSelect({
-    //       pointer,
-    //       start: (axesInfo.primaryAxes[0].scale as ScaleLinear<
-    //         number,
-    //         number
-    //       >).invert(pointer.startX),
-    //       end: (axesInfo.primaryAxes[0].scale as ScaleLinear<
-    //         number,
-    //         number
-    //       >).invert(pointer.x),
-    //     })
-    //   }
-    // }
+  //   // if (options.brush?.onSelect && pointer.dragging) {
+  //   //   if (Math.abs(pointer.startX - pointer.x) >= 20) {
+  //   //     options.brush.onSelect({
+  //   //       pointer,
+  //   //       start: (axesInfo.primaryAxes[0].scale as ScaleLinear<
+  //   //         number,
+  //   //         number
+  //   //       >).invert(pointer.startX),
+  //   //       end: (axesInfo.primaryAxes[0].scale as ScaleLinear<
+  //   //         number,
+  //   //         number
+  //   //       >).invert(pointer.x),
+  //   //     })
+  //   //   }
+  //   // }
 
-    setPointer(
-      (old): Pointer => {
-        return {
-          ...old,
-          dragging: false,
-        }
-      }
-    )
-  }
+  //   setPointer(
+  //     (old): Pointer => {
+  //       return {
+  //         ...old,
+  //         dragging: false,
+  //       }
+  //     }
+  //   )
+  // }
 
-  const onMouseDown = () => {
-    document.addEventListener('mouseup', onMouseUp)
-    document.addEventListener('mousemove', onMouseMove)
+  // const onMouseDown = () => {
+  //   document.addEventListener('mouseup', onMouseUp)
+  //   document.addEventListener('mousemove', onMouseMove)
 
-    setPointer(
-      (old): Pointer => {
-        return {
-          ...old,
-          startX: old.x,
-          startY: old.y,
-          dragging: true,
-        }
-      }
-    )
-  }
+  //   setPointer(
+  //     (old): Pointer => {
+  //       return {
+  //         ...old,
+  //         startX: old.x,
+  //         startY: old.y,
+  //         dragging: true,
+  //       }
+  //     }
+  //   )
+  // }
 
   // Reverse the stack order for proper z-indexing
   const reversedSeries = [...series].reverse()
   let orderedSeries = options.getSeriesOrder(reversedSeries)
 
-  const focusedSeriesIndex = focusedDatum
-    ? orderedSeries.findIndex(series => series.id === focusedDatum.seriesId)
-    : -1
+  // const focusedSeriesIndex = focusedDatum
+  //   ? orderedSeries.findIndex(series => series.id === focusedDatum.seriesId)
+  //   : -1
 
   // Bring focused series to the front
   // orderedSeries = focusedDatum
@@ -539,7 +521,6 @@ function ChartInner<TDatum>({
     height,
     getSeriesStatusStyle,
     getDatumStatusStyle,
-    usePointerAtom,
     useAxisDimensionsAtom,
     useFocusedDatumAtom,
     svgRect,
@@ -552,85 +533,89 @@ function ChartInner<TDatum>({
 
   return (
     <ChartContextProvider value={useGetLatest(contextValue)}>
-      <svg
-        ref={svgRef}
+      <div
         style={{
-          width,
-          height,
-          overflow: options.brush ? 'hidden' : 'visible',
+          fontFamily: 'sans-serif',
         }}
-        onMouseEnter={e => {
-          e.persist()
-          onMouseMove(e)
-        }}
-        onMouseMove={e => {
-          e.persist()
-          onMouseMove(e)
-        }}
-        onMouseLeave={e => {
-          e.persist()
-          setPointer(old => {
-            return {
-              ...old,
-              svgHovered: false,
-            }
-          })
-        }}
-        onMouseDown={e => {
-          e.persist()
-          onMouseDown()
-        }}
-        onClick={e => options.onClickDatum?.(focusedDatum, e)}
       >
-        <g
-          className="Series"
+        <svg
+          ref={svgRef}
           style={{
-            pointerEvents: 'none',
+            width,
+            height,
+            overflow: options.brush ? 'hidden' : 'visible',
           }}
+          // onMouseEnter={e => {
+          //   e.persist()
+          //   onMouseMove(e)
+          // }}
+          // onMouseMove={e => {
+          //   e.persist()
+          //   onMouseMove(e)
+          // }}
+          // onMouseLeave={e => {
+          //   e.persist()
+          //   setPointer(old => {
+          //     return {
+          //       ...old,
+          //       svgHovered: false,
+          //     }
+          //   })
+          // }}
+          // onMouseDown={e => {
+          //   e.persist()
+          //   onMouseDown()
+          // }}
+          onClick={e => options.onClickDatum?.(focusedDatum, e)}
         >
-          {seriesByAxisId.map(([axisId, series]) => {
-            const secondaryAxis = secondaryAxes.find(d => d.id === axisId)
+          <g
+            className="Series"
+            style={{
+              pointerEvents: 'none',
+            }}
+          >
+            {seriesByAxisId.map(([axisId, series]) => {
+              const secondaryAxis = secondaryAxes.find(d => d.id === axisId)
 
-            if (!secondaryAxis) {
-              return null
-            }
+              if (!secondaryAxis) {
+                return null
+              }
 
-            const { elementType } = secondaryAxis
-            const Component = (() => {
-              if (elementType === 'line') {
-                return Line
-              }
-              if (elementType === 'bar') {
-                return Bar
-              }
-              if (elementType === 'area') {
-                return Area
-              }
-              throw new Error('Invalid elementType')
-            })()
+              const { elementType } = secondaryAxis
+              const Component = (() => {
+                if (elementType === 'line') {
+                  return Line
+                }
+                if (elementType === 'bar') {
+                  return Bar
+                }
+                if (elementType === 'area') {
+                  return Area
+                }
+                throw new Error('Invalid elementType')
+              })()
 
-            return (
-              <Component
-                key={axisId ?? '__default__'}
-                primaryAxis={primaryAxis}
-                secondaryAxis={secondaryAxis}
-                series={series}
-              />
-            )
-          })}
-        </g>
-        <g className="axes">
-          {[primaryAxis, ...secondaryAxes].map(axis => (
-            <AxisLinear key={[axis.position, axis.id].join('')} {...axis} />
-          ))}
-        </g>
-        <Voronoi />
-        {options.renderSVG?.() ?? null}
-      </svg>
-      {/* <Cursor isPrimary /> */}
-      {/* <Cursor /> */}
-      {/* <Brush /> */}
-      <Tooltip />
+              return (
+                <Component
+                  key={axisId ?? '__default__'}
+                  primaryAxis={primaryAxis}
+                  secondaryAxis={secondaryAxis}
+                  series={series}
+                />
+              )
+            })}
+          </g>
+          <g className="axes">
+            {[primaryAxis, ...secondaryAxes].map(axis => (
+              <AxisLinear key={[axis.position, axis.id].join('')} {...axis} />
+            ))}
+          </g>
+          <Voronoi />
+          {options.renderSVG?.() ?? null}
+        </svg>
+        <Cursors />
+        <Tooltip />
+      </div>
     </ChartContextProvider>
   )
 }

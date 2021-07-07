@@ -4,13 +4,8 @@ import observeRect from '@reach/observe-rect'
 
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
-export type ClientRect = Omit<
-  ReturnType<Element['getBoundingClientRect']>,
-  'x' | 'y' | 'toJSON'
->
-
 export type HasBoundingClientRect = {
-  getBoundingClientRect: () => ClientRect
+  getBoundingClientRect: () => DOMRect
 }
 
 export default function useRect(
@@ -25,7 +20,7 @@ export default function useRect(
 
   const [element, setElement] = React.useState(node)
 
-  const [rect, setRect] = React.useState<ClientRect>({
+  let [rect, setRect] = React.useState<DOMRect>({
     width: options?.initialWidth ?? 0,
     height: options?.initialHeight ?? 0,
   } as DOMRect)
@@ -59,5 +54,30 @@ export default function useRect(
     }
   }, [element, enabled])
 
-  return rect
+  const resolvedRect = React.useMemo(() => {
+    if (!node || !(node as Element).tagName) {
+      return rect
+    }
+
+    const styles = window.getComputedStyle(node as Element)
+
+    return {
+      x: rect.x,
+      y: rect.y,
+      width:
+        rect.width -
+        parseInt(styles.borderLeftWidth) -
+        parseInt(styles.borderRightWidth),
+      height:
+        rect.height -
+        parseInt(styles.borderTopWidth) -
+        parseInt(styles.borderBottomWidth),
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      left: rect.left,
+    }
+  }, [node, rect])
+
+  return resolvedRect
 }

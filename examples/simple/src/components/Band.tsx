@@ -1,12 +1,13 @@
 import ResizableBox from "../ResizableBox";
 import useDemoConfig from "../useDemoConfig";
+import { stackOffsetWiggle } from "d3-shape";
 import React from "react";
 import { AxisOptions, Chart } from "react-charts";
 
-export default function Line() {
+export default function Band() {
   const { data, randomizeData } = useDemoConfig({
     series: 10,
-    dataType: "time",
+    dataType: "ordinal",
   });
 
   const primaryAxis = React.useMemo<
@@ -14,9 +15,9 @@ export default function Line() {
   >(
     () => ({
       isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
-      getValue: (datum) => (datum.primary as unknown) as Date,
+      scaleType: "band",
+      position: "left",
+      getValue: (datum) => datum.primary,
     }),
     []
   );
@@ -27,9 +28,12 @@ export default function Line() {
     () => [
       {
         scaleType: "linear",
-        position: "left",
+        position: "top",
+        show: false,
         getValue: (datum) => datum.secondary,
-        elementType: "line",
+        elementType: "bar",
+        stacked: true,
+        stackOffset: stackOffsetWiggle,
       },
     ],
     []
@@ -47,7 +51,6 @@ export default function Line() {
             primaryAxis,
             secondaryAxes,
             tooltip: true,
-            primaryCursor: true,
           }}
         />
       </ResizableBox>

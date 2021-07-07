@@ -101,7 +101,6 @@ export default function Line<TDatum>({
               data={series.datums}
               x={datum => getX(datum) ?? NaN}
               y={datum => getY(datum) ?? NaN}
-              stroke="#333"
               style={lineStyle}
             />
           </g>

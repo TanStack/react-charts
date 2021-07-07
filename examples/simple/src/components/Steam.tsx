@@ -1,9 +1,10 @@
 import ResizableBox from "../ResizableBox";
 import useDemoConfig from "../useDemoConfig";
+import { stackOffsetWiggle } from "d3-shape";
 import React from "react";
 import { AxisOptions, Chart } from "react-charts";
 
-export default function Line() {
+export default function Steam() {
   const { data, randomizeData } = useDemoConfig({
     series: 10,
     dataType: "time",
@@ -16,7 +17,7 @@ export default function Line() {
       isPrimary: true,
       scaleType: "time",
       position: "bottom",
-      getValue: (datum) => (datum.primary as unknown) as Date,
+      getValue: (datum) => datum.primary as Date,
     }),
     []
   );
@@ -29,7 +30,9 @@ export default function Line() {
         scaleType: "linear",
         position: "left",
         getValue: (datum) => datum.secondary,
-        elementType: "line",
+        elementType: "area",
+        stacked: true,
+        stackOffset: stackOffsetWiggle,
       },
     ],
     []
@@ -47,7 +50,10 @@ export default function Line() {
             primaryAxis,
             secondaryAxes,
             tooltip: true,
-            primaryCursor: true,
+            getSeriesStyle: () => ({
+              line: { opacity: 0 },
+              area: { opacity: 1 },
+            }),
           }}
         />
       </ResizableBox>

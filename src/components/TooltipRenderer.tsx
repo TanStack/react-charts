@@ -167,7 +167,6 @@ export default function TooltipRenderer<TDatum>(
     <div
       style={{
         position: 'relative',
-        fontFamily: 'sans-serif',
         fontSize: '10px',
         padding: '5px',
         background: getBackgroundColor(dark),
