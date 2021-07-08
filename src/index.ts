@@ -1,4 +1,2 @@
-import { Chart } from './components/Chart'
-
-export { Chart }
+export { Chart } from './components/Chart'
 export * from './types'
