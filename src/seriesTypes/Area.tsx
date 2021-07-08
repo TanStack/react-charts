@@ -1,10 +1,9 @@
+import { area, line } from 'd3-shape'
 import React from 'react'
 
-import { Area, LinePath } from '@visx/shape'
-
-import useChartContext from '../components/Chart'
 import { Axis, Series, Datum } from '../types'
 import { translate } from '../utils/Utils'
+import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
 
@@ -66,23 +65,23 @@ export default function AreaComponent<TDatum>({
           ...style.area,
         }
 
+        const areaPath =
+          area<Datum<TDatum>>(
+            datum => getX(datum) ?? NaN,
+            datum => getY(datum, 0) ?? NaN,
+            datum => getY(datum, 1) ?? NaN
+          ).curve(curve)(series.datums) ?? undefined
+
+        const linePath =
+          line<Datum<TDatum>>(
+            datum => getX(datum) ?? NaN,
+            datum => getY(datum, 1) ?? NaN
+          ).curve(curve)(series.datums) ?? undefined
+
         return (
           <g key={`lines-${i}`}>
-            <Area<Datum<TDatum>>
-              curve={curve}
-              data={series.datums}
-              x={datum => getX(datum) ?? NaN}
-              y0={datum => getY(datum, 0) ?? NaN}
-              y1={datum => getY(datum, 1) ?? NaN}
-              style={areaStyle}
-            />
-            <LinePath<Datum<TDatum>>
-              curve={curve}
-              data={series.datums}
-              x={datum => getX(datum) ?? NaN}
-              y={datum => getY(datum, 1) ?? NaN}
-              style={lineStyle}
-            />
+            <path d={areaPath} style={areaStyle} />
+            <path d={linePath} style={lineStyle} />
             {series.datums.map((datum, i) => {
               const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 

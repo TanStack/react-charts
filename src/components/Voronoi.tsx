@@ -3,7 +3,7 @@ import React from 'react'
 //
 import { Datum } from '../types'
 import { translate } from '../utils/Utils'
-import useChartContext from './Chart'
+import useChartContext from '../utils/chartContext'
 
 export default function Voronoi<TDatum>() {
   const { getOptions, useFocusedDatumAtom } = useChartContext<TDatum>()

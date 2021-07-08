@@ -7,7 +7,7 @@ import useLatestWhen from '../hooks/useLatestWhen'
 import { CursorOptions, Datum } from '../types'
 import { translate } from '../utils/Utils'
 //
-import useChartContext from './Chart'
+import useChartContext from '../utils/chartContext'
 
 type ResolvedCursorOptions = TSTB.Object.Required<
   CursorOptions,

@@ -1,10 +1,9 @@
+import { line } from 'd3-shape'
 import React from 'react'
 
-import { LinePath } from '@visx/shape'
-
-import useChartContext from '../components/Chart'
 import { Axis, Series, Datum } from '../types'
 import { translate } from '../utils/Utils'
+import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
 
@@ -69,6 +68,12 @@ export default function Line<TDatum>({
           fill: 'none',
         }
 
+        const linePath =
+          line<Datum<TDatum>>(
+            datum => getX(datum) ?? NaN,
+            datum => getY(datum) ?? NaN
+          ).curve(curve)(series.datums) ?? undefined
+
         return (
           <g key={`lines-${i}`}>
             {(secondaryAxis.showDatumElements ?? true) &&
@@ -96,13 +101,7 @@ export default function Line<TDatum>({
                   />
                 )
               })}
-            <LinePath<Datum<TDatum>>
-              curve={curve}
-              data={series.datums}
-              x={datum => getX(datum) ?? NaN}
-              y={datum => getY(datum) ?? NaN}
-              style={lineStyle}
-            />
+            <path d={linePath} style={lineStyle} />
           </g>
         )
       })}

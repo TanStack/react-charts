@@ -1,8 +1,8 @@
 import React from 'react'
 
-import useChartContext from '../components/Chart'
 import { Axis, Series } from '../types'
 import { getHeight, getWidth, getX, getY, translate } from '../utils/Utils'
+import useChartContext from '../utils/chartContext'
 
 //
 

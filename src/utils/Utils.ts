@@ -189,3 +189,15 @@ export function getHeight<TDatum>(
     ? getPrimaryLength(datum, primaryAxis)
     : getSecondaryLength(datum, secondaryAxis)
 }
+
+export function getTickPx<TDatum>(scale: Axis<TDatum>['scale'], value: any) {
+  let px = scale(value) ?? NaN
+
+  // @ts-ignore
+  if (scale.bandwidth) {
+    // @ts-ignore
+    return px + scale.bandwidth() / 2
+  }
+
+  return px
+}

@@ -29,6 +29,7 @@ import {
   getDatumStatus,
 } from '../utils/Utils'
 import buildAxisLinear from '../utils/buildAxis.linear'
+import { ChartContextProvider } from '../utils/chartContext'
 import AxisLinear from './AxisLinear'
 // import Brush from './Brush'
 import Cursors from './Cursors'
@@ -73,22 +74,6 @@ function defaultChartOptions<TDatum>(
     showVoronoi: options.showVoronoi ?? false,
     defaultColors: options.defaultColors ?? defaultColorScheme,
   }
-}
-
-const chartContext = React.createContext<any>(null!)
-
-function ChartContextProvider<TDatum>({
-  value,
-  children,
-}: {
-  value: () => ChartContextValue<TDatum>
-  children: React.ReactNode
-}) {
-  return <chartContext.Provider value={value} children={children} />
-}
-
-export default function useChartContext<TDatum>() {
-  return React.useContext(chartContext)() as ChartContextValue<TDatum>
 }
 
 export function Chart<TDatum>({

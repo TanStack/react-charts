@@ -2,7 +2,7 @@ import React, { MutableRefObject } from 'react'
 
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
 import { Axis, GridDimensions, Position } from '../types'
-import useChartContext from './Chart'
+import useChartContext from '../utils/chartContext'
 
 const getElBox = (el: Element) => {
   var rect = el.getBoundingClientRect()

@@ -9,7 +9,7 @@ import useLatestWhen from '../hooks/useLatestWhen'
 import usePrevious from '../hooks/usePrevious'
 import { Datum, ResolvedTooltipOptions, TooltipOptions } from '../types'
 //
-import useChartContext from './Chart'
+import useChartContext from '../utils/chartContext'
 import TooltipRenderer from './TooltipRenderer'
 
 //
