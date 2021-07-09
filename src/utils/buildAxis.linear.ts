@@ -7,7 +7,6 @@ import {
   scaleBand,
   ScaleTime,
   ScaleLinear,
-  ScaleOrdinal,
 } from 'd3-scale'
 
 import {
@@ -165,6 +164,31 @@ function buildTimeAxis<TDatum>(
   // Supplmentary band scale
   const bandScale = buildImpliedBandScale(options, scale, series, range)
 
+  const defaultFormat = scale.tickFormat()
+
+  const formatters = {} as AxisTime<TDatum>['formatters']
+
+  const scaleFormat = (value: Date) =>
+    options.formatters?.scale?.(value, { ...formatters, scale: undefined }) ??
+    defaultFormat(value)
+
+  const tooltipFormat = (value: Date) =>
+    options.formatters?.tooltip?.(value, {
+      ...formatters,
+      tooltip: undefined,
+    }) ?? scaleFormat(value)
+
+  const cursorFormat = (value: Date) =>
+    options.formatters?.cursor?.(value, { ...formatters, cursor: undefined }) ??
+    tooltipFormat(value)
+
+  Object.assign(formatters, {
+    default: defaultFormat,
+    scale: scaleFormat,
+    tooltip: tooltipFormat,
+    cursor: cursorFormat,
+  })
+
   return {
     ...options,
     axisFamily: 'time',
@@ -173,7 +197,7 @@ function buildTimeAxis<TDatum>(
     range,
     outerScale,
     bandScale,
-    format: scale.tickFormat(),
+    formatters: formatters,
   }
 }
 
@@ -228,6 +252,31 @@ function buildLinearAxis<TDatum>(
 
   const bandScale = buildImpliedBandScale(options, scale, series, range)
 
+  const defaultFormat = scale.tickFormat()
+
+  const formatters = {} as AxisLinear<TDatum>['formatters']
+
+  const scaleFormat = (value: number) =>
+    options.formatters?.scale?.(value, { ...formatters, scale: undefined }) ??
+    defaultFormat(value)
+
+  const tooltipFormat = (value: number) =>
+    options.formatters?.tooltip?.(value, {
+      ...formatters,
+      tooltip: undefined,
+    }) ?? scaleFormat(value)
+
+  const cursorFormat = (value: number) =>
+    options.formatters?.cursor?.(value, { ...formatters, cursor: undefined }) ??
+    tooltipFormat(value)
+
+  Object.assign(formatters, {
+    default: defaultFormat,
+    scale: scaleFormat,
+    tooltip: tooltipFormat,
+    cursor: cursorFormat,
+  })
+
   return {
     ...options,
     axisFamily: 'linear',
@@ -236,7 +285,7 @@ function buildLinearAxis<TDatum>(
     range,
     outerScale,
     bandScale,
-    format: scale.tickFormat(),
+    formatters,
   }
 }
 
@@ -268,39 +317,30 @@ function buildBandAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
-  // // @ts-ignore
-  // const scaleFormat = scale.tickFormat ? scale.tickFormat() : d => d
+  const defaultFormat = (d: { toString: () => string }) => d
 
-  // const userFormat = options?.format
+  const formatters = {} as AxisBand<TDatum>['formatters']
 
-  // const format = userFormat
-  //   ? (value: unknown, index: number) =>
-  //       userFormat(value, index, scaleFormat(value))
-  //   : scaleFormat
+  const scaleFormat = (value: number) =>
+    options.formatters?.scale?.(value, { ...formatters, scale: undefined }) ??
+    defaultFormat(value)
 
-  // const resolvedTickCount = options.tickCount
+  const tooltipFormat = (value: number) =>
+    options.formatters?.tooltip?.(value, {
+      ...formatters,
+      tooltip: undefined,
+    }) ?? scaleFormat(value)
 
-  // const ticks = options.filterTicks(
-  //   options.tickValues ||
-  //     // @ts-ignore
-  //     (scale.ticks ? scale.ticks(resolvedTickCount) : scale.domain())
-  // )
+  const cursorFormat = (value: number) =>
+    options.formatters?.cursor?.(value, { ...formatters, cursor: undefined }) ??
+    tooltipFormat(value)
 
-  // const scaleMax =
-  //   options.position === 'bottom'
-  //     ? -gridDimensions.gridHeight
-  //     : options.position === 'left'
-  //     ? gridDimensions.gridWidth
-  //     : options.position === 'top'
-  //     ? gridDimensions.gridHeight
-  //     : -gridDimensions.gridWidth
-
-  // const directionMultiplier =
-  //   options.position === 'top' || options.position === 'left' ? -1 : 1
-
-  // const transform = !isVertical ? translateX : translateY
-
-  // const tickSpacing = Math.max(options.tickSizeInner, 0) + options.tickPadding
+  Object.assign(formatters, {
+    default: defaultFormat,
+    scale: scaleFormat,
+    tooltip: tooltipFormat,
+    cursor: cursorFormat,
+  })
 
   return {
     ...options,
@@ -309,7 +349,7 @@ function buildBandAxis<TDatum>(
     scale,
     range,
     outerScale,
-    format: d => d,
+    formatters,
   }
 }
 
@@ -317,10 +357,7 @@ function buildBandAxis<TDatum>(
 
 function buildImpliedBandScale<TDatum>(
   options: ResolvedAxisOptions<AxisOptions<TDatum>>,
-  scale:
-    | ScaleTime<number, number, never>
-    | ScaleLinear<number, number, never>
-    | ScaleOrdinal<string | Date | number, number>,
+  scale: ScaleTime<number, number, never> | ScaleLinear<number, number, never>,
   series: Series<TDatum>[],
   range: [number, number]
 ) {

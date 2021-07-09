@@ -222,7 +222,6 @@ export type AxisOptionsBase = {
   // minTickCount?: number
   // maxTickCount?: number
   // tickValues?: unknown[]
-  // format?: (value: unknown, index: number, scaleLabel: string) => string
   // tickSizeInner?: number
   // tickSizeOuter?: number
   minTickPaddingForRotation?: number
@@ -250,17 +249,20 @@ export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
   hardMin?: number
   hardMax?: number
   base?: number
-}
-
-export type AxisOrdinalOptions<TDatum> = AxisOptionsBase & {
-  scaleType: 'ordinal'
-  getValue: (datum: TDatum) => ChartValue<any>
-}
-
-export type AxisBandOptions<TDatum> = AxisOptionsBase & {
-  scaleType: 'band'
-  getValue: (datum: TDatum) => ChartValue<any>
-  minBandSize?: number
+  formatters?: {
+    scale?: (
+      value: Date,
+      formatters: AxisTimeOptions<TDatum>['formatters']
+    ) => string
+    tooltip?: (
+      value: Date,
+      formatters: AxisTimeOptions<TDatum>['formatters']
+    ) => React.ReactNode
+    cursor?: (
+      value: Date,
+      formatters: AxisTimeOptions<TDatum>['formatters']
+    ) => React.ReactNode
+  }
 }
 
 export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
@@ -271,13 +273,46 @@ export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
   hardMin?: number
   hardMax?: number
   base?: number
+  formatters?: {
+    scale?: (
+      value: number,
+      formatters: AxisLinearOptions<TDatum>['formatters']
+    ) => string
+    tooltip?: (
+      value: number,
+      formatters: AxisLinearOptions<TDatum>['formatters']
+    ) => React.ReactNode
+    cursor?: (
+      value: number,
+      formatters: AxisLinearOptions<TDatum>['formatters']
+    ) => React.ReactNode
+  }
+}
+
+export type AxisBandOptions<TDatum> = AxisOptionsBase & {
+  scaleType: 'band'
+  getValue: (datum: TDatum) => ChartValue<any>
+  originalSinBandSize?: number
+  formatters?: {
+    scale?: (
+      value: any,
+      formatters: AxisBandOptions<TDatum>['formatters']
+    ) => string
+    tooltip?: (
+      value: React.ReactNode,
+      formatters: AxisBandOptions<TDatum>['formatters']
+    ) => string
+    cursor?: (
+      value: React.ReactNode,
+      formatters: AxisBandOptions<TDatum>['formatters']
+    ) => string
+  }
 }
 
 export type AxisOptions<TDatum> =
   | AxisTimeOptions<TDatum>
-  | AxisOrdinalOptions<TDatum>
-  | AxisBandOptions<TDatum>
   | AxisLinearOptions<TDatum>
+  | AxisBandOptions<TDatum>
 
 export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
   TAxisOptions & {},
@@ -330,7 +365,12 @@ export type AxisTime<TDatum> = Omit<
   scale: ScaleTime<number, number, never>
   outerScale: ScaleTime<number, number, never>
   bandScale: ScaleBand<number>
-  format: ReturnType<ScaleTime<number, number, never>['tickFormat']>
+  formatters: {
+    default: (value: Date) => string
+    scale: (value: Date) => string
+    tooltip: (value: Date) => React.ReactNode
+    cursor: (value: Date) => React.ReactNode
+  }
 }
 
 export type AxisLinear<TDatum> = Omit<
@@ -341,7 +381,12 @@ export type AxisLinear<TDatum> = Omit<
   scale: ScaleLinear<number, number, never>
   outerScale: ScaleLinear<number, number, never>
   bandScale: ScaleBand<number>
-  format: ReturnType<ScaleLinear<number, number, never>['tickFormat']>
+  formatters: {
+    default: (value: ChartValue<any>) => string
+    scale: (value: number) => string
+    tooltip: (value: number) => React.ReactNode
+    cursor: (value: number) => React.ReactNode
+  }
 }
 
 export type AxisBand<TDatum> = Omit<
@@ -351,7 +396,12 @@ export type AxisBand<TDatum> = Omit<
   axisFamily: 'band'
   scale: ScaleBand<any>
   outerScale: ScaleBand<any>
-  format: (value: ChartValue<any>) => string
+  formatters: {
+    default: (value: any) => string
+    scale: (value: any) => string
+    tooltip: (value: React.ReactNode) => string
+    cursor: (value: React.ReactNode) => string
+  }
 }
 
 export type Axis<TDatum> =

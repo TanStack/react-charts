@@ -1,10 +1,13 @@
 import React from 'react'
+import ReactDOM from 'react-dom'
 import * as TSTB from 'ts-toolbelt'
 
 import { animated, config, useSpring } from '@react-spring/web'
 
+// import useIsScrolling from '../hooks/useIsScrolling'
 import useLatestWhen from '../hooks/useLatestWhen'
-import { CursorOptions, Datum } from '../types'
+import usePortalElement from '../hooks/usePortalElement'
+import { AxisTime, CursorOptions, Datum } from '../types'
 import { translate } from '../utils/Utils'
 //
 import useChartContext from '../utils/chartContext'
@@ -75,6 +78,7 @@ function Cursor<TDatum>(props: {
 }) {
   const {
     getOptions,
+    svgRect,
     gridDimensions,
     useFocusedDatumAtom,
     primaryAxis,
@@ -192,72 +196,84 @@ function Cursor<TDatum>(props: {
     }
   }
 
-  const formattedValue = axis.format(latestValue)
+  const formattedValue = (axis as AxisTime<any>).formatters.cursor(latestValue)
+
+  // const isScrolling = useIsScrolling(200)
 
   const lineSpring = useSpring({
     transform: translate(lineStartX, lineStartY),
     width: `${lineWidth}px`,
     height: `${lineHeight}px`,
     config: config.stiff,
+    // immediate: isScrolling,
   })
 
   const bubbleSpring = useSpring({
     transform: translate(bubbleX, bubbleY),
     config: config.stiff,
+    // immediate: isScrolling,
   })
 
-  return (
-    <div
-      style={{
-        pointerEvents: 'none',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        transform: translate(gridDimensions.gridX, gridDimensions.gridY),
-        opacity: show ? 1 : 0,
-        transition: 'all .3s ease',
-      }}
-      className="Cursor"
-    >
-      {/* Render the cursor line */}
-      {props.options.showLine ? (
-        <animated.div
+  const portalEl = usePortalElement()
+
+  return portalEl
+    ? ReactDOM.createPortal(
+        <div
           style={{
-            ...lineSpring,
+            pointerEvents: 'none',
             position: 'absolute',
             top: 0,
             left: 0,
-            background: getLineBackgroundColor(getOptions().dark),
+            transform: translate(
+              svgRect.left + gridDimensions.gridX,
+              svgRect.top + gridDimensions.gridY
+            ),
+            opacity: show ? 1 : 0,
+            transition: 'all .3s ease',
           }}
-        />
-      ) : null}
-      {/* Render the cursor bubble */}
-      {props.options.showLabel ? (
-        <animated.div
-          style={{
-            ...bubbleSpring,
-            position: 'absolute',
-            top: 0,
-            left: 0,
-          }}
+          className="Cursor"
         >
-          {/* Render the cursor label */}
-          <div
-            style={{
-              padding: '5px',
-              fontSize: '10px',
-              background: getBackgroundColor(getOptions().dark),
-              color: getBackgroundColor(!getOptions().dark),
-              borderRadius: '3px',
-              position: 'relative',
-              transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0)`,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {formattedValue}
-          </div>
-        </animated.div>
-      ) : null}
-    </div>
-  )
+          {/* Render the cursor line */}
+          {props.options.showLine ? (
+            <animated.div
+              style={{
+                ...lineSpring,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                background: getLineBackgroundColor(getOptions().dark),
+              }}
+            />
+          ) : null}
+          {/* Render the cursor bubble */}
+          {props.options.showLabel ? (
+            <animated.div
+              style={{
+                ...bubbleSpring,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+              }}
+            >
+              {/* Render the cursor label */}
+              <div
+                style={{
+                  padding: '5px',
+                  fontSize: '10px',
+                  background: getBackgroundColor(getOptions().dark),
+                  color: getBackgroundColor(!getOptions().dark),
+                  borderRadius: '3px',
+                  position: 'relative',
+                  transform: `translate3d(${alignPctX}%, ${alignPctY}%, 0)`,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {formattedValue}
+              </div>
+            </animated.div>
+          ) : null}
+        </div>,
+        portalEl
+      )
+    : null
 }

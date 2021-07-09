@@ -1,7 +1,7 @@
 import { ScaleLinear, ScaleTime } from 'd3-scale'
 import React from 'react'
 
-import { Axis } from '../types'
+import { Axis, AxisTime } from '../types'
 import { getTickPx, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
@@ -187,7 +187,7 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
                     isRotated ? (axis.position === 'top' ? 60 : -60) : 0
                   })`}
                 >
-                  {axis.format(tick as any)}
+                  {(axis as AxisTime<any>).formatters.scale(tick as Date)}
                 </text>
               </g>
             )

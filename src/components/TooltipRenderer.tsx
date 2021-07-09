@@ -2,7 +2,7 @@ import { sum } from 'd3-array'
 import React, { CSSProperties } from 'react'
 
 import { useAnchor } from '../hooks/useAnchor'
-import { Axis, Datum, RequiredChartOptions } from '../types'
+import { Axis, AxisTime, Datum, RequiredChartOptions } from '../types'
 
 //
 //
@@ -193,13 +193,13 @@ export default function TooltipRenderer<TDatum>(
             <strong>{focusedDatum.seriesLabel}</strong>
           ) : groupingMode === 'secondary' ? (
             <strong>
-              {secondaryAxis.format(
+              {(secondaryAxis as AxisTime<any>).formatters.tooltip(
                 secondaryAxis.getValue(focusedDatum.originalDatum)
               )}
             </strong>
           ) : (
             <strong>
-              {primaryAxis.format(
+              {(primaryAxis as AxisTime<any>).formatters.tooltip(
                 primaryAxis.getValue(focusedDatum.originalDatum)
               )}
             </strong>
@@ -256,7 +256,7 @@ export default function TooltipRenderer<TDatum>(
                   {groupingMode === 'series' ? (
                     <React.Fragment>
                       <td>
-                        {primaryAxis.format(
+                        {(primaryAxis as AxisTime<any>).formatters.tooltip(
                           primaryAxis.getValue(sortedDatum.originalDatum)
                         )}
                         : &nbsp;
@@ -266,7 +266,7 @@ export default function TooltipRenderer<TDatum>(
                           textAlign: 'right',
                         }}
                       >
-                        {secondaryAxis.format(
+                        {(secondaryAxis as AxisTime<any>).formatters.tooltip(
                           secondaryAxis.getValue(sortedDatum.originalDatum)
                         )}
                       </td>
@@ -279,7 +279,7 @@ export default function TooltipRenderer<TDatum>(
                           textAlign: 'right',
                         }}
                       >
-                        {primaryAxis.format(
+                        {(primaryAxis as AxisTime<any>).formatters.tooltip(
                           primaryAxis.getValue(sortedDatum.originalDatum)
                         )}
                       </td>
@@ -292,7 +292,7 @@ export default function TooltipRenderer<TDatum>(
                           textAlign: 'right',
                         }}
                       >
-                        {secondaryAxis.format(
+                        {(secondaryAxis as AxisTime<any>).formatters.tooltip(
                           secondaryAxis.getValue(sortedDatum.originalDatum)
                         )}
                       </td>

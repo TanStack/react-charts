@@ -4,8 +4,9 @@ import ReactDOM from 'react-dom'
 import { useSpring, animated } from '@react-spring/web'
 
 import { useAnchor } from '../hooks/useAnchor'
-import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
+// import useIsScrolling from '../hooks/useIsScrolling'
 import useLatestWhen from '../hooks/useLatestWhen'
+import usePortalElement from '../hooks/usePortalElement'
 import usePrevious from '../hooks/usePrevious'
 import { Datum, ResolvedTooltipOptions, TooltipOptions } from '../types'
 //
@@ -70,36 +71,9 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     anchorRect = latestFocusedDatum.element?.getBoundingClientRect() ?? null
   }
 
-  const [portalEl, setPortalEl] = React.useState<HTMLDivElement | null>()
+  const portalEl = usePortalElement()
+
   const [tooltipEl, setTooltipEl] = React.useState<HTMLDivElement | null>()
-
-  useIsomorphicLayoutEffect(() => {
-    if (!portalEl) {
-      let element = document.getElementById(
-        'react-charts-portal'
-      ) as HTMLDivElement
-
-      if (!element) {
-        element = document.createElement('div')
-
-        element.setAttribute('id', 'react-charts-portal')
-
-        Object.assign(element.style, {
-          pointerEvents: 'none',
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-          'z-index': 99999999999,
-        })
-
-        document.body.append(element)
-      }
-
-      setPortalEl(element)
-    }
-  })
 
   const translateX = anchorRect?.left ?? 0
   const translateY = anchorRect?.top ?? 0
@@ -133,6 +107,8 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     [boundingBox]
   )
 
+  // const isScrolling = useIsScrolling(200)
+
   const anchorFit = useAnchor({
     show: !!focusedDatum,
     portalEl,
@@ -154,6 +130,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     config: { mass: 1, tension: 210, friction: 30 },
     immediate: key => {
       return (
+        // isScrolling ||
         wasZero ||
         (['left', 'top'].includes(key) &&
           !previousFocusedDatum &&

@@ -25,13 +25,13 @@ export default function useRect(
     height: options?.initialHeight ?? 0,
   } as DOMRect)
 
-  const initialRectSet = React.useRef(false)
-
   useIsomorphicLayoutEffect(() => {
     if (node !== element) {
       setElement(node)
     }
   })
+
+  const initialRectSet = React.useRef(false)
 
   useIsomorphicLayoutEffect(() => {
     if (element && !initialRectSet.current) {
@@ -39,6 +39,8 @@ export default function useRect(
       setRect(element.getBoundingClientRect())
     }
   }, [element])
+
+  // const isScrolling = useIsScrolling(200)
 
   React.useEffect(() => {
     if (!element || !enabled) {
@@ -54,30 +56,30 @@ export default function useRect(
     }
   }, [element, enabled])
 
-  const resolvedRect = React.useMemo(() => {
-    if (!node || !(node as Element).tagName) {
-      return rect
-    }
+  // const resolvedRect = React.useMemo(() => {
+  //   if (!element || !(element as Element).tagName) {
+  //     return rect
+  //   }
 
-    const styles = window.getComputedStyle(node as Element)
+  //   const styles = window.getComputedStyle(element as Element)
 
-    return {
-      x: rect.x,
-      y: rect.y,
-      width:
-        rect.width -
-        parseInt(styles.borderLeftWidth) -
-        parseInt(styles.borderRightWidth),
-      height:
-        rect.height -
-        parseInt(styles.borderTopWidth) -
-        parseInt(styles.borderBottomWidth),
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom,
-      left: rect.left,
-    }
-  }, [node, rect])
+  //   return {
+  //     x: rect.x,
+  //     y: rect.y,
+  //     width:
+  //       rect.width -
+  //       parseInt(styles.borderLeftWidth) -
+  //       parseInt(styles.borderRightWidth),
+  //     height:
+  //       rect.height -
+  //       parseInt(styles.borderTopWidth) -
+  //       parseInt(styles.borderBottomWidth),
+  //     top: rect.top,
+  //     right: rect.right,
+  //     bottom: rect.bottom,
+  //     left: rect.left,
+  //   }
+  // }, [element, rect])
 
-  return resolvedRect
+  return rect
 }

@@ -230,9 +230,9 @@ export default function useMeasure<TDatum>({
   // Measure after if needed
   useIsomorphicLayoutEffect(() => {
     measureRotation()
-  })
+  }, [measureRotation])
 
   useIsomorphicLayoutEffect(() => {
     measureDimensions()
-  })
+  }, [measureRotation])
 }

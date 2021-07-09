@@ -87,7 +87,19 @@ export function Chart<TDatum>({
     containerElement,
     setContainerElement,
   ] = React.useState<HTMLDivElement | null>(null)
-  const { width, height } = useRect(containerElement?.parentElement, options)
+  const parentElement = containerElement?.parentElement
+
+  const { width, height } = useRect(parentElement, options)
+
+  useIsomorphicLayoutEffect(() => {
+    if (parentElement) {
+      const computed = window.getComputedStyle(parentElement)
+
+      if (!['relative', 'absolute', 'fixed'].includes(computed.display)) {
+        parentElement.style.position = 'relative'
+      }
+    }
+  }, [parentElement])
 
   return (
     <div
