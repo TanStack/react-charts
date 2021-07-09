@@ -134,11 +134,13 @@ function buildTimeAxis<TDatum>(
     options.getValue(datum.originalDatum)
   )
 
-  if (minValue === undefined) {
-    throw new Error('Invalid scale min/max')
-  }
-
-  if (maxValue === undefined) {
+  if (minValue === undefined || maxValue === undefined) {
+    console.info({
+      options,
+      series,
+      range,
+      values: allDatums.map(d => options.getValue(d.originalDatum)),
+    })
     throw new Error('Invalid scale min/max')
   }
 
@@ -194,11 +196,13 @@ function buildLinearAxis<TDatum>(
       )
     : extent(allDatums, datum => options.getValue(datum.originalDatum))
 
-  if (minValue === undefined) {
-    throw new Error('Invalid scale min/max')
-  }
-
-  if (maxValue === undefined) {
+  if (minValue === undefined || maxValue === undefined) {
+    console.info({
+      options,
+      series,
+      range,
+      values: allDatums.map(d => options.getValue(d.originalDatum)),
+    })
     throw new Error('Invalid scale min/max')
   }
 
