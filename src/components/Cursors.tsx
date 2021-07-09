@@ -34,8 +34,8 @@ function defaultCursor(options: CursorOptions): ResolvedCursorOptions {
 export default function Cursors<TDatum>() {
   const { getOptions } = useChartContext<TDatum>()
 
-  let primaryOptions = getOptions().primaryCursor
-  let secondaryOptions = getOptions().secondaryCursor
+  let primaryOptions = getOptions().primaryCursor ?? true
+  let secondaryOptions = getOptions().secondaryCursor ?? true
 
   const resolvedPrimaryOptions = React.useMemo(
     () =>
