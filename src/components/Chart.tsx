@@ -95,7 +95,7 @@ export function Chart<TDatum>({
     if (parentElement) {
       const computed = window.getComputedStyle(parentElement)
 
-      if (!['relative', 'absolute', 'fixed'].includes(computed.display)) {
+      if (!['relative', 'absolute', 'fixed'].includes(computed.position)) {
         parentElement.style.position = 'relative'
       }
     }
