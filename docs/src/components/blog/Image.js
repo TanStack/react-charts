@@ -28,13 +28,11 @@ class Image extends Component {
 
   handleIntersect = (entry) => {
     if (entry.isIntersecting) {
-      console.log('intersected');
       this.setState({ src: this.props.src });
     }
   };
 
   onLoad = () => {
-    console.log('loaded');
     this.setState({
       loaded: true,
     });
