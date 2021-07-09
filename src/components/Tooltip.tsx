@@ -50,7 +50,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
   const [focusedDatum] = useFocusedDatumAtom()
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
-  const preTooltipOptions = getOptions().tooltip
+  const preTooltipOptions = getOptions().tooltip ?? true
 
   const secondaryAxis =
     secondaryAxes.find(d => d.id === latestFocusedDatum?.secondaryAxisId) ??
@@ -162,7 +162,9 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     },
   })
 
-  return portalEl
+  const show = !!preTooltipOptions
+
+  return show && portalEl
     ? ReactDOM.createPortal(
         <animated.div style={springProps}>
           <div
