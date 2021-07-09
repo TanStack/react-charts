@@ -228,6 +228,8 @@ export type AxisOptionsBase = {
   tickLabelRotationDeg?: number
   innerBandPadding?: number
   outerBandPadding?: number
+  minBandSize?: number
+  maxBandSize?: number
   showGrid?: boolean
   // showTicks?: boolean
   // filterTicks?: <T extends string>(ticks: T[]) => T[]

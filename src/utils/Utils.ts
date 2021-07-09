@@ -135,7 +135,13 @@ export function getPrimaryLength<TDatum>(
   primaryAxis: Axis<TDatum>
 ) {
   if (primaryAxis.axisFamily === 'band') {
-    return Math.max(primaryAxis.scale.bandwidth(), primaryAxis.minBandSize ?? 1)
+    return Math.min(
+      Math.max(
+        primaryAxis.scale.bandwidth(),
+        primaryAxis.minBandSize ?? 99999999
+      ),
+      primaryAxis.maxBandSize ?? 1
+    )
   }
 
   return Math.max(primaryAxis.bandScale.bandwidth(), 1)
