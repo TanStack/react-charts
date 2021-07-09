@@ -95,21 +95,18 @@ export default function AreaComponent<TDatum>({
                   cx={getX(datum)}
                   cy={getY(datum, 1) ?? NaN}
                   stroke="rgba(33,33,33,0.5)"
-                  fill="transparent"
                   style={{
                     // @ts-ignore
                     r: 2,
-                    opacity: 1,
-                    ...(!secondaryAxis.showDatumElements
-                      ? {
-                          opacity: 0,
-                          pointerEvents: 'none',
-                        }
-                      : {}),
                     ...style,
                     ...style.circle,
                     ...dataStyle,
                     ...dataStyle.circle,
+                    ...(!(secondaryAxis.showDatumElements ?? true)
+                      ? {
+                          opacity: 0,
+                        }
+                      : {}),
                   }}
                 />
               )

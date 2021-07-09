@@ -11,14 +11,6 @@ const pathDefaultStyle = {
   strokeWidth: 2,
 }
 
-const circleDefaultStyle = {
-  r: 2,
-  strokeWidth: '1',
-  stroke: '#000000',
-  fill: '#000000',
-  opacity: 1,
-}
-
 export default function Line<TDatum>({
   primaryAxis,
   secondaryAxis,
@@ -76,31 +68,36 @@ export default function Line<TDatum>({
 
         return (
           <g key={`lines-${i}`}>
-            {(secondaryAxis.showDatumElements ?? true) &&
-              series.datums.map((datum, i) => {
-                const dataStyle = getDatumStatusStyle(datum, focusedDatum)
+            {series.datums.map((datum, i) => {
+              const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 
-                return (
-                  <circle
-                    key={i}
-                    ref={el => {
-                      datum.element = el
-                    }}
-                    r={2}
-                    cx={getX(datum)}
-                    cy={getY(datum)}
-                    stroke="rgba(33,33,33,0.5)"
-                    fill="transparent"
-                    style={{
-                      ...circleDefaultStyle,
-                      ...style,
-                      ...style.circle,
-                      ...dataStyle,
-                      ...dataStyle.circle,
-                    }}
-                  />
-                )
-              })}
+              return (
+                <circle
+                  key={i}
+                  ref={el => {
+                    datum.element = el
+                  }}
+                  r={2}
+                  cx={getX(datum)}
+                  cy={getY(datum)}
+                  stroke="rgba(33,33,33,0.5)"
+                  fill="transparent"
+                  style={{
+                    // @ts-ignore
+                    r: 2,
+                    ...style,
+                    ...style.circle,
+                    ...dataStyle,
+                    ...dataStyle.circle,
+                    ...(!(secondaryAxis.showDatumElements ?? true)
+                      ? {
+                          opacity: 0,
+                        }
+                      : {}),
+                  }}
+                />
+              )
+            })}
             <path d={linePath} style={lineStyle} />
           </g>
         )

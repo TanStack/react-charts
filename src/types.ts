@@ -215,7 +215,6 @@ export type AxisOptionsBase = {
   primaryAxisId?: string
   elementType?: 'line' | 'area' | 'bar'
   showDatumElements?: boolean
-  showOrphanDatumElements?: boolean
   curve?: CurveFactory
   invert?: boolean
   position: Position
