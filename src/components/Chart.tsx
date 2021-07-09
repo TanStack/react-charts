@@ -83,22 +83,22 @@ export function Chart<TDatum>({
   ...rest
 }: ComponentPropsWithoutRef<'div'> & { options: ChartOptions<TDatum> }) {
   const options = defaultChartOptions(userOptions)
-  const responsiveElRef = React.useRef<HTMLDivElement>(null)
-  const { width, height } = useRect(
-    responsiveElRef.current?.parentElement,
-    options
-  )
+  const [
+    containerElement,
+    setContainerElement,
+  ] = React.useState<HTMLDivElement | null>(null)
+  const { width, height } = useRect(containerElement?.parentElement, options)
 
   return (
     <div
-      ref={responsiveElRef}
+      ref={setContainerElement}
       {...rest}
       className={`ReactChart ${className || ''}`}
       style={{
+        ...style,
+        position: 'absolute',
         width,
         height,
-        position: 'absolute',
-        ...style,
       }}
     >
       <ChartInner options={options} {...{ width, height }} />
@@ -357,7 +357,7 @@ function ChartInner<TDatum>({
 
   const getSeriesStatusStyle = React.useCallback(
     (series: Series<TDatum>, focusedDatum: Datum<TDatum> | null) => {
-      const defaults = {
+      const base = {
         color: getOptions().defaultColors[
           series.index % (getOptions().defaultColors.length - 1)
         ],
@@ -365,7 +365,7 @@ function ChartInner<TDatum>({
 
       const status = getSeriesStatus(series, focusedDatum)
       const statusStyles = getOptions().getSeriesStyle(series, status)
-      series.style = materializeStyles(statusStyles, defaults)
+      series.style = materializeStyles(statusStyles, base)
       return series.style
     },
     [getOptions]
@@ -373,7 +373,7 @@ function ChartInner<TDatum>({
 
   const getDatumStatusStyle = React.useCallback(
     (datum: Datum<TDatum>, focusedDatum: Datum<TDatum> | null) => {
-      const defaults = {
+      const base = {
         ...series[datum.seriesIndex].style,
         color: getOptions().defaultColors[
           datum.seriesIndex % (getOptions().defaultColors.length - 1)
@@ -386,7 +386,7 @@ function ChartInner<TDatum>({
         status
       )
 
-      datum.style = materializeStyles(statusStyles, defaults)
+      datum.style = materializeStyles(statusStyles, base)
 
       return datum.style
     },
