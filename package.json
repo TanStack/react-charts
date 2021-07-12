@@ -3,7 +3,7 @@
   "author": "Tanner Linsley",
   "description": "Charts for React",
   "repository": "tannerlinsley/react-charts",
-  "module": "dist/react-charts-1.esm.js",
+  "module": "dist/react-charts.esm.js",
   "version": "0.1.0",
   "license": "MIT",
   "main": "dist/index.js",
