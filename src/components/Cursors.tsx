@@ -4,7 +4,6 @@ import * as TSTB from 'ts-toolbelt'
 
 import { animated, config, useSpring } from '@react-spring/web'
 
-import useIsScrolling from '../hooks/useIsScrolling'
 import usePrevious from '../hooks/usePrevious'
 import useLatestWhen from '../hooks/useLatestWhen'
 import usePortalElement from '../hooks/usePortalElement'
