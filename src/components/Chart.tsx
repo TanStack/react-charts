@@ -35,6 +35,7 @@ import AxisLinear from './AxisLinear'
 import Cursors from './Cursors'
 import Tooltip from './Tooltip'
 import Voronoi from './Voronoi'
+import useIsScrolling from '../hooks/useIsScrolling'
 
 //
 
@@ -83,13 +84,18 @@ export function Chart<TDatum>({
   ...rest
 }: ComponentPropsWithoutRef<'div'> & { options: ChartOptions<TDatum> }) {
   const options = defaultChartOptions(userOptions)
-  const [
-    containerElement,
-    setContainerElement,
-  ] = React.useState<HTMLDivElement | null>(null)
+  const [containerElement, setContainerElement] =
+    React.useState<HTMLDivElement | null>(null)
   const parentElement = containerElement?.parentElement
 
-  const { width, height } = useRect(parentElement, options)
+  const isScrolling = useIsScrolling(200)
+
+  const { width, height } = useRect(parentElement, {
+    enabled: !isScrolling,
+    initialWidth: options.initialWidth,
+    initialHeight: options.initialHeight,
+    dimsOnly: true,
+  })
 
   useIsomorphicLayoutEffect(() => {
     if (parentElement) {
@@ -136,7 +142,6 @@ function ChartInner<TDatum>({
   }
 
   const svgRef = React.useRef<SVGSVGElement>(null)
-  const svgRect = useRect(svgRef.current)
   const getOptions = useGetLatest(options)
 
   const axisDimensionsAtom = React.useMemo(
@@ -171,37 +176,21 @@ function ChartInner<TDatum>({
 
   const gridDimensions = React.useMemo((): GridDimensions => {
     // Left
-    const [axesLeftWidth, axesLeftTop, axesLeftBottom] = ([
-      'width',
-      'top',
-      'bottom',
-    ] as Measurement[]).map(prop =>
-      sumAllDimensionProperties(axisDimensions.left, prop)
-    )
+    const [axesLeftWidth, axesLeftTop, axesLeftBottom] = (
+      ['width', 'top', 'bottom'] as Measurement[]
+    ).map(prop => sumAllDimensionProperties(axisDimensions.left, prop))
 
-    const [axesRightWidth, axesRightTop, axesRightBottom] = ([
-      'width',
-      'top',
-      'bottom',
-    ] as Measurement[]).map(prop =>
-      sumAllDimensionProperties(axisDimensions.right, prop)
-    )
+    const [axesRightWidth, axesRightTop, axesRightBottom] = (
+      ['width', 'top', 'bottom'] as Measurement[]
+    ).map(prop => sumAllDimensionProperties(axisDimensions.right, prop))
 
-    const [axesTopHeight, axesTopLeft, axesTopRight] = ([
-      'height',
-      'left',
-      'right',
-    ] as Measurement[]).map(prop =>
-      sumAllDimensionProperties(axisDimensions.top, prop)
-    )
+    const [axesTopHeight, axesTopLeft, axesTopRight] = (
+      ['height', 'left', 'right'] as Measurement[]
+    ).map(prop => sumAllDimensionProperties(axisDimensions.top, prop))
 
-    const [axesBottomHeight, axesBottomLeft, axesBottomRight] = ([
-      'height',
-      'left',
-      'right',
-    ] as Measurement[]).map(prop =>
-      sumAllDimensionProperties(axisDimensions.bottom, prop)
-    )
+    const [axesBottomHeight, axesBottomLeft, axesBottomRight] = (
+      ['height', 'left', 'right'] as Measurement[]
+    ).map(prop => sumAllDimensionProperties(axisDimensions.bottom, prop))
 
     const gridX = Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
     const gridY = Math.max(axesTopHeight, axesLeftTop, axesRightTop)
@@ -299,9 +288,8 @@ function ChartInner<TDatum>({
               // @ts-ignore
               datum.data = axisSeries[sIndex].datums[i]
 
-              axisSeries[sIndex].datums[
-                i
-              ].stackData = (datum as unknown) as StackDatum<TDatum>
+              axisSeries[sIndex].datums[i].stackData =
+                datum as unknown as StackDatum<TDatum>
             })
           })
         })
@@ -370,9 +358,10 @@ function ChartInner<TDatum>({
   const getSeriesStatusStyle = React.useCallback(
     (series: Series<TDatum>, focusedDatum: Datum<TDatum> | null) => {
       const base = {
-        color: getOptions().defaultColors[
-          series.index % (getOptions().defaultColors.length - 1)
-        ],
+        color:
+          getOptions().defaultColors[
+            series.index % (getOptions().defaultColors.length - 1)
+          ],
       }
 
       const status = getSeriesStatus(series, focusedDatum)
@@ -387,9 +376,10 @@ function ChartInner<TDatum>({
     (datum: Datum<TDatum>, focusedDatum: Datum<TDatum> | null) => {
       const base = {
         ...series[datum.seriesIndex].style,
-        color: getOptions().defaultColors[
-          datum.seriesIndex % (getOptions().defaultColors.length - 1)
-        ],
+        color:
+          getOptions().defaultColors[
+            datum.seriesIndex % (getOptions().defaultColors.length - 1)
+          ],
       }
 
       const status = getDatumStatus(datum as Datum<TDatum>, focusedDatum)
@@ -520,7 +510,7 @@ function ChartInner<TDatum>({
     getDatumStatusStyle,
     useAxisDimensionsAtom,
     useFocusedDatumAtom,
-    svgRect,
+    svgRef,
   }
 
   const seriesByAxisId = sort(

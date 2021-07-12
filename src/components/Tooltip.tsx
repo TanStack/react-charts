@@ -65,22 +65,23 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     [preTooltipOptions]
   )
 
-  let anchorRect: DOMRect | null = null
-
-  if (latestFocusedDatum) {
-    anchorRect = latestFocusedDatum.element?.getBoundingClientRect() ?? null
-  }
-
   const portalEl = usePortalElement()
 
   const [tooltipEl, setTooltipEl] = React.useState<HTMLDivElement | null>()
 
-  const translateX = anchorRect?.left ?? 0
-  const translateY = anchorRect?.top ?? 0
-  const width = anchorRect?.width ?? 0
-  const height = anchorRect?.height ?? 0
+  const anchorEl = React.useMemo(() => {
+    const anchorRect =
+      latestFocusedDatum?.element?.getBoundingClientRect() ?? null
 
-  const boundingBox = React.useMemo(() => {
+    if (!anchorRect) {
+      return null
+    }
+
+    const translateX = anchorRect.left ?? 0
+    const translateY = anchorRect.top ?? 0
+    const width = anchorRect.width ?? 0
+    const height = anchorRect.height ?? 0
+
     const box = {
       x: translateY,
       y: translateX,
@@ -95,21 +96,16 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
 
     box.toJSON = () => box
 
-    return box
-  }, [height, translateX, translateY, width])
-
-  const anchorEl = React.useMemo(
-    () => ({
-      getBoundingClientRect() {
-        return boundingBox
+    return {
+      getBoundingClientRect: () => {
+        return box
       },
-    }),
-    [boundingBox]
-  )
+    }
+  }, [latestFocusedDatum?.element])
 
   // const isScrolling = useIsScrolling(200)
 
-  const anchorFit = useAnchor({
+  const anchor = useAnchor({
     show: !!focusedDatum,
     portalEl,
     anchorEl,
@@ -117,29 +113,29 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     side: ['right', 'left', 'top', 'bottom'],
   })
 
-  const { visibility, ...anchorFitStyle } = anchorFit.style
+  const previousAnchor = usePrevious(anchor)
+  const latestStableAnchor = useLatestWhen(anchor, !!anchor.fit) ?? anchor
 
-  const previousFocusedDatum = usePrevious(focusedDatum)
-  const previousAnchorFitStyle = usePrevious(anchorFitStyle)
-  const wasZero =
-    previousAnchorFitStyle?.left === 0 && previousAnchorFitStyle?.top === 0
+  const { visibility, ...anchorStyle } = latestStableAnchor.style
 
   const springProps = useSpring({
-    ...anchorFitStyle,
-    opacity: wasZero ? 0 : focusedDatum && anchorFit.fit ? 1 : 0,
+    ...anchorStyle,
+    left: anchorStyle.left || 0,
+    top: anchorStyle.top || 0,
+    opacity: !!focusedDatum ? 1 : 0,
     config: { mass: 1, tension: 210, friction: 30 },
     immediate: key => {
-      return (
-        // isScrolling ||
-        wasZero ||
-        (['left', 'top'].includes(key) &&
-          !previousFocusedDatum &&
-          !!focusedDatum)
-      )
+      if (['left', 'top'].includes(key)) {
+        return Number.isNaN(previousAnchor?.style.left)
+      }
+
+      return false
     },
   })
 
   const show = !!preTooltipOptions
+
+  const latestFit = useLatestWhen(anchor.fit, !!anchor.fit)
 
   return show && portalEl
     ? ReactDOM.createPortal(
@@ -148,7 +144,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
             ref={el => setTooltipEl(el)}
             style={{
               fontFamily: 'sans-serif',
-              ...(anchorFit.fit?.startKey === 'left'
+              ...(latestFit?.startKey === 'left'
                 ? {
                     padding: '0 10px',
                   }
@@ -164,7 +160,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
               secondaryAxis,
               getDatumStyle: (datum: Datum<TDatum>) =>
                 getDatumStatusStyle(datum, focusedDatum),
-              anchorFit,
+              anchor,
             })}
           </div>
         </animated.div>,

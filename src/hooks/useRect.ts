@@ -1,6 +1,6 @@
-import React from 'react'
-
 import observeRect from '@reach/observe-rect'
+import React from 'react'
+// import observeRect from '../utils/observe-rect'
 
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 
@@ -10,20 +10,23 @@ export type HasBoundingClientRect = {
 
 export default function useRect(
   node: HasBoundingClientRect | null | undefined,
-  options?: {
-    enabled?: boolean
+  options: {
+    enabled: boolean
     initialWidth?: number
     initialHeight?: number
+    dimsOnly?: boolean
   }
 ) {
-  const enabled = options?.enabled ?? true
-
   const [element, setElement] = React.useState(node)
 
   let [rect, setRect] = React.useState<DOMRect>({
-    width: options?.initialWidth ?? 0,
-    height: options?.initialHeight ?? 0,
+    width: options.initialWidth ?? 0,
+    height: options.initialHeight ?? 0,
   } as DOMRect)
+
+  const rectRef = React.useRef(rect)
+
+  rectRef.current = rect
 
   useIsomorphicLayoutEffect(() => {
     if (node !== element) {
@@ -34,27 +37,36 @@ export default function useRect(
   const initialRectSet = React.useRef(false)
 
   useIsomorphicLayoutEffect(() => {
-    if (element && !initialRectSet.current) {
+    if (options.enabled && element && !initialRectSet.current) {
       initialRectSet.current = true
       setRect(element.getBoundingClientRect())
     }
-  }, [element])
-
-  // const isScrolling = useIsScrolling(200)
+  }, [element, options.enabled])
 
   React.useEffect(() => {
-    if (!element || !enabled) {
+    if (!element || !options.enabled) {
       return
     }
 
-    const observer = observeRect(element as Element, setRect)
+    const observer = observeRect(element as Element, (newRect: DOMRect) => {
+      if (options.dimsOnly) {
+        if (
+          rectRef.current.width !== newRect.width ||
+          rectRef.current.height !== newRect.height
+        ) {
+          setRect(newRect)
+        }
+      } else {
+        setRect(newRect)
+      }
+    })
 
     observer.observe()
 
     return () => {
       observer.unobserve()
     }
-  }, [element, enabled])
+  }, [element, options.dimsOnly, options.enabled])
 
   // const resolvedRect = React.useMemo(() => {
   //   if (!element || !(element as Element).tagName) {

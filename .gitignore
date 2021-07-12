@@ -22,3 +22,6 @@ size-plugin.json
 stats.html
 yarn-debug.log*
 yarn-error.log*
+es
+lib
+types

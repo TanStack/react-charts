@@ -43,7 +43,7 @@ export default function App() {
           </div>
         );
       })}
-      <div style={{ height: "5rem" }} />
+      <div style={{ height: "50rem" }} />
     </div>
   );
 }

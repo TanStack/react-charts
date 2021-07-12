@@ -1,7 +1,7 @@
 import { ScaleBand, ScaleLinear, ScaleTime } from 'd3-scale'
 import { CurveFactory, stackOffsetNone } from 'd3-shape'
 import { SetStateAction } from 'jotai'
-import React, { CSSProperties } from 'react'
+import React, { CSSProperties, RefObject } from 'react'
 import * as TSTB from 'ts-toolbelt'
 
 import { TooltipRendererProps } from './components/TooltipRenderer'
@@ -69,7 +69,7 @@ export type ChartContextValue<TDatum> = {
   groupedDatums: Map<any, Datum<TDatum>[]>
   width: number
   height: number
-  svgRect: ClientRect
+  svgRef: RefObject<SVGSVGElement>
   getSeriesStatusStyle: (
     series: Series<TDatum>,
     focusedDatum: Datum<TDatum> | null

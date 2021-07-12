@@ -2,6 +2,7 @@ import { sum } from 'd3-array'
 import React, { CSSProperties } from 'react'
 
 import { useAnchor } from '../hooks/useAnchor'
+import useLatestWhen from '../hooks/useLatestWhen'
 import { Axis, AxisTime, Datum, RequiredChartOptions } from '../types'
 
 //
@@ -20,12 +21,18 @@ export type TooltipRendererProps<TDatum> = {
   primaryAxis: Axis<TDatum>
   secondaryAxis: Axis<TDatum>
   getDatumStyle: (datum: Datum<TDatum>) => CSSProperties
-  anchorFit: ReturnType<typeof useAnchor>
+  anchor: ReturnType<typeof useAnchor>
 }
 
-export default function TooltipRenderer<TDatum>(
+export default function tooltipRenderer<TDatum>(
   props: TooltipRendererProps<TDatum>
 ) {
+  return <TooltipRenderer {...props} />
+}
+
+function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
+  const latestFit = useLatestWhen(props.anchor.fit, !!props.anchor.fit)
+
   if (!props.focusedDatum) {
     return null
   }
@@ -58,7 +65,7 @@ export default function TooltipRenderer<TDatum>(
   // Or next items
   const hasNext = end < length
 
-  const finalAlign = `${props.anchorFit.fit?.side}-${props.anchorFit.fit?.align}`
+  const finalAlign = `${latestFit?.side}-${latestFit?.align}`
 
   let arrowPosition
   let triangleStyles

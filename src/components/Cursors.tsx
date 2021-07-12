@@ -4,13 +4,15 @@ import * as TSTB from 'ts-toolbelt'
 
 import { animated, config, useSpring } from '@react-spring/web'
 
-// import useIsScrolling from '../hooks/useIsScrolling'
+import useIsScrolling from '../hooks/useIsScrolling'
+import usePrevious from '../hooks/usePrevious'
 import useLatestWhen from '../hooks/useLatestWhen'
 import usePortalElement from '../hooks/usePortalElement'
 import { AxisTime, CursorOptions, Datum } from '../types'
 import { translate } from '../utils/Utils'
 //
 import useChartContext from '../utils/chartContext'
+import useRect from '../hooks/useRect'
 
 type ResolvedCursorOptions = TSTB.Object.Required<
   CursorOptions,
@@ -78,7 +80,7 @@ function Cursor<TDatum>(props: {
 }) {
   const {
     getOptions,
-    svgRect,
+    svgRef,
     gridDimensions,
     useFocusedDatumAtom,
     primaryAxis,
@@ -198,20 +200,25 @@ function Cursor<TDatum>(props: {
 
   const formattedValue = (axis as AxisTime<any>).formatters.cursor(latestValue)
 
-  // const isScrolling = useIsScrolling(200)
+  const svgRect = useRect(svgRef.current, {
+    enabled: show,
+  })
+
+  const immediatePos = !axis.isVertical ? lineStartX : lineStartY
+  const immediate = usePrevious(immediatePos) === -1 && immediatePos > -1
 
   const lineSpring = useSpring({
     transform: translate(lineStartX, lineStartY),
     width: `${lineWidth}px`,
     height: `${lineHeight}px`,
     config: config.stiff,
-    // immediate: isScrolling,
+    immediate: key => (key === 'transform' ? immediate : false),
   })
 
   const bubbleSpring = useSpring({
     transform: translate(bubbleX, bubbleY),
     config: config.stiff,
-    // immediate: isScrolling,
+    immediate: key => (key === 'transform' ? immediate : false),
   })
 
   const portalEl = usePortalElement()
@@ -220,6 +227,7 @@ function Cursor<TDatum>(props: {
     ? ReactDOM.createPortal(
         <div
           style={{
+            fontFamily: 'sans-serif',
             pointerEvents: 'none',
             position: 'absolute',
             top: 0,
@@ -229,7 +237,7 @@ function Cursor<TDatum>(props: {
               svgRect.top + gridDimensions.gridY
             ),
             opacity: show ? 1 : 0,
-            transition: 'all .3s ease',
+            transition: 'opacity .3s ease',
           }}
           className="Cursor"
         >

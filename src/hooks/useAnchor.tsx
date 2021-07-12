@@ -127,7 +127,7 @@ export function useAnchor(options: {
 
   const fit = React.useMemo(
     () =>
-      ready
+      ready && options.show
         ? fitOnBestSide({
             portalDims,
             tooltipDims,
@@ -136,7 +136,15 @@ export function useAnchor(options: {
             useLargest: options.useLargest,
           })
         : null,
-    [anchorDims, options.useLargest, portalDims, ready, sides, tooltipDims]
+    [
+      anchorDims,
+      options.show,
+      options.useLargest,
+      portalDims,
+      ready,
+      sides,
+      tooltipDims,
+    ]
   )
 
   return {
