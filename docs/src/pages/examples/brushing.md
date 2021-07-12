@@ -4,11 +4,11 @@ title: Brushing
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/brushing)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/brushing)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/brushing)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/brushing)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/brushing?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/brushing?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: brushing"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{

@@ -4,11 +4,11 @@ title: Axis Options
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/axis-options)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/axis-options)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/axis-options)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/axis-options)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/axis-options?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/axis-options?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: axis-options"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{

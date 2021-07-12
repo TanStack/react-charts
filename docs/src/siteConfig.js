@@ -1,7 +1,7 @@
 // List of projects/orgs using your project for the users page.
 export const siteConfig = {
   editUrl:
-    'https://github.com/tannerlinsley/react-charts/edit/master/docs/src/pages',
+    'https://github.com/tannerlinsley/react-charts/edit/main/docs/src/pages',
   copyright: `Copyright © ${new Date().getFullYear()} Tanner Linsley. All Rights Reserved.`,
   repoUrl: 'https://github.com/tannerlinsley/react-charts',
   algolia: {

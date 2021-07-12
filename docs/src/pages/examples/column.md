@@ -4,11 +4,11 @@ title: Column Chart
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/column)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/column)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/column)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/column)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/column?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/column?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: column"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{
