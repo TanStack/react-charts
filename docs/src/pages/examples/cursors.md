@@ -4,11 +4,11 @@ title: Cursors
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/cursors)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/cursors)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/cursors)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/cursors)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/cursors?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/cursors?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: cursors"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{

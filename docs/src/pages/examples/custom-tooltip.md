@@ -4,11 +4,11 @@ title: Custom Tooltip
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/custom-tooltip)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/custom-tooltip)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/custom-tooltip)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/custom-tooltip)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/custom-tooltip?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/custom-tooltip?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: custom-tooltip"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{

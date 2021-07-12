@@ -4,11 +4,11 @@ title: Mixed Types
 toc: false
 ---
 
-- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/next/examples/mixed-types)
-- [View Source](https://github.com/tannerlinsley/react-charts/tree/next/examples/mixed-types)
+- [Open in CodeSandbox](https://codesandbox.io/s/github/tannerlinsley/react-charts/tree/main/examples/mixed-types)
+- [View Source](https://github.com/tannerlinsley/react-charts/tree/main/examples/mixed-types)
 
 <iframe
-  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/next/examples/mixed-types?autoresize=1&fontsize=14&theme=dark"
+  src="https://codesandbox.io/embed/github/tannerlinsley/react-charts/tree/main/examples/mixed-types?autoresize=1&fontsize=14&theme=dark"
   title="tannerlinsley/react-charts: mixed-types"
   sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
   style={{
