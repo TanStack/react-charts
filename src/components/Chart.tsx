@@ -5,7 +5,6 @@ import React, { ComponentPropsWithoutRef } from 'react'
 
 import useGetLatest from '../hooks/useGetLatest'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import useRect from '../hooks/useRect'
 import Area from '../seriesTypes/Area'
 import Bar from '../seriesTypes/Bar'
 import Line from '../seriesTypes/Line'
@@ -35,7 +34,6 @@ import AxisLinear from './AxisLinear'
 import Cursors from './Cursors'
 import Tooltip from './Tooltip'
 import Voronoi from './Voronoi'
-import useIsScrolling from '../hooks/useIsScrolling'
 
 //
 
@@ -74,6 +72,9 @@ function defaultChartOptions<TDatum>(
     groupingMode: options.groupingMode ?? 'primary',
     showVoronoi: options.showVoronoi ?? false,
     defaultColors: options.defaultColors ?? defaultColorScheme,
+    useIntersectionObserver: options.useIntersectionObserver ?? true,
+    intersectionObserverRootMargin:
+      options.intersectionObserverRootMargin ?? '1000px',
   }
 }
 
@@ -84,28 +85,107 @@ export function Chart<TDatum>({
   ...rest
 }: ComponentPropsWithoutRef<'div'> & { options: ChartOptions<TDatum> }) {
   const options = defaultChartOptions(userOptions)
-  const [containerElement, setContainerElement] =
+  const [chartElement, setContainerElement] =
     React.useState<HTMLDivElement | null>(null)
-  const parentElement = containerElement?.parentElement
 
-  const isScrolling = useIsScrolling(200)
+  const containerEl = chartElement?.parentElement
 
-  const { width, height } = useRect(parentElement, {
-    enabled: !isScrolling,
-    initialWidth: options.initialWidth,
-    initialHeight: options.initialHeight,
-    dimsOnly: true,
+  const nearestScrollableParent = React.useMemo(() => {
+    const run = (el?: Element | null): Element | null => {
+      if (!el) {
+        return null
+      }
+
+      const grandParent = el.parentElement
+
+      if (!grandParent) {
+        return null
+      }
+
+      if (grandParent.scrollHeight > grandParent.clientHeight) {
+        const { overflow } = window.getComputedStyle(grandParent)
+
+        if (overflow.includes('scroll') || overflow.includes('auto')) {
+          return grandParent
+        }
+      }
+
+      return run(grandParent)
+    }
+
+    return run(containerEl)
+  }, [containerEl])
+
+  const [{ width, height }, setDims] = React.useState({
+    width: options.initialWidth,
+    height: options.initialHeight,
   })
 
   useIsomorphicLayoutEffect(() => {
-    if (parentElement) {
-      const computed = window.getComputedStyle(parentElement)
+    if (containerEl) {
+      const computed = window.getComputedStyle(containerEl)
 
       if (!['relative', 'absolute', 'fixed'].includes(computed.position)) {
-        parentElement.style.position = 'relative'
+        containerEl.style.position = 'relative'
       }
     }
-  }, [parentElement])
+  }, [containerEl])
+
+  React.useEffect(() => {
+    if (!containerEl) {
+      return
+    }
+
+    const observer = new ResizeObserver(() => {
+      const rect = containerEl?.getBoundingClientRect()
+
+      if (rect) {
+        setDims({
+          width: rect.width,
+          height: rect.height,
+        })
+      }
+    })
+
+    observer.observe(containerEl)
+
+    return () => {
+      observer.unobserve(containerEl)
+    }
+  }, [containerEl])
+
+  const [isIntersecting, setIsIntersecting] = React.useState(true)
+
+  React.useEffect(() => {
+    if (!containerEl || !options.useIntersectionObserver) return
+
+    let observer = new IntersectionObserver(
+      entries => {
+        for (let entry of entries) {
+          if (entry.isIntersecting) {
+            setIsIntersecting(true)
+          } else {
+            setIsIntersecting(false)
+          }
+        }
+      },
+      {
+        root: nearestScrollableParent,
+        rootMargin: options.intersectionObserverRootMargin,
+      }
+    )
+
+    observer.observe(containerEl)
+
+    return () => {
+      observer.unobserve(containerEl)
+    }
+  }, [
+    containerEl,
+    nearestScrollableParent,
+    options.intersectionObserverRootMargin,
+    options.useIntersectionObserver,
+  ])
 
   return (
     <div
@@ -119,7 +199,9 @@ export function Chart<TDatum>({
         height,
       }}
     >
-      <ChartInner options={options} {...{ width, height }} />
+      {isIntersecting ? (
+        <ChartInner options={options} {...{ width, height }} />
+      ) : null}
     </div>
   )
 }

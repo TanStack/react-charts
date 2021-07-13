@@ -199,9 +199,7 @@ function Cursor<TDatum>(props: {
 
   const formattedValue = (axis as AxisTime<any>).formatters.cursor(latestValue)
 
-  const svgRect = useRect(svgRef.current, {
-    enabled: show,
-  })
+  const svgRect = useRect(svgRef.current, show)
 
   const immediatePos = !axis.isVertical ? lineStartX : lineStartY
   const immediate = usePrevious(immediatePos) === -1 && immediatePos > -1

@@ -10,18 +10,13 @@ export type HasBoundingClientRect = {
 
 export default function useRect(
   node: HasBoundingClientRect | null | undefined,
-  options: {
-    enabled: boolean
-    initialWidth?: number
-    initialHeight?: number
-    dimsOnly?: boolean
-  }
+  enabled: boolean
 ) {
   const [element, setElement] = React.useState(node)
 
   let [rect, setRect] = React.useState<DOMRect>({
-    width: options.initialWidth ?? 0,
-    height: options.initialHeight ?? 0,
+    width: 0,
+    height: 0,
   } as DOMRect)
 
   const rectRef = React.useRef(rect)
@@ -37,28 +32,19 @@ export default function useRect(
   const initialRectSet = React.useRef(false)
 
   useIsomorphicLayoutEffect(() => {
-    if (options.enabled && element && !initialRectSet.current) {
+    if (enabled && element && !initialRectSet.current) {
       initialRectSet.current = true
       setRect(element.getBoundingClientRect())
     }
-  }, [element, options.enabled])
+  }, [element, enabled])
 
   React.useEffect(() => {
-    if (!element || !options.enabled) {
+    if (!element || !enabled) {
       return
     }
 
     const observer = observeRect(element as Element, (newRect: DOMRect) => {
-      if (options.dimsOnly) {
-        if (
-          rectRef.current.width !== newRect.width ||
-          rectRef.current.height !== newRect.height
-        ) {
-          setRect(newRect)
-        }
-      } else {
-        setRect(newRect)
-      }
+      setRect(newRect)
     })
 
     observer.observe()
@@ -66,7 +52,7 @@ export default function useRect(
     return () => {
       observer.unobserve()
     }
-  }, [element, options.dimsOnly, options.enabled])
+  }, [element, enabled])
 
   // const resolvedRect = React.useMemo(() => {
   //   if (!element || !(element as Element).tagName) {

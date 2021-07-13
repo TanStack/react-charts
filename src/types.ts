@@ -44,6 +44,11 @@ export type ChartOptions<TDatum> = {
   primaryCursor?: boolean | CursorOptions
   secondaryCursor?: boolean | CursorOptions
   tooltip?: boolean | TooltipOptions<TDatum>
+  useIntersectionObserver?: boolean
+  intersectionObserverRootMargin?:
+    | `${number}px`
+    | `${number}px ${number}px`
+    | `${number}px ${number}px ${number}px ${number}px`
 }
 
 export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
@@ -56,6 +61,8 @@ export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
   | 'defaultColors'
   | 'initialWidth'
   | 'initialHeight'
+  | 'useIntersectionObserver'
+  | 'intersectionObserverThreshold'
 >
 
 export type ChartContextValue<TDatum> = {

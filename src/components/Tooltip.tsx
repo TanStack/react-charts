@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom'
 import { useSpring, animated } from '@react-spring/web'
 
 import { useAnchor } from '../hooks/useAnchor'
-// import useIsScrolling from '../hooks/useIsScrolling'
 import useLatestWhen from '../hooks/useLatestWhen'
 import usePortalElement from '../hooks/usePortalElement'
 import usePrevious from '../hooks/usePrevious'
@@ -12,6 +11,7 @@ import { Datum, ResolvedTooltipOptions, TooltipOptions } from '../types'
 //
 import useChartContext from '../utils/chartContext'
 import TooltipRenderer from './TooltipRenderer'
+import useRect from '../hooks/useRect'
 
 //
 
@@ -45,7 +45,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     primaryAxis,
     secondaryAxes,
     getDatumStatusStyle,
-    // getSeriesStatusStyle,
+    svgRef,
   } = useChartContext<TDatum>()
 
   const [focusedDatum] = useFocusedDatumAtom()
@@ -69,6 +69,8 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
 
   const [tooltipEl, setTooltipEl] = React.useState<HTMLDivElement | null>()
 
+  const svgRect = useRect(svgRef.current, !!focusedDatum?.element)
+
   const anchorEl = React.useMemo(() => {
     const anchorRect =
       latestFocusedDatum?.element?.getBoundingClientRect() ?? null
@@ -76,6 +78,8 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     if (!anchorRect) {
       return null
     }
+
+    if (!svgRect) return
 
     const translateX = anchorRect.left ?? 0
     const translateY = anchorRect.top ?? 0
@@ -101,9 +105,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
         return box
       },
     }
-  }, [latestFocusedDatum?.element])
-
-  // const isScrolling = useIsScrolling(200)
+  }, [latestFocusedDatum?.element, svgRect])
 
   const anchor = useAnchor({
     show: !!focusedDatum,

@@ -80,11 +80,9 @@ export function useAnchor(options: {
   anchorEl: HasBoundingClientRect | null | undefined
   tooltipEl: HasBoundingClientRect | null | undefined
 }) {
-  const portalDims = useRect(options.portalEl, { enabled: options.show })
-  const anchorDims = useRect(options.anchorEl, { enabled: options.show })
-  const tooltipDims = useRect(options.tooltipEl, {
-    enabled: options.show,
-  })
+  const portalDims = useRect(options.portalEl, options.show)
+  const anchorDims = useRect(options.anchorEl, options.show)
+  const tooltipDims = useRect(options.tooltipEl, options.show)
 
   const sides = React.useMemo(() => {
     const preSides = Array.isArray(options.side) ? options.side : [options.side]
