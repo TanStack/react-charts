@@ -1,4 +1,5 @@
-name: react-charts publish
+name: react-charts tests
+
 on:
   push:
     branches:
@@ -8,38 +9,35 @@ on:
 
 jobs:
   test:
-    name: 'node ${{ matrix.node }} ${{ matrix.os }} '
-    runs-on: '${{ matrix.os }}'
+    name: 'Node ${{ matrix.node }}'
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        node: [12, 14, 16]
+        node: [10, 12, 14, 16]
     steps:
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
-      - run: npm i -g yarn
-      - run: yarn --frozen-lockfile
+      - name: Install dependencies
+        uses: bahmutov/npm-install@v1
       - run: yarn test:ci
 
   publish-module:
     name: 'Publish Module to NPM'
-    # needs: test
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta' #publish only when merged in master, not on PR
+    needs: test
+    # publish only when merged in master on original repo, not on PR
+    if: github.repository == 'tannerlinsley/react-charts' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          fetch-depth: 1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
+          node-version: 14
           registry-url: https://registry.npmjs.org/
-      - run: npm i -g yarn
-      - run: yarn --frozen-lockfile
+      - name: Install dependencies
+        uses: bahmutov/npm-install@v1
+      - run: yarn build
       - run: npx semantic-release@17
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

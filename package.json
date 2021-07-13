@@ -1,7 +1,7 @@
 {
   "name": "react-charts",
   "version": "1.0.0-semantic-release",
-  "description": "Hooks for managing, caching and syncing asynchronous and remote data in React",
+  "description": "Simple, immersive & interactive charts for React. Flexible, declarative, and highly configurable.",
   "author": "tannerlinsley",
   "license": "MIT",
   "repository": "tannerlinsley/react-charts",

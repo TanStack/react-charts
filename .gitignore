@@ -1,27 +1,35 @@
-.cache
-.DS_Store
+
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# builds
+types
+build
+dist
+lib
+es
+artifacts
+.rpt2_cache
+coverage
+*.tgz
+
+# misc
 .DS_Store
 .env
-.env.development.local
 .env.local
-.env.production.local
+.env.development.local
 .env.test.local
-.history
+.env.production.local
 .next
-.rpt2_cache
-*.log
-artifacts
-build
-d3/index.js
-dist
-dist
-node_modules
-node_modules
+
 npm-debug.log*
-size-plugin.json
-stats.html
 yarn-debug.log*
 yarn-error.log*
-es
-lib
-types
+.history
+size-plugin.json
+stats-hydration.json
+stats-react.json
+stats.html
+.vscode/settings.json
