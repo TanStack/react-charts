@@ -25,7 +25,7 @@ jobs:
 
   publish-module:
     name: 'Publish Module to NPM'
-    needs: test
+    # needs: test
     # publish only when merged in master on original repo, not on PR
     if: github.repository == 'tannerlinsley/react-charts' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
     runs-on: ubuntu-latest
