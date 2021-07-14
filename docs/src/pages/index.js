@@ -91,7 +91,7 @@ const Home = props => {
                 <div className="mt-10 lg:mt-0">
                   <div>
                     <h3 className="text-xl leading-6 xl:text-2xl font-bold text-gray-900">
-                      Cartesion-Only Charts
+                      X/Y-Only Charts
                     </h3>
                     <div className="mt-2  lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
                       We believe data visualization is all about{' '}

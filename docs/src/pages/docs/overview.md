@@ -3,7 +3,7 @@ id: overview
 title: Overview
 ---
 
-React Charts is first and foremost a React component for rendering many many different variations of `cartesian` charts including, but not limited to, **line, area, bar, column and bubble charts**.
+React Charts is first and foremost a React component for rendering many many different variations of X/Y charts including, but not limited to, **line, area, bar, column and bubble charts**.
 
 Outside of providing custom styling and interfacing with some D3-supported options, you do not need any knowledge of SVG to use React Charts, nor should you, since you probably have better things to do than remember how to transpose the attributes of a `rect` from a vertical to horizontal orientation or heaven forbid, calculate an columnar-voronoi for faster closest-to-point tooltip performance.
 
