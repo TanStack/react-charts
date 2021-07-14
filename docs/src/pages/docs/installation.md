@@ -7,7 +7,7 @@ You can install React Charts with [NPM](https://npmjs.com),
 [Yarn](https://yarnpkg.com), or a good ol' `<script>` via
 [unpkg.com](https://unpkg.com).
 
-### NP
+### NPM
 
 ```sh
 npm install react-charts@beta --save
