@@ -15,7 +15,12 @@
           "editUrl": "/docs/installation.md"
         },
         {
-          "title": "API Reference (WIP)",
+          "title": "Getting Started",
+          "path": "/docs/getting-started",
+          "editUrl": "/docs/getting-started.md"
+        },
+        {
+          "title": "API Reference",
           "path": "/docs/api",
           "editUrl": "/docs/api.md"
         }

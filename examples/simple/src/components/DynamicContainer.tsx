@@ -16,7 +16,7 @@ export default function DyanmicContainer() {
       isPrimary: true,
       scaleType: "time",
       position: "bottom",
-      getValue: (datum) => (datum.primary as unknown) as Date,
+      getValue: (datum) => datum.primary as unknown as Date,
     }),
     []
   );
@@ -78,7 +78,6 @@ export default function DyanmicContainer() {
               data,
               primaryAxis,
               secondaryAxes,
-              tooltip: true,
             }}
           />
         </div>

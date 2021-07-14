@@ -49,7 +49,7 @@ export default function Steam() {
             data,
             primaryAxis,
             secondaryAxes,
-            tooltip: true,
+
             getSeriesStyle: () => ({
               line: { opacity: 0 },
               area: { opacity: 1 },

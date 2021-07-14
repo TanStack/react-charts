@@ -16,7 +16,7 @@ export default function DarkMode() {
       isPrimary: true,
       scaleType: "time",
       position: "bottom",
-      getValue: (datum) => (datum.primary as unknown) as Date,
+      getValue: (datum) => datum.primary as unknown as Date,
     }),
     []
   );
@@ -53,7 +53,7 @@ export default function DarkMode() {
               data,
               primaryAxis,
               secondaryAxes,
-              tooltip: true,
+
               dark: true,
             }}
           />

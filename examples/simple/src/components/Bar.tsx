@@ -47,7 +47,6 @@ export default function Bar() {
             data,
             primaryAxis,
             secondaryAxes,
-            tooltip: true,
           }}
         />
       </ResizableBox>

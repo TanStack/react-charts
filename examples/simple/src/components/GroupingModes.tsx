@@ -58,7 +58,7 @@ export default function GroupingModes() {
             groupingMode: grouping,
             primaryAxis,
             secondaryAxes,
-            tooltip: true,
+
             onClickDatum: (datum) => {
               if (datum) setState((old) => ({ ...old, clicked: datum as any }));
             },

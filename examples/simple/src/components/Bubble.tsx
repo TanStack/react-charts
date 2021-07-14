@@ -53,7 +53,6 @@ export default function Bubble() {
               ({
                 circle: { r: datum.originalDatum.radius },
               } as any),
-            tooltip: true,
           }}
         />
       </ResizableBox>

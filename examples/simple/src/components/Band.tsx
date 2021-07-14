@@ -50,7 +50,6 @@ export default function Band() {
             data,
             primaryAxis,
             secondaryAxes,
-            tooltip: true,
           }}
         />
       </ResizableBox>

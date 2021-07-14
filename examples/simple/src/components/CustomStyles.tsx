@@ -155,7 +155,7 @@ function MyChart({
                 activeSeriesIndex: focused ? focused.seriesIndex : -1,
                 activeDatumIndex: focused ? focused.index : -1,
               }),
-            tooltip: true,
+
             renderSVG: () => (
               <defs>
                 <linearGradient id="0" x1="0" x2="0" y1="1" y2="0">
