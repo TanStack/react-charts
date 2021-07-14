@@ -3,7 +3,13 @@ import React, { CSSProperties } from 'react'
 
 import { useAnchor } from '../hooks/useAnchor'
 import useLatestWhen from '../hooks/useLatestWhen'
-import { Axis, AxisTime, Datum, RequiredChartOptions } from '../types'
+import {
+  Axis,
+  AxisLinear,
+  AxisTime,
+  Datum,
+  RequiredChartOptions,
+} from '../types'
 
 //
 //
@@ -353,8 +359,10 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                   [...focusedDatum.group].reverse()[0].totalValue,
                   -1
                 )} */}
-                  {sum(focusedDatum.group ?? [], d =>
-                    secondaryAxis.getValue(d.originalDatum)
+                  {(secondaryAxis as AxisLinear<any>).formatters.scale(
+                    sum(focusedDatum.group ?? [], d =>
+                      secondaryAxis.getValue(d.originalDatum)
+                    )
                   )}
                 </td>
               </tr>

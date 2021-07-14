@@ -20,6 +20,7 @@
     "@next/mdx": "^9.4.0",
     "@next/plugin-google-analytics": "^9.4.4",
     "@reactions/component": "^2.0.2",
+    "@visx/responsive": "^1.10.1",
     "@zeit/fetch": "^6.0.0",
     "@zeit/react-jsx-parser": "^2.0.0",
     "async-sema": "^3.1.0",

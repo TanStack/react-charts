@@ -460,7 +460,7 @@ function ChartInner<TDatum>({
   const getDatumStatusStyle = React.useCallback(
     (datum: Datum<TDatum>, focusedDatum: Datum<TDatum> | null) => {
       const base = {
-        ...series[datum.seriesIndex].style,
+        ...series[datum.seriesIndex]?.style,
         color:
           getOptions().defaultColors[
             datum.seriesIndex % (getOptions().defaultColors.length - 1)
