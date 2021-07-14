@@ -22,10 +22,10 @@ export default function Voronoi<TDatum>() {
 
   const handleFocus = React.useCallback(
     (datum: Datum<TDatum> | null) => {
-      onFocusDatum?.(datum)
+      getOptions().onFocusDatum?.(datum)
       setFocusedDatum(datum)
     },
-    [onFocusDatum, setFocusedDatum]
+    [getOptions, setFocusedDatum]
   )
 
   const needsVoronoi =

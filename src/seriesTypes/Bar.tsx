@@ -4,10 +4,8 @@ import { Axis, Series } from '../types'
 import {
   getHeight,
   getWidth,
-  getX,
-  getXStart,
-  getY,
-  getYStart,
+  getRectX,
+  getRectY,
   translate,
 } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
@@ -46,22 +44,29 @@ export default function BarComponent<TDatum>({
             {series.datums.map((datum, i) => {
               const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 
+              const x = getRectX(datum, primaryAxis, secondaryAxis) ?? NaN
+              const y = getRectY(datum, primaryAxis, secondaryAxis) ?? NaN
+              const width = getWidth(datum, primaryAxis, secondaryAxis) ?? NaN
+              const height = getHeight(datum, primaryAxis, secondaryAxis) ?? NaN
+
               return (
                 <rect
-                  ref={el => {
-                    datum.element = el
-                  }}
-                  key={i}
-                  x={getXStart(datum, primaryAxis, secondaryAxis) ?? NaN}
-                  y={getYStart(datum, primaryAxis, secondaryAxis) ?? NaN}
-                  width={getWidth(datum, primaryAxis, secondaryAxis) ?? NaN}
-                  height={getHeight(datum, primaryAxis, secondaryAxis) ?? NaN}
-                  style={{
-                    strokeWidth: 0,
-                    ...style,
-                    ...style.rectangle,
-                    ...dataStyle,
-                    ...dataStyle.rectangle,
+                  {...{
+                    ref: el => {
+                      datum.element = el
+                    },
+                    key: i,
+                    x,
+                    y,
+                    width,
+                    height,
+                    style: {
+                      strokeWidth: 0,
+                      ...style,
+                      ...style.rectangle,
+                      ...dataStyle,
+                      ...dataStyle.rectangle,
+                    },
                   }}
                 />
               )

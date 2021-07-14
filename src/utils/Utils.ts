@@ -96,11 +96,7 @@ export function getSecondaryStart<TDatum>(
   secondaryAxis: Axis<TDatum>
 ): number {
   if (secondaryAxis.stacked) {
-    return (
-      secondaryAxis.scale(
-        datum.stackData?.[!secondaryAxis.isVertical ? 0 : 1] ?? NaN
-      ) ?? NaN
-    )
+    return secondaryAxis.scale(datum.stackData?.[0] ?? NaN) ?? NaN
   }
 
   return secondaryAxis.scale(0) ?? NaN
@@ -111,11 +107,7 @@ export function getSecondary<TDatum>(
   secondaryAxis: Axis<TDatum>
 ): number {
   if (secondaryAxis.stacked) {
-    return (
-      secondaryAxis.scale(
-        datum.stackData?.[!secondaryAxis.isVertical ? 1 : 0] ?? NaN
-      ) ?? NaN
-    )
+    return secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
   }
 
   return secondaryAxis.scale(secondaryAxis.getValue(datum.originalDatum)) ?? NaN
@@ -128,9 +120,7 @@ export function getPrimary<TDatum>(
   let primary: number
 
   if (primaryAxis.stacked) {
-    primary =
-      primaryAxis.scale(datum.stackData?.[primaryAxis.invert ? 1 : 0] ?? NaN) ??
-      NaN
+    primary = primaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
   } else {
     primary =
       primaryAxis.scale(primaryAxis.getValue(datum.originalDatum)) ?? NaN
@@ -215,6 +205,26 @@ export function getYStart<TDatum>(
   return primaryAxis.isVertical
     ? getPrimaryStart(datum, primaryAxis)
     : getSecondaryStart(datum, secondaryAxis)
+}
+
+export function getRectX<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getSecondaryStart(datum, secondaryAxis)
+    : getPrimaryStart(datum, primaryAxis)
+}
+
+export function getRectY<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getPrimaryStart(datum, primaryAxis)
+    : getSecondary(datum, secondaryAxis)
 }
 
 export function getWidth<TDatum>(

@@ -237,6 +237,7 @@ export type AxisOptionsBase = {
   outerBandPadding?: number
   minBandSize?: number
   maxBandSize?: number
+  minDomainLength?: number
   showGrid?: boolean
   // showTicks?: boolean
   // filterTicks?: <T extends string>(ticks: T[]) => T[]

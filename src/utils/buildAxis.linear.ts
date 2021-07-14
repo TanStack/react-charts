@@ -1,4 +1,4 @@
-import { extent, max, min, range as d3Range } from 'd3-array'
+import { extent, max, median, min, range as d3Range } from 'd3-array'
 import {
   scaleLinear,
   scaleLog,
@@ -249,6 +249,17 @@ function buildLinearAxis<TDatum>(
   if (typeof options.max === 'number') {
     maxValue = max([options.max, maxValue as number])
     shouldNice = false
+  }
+
+  if (
+    typeof options.minDomainLength === 'number' &&
+    !(minValue === undefined || maxValue === undefined)
+  ) {
+    const mid = median([minValue, maxValue])!
+    const top = mid + options.minDomainLength / 2
+    const bottom = mid - options.minDomainLength / 2
+    maxValue = Math.max(top, maxValue)
+    minValue = Math.min(bottom, minValue)
   }
 
   if (typeof options.hardMin === 'number') {

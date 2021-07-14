@@ -2,7 +2,14 @@ import { area, line } from 'd3-shape'
 import React from 'react'
 
 import { Axis, Series, Datum } from '../types'
-import { getX, getY, getYStart, translate } from '../utils/Utils'
+import {
+  getPrimary,
+  getSecondary,
+  getSecondaryStart,
+  getX,
+  getY,
+  translate,
+} from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
@@ -52,15 +59,15 @@ export default function AreaComponent<TDatum>({
 
         const areaPath =
           area<Datum<TDatum>>(
-            datum => getX(datum, primaryAxis, secondaryAxis) ?? NaN,
-            datum => getYStart(datum, primaryAxis, secondaryAxis) ?? NaN,
-            datum => getY(datum, primaryAxis, secondaryAxis) ?? NaN
+            datum => getPrimary(datum, primaryAxis) ?? NaN,
+            datum => getSecondaryStart(datum, secondaryAxis) ?? NaN,
+            datum => getSecondary(datum, secondaryAxis) ?? NaN
           ).curve(curve)(series.datums) ?? undefined
 
         const linePath =
           line<Datum<TDatum>>(
-            datum => getX(datum, primaryAxis, secondaryAxis) ?? NaN,
-            datum => getY(datum, primaryAxis, secondaryAxis) ?? NaN
+            datum => getPrimary(datum, primaryAxis) ?? NaN,
+            datum => getSecondary(datum, secondaryAxis) ?? NaN
           ).curve(curve)(series.datums) ?? undefined
 
         return (
