@@ -2,7 +2,7 @@ import React from 'react'
 
 //
 import { Datum } from '../types'
-import { translate } from '../utils/Utils'
+import { getPrimary, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 
 export default function Voronoi<TDatum>() {
@@ -74,25 +74,19 @@ function PrimaryVoronoi<TDatum>({
       const next = series[0].datums[i + 1]
 
       const primaryValue = primaryAxis.getValue(datum.originalDatum)
-      const primaryPx = primaryAxis?.scale(primaryValue) ?? NaN
+      const primaryPx = getPrimary(datum, primaryAxis)
 
       let range = primaryAxis?.scale.range() ?? [0, 0]
-
-      if (primaryAxis?.isVertical) {
-        range.reverse()
-      }
 
       let [primaryStart, primaryEnd] = range
 
       if (prev) {
-        const prevPx =
-          primaryAxis?.scale(primaryAxis.getValue(prev.originalDatum)) ?? NaN
+        const prevPx = getPrimary(prev, primaryAxis)
         primaryStart = primaryPx - (primaryPx - prevPx) / 2
       }
 
       if (next) {
-        const nextPx =
-          primaryAxis?.scale(primaryAxis.getValue(next.originalDatum)) ?? NaN
+        const nextPx = getPrimary(next, primaryAxis)
         primaryEnd = primaryPx + (nextPx - primaryPx) / 2
       }
 
@@ -129,20 +123,21 @@ function PrimaryVoronoi<TDatum>({
           if (secondaryAxis?.stacked) {
             let range = secondaryAxis?.scale.range() ?? [0, 0]
 
+            let stackData = [datum.stackData?.[0], datum.stackData?.[1]]
+
             if (secondaryAxis?.isVertical) {
               range.reverse()
+              stackData.reverse()
             }
 
             let [secondaryStart, secondaryEnd] = range
 
             if (prev) {
-              secondaryStart =
-                secondaryAxis?.scale(datum.stackData?.[1] ?? NaN) ?? NaN
+              secondaryStart = secondaryAxis?.scale(stackData[0] ?? NaN) ?? NaN
             }
 
             if (next) {
-              secondaryEnd =
-                secondaryAxis?.scale(datum.stackData?.[0] ?? NaN) ?? NaN
+              secondaryEnd = secondaryAxis?.scale(stackData[1] ?? NaN) ?? NaN
             }
 
             return {
@@ -237,7 +232,11 @@ function PrimaryVoronoi<TDatum>({
                       className: 'action-voronoi',
                       onMouseEnter: () => handleFocus(datumBoundary.datum),
                       style: {
-                        fill: randomFill(),
+                        fill: getOptions().dark
+                          ? '#ffffff33'
+                          : 'rgba(0,0,0,0.2)',
+                        strokeWidth: 1,
+                        stroke: getOptions().dark ? 'white' : 'black',
                         opacity: getOptions().showVoronoi ? 1 : 0,
                       },
                     }}
@@ -335,37 +334,3 @@ function PrimaryVoronoi<TDatum>({
 //     </g>
 //   )
 // }
-
-function randomFill() {
-  const r = randomHue(100, 200)
-  const g = randomHue(0, r)
-  const b = randomHue(0, g)
-
-  const colors = shuffle([r, g, b])
-
-  return `rgba(${colors.join(', ')}, .5)`
-}
-
-function randomHue(min = 0, max = 255) {
-  return Math.floor(min + Math.random() * Math.min(max, 255 - min))
-}
-
-function shuffle<T>(array: T[]): T[] {
-  var currentIndex = array.length,
-    randomIndex
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex)
-    currentIndex--
-
-    // And swap it with the current element.
-    ;[array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ]
-  }
-
-  return array
-}

@@ -2,7 +2,7 @@ import { area, line } from 'd3-shape'
 import React from 'react'
 
 import { Axis, Series, Datum } from '../types'
-import { translate } from '../utils/Utils'
+import { getX, getY, getYStart, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
@@ -26,21 +26,6 @@ export default function AreaComponent<TDatum>({
   const curve = secondaryAxis.curve ?? monotoneX
 
   const [focusedDatum] = useFocusedDatumAtom()
-
-  const xAxis = primaryAxis.isVertical ? secondaryAxis : primaryAxis
-  const yAxis = !primaryAxis.isVertical ? secondaryAxis : primaryAxis
-
-  const getX = (datum: Datum<TDatum>) =>
-    xAxis.scale(
-      xAxis.stacked ? datum.stackData?.[1] : xAxis.getValue(datum.originalDatum)
-    )
-
-  const getY = (datum: Datum<TDatum>, isEnd: 0 | 1) =>
-    yAxis.scale(
-      yAxis.stacked
-        ? datum.stackData?.[isEnd]
-        : yAxis.getValue(datum.originalDatum)
-    )
 
   return (
     <g
@@ -67,15 +52,15 @@ export default function AreaComponent<TDatum>({
 
         const areaPath =
           area<Datum<TDatum>>(
-            datum => getX(datum) ?? NaN,
-            datum => getY(datum, 0) ?? NaN,
-            datum => getY(datum, 1) ?? NaN
+            datum => getX(datum, primaryAxis, secondaryAxis) ?? NaN,
+            datum => getYStart(datum, primaryAxis, secondaryAxis) ?? NaN,
+            datum => getY(datum, primaryAxis, secondaryAxis) ?? NaN
           ).curve(curve)(series.datums) ?? undefined
 
         const linePath =
           line<Datum<TDatum>>(
-            datum => getX(datum) ?? NaN,
-            datum => getY(datum, 1) ?? NaN
+            datum => getX(datum, primaryAxis, secondaryAxis) ?? NaN,
+            datum => getY(datum, primaryAxis, secondaryAxis) ?? NaN
           ).curve(curve)(series.datums) ?? undefined
 
         return (
@@ -92,8 +77,8 @@ export default function AreaComponent<TDatum>({
                     datum.element = el
                   }}
                   r={2}
-                  cx={getX(datum)}
-                  cy={getY(datum, 1) ?? NaN}
+                  cx={getX(datum, primaryAxis, secondaryAxis)}
+                  cy={getY(datum, primaryAxis, secondaryAxis) ?? NaN}
                   stroke="rgba(33,33,33,0.5)"
                   style={{
                     // @ts-ignore
@@ -102,7 +87,7 @@ export default function AreaComponent<TDatum>({
                     ...style.circle,
                     ...dataStyle,
                     ...dataStyle.circle,
-                    ...(!(secondaryAxis.showDatumElements ?? true)
+                    ...(!(secondaryAxis.showDatumElements ?? false)
                       ? {
                           opacity: 0,
                         }

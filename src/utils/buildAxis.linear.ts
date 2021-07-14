@@ -1,4 +1,4 @@
-import { extent, range as d3Range } from 'd3-array'
+import { extent, max, min, range as d3Range } from 'd3-array'
 import {
   scaleLinear,
   scaleLog,
@@ -129,9 +129,31 @@ function buildTimeAxis<TDatum>(
 
   const allDatums = series.map(d => d.datums).flat()
 
-  const [minValue, maxValue] = extent(allDatums, datum =>
+  let [minValue, maxValue] = extent(allDatums, datum =>
     options.getValue(datum.originalDatum)
   )
+
+  let shouldNice = true
+
+  if (typeof options.min === 'number') {
+    minValue = min([options.min, minValue as Date])
+    shouldNice = false
+  }
+
+  if (typeof options.max === 'number') {
+    maxValue = max([options.max, maxValue as Date])
+    shouldNice = false
+  }
+
+  if (typeof options.hardMin === 'number') {
+    minValue = options.hardMin
+    shouldNice = false
+  }
+
+  if (typeof options.hardMax === 'number') {
+    maxValue = options.hardMax
+    shouldNice = false
+  }
 
   if (minValue === undefined || maxValue === undefined) {
     console.info({
@@ -144,25 +166,22 @@ function buildTimeAxis<TDatum>(
   }
 
   // Set the domain
-  scale.domain([minValue, maxValue])
-
-  if (typeof options.hardMin === 'number') {
-    scale.domain([options.hardMin, Number(scale.domain()[1])])
-  }
-  if (typeof options.hardMax === 'number') {
-    scale.domain([Number(scale.domain()[0]), options.hardMax])
-  }
+  scale.domain([minValue as Date, maxValue as Date])
 
   if (options.invert) {
     scale.domain(Array.from(scale.domain()).reverse())
   }
 
-  scale.nice()
+  if (shouldNice) {
+    scale.nice()
+  }
 
   const outerScale = scale.copy().range(outerRange)
 
   // Supplmentary band scale
-  const bandScale = buildImpliedBandScale(options, scale, series, range)
+  const bandScale = options.isPrimary
+    ? buildImpliedBandScale(options, scale, series, range)
+    : undefined
 
   const defaultFormat = scale.tickFormat()
 
@@ -212,13 +231,35 @@ function buildLinearAxis<TDatum>(
 
   const allDatums = series.map(d => d.datums).flat(2)
 
-  const [minValue, maxValue] = options.stacked
+  let [minValue, maxValue] = options.stacked
     ? extent(
-        (series
+        series
           .map(s => s.datums.map(datum => datum.stackData ?? []))
-          .flat(2) as unknown) as number[]
+          .flat(2) as unknown as number[]
       )
     : extent(allDatums, datum => options.getValue(datum.originalDatum))
+
+  let shouldNice = true
+
+  if (typeof options.min === 'number') {
+    minValue = min([options.min, minValue as number])
+    shouldNice = false
+  }
+
+  if (typeof options.max === 'number') {
+    maxValue = max([options.max, maxValue as number])
+    shouldNice = false
+  }
+
+  if (typeof options.hardMin === 'number') {
+    minValue = options.hardMin
+    shouldNice = false
+  }
+
+  if (typeof options.hardMax === 'number') {
+    maxValue = options.hardMax
+    shouldNice = false
+  }
 
   if (minValue === undefined || maxValue === undefined) {
     console.info({
@@ -233,24 +274,21 @@ function buildLinearAxis<TDatum>(
   // Set the domain
   scale.domain([minValue, maxValue])
 
-  if (typeof options.hardMin === 'number') {
-    scale.domain([options.hardMin, Number(scale.domain()[1])])
-  }
-  if (typeof options.hardMax === 'number') {
-    scale.domain([Number(scale.domain()[0]), options.hardMax])
-  }
-
   if (options.invert) {
     scale.domain(Array.from(scale.domain()).reverse())
   }
 
   scale.range(range)
 
-  scale.nice()
+  if (shouldNice) {
+    scale.nice()
+  }
 
   const outerScale = scale.copy().range(outerRange)
 
-  const bandScale = buildImpliedBandScale(options, scale, series, range)
+  const bandScale = options.isPrimary
+    ? buildImpliedBandScale(options, scale, series, range)
+    : undefined
 
   const defaultFormat = scale.tickFormat()
 

@@ -3,11 +3,10 @@ import useDemoConfig from "../useDemoConfig";
 import React from "react";
 import { AxisOptions, Chart } from "react-charts";
 
-export default function Bubble() {
+export default function Bar() {
   const { data, randomizeData } = useDemoConfig({
     series: 10,
-    dataType: "linear",
-    useR: true,
+    dataType: "ordinal",
   });
 
   const primaryAxis = React.useMemo<
@@ -15,9 +14,9 @@ export default function Bubble() {
   >(
     () => ({
       isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
-      getValue: (datum) => datum.primary as unknown as Date,
+      scaleType: "band",
+      position: "left",
+      getValue: (datum) => datum.primary,
     }),
     []
   );
@@ -28,9 +27,10 @@ export default function Bubble() {
     () => [
       {
         scaleType: "linear",
-        position: "left",
+        position: "bottom",
         getValue: (datum) => datum.secondary,
-        elementType: "line",
+        elementType: "bar",
+        stacked: true,
       },
     ],
     []
@@ -47,12 +47,6 @@ export default function Bubble() {
             data,
             primaryAxis,
             secondaryAxes,
-            groupingMode: "single",
-            getSeriesStyle: () => ({ line: { opacity: 0 } }),
-            getDatumStyle: (datum) =>
-              ({
-                circle: { r: datum.originalDatum.radius },
-              } as any),
             tooltip: true,
           }}
         />

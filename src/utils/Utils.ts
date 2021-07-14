@@ -91,21 +91,34 @@ export function translate(x: number, y: number) {
   return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
 }
 
-export function getSecondaries<TDatum>(
+export function getSecondaryStart<TDatum>(
   datum: Datum<TDatum>,
   secondaryAxis: Axis<TDatum>
-): [number, number] {
+): number {
   if (secondaryAxis.stacked) {
-    return [
-      secondaryAxis.scale(datum.stackData?.[0] ?? NaN) ?? NaN,
-      secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN,
-    ]
+    return (
+      secondaryAxis.scale(
+        datum.stackData?.[!secondaryAxis.isVertical ? 0 : 1] ?? NaN
+      ) ?? NaN
+    )
   }
 
-  return [
-    secondaryAxis.scale(0) ?? NaN,
-    secondaryAxis.scale(secondaryAxis.getValue(datum.originalDatum)) ?? NaN,
-  ]
+  return secondaryAxis.scale(0) ?? NaN
+}
+
+export function getSecondary<TDatum>(
+  datum: Datum<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  if (secondaryAxis.stacked) {
+    return (
+      secondaryAxis.scale(
+        datum.stackData?.[!secondaryAxis.isVertical ? 1 : 0] ?? NaN
+      ) ?? NaN
+    )
+  }
+
+  return secondaryAxis.scale(secondaryAxis.getValue(datum.originalDatum)) ?? NaN
 }
 
 export function getPrimary<TDatum>(
@@ -123,11 +136,20 @@ export function getPrimary<TDatum>(
       primaryAxis.scale(primaryAxis.getValue(datum.originalDatum)) ?? NaN
   }
 
-  if (primaryAxis.axisFamily !== 'band') {
-    primary = primary - getPrimaryLength(datum, primaryAxis) / 2
+  if (primaryAxis.axisFamily === 'band') {
+    primary = primary + getPrimaryLength(datum, primaryAxis) / 2
   }
 
   return primary
+}
+
+export function getPrimaryStart<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>
+): number {
+  return (
+    getPrimary(datum, primaryAxis) - getPrimaryLength(datum, primaryAxis) / 2
+  )
 }
 
 export function getPrimaryLength<TDatum>(
@@ -141,14 +163,17 @@ export function getPrimaryLength<TDatum>(
     )
   }
 
-  return Math.max(primaryAxis.bandScale.bandwidth(), 1)
+  return Math.max(primaryAxis.bandScale!.bandwidth(), 1)
 }
 
 export function getSecondaryLength<TDatum>(
   datum: Datum<TDatum>,
   secondaryAxis: Axis<TDatum>
 ): number {
-  const secondary = getSecondaries(datum, secondaryAxis).sort()
+  const secondary = [
+    getSecondaryStart(datum, secondaryAxis),
+    getSecondary(datum, secondaryAxis),
+  ]
   return Math.abs(secondary[1] - secondary[0])
 }
 
@@ -158,8 +183,18 @@ export function getX<TDatum>(
   secondaryAxis: Axis<TDatum>
 ): number {
   return primaryAxis.isVertical
-    ? getSecondaries(datum, secondaryAxis)[secondaryAxis.invert ? 1 : 0]
+    ? getSecondary(datum, secondaryAxis)
     : getPrimary(datum, primaryAxis)
+}
+
+export function getXStart<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getSecondaryStart(datum, secondaryAxis)
+    : getPrimaryStart(datum, primaryAxis)
 }
 
 export function getY<TDatum>(
@@ -169,8 +204,17 @@ export function getY<TDatum>(
 ): number {
   return primaryAxis.isVertical
     ? getPrimary(datum, primaryAxis)
-    : getSecondaries(datum, secondaryAxis)[secondaryAxis.invert ? 1 : 0] -
-        getSecondaryLength(datum, secondaryAxis)
+    : getSecondary(datum, secondaryAxis)
+}
+
+export function getYStart<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getPrimaryStart(datum, primaryAxis)
+    : getSecondaryStart(datum, secondaryAxis)
 }
 
 export function getWidth<TDatum>(

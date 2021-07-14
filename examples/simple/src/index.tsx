@@ -9,6 +9,7 @@ import GroupingModes from "./components/GroupingModes";
 import Line from "./components/Line";
 import MultipleAxes from "./components/MultipleAxes";
 import Steam from "./components/Steam";
+import BarHorizontal from "./components/BarHorizontal";
 import "./styles.css";
 import useLagRadar from "./useLagRadar";
 import React from "react";
@@ -17,6 +18,7 @@ import ReactDOM from "react-dom";
 const components = [
   ["Line", Line],
   ["Bar", Bar],
+  ["Bar (Horizontal)", BarHorizontal],
   ["Band", Band],
   ["Area", Area],
   ["Bubble", Bubble],

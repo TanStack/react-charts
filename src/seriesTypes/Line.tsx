@@ -2,7 +2,7 @@ import { line } from 'd3-shape'
 import React from 'react'
 
 import { Axis, Series, Datum } from '../types'
-import { translate } from '../utils/Utils'
+import { getX, getY, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
@@ -31,19 +31,6 @@ export default function Line<TDatum>({
 
   const [focusedDatum] = useFocusedDatumAtom()
 
-  const xAxis = primaryAxis.isVertical ? secondaryAxis : primaryAxis
-  const yAxis = !primaryAxis.isVertical ? secondaryAxis : primaryAxis
-
-  const getX = (datum: Datum<TDatum>) =>
-    xAxis.scale(
-      xAxis.stacked ? datum.stackData?.[1] : xAxis.getValue(datum.originalDatum)
-    )
-
-  const getY = (datum: Datum<TDatum>) =>
-    yAxis.scale(
-      yAxis.stacked ? datum.stackData?.[1] : yAxis.getValue(datum.originalDatum)
-    )
-
   return (
     <g
       style={{
@@ -62,8 +49,8 @@ export default function Line<TDatum>({
 
         const linePath =
           line<Datum<TDatum>>(
-            datum => getX(datum) ?? NaN,
-            datum => getY(datum) ?? NaN
+            datum => getX(datum, primaryAxis, secondaryAxis) ?? NaN,
+            datum => getY(datum, primaryAxis, secondaryAxis) ?? NaN
           ).curve(curve)(series.datums) ?? undefined
 
         return (
@@ -78,8 +65,8 @@ export default function Line<TDatum>({
                     datum.element = el
                   }}
                   r={2}
-                  cx={getX(datum)}
-                  cy={getY(datum)}
+                  cx={getX(datum, primaryAxis, secondaryAxis)}
+                  cy={getY(datum, primaryAxis, secondaryAxis)}
                   stroke="rgba(33,33,33,0.5)"
                   fill="transparent"
                   style={{

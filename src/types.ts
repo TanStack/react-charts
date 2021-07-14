@@ -253,11 +253,10 @@ export type AxisOptionsBase = {
 export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
   scaleType: 'time' | 'localTime'
   getValue: (datum: TDatum) => ChartValue<Date>
-  min?: number
-  max?: number
-  hardMin?: number
-  hardMax?: number
-  base?: number
+  min?: Date
+  max?: Date
+  hardMin?: Date
+  hardMax?: Date
   formatters?: {
     scale?: (
       value: Date,
@@ -281,7 +280,7 @@ export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
   max?: number
   hardMin?: number
   hardMax?: number
-  base?: number
+  // base?: number
   formatters?: {
     scale?: (
       value: number,
@@ -373,7 +372,7 @@ export type AxisTime<TDatum> = Omit<
   axisFamily: 'time'
   scale: ScaleTime<number, number, never>
   outerScale: ScaleTime<number, number, never>
-  bandScale: ScaleBand<number>
+  bandScale?: ScaleBand<number>
   formatters: {
     default: (value: Date) => string
     scale: (value: Date) => string
@@ -389,7 +388,7 @@ export type AxisLinear<TDatum> = Omit<
   axisFamily: 'linear'
   scale: ScaleLinear<number, number, never>
   outerScale: ScaleLinear<number, number, never>
-  bandScale: ScaleBand<number>
+  bandScale?: ScaleBand<number>
   formatters: {
     default: (value: ChartValue<any>) => string
     scale: (value: number) => string
@@ -457,6 +456,7 @@ export type StackDatum<TDatum> = {
   0: number
   1: number
   data: Datum<TDatum>
+  length: number
 }
 
 //

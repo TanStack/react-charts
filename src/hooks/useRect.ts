@@ -29,11 +29,8 @@ export default function useRect(
     }
   })
 
-  const initialRectSet = React.useRef(false)
-
   useIsomorphicLayoutEffect(() => {
-    if (enabled && element && !initialRectSet.current) {
-      initialRectSet.current = true
+    if (enabled && element) {
       setRect(element.getBoundingClientRect())
     }
   }, [element, enabled])
