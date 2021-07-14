@@ -20,7 +20,7 @@ export const Footer = props => {
                     </Link>
                   </li>
                   <li className="mt-4">
-                    <Link href="/examples/line">
+                    <Link href="/examples/simple">
                       <a className="text-base leading-6 text-gray-500 hover:text-gray-900">
                         Examples
                       </a>
