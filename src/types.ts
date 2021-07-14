@@ -63,6 +63,9 @@ export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
   | 'initialHeight'
   | 'useIntersectionObserver'
   | 'intersectionObserverThreshold'
+  | 'tooltip'
+  | 'primaryCursor'
+  | 'secondaryCursor'
 >
 
 export type ChartContextValue<TDatum> = {

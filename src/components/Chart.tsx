@@ -75,6 +75,9 @@ function defaultChartOptions<TDatum>(
     useIntersectionObserver: options.useIntersectionObserver ?? true,
     intersectionObserverRootMargin:
       options.intersectionObserverRootMargin ?? '1000px',
+    tooltip: options.tooltip ?? true,
+    primaryCursor: options.primaryCursor ?? true,
+    secondaryCursor: options.secondaryCursor ?? true,
   }
 }
 
