@@ -99,8 +99,7 @@ const Home = props => {
                       users, and not about building <em>new</em> and
                       <em>"exciting"</em> methods of indirection or{' '}
                       <em>"art"</em> for them to ponder and decipher. To that
-                      end, React Charts only supports x/y (cartesional) chart
-                      layouts and{' '}
+                      end, React Charts only supports X/Y chart layouts and{' '}
                       <a
                         href="https://www.businessinsider.com/pie-charts-are-the-worst-2013-6"
                         target="_blank"
