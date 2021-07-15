@@ -34,11 +34,6 @@
           "title": "Simple",
           "path": "/examples/simple",
           "editUrl": "/examples/simple.md"
-        },
-        {
-          "title": "Stress Test",
-          "path": "/examples/stress-test",
-          "editUrl": "/examples/stress-test.md"
         }
       ]
     }
