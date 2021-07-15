@@ -124,7 +124,6 @@
   "dependencies": {
     "@babel/runtime": "^7.14.6",
     "@reach/observe-rect": "^1.2.0",
-    "@react-spring/web": "^9.2.3",
     "@types/d3-array": "^3.0.1",
     "@types/d3-scale": "^4.0.1",
     "@types/d3-shape": "^3.0.1",

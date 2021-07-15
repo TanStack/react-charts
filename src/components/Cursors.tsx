@@ -2,8 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import * as TSTB from 'ts-toolbelt'
 
-import { animated, config, useSpring } from '@react-spring/web'
-
 import usePrevious from '../hooks/usePrevious'
 import useLatestWhen from '../hooks/useLatestWhen'
 import usePortalElement from '../hooks/usePortalElement'
@@ -12,6 +10,7 @@ import { translate } from '../utils/Utils'
 //
 import useChartContext from '../utils/chartContext'
 import useRect from '../hooks/useRect'
+import { useSpring } from '../hooks/useSpring'
 
 type ResolvedCursorOptions = TSTB.Object.Required<
   CursorOptions,
@@ -204,19 +203,52 @@ function Cursor<TDatum>(props: {
   const immediatePos = !axis.isVertical ? lineStartX : lineStartY
   const immediate = usePrevious(immediatePos) === -1 && immediatePos > -1
 
-  const lineSpring = useSpring({
-    transform: translate(lineStartX, lineStartY),
-    width: `${lineWidth}px`,
-    height: `${lineHeight}px`,
-    config: config.stiff,
-    immediate: key => (key === 'transform' ? immediate : false),
-  })
+  const lineRef = React.useRef<HTMLDivElement | null>(null)
+  const bubbleRef = React.useRef<HTMLDivElement | null>(null)
 
-  const bubbleSpring = useSpring({
-    transform: translate(bubbleX, bubbleY),
-    config: config.stiff,
-    immediate: key => (key === 'transform' ? immediate : false),
-  })
+  const lineXSpring = useSpring(
+    lineStartX,
+    [1, 210, 20],
+    () => {
+      if (lineRef.current) {
+        lineRef.current.style.transform = `translate(${lineXSpring.x()}px, ${lineYSpring.x()}px)`
+      }
+    },
+    immediate
+  )
+
+  const lineYSpring = useSpring(
+    lineStartY,
+    [1, 210, 20],
+    () => {
+      if (lineRef.current) {
+        lineRef.current.style.transform = `translate(${lineXSpring.x()}px, ${lineYSpring.x()}px)`
+      }
+    },
+    immediate
+  )
+
+  const bubbleXSpring = useSpring(
+    bubbleX,
+    [1, 210, 20],
+    () => {
+      if (bubbleRef.current) {
+        bubbleRef.current.style.transform = `translate(${bubbleXSpring.x()}px, ${bubbleYSpring.x()}px)`
+      }
+    },
+    immediate
+  )
+
+  const bubbleYSpring = useSpring(
+    bubbleY,
+    [1, 210, 20],
+    () => {
+      if (bubbleRef.current) {
+        bubbleRef.current.style.transform = `translate(${bubbleXSpring.x()}px, ${bubbleYSpring.x()}px)`
+      }
+    },
+    immediate
+  )
 
   const portalEl = usePortalElement()
 
@@ -240,9 +272,11 @@ function Cursor<TDatum>(props: {
         >
           {/* Render the cursor line */}
           {props.options.showLine ? (
-            <animated.div
+            <div
+              ref={lineRef}
               style={{
-                ...lineSpring,
+                width: `${lineWidth}px`,
+                height: `${lineHeight}px`,
                 position: 'absolute',
                 top: 0,
                 left: 0,
@@ -252,9 +286,9 @@ function Cursor<TDatum>(props: {
           ) : null}
           {/* Render the cursor bubble */}
           {props.options.showLabel ? (
-            <animated.div
+            <div
+              ref={bubbleRef}
               style={{
-                ...bubbleSpring,
                 position: 'absolute',
                 top: 0,
                 left: 0,
@@ -275,7 +309,7 @@ function Cursor<TDatum>(props: {
               >
                 {formattedValue}
               </div>
-            </animated.div>
+            </div>
           ) : null}
         </div>,
         portalEl

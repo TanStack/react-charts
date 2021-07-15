@@ -66,6 +66,7 @@ export default inputSrcs
           visualizer({
             filename: 'stats-react.json',
             json: true,
+            gzipSize: true,
           }),
         ],
       },

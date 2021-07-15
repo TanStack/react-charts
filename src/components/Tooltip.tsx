@@ -1,8 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import { useSpring, animated } from '@react-spring/web'
-
 import { useAnchor } from '../hooks/useAnchor'
 import useLatestWhen from '../hooks/useLatestWhen'
 import usePortalElement from '../hooks/usePortalElement'
@@ -12,6 +10,7 @@ import { Datum, ResolvedTooltipOptions, TooltipOptions } from '../types'
 import useChartContext from '../utils/chartContext'
 import TooltipRenderer from './TooltipRenderer'
 import useRect from '../hooks/useRect'
+import { useSpring } from '../hooks/useSpring'
 
 //
 
@@ -120,20 +119,45 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
 
   const { visibility, ...anchorStyle } = latestStableAnchor.style
 
-  const springProps = useSpring({
-    ...anchorStyle,
-    left: anchorStyle.left || 0,
-    top: anchorStyle.top || 0,
-    opacity: !!focusedDatum ? 1 : 0,
-    config: { mass: 1, tension: 210, friction: 30 },
-    immediate: key => {
-      if (['left', 'top'].includes(key)) {
-        return Number.isNaN(previousAnchor?.style.left)
-      }
+  const tooltipRef = React.useRef<HTMLDivElement | null>(null)
 
-      return false
+  const immediate = Number.isNaN(previousAnchor?.style.left)
+
+  const tooltipXSpring = useSpring(
+    anchorStyle.left || 0,
+    [1, 210, 30],
+    () => {
+      if (tooltipRef.current) {
+        tooltipRef.current.style.transform = `translate(${tooltipXSpring.x()}px, ${tooltipYSpring.x()}px)`
+      }
     },
-  })
+    immediate
+  )
+
+  const tooltipYSpring = useSpring(
+    anchorStyle.top || 0,
+    [1, 210, 30],
+    () => {
+      if (tooltipRef.current) {
+        tooltipRef.current.style.transform = `translate(${tooltipXSpring.x()}px, ${tooltipYSpring.x()}px)`
+      }
+    },
+    immediate
+  )
+
+  // const springProps = useSpring({
+  //   ...anchorStyle,
+  //   left: anchorStyle.left || 0,
+  //   top: anchorStyle.top || 0,
+  //   config: { mass: 1, tension: 210, friction: 30 },
+  //   immediate: key => {
+  //     if (['left', 'top'].includes(key)) {
+  //       return Number.isNaN(previousAnchor?.style.left)
+  //     }
+
+  //     return false
+  //   },
+  // })
 
   const show = !!preTooltipOptions
 
@@ -141,7 +165,14 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
 
   return show && portalEl
     ? ReactDOM.createPortal(
-        <animated.div style={springProps}>
+        <div
+          ref={tooltipRef}
+          style={{
+            position: anchorStyle.position,
+            opacity: !!focusedDatum ? 1 : 0,
+            transition: 'opacity .3s ease',
+          }}
+        >
           <div
             ref={el => setTooltipEl(el)}
             style={{
@@ -165,7 +196,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
               anchor,
             })}
           </div>
-        </animated.div>,
+        </div>,
         portalEl
       )
     : null
