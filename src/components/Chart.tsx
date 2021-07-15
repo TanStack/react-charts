@@ -1,6 +1,5 @@
 import { groups, sort } from 'd3-array'
 import { stack, stackOffsetNone } from 'd3-shape'
-import { atom, useAtom } from 'jotai'
 import React, { ComponentPropsWithoutRef } from 'react'
 
 import useGetLatest from '../hooks/useGetLatest'
@@ -229,35 +228,19 @@ function ChartInner<TDatum>({
   const svgRef = React.useRef<SVGSVGElement>(null)
   const getOptions = useGetLatest(options)
 
-  const axisDimensionsAtom = React.useMemo(
-    () =>
-      atom<AxisDimensions>({
-        left: {},
-        right: {},
-        top: {},
-        bottom: {},
-      }),
-    []
-  )
+  const axisDimensionsState = React.useState<AxisDimensions>({
+    left: {},
+    right: {},
+    top: {},
+    bottom: {},
+  })
 
-  const focusedDatumAtom = React.useMemo(
-    () => atom<Datum<TDatum> | null>(null),
-    []
-  )
+  const [axisDimensions] = axisDimensionsState
 
-  const useAxisDimensionsAtom = React.useCallback(() => {
-    // eslint-disable-next-line
-    return useAtom(axisDimensionsAtom)
-  }, [axisDimensionsAtom])
-  const useFocusedDatumAtom = React.useCallback(() => {
-    // eslint-disable-next-line
-    return useAtom(focusedDatumAtom)
-  }, [focusedDatumAtom])
+  const focusedDatumState = React.useState<Datum<TDatum> | null>(null)
+  const [focusedDatum] = focusedDatumState
 
   // useAtom<Datum<TDatum> | null>(focusedDatumAtom)
-
-  const [axisDimensions] = useAxisDimensionsAtom()
-  const [focusedDatum] = useFocusedDatumAtom()
 
   const gridDimensions = React.useMemo((): GridDimensions => {
     // Left
@@ -593,8 +576,8 @@ function ChartInner<TDatum>({
     height,
     getSeriesStatusStyle,
     getDatumStatusStyle,
-    useAxisDimensionsAtom,
-    useFocusedDatumAtom,
+    axisDimensionsState,
+    focusedDatumState,
     svgRef,
   }
 

@@ -30,9 +30,9 @@ export default function useMeasure<TDatum>({
   showRotated: boolean
   setShowRotated: (value: boolean) => void
 }) {
-  const { useAxisDimensionsAtom } = useChartContext<TDatum>()
+  const { axisDimensionsState } = useChartContext<TDatum>()
 
-  const [axisDimensions, setAxisDimensions] = useAxisDimensionsAtom()
+  const [axisDimensions, setAxisDimensions] = axisDimensionsState
 
   const axisDimension = React.useMemo(() => {
     return axisDimensions[axis.position as Position]?.[axis.id!]

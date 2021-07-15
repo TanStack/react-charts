@@ -26,13 +26,13 @@ export default function AreaComponent<TDatum>({
   const {
     getSeriesStatusStyle,
     getDatumStatusStyle,
-    useFocusedDatumAtom,
+    focusedDatumState,
     gridDimensions,
   } = useChartContext<TDatum>()
 
   const curve = secondaryAxis.curve ?? monotoneX
 
-  const [focusedDatum] = useFocusedDatumAtom()
+  const [focusedDatum] = focusedDatumState
 
   return (
     <g

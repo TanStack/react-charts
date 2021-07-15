@@ -39,7 +39,7 @@ function defaultTooltip<TDatum>(
 
 export default function Tooltip<TDatum>(): React.ReactPortal | null {
   const {
-    useFocusedDatumAtom,
+    focusedDatumState,
     getOptions,
     primaryAxis,
     secondaryAxes,
@@ -47,7 +47,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     svgRef,
   } = useChartContext<TDatum>()
 
-  const [focusedDatum] = useFocusedDatumAtom()
+  const [focusedDatum] = focusedDatumState
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
   const preTooltipOptions = getOptions().tooltip ?? true

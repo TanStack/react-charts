@@ -6,9 +6,9 @@ import { getPrimary, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 
 export default function Voronoi<TDatum>() {
-  const { getOptions, useFocusedDatumAtom } = useChartContext<TDatum>()
+  const { getOptions, focusedDatumState } = useChartContext<TDatum>()
 
-  const [, setFocusedDatum] = useFocusedDatumAtom()
+  const [, setFocusedDatum] = focusedDatumState
 
   const {
     onFocusDatum,

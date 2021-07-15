@@ -1,11 +1,9 @@
 import { ScaleBand, ScaleLinear, ScaleTime } from 'd3-scale'
 import { CurveFactory, stackOffsetNone } from 'd3-shape'
-import { SetStateAction } from 'jotai'
 import React, { CSSProperties, RefObject } from 'react'
 import * as TSTB from 'ts-toolbelt'
 
 import { TooltipRendererProps } from './components/TooltipRenderer'
-import { SetAtom } from 'jotai/core/atom'
 
 export type ChartOptions<TDatum> = {
   data: UserSerie<TDatum>[]
@@ -88,13 +86,13 @@ export type ChartContextValue<TDatum> = {
     datum: Datum<TDatum>,
     focusedDatum: Datum<TDatum> | null
   ) => DatumStyles
-  useAxisDimensionsAtom: () => [
+  axisDimensionsState: [
     AxisDimensions,
-    SetAtom<SetStateAction<AxisDimensions>>
+    React.Dispatch<React.SetStateAction<AxisDimensions>>
   ]
-  useFocusedDatumAtom: () => [
+  focusedDatumState: [
     Datum<TDatum> | null,
-    SetAtom<SetStateAction<Datum<TDatum> | null>>
+    React.Dispatch<React.SetStateAction<Datum<TDatum> | null>>
   ]
 }
 
@@ -228,12 +226,6 @@ export type AxisOptionsBase = {
   curve?: CurveFactory
   invert?: boolean
   position: Position
-  // tickCount?: number
-  // minTickCount?: number
-  // maxTickCount?: number
-  // tickValues?: unknown[]
-  // tickSizeInner?: number
-  // tickSizeOuter?: number
   minTickPaddingForRotation?: number
   tickLabelRotationDeg?: number
   innerBandPadding?: number
@@ -242,8 +234,6 @@ export type AxisOptionsBase = {
   maxBandSize?: number
   minDomainLength?: number
   showGrid?: boolean
-  // showTicks?: boolean
-  // filterTicks?: <T extends string>(ticks: T[]) => T[]
   show?: boolean
   stacked?: boolean
   stackOffset?: typeof stackOffsetNone
@@ -328,17 +318,10 @@ export type AxisOptions<TDatum> =
 
 export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
   TAxisOptions & {},
-  // | 'tickCount'
-  // | 'minTickCount'
-  // | 'maxTickCount'
-  // | 'tickSizeInner'
-  // | 'tickSizeOuter'
   | 'minTickPaddingForRotation'
   | 'tickLabelRotationDeg'
   | 'innerBandPadding'
   | 'outerBandPadding'
-  // | 'showTicks'
-  // | 'filterTicks'
   | 'show'
   | 'stacked'
 >
@@ -349,24 +332,6 @@ export type AxisBase<TDatum> = {
   _?: TDatum
   isVertical: boolean
   range: [number, number]
-  // isPrimary?: boolean
-  // primaryAxisId?: string
-  // isTimeType: boolean
-  // uniquePrimariesSet: Set<unknown>
-  // barSize: number
-  // cursorSize: number
-  // stepSize: number
-  // seriesBandScale?: ScaleBand<string>
-  // seriesBarSize: number
-  // domain: [unknown, unknown] | unknown[]
-  // directionMultiplier: -1 | 1
-  // transform: typeof translateX | typeof translateY
-  // ticks: unknown[]
-  // format: (value: unknown, index: number) => string
-  // tickSpacing: number
-  // tickOffset: number
-  // barOffset: number
-  // gridOffset: number
 }
 
 export type AxisTime<TDatum> = Omit<

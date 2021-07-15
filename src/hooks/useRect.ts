@@ -1,6 +1,5 @@
 import observeRect from '@reach/observe-rect'
 import React from 'react'
-// import observeRect from '../utils/observe-rect'
 
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
 

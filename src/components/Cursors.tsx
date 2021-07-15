@@ -80,12 +80,12 @@ function Cursor<TDatum>(props: {
     getOptions,
     svgRef,
     gridDimensions,
-    useFocusedDatumAtom,
+    focusedDatumState,
     primaryAxis,
     secondaryAxes,
   } = useChartContext<TDatum>()
 
-  const [focusedDatum] = useFocusedDatumAtom()
+  const [focusedDatum] = focusedDatumState
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
   const secondaryAxis = secondaryAxes.find(

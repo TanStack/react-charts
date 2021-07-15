@@ -24,11 +24,11 @@ export default function BarComponent<TDatum>({
   const {
     getSeriesStatusStyle,
     getDatumStatusStyle,
-    useFocusedDatumAtom,
+    focusedDatumState,
     gridDimensions,
   } = useChartContext<TDatum>()
 
-  const [focusedDatum] = useFocusedDatumAtom()
+  const [focusedDatum] = focusedDatumState
 
   return (
     <g
