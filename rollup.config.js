@@ -67,6 +67,7 @@ export default inputSrcs
             filename: 'stats-react.json',
             json: true,
             gzipSize: true,
+            brotliSize: true,
           }),
         ],
       },
