@@ -11,6 +11,7 @@ import { translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 import useRect from '../hooks/useRect'
 import { useSpring } from '../hooks/useSpring'
+import useGetLatest from '../hooks/useGetLatest'
 
 type ResolvedCursorOptions = TSTB.Object.Required<
   CursorOptions,
@@ -85,6 +86,8 @@ function Cursor<TDatum>(props: {
     secondaryAxes,
   } = useChartContext<TDatum>()
 
+  const getTooltipOptions = useGetLatest(props.options)
+
   const [focusedDatum] = focusedDatumState
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
@@ -97,15 +100,20 @@ function Cursor<TDatum>(props: {
   const siblingAxis = props.primary ? secondaryAxis : primaryAxis
 
   const resolveValue = (d: Datum<TDatum> | null) =>
-    props.options.value ??
-    (d
+    d
       ? axis.stacked
         ? d.stackData?.[1]
         : axis.getValue(d?.originalDatum)
-      : undefined)
+      : undefined
 
-  const value = resolveValue(focusedDatum)
-  const latestValue = resolveValue(latestFocusedDatum)
+  const preValue = resolveValue(focusedDatum)
+
+  React.useEffect(() => {
+    getTooltipOptions()?.onChange?.(preValue)
+  }, [getTooltipOptions, preValue])
+
+  const value = props.options.value ?? preValue
+  const latestValue = props.options.value ?? resolveValue(latestFocusedDatum)
 
   // Get the sibling range
   const siblingRange = siblingAxis.scale.range()

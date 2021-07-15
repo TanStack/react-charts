@@ -64,8 +64,6 @@ function defaultChartOptions<TDatum>(
     ...options,
     initialWidth: options.initialWidth ?? 300,
     initialHeight: options.initialHeight ?? 200,
-    getSeriesStyle: options.getSeriesStyle ?? (() => ({})),
-    getDatumStyle: options.getDatumStyle ?? (() => ({})),
     getSeriesOrder:
       options.getSeriesOrder ?? ((series: Series<TDatum>[]) => series),
     groupingMode: options.groupingMode ?? 'primary',
@@ -433,7 +431,7 @@ function ChartInner<TDatum>({
       }
 
       const status = getSeriesStatus(series, focusedDatum)
-      const statusStyles = getOptions().getSeriesStyle(series, status)
+      const statusStyles = getOptions().getSeriesStyle?.(series, status) ?? {}
       series.style = materializeStyles(statusStyles, base)
       return series.style
     },
@@ -451,10 +449,8 @@ function ChartInner<TDatum>({
       }
 
       const status = getDatumStatus(datum as Datum<TDatum>, focusedDatum)
-      const statusStyles = getOptions().getDatumStyle(
-        datum as Datum<TDatum>,
-        status
-      )
+      const statusStyles =
+        getOptions().getDatumStyle?.(datum as Datum<TDatum>, status) ?? {}
 
       datum.style = materializeStyles(statusStyles, base)
 
@@ -463,95 +459,12 @@ function ChartInner<TDatum>({
     [getOptions, series]
   )
 
-  // const mouseMoveRafRef = React.useRef<number | null>()
-
-  // const onMouseMove = (
-  //   e: React.MouseEvent<SVGSVGElement, MouseEvent> | MouseEvent
-  // ) => {
-  //   if (mouseMoveRafRef.current) {
-  //     Raf.cancel(mouseMoveRafRef.current)
-  //   }
-
-  //   mouseMoveRafRef.current = Raf(() => {
-  //     mouseMoveRafRef.current = null
-  //     const { clientX, clientY } = e
-
-  //     setPointer(old => {
-  //       const x = clientX - svgRect.left - gridDimensions.gridX
-  //       const y = clientY - svgRect.top - gridDimensions.gridY
-
-  //       return {
-  //         ...old,
-  //         svgHovered: true,
-  //         x,
-  //         y,
-  //       }
-  //     })
-  //   })
-  // }
-
-  // const onMouseUp = () => {
-  //   document.removeEventListener('mouseup', onMouseUp)
-  //   document.removeEventListener('mousemove', onMouseMove)
-
-  //   // if (options.brush?.onSelect && pointer.dragging) {
-  //   //   if (Math.abs(pointer.startX - pointer.x) >= 20) {
-  //   //     options.brush.onSelect({
-  //   //       pointer,
-  //   //       start: (axesInfo.primaryAxes[0].scale as ScaleLinear<
-  //   //         number,
-  //   //         number
-  //   //       >).invert(pointer.startX),
-  //   //       end: (axesInfo.primaryAxes[0].scale as ScaleLinear<
-  //   //         number,
-  //   //         number
-  //   //       >).invert(pointer.x),
-  //   //     })
-  //   //   }
-  //   // }
-
-  //   setPointer(
-  //     (old): Pointer => {
-  //       return {
-  //         ...old,
-  //         dragging: false,
-  //       }
-  //     }
-  //   )
-  // }
-
-  // const onMouseDown = () => {
-  //   document.addEventListener('mouseup', onMouseUp)
-  //   document.addEventListener('mousemove', onMouseMove)
-
-  //   setPointer(
-  //     (old): Pointer => {
-  //       return {
-  //         ...old,
-  //         startX: old.x,
-  //         startY: old.y,
-  //         dragging: true,
-  //       }
-  //     }
-  //   )
-  // }
-
   // Reverse the stack order for proper z-indexing
-  const reversedSeries = [...series].reverse()
-  let orderedSeries = options.getSeriesOrder(reversedSeries)
+  let orderedSeries = React.useMemo(() => {
+    const reversedSeries = [...series].reverse()
 
-  // const focusedSeriesIndex = focusedDatum
-  //   ? orderedSeries.findIndex(series => series.id === focusedDatum.seriesId)
-  //   : -1
-
-  // Bring focused series to the front
-  // orderedSeries = focusedDatum
-  //   ? [
-  //       ...orderedSeries.slice(0, focusedSeriesIndex),
-  //       ...orderedSeries.slice(focusedSeriesIndex + 1),
-  //       orderedSeries[focusedSeriesIndex],
-  //     ]
-  //   : orderedSeries
+    return getOptions().getSeriesOrder(reversedSeries)
+  }, [getOptions, series])
 
   useIsomorphicLayoutEffect(() => {
     if (
@@ -581,10 +494,70 @@ function ChartInner<TDatum>({
     svgRef,
   }
 
-  const seriesByAxisId = sort(
-    groups(orderedSeries, d => d.secondaryAxisId),
-    ([key]) => secondaryAxes.findIndex(axis => axis.id === key)
+  const seriesByAxisId = React.useMemo(
+    () =>
+      sort(
+        groups(orderedSeries, d => d.secondaryAxisId),
+        ([key]) => secondaryAxes.findIndex(axis => axis.id === key)
+      ),
+    [orderedSeries, secondaryAxes]
   )
+
+  let memoizeSeries = !options.getDatumStyle && !options.getSeriesStyle
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  let getSeriesInfo = () => ({
+    primaryAxis,
+    secondaryAxes,
+    seriesByAxisId,
+  })
+
+  let getMemoizedSeriesInfo = React.useCallback(
+    () => ({
+      primaryAxis,
+      secondaryAxes,
+      seriesByAxisId,
+    }),
+    [primaryAxis, secondaryAxes, seriesByAxisId]
+  )
+
+  if (memoizeSeries) {
+    getSeriesInfo = getMemoizedSeriesInfo
+  }
+
+  const seriesEl = React.useMemo(() => {
+    const { primaryAxis, secondaryAxes, seriesByAxisId } = getSeriesInfo()
+    return seriesByAxisId.map(([axisId, series]) => {
+      const secondaryAxis = secondaryAxes.find(d => d.id === axisId)
+
+      if (!secondaryAxis) {
+        return null
+      }
+
+      const { elementType } = secondaryAxis
+      const Component = (() => {
+        if (elementType === 'line') {
+          return Line
+        }
+        if (elementType === 'bar') {
+          return Bar
+        }
+        if (elementType === 'area') {
+          return Area
+        }
+        throw new Error('Invalid elementType')
+      })()
+
+      return (
+        <Component
+          key={axisId ?? '__default__'}
+          primaryAxis={primaryAxis}
+          secondaryAxis={secondaryAxis}
+          series={series}
+        />
+      )
+    })
+  }, [getSeriesInfo])
 
   return (
     <ChartContextProvider value={useGetLatest(contextValue)}>
@@ -600,27 +573,6 @@ function ChartInner<TDatum>({
             height,
             overflow: options.brush ? 'hidden' : 'visible',
           }}
-          // onMouseEnter={e => {
-          //   e.persist()
-          //   onMouseMove(e)
-          // }}
-          // onMouseMove={e => {
-          //   e.persist()
-          //   onMouseMove(e)
-          // }}
-          // onMouseLeave={e => {
-          //   e.persist()
-          //   setPointer(old => {
-          //     return {
-          //       ...old,
-          //       svgHovered: false,
-          //     }
-          //   })
-          // }}
-          // onMouseDown={e => {
-          //   e.persist()
-          //   onMouseDown()
-          // }}
           onClick={e => options.onClickDatum?.(focusedDatum, e)}
         >
           <g
@@ -629,36 +581,7 @@ function ChartInner<TDatum>({
               pointerEvents: 'none',
             }}
           >
-            {seriesByAxisId.map(([axisId, series]) => {
-              const secondaryAxis = secondaryAxes.find(d => d.id === axisId)
-
-              if (!secondaryAxis) {
-                return null
-              }
-
-              const { elementType } = secondaryAxis
-              const Component = (() => {
-                if (elementType === 'line') {
-                  return Line
-                }
-                if (elementType === 'bar') {
-                  return Bar
-                }
-                if (elementType === 'area') {
-                  return Area
-                }
-                throw new Error('Invalid elementType')
-              })()
-
-              return (
-                <Component
-                  key={axisId ?? '__default__'}
-                  primaryAxis={primaryAxis}
-                  secondaryAxis={secondaryAxis}
-                  series={series}
-                />
-              )
-            })}
+            {seriesEl}
           </g>
           <g className="axes">
             {[primaryAxis, ...secondaryAxes].map(axis => (

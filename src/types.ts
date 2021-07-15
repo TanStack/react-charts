@@ -51,8 +51,6 @@ export type ChartOptions<TDatum> = {
 
 export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
   ChartOptions<TDatum>,
-  | 'getSeriesStyle'
-  | 'getDatumStyle'
   | 'getSeriesOrder'
   | 'groupingMode'
   | 'showVoronoi'
@@ -450,7 +448,7 @@ export type CursorOptions = {
   showLine?: boolean
   showLabel?: boolean
   axisId?: string
-  onChange?: () => void
+  onChange?: (value: any) => void
 }
 
 export type SeriesFocusStatus = 'none' | 'focused'
