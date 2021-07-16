@@ -1,5 +1,6 @@
 import * as React from 'react'
 import Link from 'next/link'
+import CarbonAds from './CarbonAds'
 export const Footer = props => {
   return (
     <div className="bg-gray-50 border-t border-gray-200">
