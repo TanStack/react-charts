@@ -16,9 +16,6 @@ export default function MultipleAxes() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
       getValue: (datum) => datum.primary as unknown as Date,
     }),
     []
@@ -29,16 +26,11 @@ export default function MultipleAxes() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
         elementType: "bar",
-        stacked: true,
       },
       {
         id: "2",
-        scaleType: "linear",
-        position: "right",
         getValue: (datum) => datum.secondary,
         elementType: "line",
       },

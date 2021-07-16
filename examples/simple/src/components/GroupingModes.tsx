@@ -21,9 +21,6 @@ export default function GroupingModes() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
       getValue: (datum) => datum.primary as Date,
     }),
     []
@@ -34,11 +31,8 @@ export default function GroupingModes() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
         elementType,
-        stacked: true,
       },
     ],
     [elementType]

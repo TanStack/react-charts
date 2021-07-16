@@ -14,8 +14,6 @@ export default function Band() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "band",
       position: "left",
       getValue: (datum) => datum.primary,
     }),
@@ -27,12 +25,9 @@ export default function Band() {
   >(
     () => [
       {
-        scaleType: "linear",
         position: "top",
         show: false,
         getValue: (datum) => datum.secondary,
-        elementType: "bar",
-        stacked: true,
         stackOffset: stackOffsetWiggle,
       },
     ],

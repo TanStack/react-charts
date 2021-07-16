@@ -63,9 +63,9 @@ The individual datums in a series' `data` array can be anything you want! Just r
 React Charts uses axes to configure a fair amount of the chart. Axes handle many things like:
 
 - Accessing chart values from your series' `Datum`s
-- Positioning your axis on the grid
-- Configuring the scale type for your axis
-- Configuring the element type for series that are tied to your axis
+- Optionally positioning your axis on the grid
+- Optionsally configuring the scale type for your axis
+- Optionsally configuring the element type for series that are tied to your axis
 
 To date, we have the following scale types available:
 
@@ -97,9 +97,6 @@ function MyChart() {
 
   const primaryAxis = React.useMemo(
     (): AxisOptions<MyDatum> => ({
-      isPrimary: true,
-      scaleType: 'time',
-      position: 'bottom',
       getValue: datum => datum.date,
     }),
     []
@@ -108,8 +105,6 @@ function MyChart() {
   const secondaryAxes = React.useMemo(
     (): AxisOptions<MyDatum>[] => [
       {
-        scaleType: 'linear',
-        position: 'left',
         getValue: datum => datum.stars,
       },
     ],
@@ -130,7 +125,7 @@ function MyChart() {
 
 ## Secondary Axis Element Types
 
-Secondary axes can be configured to render their respective series using 3 different element types using the `AxisOptions<TDatum>['scaleType']` property:
+Secondary axes for the most part are automatic, but can be optionally configured to render their respective series using 3 different element types using the `AxisOptions<TDatum>['scaleType']` property:
 
 - `line`
   - 1 Line per series (optional, eg. for Bubble/Scatter charts)
@@ -148,9 +143,7 @@ Example
 const secondaryAxes = React.useMemo(
   (): AxisOptions<MyDatum>[] => [
     {
-      // scaleType: 'linear',
-      // position: 'left',
-      // getValue: datum => datum.stars,
+      getValue: datum => datum.stars,
       elementType: 'bar',
     },
   ],

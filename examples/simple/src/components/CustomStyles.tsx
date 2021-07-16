@@ -51,9 +51,6 @@ function MyChart({
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "band",
-      position: "bottom",
       getValue: (datum) => datum.primary,
     }),
     []
@@ -64,11 +61,8 @@ function MyChart({
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
         elementType,
-        stacked: true,
       },
     ],
     [elementType]

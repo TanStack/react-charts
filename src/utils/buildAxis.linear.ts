@@ -18,35 +18,30 @@ import {
   AxisOptions,
   AxisTime,
   AxisTimeOptions,
+  BuildAxisOptions,
   GridDimensions,
   ResolvedAxisOptions,
   Series,
 } from '../types'
 
 function defaultAxisOptions<TDatum>(
-  options: AxisOptions<TDatum>
+  options: BuildAxisOptions<TDatum>
 ): ResolvedAxisOptions<AxisOptions<TDatum>> {
   return {
     ...options,
     elementType: options.elementType ?? 'line',
-    // tickCount: options.tickCount ?? 10,
-    // minTickCount: options.minTickCount ?? 1,
-    // maxTickCount: options.maxTickCount ?? 99999999,
-    // tickSizeInner: options.tickSizeInner ?? 6,
-    // tickSizeOuter: options.tickSizeOuter ?? 6,
     minTickPaddingForRotation: options.minTickPaddingForRotation ?? 10,
     tickLabelRotationDeg: options.tickLabelRotationDeg ?? 60,
     innerBandPadding: options.innerBandPadding ?? 0.6,
     outerBandPadding: options.outerBandPadding ?? 0.2,
-    // showTicks: options.showTicks ?? true,
-    // filterTicks: options.filterTicks ?? (d => d),
     show: options.show ?? true,
     stacked: options.stacked ?? false,
   }
 }
 
 export default function buildAxisLinear<TDatum>(
-  userOptions: AxisOptions<TDatum>,
+  isPrimary: boolean,
+  userOptions: BuildAxisOptions<TDatum>,
   series: Series<TDatum>[],
   gridDimensions: GridDimensions,
   width: number,
@@ -69,53 +64,18 @@ export default function buildAxisLinear<TDatum>(
 
   // Give the scale a home
   return options.scaleType === 'time' || options.scaleType === 'localTime'
-    ? buildTimeAxis(options, series, isVertical, range, outerRange)
+    ? buildTimeAxis(isPrimary, options, series, isVertical, range, outerRange)
     : options.scaleType === 'linear' || options.scaleType === 'log'
-    ? buildLinearAxis(options, series, isVertical, range, outerRange)
+    ? buildLinearAxis(isPrimary, options, series, isVertical, range, outerRange)
     : options.scaleType === 'band'
-    ? buildBandAxis(options, series, isVertical, range, outerRange)
+    ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
     : (() => {
         throw new Error('Invalid scale type')
       })()
-
-  // @ts-ignore
-  // const scaleFormat = scale.tickFormat ? scale.tickFormat() : d => d
-
-  // const userFormat = options?.format
-
-  // const format = userFormat
-  //   ? (value: unknown, index: number) =>
-  //       userFormat(value, index, scaleFormat(value))
-  //   : scaleFormat
-
-  // const resolvedTickCount = options.tickCount
-
-  // const ticks = options.filterTicks(
-  //   options.tickValues ||
-  //     // @ts-ignore
-  //     (scale.ticks ? scale.ticks(resolvedTickCount) : scale.domain())
-  // )
-
-  // const scaleMax =
-  //   options.position === 'bottom'
-  //     ? -gridDimensions.gridHeight
-  //     : options.position === 'left'
-  //     ? gridDimensions.gridWidth
-  //     : options.position === 'top'
-  //     ? gridDimensions.gridHeight
-  //     : -gridDimensions.gridWidth
-
-  // // const directionMultiplier =
-  // //   options.position === 'top' || options.position === 'left' ? -1 : 1
-
-  // const transform = !isVertical ? translateX : translateY
-
-  // const tickSpacing = Math.max(options.tickSizeInner, 0) + options.tickPadding
-
-  // Pass down the axis config (including the scale itself) for posterity
 }
 
 function buildTimeAxis<TDatum>(
+  isPrimary: boolean,
   options: ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
   series: Series<TDatum>[],
   isVertical: boolean,
@@ -179,7 +139,7 @@ function buildTimeAxis<TDatum>(
   const outerScale = scale.copy().range(outerRange)
 
   // Supplmentary band scale
-  const bandScale = options.isPrimary
+  const bandScale = isPrimary
     ? buildImpliedBandScale(options, scale, series, range)
     : undefined
 
@@ -221,6 +181,7 @@ function buildTimeAxis<TDatum>(
 }
 
 function buildLinearAxis<TDatum>(
+  isPrimary: boolean,
   options: ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
   series: Series<TDatum>[],
   isVertical: boolean,
@@ -297,7 +258,7 @@ function buildLinearAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
-  const bandScale = options.isPrimary
+  const bandScale = isPrimary
     ? buildImpliedBandScale(options, scale, series, range)
     : undefined
 
@@ -339,6 +300,7 @@ function buildLinearAxis<TDatum>(
 }
 
 function buildBandAxis<TDatum>(
+  isPrimary: boolean,
   options: ResolvedAxisOptions<AxisBandOptions<TDatum>>,
   series: Series<TDatum>[],
   isVertical: boolean,

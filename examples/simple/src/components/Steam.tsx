@@ -14,9 +14,6 @@ export default function Steam() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
       getValue: (datum) => datum.primary as Date,
     }),
     []
@@ -27,11 +24,10 @@ export default function Steam() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
         elementType: "area",
-        stacked: true,
+        // or
+        // stacked: true,
         stackOffset: stackOffsetWiggle,
       },
     ],

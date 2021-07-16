@@ -40,9 +40,6 @@ export default function StressTest() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
       getValue: (datum) => datum.primary as unknown as Date,
     }),
     []
@@ -53,10 +50,7 @@ export default function StressTest() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
-        elementType: "line",
         showDatumElements: showPoints,
       },
     ],

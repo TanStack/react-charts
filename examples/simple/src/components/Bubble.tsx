@@ -14,9 +14,6 @@ export default function Bubble() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "time",
-      position: "bottom",
       getValue: (datum) => datum.primary as unknown as Date,
     }),
     []
@@ -27,10 +24,7 @@ export default function Bubble() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
-        elementType: "line",
       },
     ],
     []

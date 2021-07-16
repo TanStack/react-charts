@@ -217,13 +217,12 @@ export type AxisDimensions = {
 }
 
 export type AxisOptionsBase = {
-  isPrimary?: boolean
   primaryAxisId?: string
   elementType?: 'line' | 'area' | 'bar'
   showDatumElements?: boolean
   curve?: CurveFactory
   invert?: boolean
-  position: Position
+  position?: Position
   minTickPaddingForRotation?: number
   tickLabelRotationDeg?: number
   innerBandPadding?: number
@@ -243,7 +242,7 @@ export type AxisOptionsBase = {
 }
 
 export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
-  scaleType: 'time' | 'localTime'
+  scaleType?: 'time' | 'localTime'
   getValue: (datum: TDatum) => ChartValue<Date>
   min?: Date
   max?: Date
@@ -266,7 +265,7 @@ export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
 }
 
 export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
-  scaleType: 'linear' | 'log'
+  scaleType?: 'linear' | 'log'
   getValue: (datum: TDatum) => ChartValue<number>
   min?: number
   max?: number
@@ -290,7 +289,7 @@ export type AxisLinearOptions<TDatum> = AxisOptionsBase & {
 }
 
 export type AxisBandOptions<TDatum> = AxisOptionsBase & {
-  scaleType: 'band'
+  scaleType?: 'band'
   getValue: (datum: TDatum) => ChartValue<any>
   originalSinBandSize?: number
   formatters?: {
@@ -314,8 +313,20 @@ export type AxisOptions<TDatum> =
   | AxisLinearOptions<TDatum>
   | AxisBandOptions<TDatum>
 
+export type AxisOptionsWithScaleType<TDatum> = TSTB.Object.Required<
+  AxisOptions<TDatum>,
+  'scaleType'
+>
+
+export type BuildAxisOptions<TDatum> = TSTB.Object.Required<
+  AxisOptions<TDatum>,
+  'position' | 'scaleType'
+>
+
 export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
   TAxisOptions & {},
+  | 'scaleType'
+  | 'position'
   | 'minTickPaddingForRotation'
   | 'tickLabelRotationDeg'
   | 'innerBandPadding'
@@ -326,14 +337,14 @@ export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
 
 export type ChartValue<T> = T | null | undefined
 
-export type AxisBase<TDatum> = {
-  _?: TDatum
+export type AxisBase = {
+  position: Position
   isVertical: boolean
   range: [number, number]
 }
 
 export type AxisTime<TDatum> = Omit<
-  AxisBase<TDatum> & ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
+  AxisBase & ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
   'format'
 > & {
   axisFamily: 'time'
@@ -349,7 +360,7 @@ export type AxisTime<TDatum> = Omit<
 }
 
 export type AxisLinear<TDatum> = Omit<
-  AxisBase<TDatum> & ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
+  AxisBase & ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
   'format'
 > & {
   axisFamily: 'linear'
@@ -365,7 +376,7 @@ export type AxisLinear<TDatum> = Omit<
 }
 
 export type AxisBand<TDatum> = Omit<
-  AxisBase<TDatum> & ResolvedAxisOptions<AxisBandOptions<TDatum>>,
+  AxisBase & ResolvedAxisOptions<AxisBandOptions<TDatum>>,
   'format'
 > & {
   axisFamily: 'band'

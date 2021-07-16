@@ -13,9 +13,6 @@ export default function Bar() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      isPrimary: true,
-      scaleType: "band",
-      position: "bottom",
       getValue: (datum) => datum.primary,
     }),
     []
@@ -26,11 +23,7 @@ export default function Bar() {
   >(
     () => [
       {
-        scaleType: "linear",
-        position: "left",
         getValue: (datum) => datum.secondary,
-        elementType: "bar",
-        stacked: true,
       },
     ],
     []

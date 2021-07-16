@@ -12,6 +12,9 @@ import {
   AxesInfo,
   AxisDimension,
   AxisDimensions,
+  AxisOptions,
+  AxisOptionsWithScaleType,
+  BuildAxisOptions,
   ChartContextValue,
   ChartOptions,
   Datum,
@@ -20,6 +23,7 @@ import {
   RequiredChartOptions,
   Series,
   StackDatum,
+  UserSerie,
 } from '../types'
 import {
   materializeStyles,
@@ -223,6 +227,47 @@ function ChartInner<TDatum>({
     throw new Error('At least one secondaryAxis is required')
   }
 
+  const primaryAxisOptions = React.useMemo((): BuildAxisOptions<TDatum> => {
+    const firstValue = getFirstDefinedValue(options.primaryAxis, options.data)
+    const optionsWithScaleType = axisOptionsWithScaleType(
+      options.primaryAxis,
+      firstValue
+    )
+
+    return { position: 'bottom', ...optionsWithScaleType }
+  }, [options.data, options.primaryAxis])
+
+  const secondaryAxesOptions = React.useMemo(() => {
+    return options.secondaryAxes.map(
+      (secondaryAxis, i): BuildAxisOptions<TDatum> => {
+        const firstValue = getFirstDefinedValue(secondaryAxis, options.data)
+
+        const optionsWithScaleType = axisOptionsWithScaleType(
+          secondaryAxis,
+          firstValue
+        )
+
+        if (!optionsWithScaleType.elementType) {
+          if (primaryAxisOptions.scaleType === 'band') {
+            optionsWithScaleType.elementType = 'bar'
+          } else if (optionsWithScaleType.stacked) {
+            optionsWithScaleType.elementType = 'area'
+          }
+        }
+
+        if (
+          typeof optionsWithScaleType.stacked === 'undefined' &&
+          optionsWithScaleType.elementType &&
+          ['bar', 'area'].includes(optionsWithScaleType.elementType)
+        ) {
+          optionsWithScaleType.stacked = true
+        }
+
+        return { position: !i ? 'left' : 'right', ...optionsWithScaleType }
+      }
+    )
+  }, [options.data, options.secondaryAxes, primaryAxisOptions])
+
   const svgRef = React.useRef<SVGSVGElement>(null)
   const getOptions = useGetLatest(options)
 
@@ -318,8 +363,8 @@ function ChartInner<TDatum>({
       }
     }
 
-    if (options.secondaryAxes.some(axisOptions => axisOptions.stacked)) {
-      options.secondaryAxes
+    if (secondaryAxesOptions.some(axisOptions => axisOptions.stacked)) {
+      secondaryAxesOptions
         .filter(d => d.stacked)
         .forEach(secondaryAxis => {
           const axisSeries = series.filter(
@@ -362,21 +407,23 @@ function ChartInner<TDatum>({
     }
 
     return series
-  }, [options.data, options.secondaryAxes])
+  }, [options.data, secondaryAxesOptions])
 
   const primaryAxis = React.useMemo(() => {
     return buildAxisLinear<TDatum>(
-      options.primaryAxis,
+      true,
+      primaryAxisOptions,
       series,
       gridDimensions,
       width,
       height
     )
-  }, [gridDimensions, height, options.primaryAxis, series, width])
+  }, [gridDimensions, height, primaryAxisOptions, series, width])
 
   const secondaryAxes = React.useMemo(() => {
-    return options.secondaryAxes.map(secondaryAxis => {
+    return secondaryAxesOptions.map(secondaryAxis => {
       return buildAxisLinear<TDatum>(
+        false,
         secondaryAxis,
         series,
         gridDimensions,
@@ -384,7 +431,7 @@ function ChartInner<TDatum>({
         height
       )
     })
-  }, [gridDimensions, height, options.secondaryAxes, series, width])
+  }, [gridDimensions, height, secondaryAxesOptions, series, width])
 
   const axesInfo: AxesInfo = React.useMemo(() => {
     // Make sure we're mapping x and y to the correct axes
@@ -609,4 +656,47 @@ function sumAllDimensionProperties(
   })
 
   return sum
+}
+
+function getFirstDefinedValue<TDatum>(
+  options: AxisOptions<TDatum>,
+  data: UserSerie<TDatum>[]
+) {
+  let firstDefinedValue: Date | number | string | undefined
+
+  data.some(serie => {
+    return serie.data.some(originalDatum => {
+      const value = options.getValue(originalDatum)
+      if (value !== null && typeof value !== 'undefined') {
+        firstDefinedValue = value
+        return true
+      }
+    })
+  })
+
+  return firstDefinedValue
+}
+
+function axisOptionsWithScaleType<TDatum>(
+  options: AxisOptions<TDatum>,
+  firstValue: Date | number | string | undefined
+): AxisOptionsWithScaleType<TDatum> {
+  let scaleType = options.scaleType
+
+  if (!options.scaleType) {
+    if (typeof firstValue === 'number') {
+      scaleType = 'linear'
+    } else if (typeof (firstValue as Date)?.getMonth === 'function') {
+      scaleType = 'time'
+    } else if (
+      typeof firstValue === 'string' ||
+      typeof firstValue === 'boolean'
+    ) {
+      scaleType = 'band'
+    } else {
+      throw new Error('Invalid scale type: Unable to infer type from data')
+    }
+  }
+
+  return { ...options, scaleType } as AxisOptionsWithScaleType<TDatum>
 }

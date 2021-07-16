@@ -43,23 +43,14 @@ const data: Series[] = [
 ```
 
 - `primaryAxis: AxisOptions<TDatum>`
-  - `isPrimary: true`
-  - Scale Type
-  - Position
   - Primary Value Accessor
 - `secondaryAxes: AxisOptions<TDatum>[]`
-  - `isPrimary: boolean`
-  - Scale Type
-  - Position
   - Primary Value Accessor
 
 ```tsx
 function App() {
   const primaryAxis = React.useMemo(
     (): AxisOptions<DailyStars> => ({
-      isPrimary: true,
-      scaleType: 'time',
-      position: 'bottom',
       getValue: datum => datum.date,
     }),
     []
@@ -68,8 +59,6 @@ function App() {
   const secondaryAxes = React.useMemo(
     (): AxisOptions<DailyStars>[] => [
       {
-        scaleType: 'linear',
-        position: 'left',
         getValue: datum => datum.stars,
       },
     ],
