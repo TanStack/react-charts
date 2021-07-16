@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import cn from 'classnames'
 import { Search } from './Search'
+import CarbonAds from './CarbonAds'
 export const Sidebar = ({ active, children, fixed }) => {
   const [searching, setSearching] = useState(false)
   return (
@@ -16,6 +17,7 @@ export const Sidebar = ({ active, children, fixed }) => {
         <Search />
       </div>
       <div className="sidebar-content overflow-y-auto pb-4">{children}</div>
+      <CarbonAds />
       <style jsx>{`
         .sidebar {
           -webkit-overflow-scrolling: touch;
