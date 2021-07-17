@@ -68,7 +68,7 @@ export default function buildAxisLinear<TDatum>(
     : options.scaleType === 'linear' || options.scaleType === 'log'
     ? buildLinearAxis(isPrimary, options, series, isVertical, range, outerRange)
     : options.scaleType === 'band'
-    ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
+    ? buildBandAxis(options, series, isVertical, range, outerRange)
     : (() => {
         throw new Error('Invalid scale type')
       })()
@@ -300,7 +300,6 @@ function buildLinearAxis<TDatum>(
 }
 
 function buildBandAxis<TDatum>(
-  isPrimary: boolean,
   options: ResolvedAxisOptions<AxisBandOptions<TDatum>>,
   series: Series<TDatum>[],
   isVertical: boolean,
