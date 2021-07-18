@@ -106,14 +106,18 @@ function Cursor<TDatum>(props: {
         : axis.getValue(d?.originalDatum)
       : undefined
 
-  const preValue = resolveValue(focusedDatum)
+  const datumValue = resolveValue(focusedDatum)
 
   React.useEffect(() => {
-    getTooltipOptions()?.onChange?.(preValue)
-  }, [getTooltipOptions, preValue])
+    getTooltipOptions()?.onChange?.(datumValue)
+  }, [getTooltipOptions, datumValue])
 
-  const value = props.options.value ?? preValue
-  const latestValue = props.options.value ?? resolveValue(latestFocusedDatum)
+  const value = props.options.value ?? datumValue
+
+  const latestValue = useLatestWhen(
+    props.options.value ?? resolveValue(latestFocusedDatum),
+    typeof props.options.value !== 'undefined'
+  )
 
   // Get the sibling range
   const siblingRange = siblingAxis.scale.range()
