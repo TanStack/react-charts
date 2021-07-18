@@ -3,6 +3,7 @@ import React from 'react'
 
 import { Axis, Series, Datum } from '../types'
 import {
+  clampPxToAxis,
   getPrimary,
   getSecondary,
   getSecondaryStart,
@@ -60,8 +61,16 @@ export default function AreaComponent<TDatum>({
         const areaPath =
           area<Datum<TDatum>>(
             datum => getPrimary(datum, primaryAxis) ?? NaN,
-            datum => getSecondaryStart(datum, secondaryAxis) ?? NaN,
-            datum => getSecondary(datum, secondaryAxis) ?? NaN
+            datum =>
+              clampPxToAxis(
+                getSecondaryStart(datum, secondaryAxis) ?? NaN,
+                secondaryAxis
+              ),
+            datum =>
+              clampPxToAxis(
+                getSecondary(datum, secondaryAxis) ?? NaN,
+                secondaryAxis
+              )
           ).curve(curve)(series.datums) ?? undefined
 
         const linePath =

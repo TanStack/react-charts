@@ -247,6 +247,15 @@ export function getHeight<TDatum>(
     : getSecondaryLength(datum, secondaryAxis)
 }
 
+export function clampPxToAxis<TDatum>(px: number, axis: Axis<TDatum>) {
+  const range = axis.scale.range()
+  if (axis.isVertical) {
+    range.reverse()
+  }
+
+  return Math.max(range[0], Math.min(px, range[1]))
+}
+
 export function getTickPx<TDatum>(scale: Axis<TDatum>['scale'], value: any) {
   let px = scale(value) ?? NaN
 
