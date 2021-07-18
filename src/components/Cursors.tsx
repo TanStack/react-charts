@@ -114,10 +114,17 @@ function Cursor<TDatum>(props: {
 
   const value = props.options.value ?? datumValue
 
-  const latestValue = useLatestWhen(
-    props.options.value ?? resolveValue(latestFocusedDatum),
-    typeof props.options.value !== 'undefined'
+  const latestPropsValue = useLatestWhen(
+    props.options.value,
+    props.options.value != null
   )
+
+  const latestDatumValue = useLatestWhen(
+    resolveValue(latestFocusedDatum),
+    resolveValue(latestFocusedDatum) != null
+  )
+
+  const latestValue = latestPropsValue ?? latestDatumValue
 
   // Get the sibling range
   const siblingRange = siblingAxis.scale.range()
@@ -133,9 +140,9 @@ function Cursor<TDatum>(props: {
 
   const bandWidth = axis.axisFamily === 'band' ? axis.scale.bandwidth() : 1
 
-  const px = axis.scale(latestValue)
-
   const show = typeof value !== 'undefined' && !Number.isNaN(value)
+
+  let px = axis.scale(value)
 
   // Vertical alignment
   if (axis.isVertical) {
@@ -162,12 +169,12 @@ function Cursor<TDatum>(props: {
     }
   }
 
-  const lineStartX = Math.min(x1, x2)
-  const lineStartY = Math.min(y1, y2)
-  const lineEndX = Math.max(x1, x2)
-  const lineEndY = Math.max(y1, y2)
-  const lineHeight = Math.max(lineEndY - lineStartY, 0)
-  const lineWidth = Math.max(lineEndX - lineStartX, 0)
+  let lineStartX = Math.min(x1, x2)
+  let lineStartY = Math.min(y1, y2)
+  let lineEndX = Math.max(x1, x2)
+  let lineEndY = Math.max(y1, y2)
+  let lineHeight = Math.max(lineEndY - lineStartY, 0)
+  let lineWidth = Math.max(lineEndX - lineStartX, 0)
 
   let bubbleX
   let bubbleY
@@ -212,11 +219,21 @@ function Cursor<TDatum>(props: {
 
   const svgRect = useRect(svgRef.current, show)
 
-  const immediatePos = !axis.isVertical ? lineStartX : lineStartY
-  const immediate = usePrevious(immediatePos) === -1 && immediatePos > -1
-
   const lineRef = React.useRef<HTMLDivElement | null>(null)
   const bubbleRef = React.useRef<HTMLDivElement | null>(null)
+
+  const latestLineStartX = useLatestWhen(lineStartX, px != null)
+  const latestLineStartY = useLatestWhen(lineStartY, px != null)
+  const latestBubbleX = useLatestWhen(bubbleX, px != null)
+  const latestBubbleY = useLatestWhen(bubbleY, px != null)
+
+  const previousTruePx = usePrevious(px)
+  const immediate = previousTruePx == null && px !== null
+
+  lineStartX = (px != null ? lineStartX : latestLineStartX) ?? NaN
+  lineStartY = (px != null ? lineStartY : latestLineStartY) ?? NaN
+  bubbleX = (px != null ? bubbleX : latestBubbleX) ?? NaN
+  bubbleY = (px != null ? bubbleY : latestBubbleY) ?? NaN
 
   const lineXSpring = useSpring(
     lineStartX,

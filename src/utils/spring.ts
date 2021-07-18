@@ -58,14 +58,7 @@ export class Spring {
     return this._solution ? this._solution.dx(dt) : 0
   }
 
-  setEnd(x: number, immediate?: boolean) {
-    if (immediate) {
-      this._solution = null
-      this.endPosition = x
-      this._startTime = 0
-      return
-    }
-
+  setEnd(x: number) {
     const t = new Date().getTime()
 
     let velocity = 0
@@ -87,18 +80,18 @@ export class Spring {
     this._startTime = t
   }
 
-  // snap(x: number) {
-  //   this._startTime = new Date().getTime()
-  //   this.endPosition = x
-  //   this._solution = {
-  //     x() {
-  //       return 0
-  //     },
-  //     dx() {
-  //       return 0
-  //     },
-  //   }
-  // }
+  snap(x: number) {
+    this._startTime = new Date().getTime()
+    this.endPosition = x
+    this._solution = {
+      x() {
+        return 0
+      },
+      dx() {
+        return 0
+      },
+    }
+  }
 
   done() {
     return almostEqual(this.x(), this.endPosition) && almostZero(this.dx())

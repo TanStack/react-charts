@@ -9,7 +9,7 @@ export default function ResizableBox({
   height = 300,
   resizable = true,
   style = {},
-  className = ''
+  className = "",
 }) {
   return (
     <div>
@@ -17,9 +17,10 @@ export default function ResizableBox({
         <ReactResizableBox width={width} height={height}>
           <div
             style={{
+              boxShadow: "0 20px 40px rgba(0,0,0,.1)",
               ...style,
               width: "100%",
-              height: "100%"
+              height: "100%",
             }}
             className={className}
           >
@@ -31,7 +32,8 @@ export default function ResizableBox({
           style={{
             width: `${width}px`,
             height: `${height}px`,
-            ...style
+            boxShadow: "0 20px 40px rgba(0,0,0,.1)",
+            ...style,
           }}
           className={className}
         >

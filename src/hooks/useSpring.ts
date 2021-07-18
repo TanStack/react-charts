@@ -6,22 +6,27 @@ export function useSpring(
   value: number,
   config: [number, number, number],
   cb: (x: number) => void,
-  immediate?: boolean
+  immediate?: boolean,
+  debug?: boolean
 ) {
   const springRef = React.useRef(new Spring(value, ...config))
-  const getImmediate = useGetLatest(immediate)
+  const getValue = useGetLatest(value)
 
   const [startRaf, stopRaf] = useRaf(() => {
     cb(springRef.current.x())
     return springRef.current.done()
   })
 
+  // Immediate
   React.useEffect(() => {
-    if (springRef.current.endPosition !== value) {
-      springRef.current.setEnd(value, getImmediate())
+    if (immediate) {
+      springRef.current.snap(getValue())
       startRaf()
+      return
     }
-  }, [getImmediate, startRaf, value])
+    springRef.current.setEnd(value)
+    startRaf()
+  }, [debug, getValue, immediate, startRaf, stopRaf, value])
 
   React.useEffect(() => {
     return () => {
