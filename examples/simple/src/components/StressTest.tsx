@@ -81,7 +81,7 @@ export default function StressTest() {
       <br />
 
       <p>
-        NOTE: This example is best views in production for maximum performance.
+        NOTE: This example is best viewed in production for maximum performance.
       </p>
 
       <br />
