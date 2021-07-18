@@ -1,7 +1,6 @@
-import { ScaleLinear, ScaleTime } from 'd3-scale'
 import React from 'react'
 
-import { Axis, AxisTime } from '../types'
+import { Axis, AxisLinear } from '../types'
 import { getTickPx, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
@@ -9,12 +8,8 @@ import useMeasure from './AxisLinear.useMeasure'
 
 export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
   const [showRotated, setShowRotated] = React.useState(false)
-  const {
-    getOptions,
-    gridDimensions,
-    width,
-    height,
-  } = useChartContext<TDatum>()
+  const { getOptions, gridDimensions, width, height } =
+    useChartContext<TDatum>()
 
   const { dark, showDebugAxes } = getOptions()
 
@@ -34,15 +29,22 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
     const scale = isOuter ? axis.outerScale : axis.scale
     const [rangeStart, rangeEnd] = scale.range()
 
-    const getTicks = (
-      scale: ScaleTime<any, any> | ScaleLinear<any, any>,
-      num: number
-    ) => {
-      if (scale.ticks) {
-        return scale.ticks(num)
+    const getTicks = () => {
+      const anyAxis = axis as AxisLinear<TDatum>
+
+      if ((anyAxis as AxisLinear<TDatum>).outerScale.ticks!) {
+        if (typeof anyAxis.tickCount === 'number') {
+          return anyAxis.outerScale.ticks(anyAxis.tickCount)
+        }
+
+        const autoSpacing = anyAxis.isVertical ? 40 : 80
+        const range = anyAxis.outerScale.range()
+        const num = Math.abs(range[1] - range[0]) / autoSpacing
+
+        return anyAxis.outerScale.ticks(num)
       }
 
-      return scale.domain()
+      return anyAxis.outerScale.domain()
     }
 
     const resolvedHeight = isOuter ? height : gridDimensions.gridHeight
@@ -101,7 +103,7 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
             y2={lineTo.y}
             stroke={dark ? 'rgba(255,255,255, .2)' : 'rgba(0,0,0, .2)'}
           />
-          {getTicks(scale as ScaleTime<any, any>, 10).map((tick, i) => {
+          {getTicks().map((tick, i) => {
             const px = getTickPx(scale, tick)
 
             const [tickFrom, tickTo, gridTo] =
@@ -187,7 +189,7 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
                     isRotated ? (axis.position === 'top' ? 60 : -60) : 0
                   })`}
                 >
-                  {(axis as AxisTime<any>).formatters.scale(tick as Date)}
+                  {(axis as AxisLinear<any>).formatters.scale(tick as number)}
                 </text>
               </g>
             )

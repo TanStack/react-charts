@@ -12,7 +12,7 @@ export default function ResizableBox({
   className = "",
 }) {
   return (
-    <div>
+    <div style={{ marginLeft: 20 }}>
       {resizable ? (
         <ReactResizableBox width={width} height={height}>
           <div

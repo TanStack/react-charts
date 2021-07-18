@@ -433,17 +433,6 @@ function ChartInner<TDatum>({
     })
   }, [gridDimensions, height, secondaryAxesOptions, series, width])
 
-  const axesInfo: AxesInfo = React.useMemo(() => {
-    // Make sure we're mapping x and y to the correct axes
-    const xKey = primaryAxis.isVertical ? 'secondary' : 'primary'
-    const yKey = primaryAxis.isVertical ? 'primary' : 'secondary'
-
-    return {
-      xKey,
-      yKey,
-    }
-  }, [primaryAxis])
-
   const groupedDatums = React.useMemo(() => {
     const groupedDatums = new Map<any, Datum<TDatum>[]>()
 
@@ -528,7 +517,6 @@ function ChartInner<TDatum>({
     gridDimensions,
     primaryAxis,
     secondaryAxes,
-    axesInfo,
     series,
     orderedSeries,
     groupedDatums,

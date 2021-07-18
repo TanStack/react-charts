@@ -124,77 +124,93 @@ export default function useMeasure<TDatum>({
       right: 0,
     }
 
-    const domainEl = elRef.current.querySelector(`.Axis-Group.inner .domain`)
+    const currentEl = elRef.current
 
-    if (!domainEl) {
+    const [innerDims] = ['inner'].map(inOrOut => {
+      const domainEl = currentEl.querySelector(`.Axis-Group.${inOrOut} .domain`)
+
+      if (!domainEl) {
+        return
+      }
+
+      const domainDims = getElBox(domainEl)
+
+      const measureDims = Array.from(
+        currentEl.querySelectorAll(`.Axis-Group.${inOrOut} .tickLabel`)
+      ).map(el => getElBox(el))
+
+      if (!measureDims.length) {
+        return
+      }
+
+      // Determine the largest labels on the axis
+      let widestLabel = measureDims[0]
+      let tallestLabel = measureDims[0]
+
+      measureDims.forEach(d => {
+        if (d.width > 0 && d.width > widestLabel.width) {
+          widestLabel = d
+        }
+
+        if (d.height > 0 && d.height > tallestLabel.height) {
+          tallestLabel = d
+        }
+      })
+
+      return { domainDims, measureDims, widestLabel, tallestLabel }
+    })
+
+    if (!innerDims) {
       return
     }
 
-    const domainDims = getElBox(domainEl)
-
-    const measureDims = Array.from(
-      elRef.current.querySelectorAll('.Axis-Group.inner .tickLabel')
-    ).map(el => getElBox(el))
-
-    // Determine the largest labels on the axis
-    let widestRealLabel = measureDims[0]
-    let tallestRealLabel = measureDims[0]
-
-    measureDims.forEach(d => {
-      if (d.width > 0 && d.width > widestRealLabel.width) {
-        widestRealLabel = d
-      }
-
-      if (d.height > 0 && d.height > tallestRealLabel.height) {
-        tallestRealLabel = d
-      }
-    })
-
     // Axis overflow measurements
     if (!axis.isVertical) {
-      if (measureDims.length) {
-        const leftMostLabelDim = measureDims.reduce((d, labelDim) =>
+      if (innerDims.measureDims.length) {
+        const leftMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
           labelDim.left < d.left ? labelDim : d
         )
-        const rightMostLabelDim = measureDims.reduce((d, labelDim) =>
+        const rightMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
           labelDim.right > d.right ? labelDim : d
         )
 
         newDimensions.left = Math.round(
-          Math.max(0, domainDims.left - leftMostLabelDim?.left)
+          Math.max(0, innerDims.domainDims.left - leftMostLabelDim?.left)
         )
 
         newDimensions.right = Math.round(
-          Math.max(0, rightMostLabelDim?.right - domainDims.right)
+          Math.max(0, rightMostLabelDim?.right - innerDims.domainDims.right)
         )
       }
 
       newDimensions.height = Math.round(
         // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        8 + axis.minTickPaddingForRotation + (tallestRealLabel?.height ?? 0)
+        8 +
+          axis.minTickPaddingForRotation +
+          (innerDims.tallestLabel?.height ?? 0)
       )
     } else {
-      if (measureDims.length) {
-        const topMostLabelDim = measureDims.reduce((d, labelDim) =>
+      if (innerDims.measureDims.length) {
+        const topMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
           labelDim.top < d.top ? labelDim : d
         )
 
-        const bottomMostLabelDim = measureDims.reduce((d, labelDim) =>
+        const bottomMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
           labelDim.bottom > d.bottom ? labelDim : d
         )
 
         newDimensions.top = Math.round(
-          Math.max(0, domainDims.top - topMostLabelDim?.top)
+          Math.max(0, innerDims.domainDims.top - topMostLabelDim?.top)
         )
 
         newDimensions.bottom = Math.round(
-          Math.max(0, bottomMostLabelDim?.bottom - domainDims.bottom)
+          Math.max(0, bottomMostLabelDim?.bottom - innerDims.domainDims.bottom)
         )
       }
 
       newDimensions.width = Math.round(
         // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        8 + axis.minTickPaddingForRotation + (widestRealLabel?.width ?? 0)
+        8 + axis.minTickPaddingForRotation + (innerDims.widestLabel?.width ?? 0)
       )
     }
 
@@ -229,10 +245,16 @@ export default function useMeasure<TDatum>({
 
   // Measure after if needed
   useIsomorphicLayoutEffect(() => {
-    measureRotation()
+    // setTimeout(() => {
+    window.requestAnimationFrame(() => {
+      measureRotation()
+    })
   }, [measureRotation])
 
   useIsomorphicLayoutEffect(() => {
-    measureDimensions()
+    // setTimeout(() => {
+    window.requestAnimationFrame(() => {
+      measureDimensions()
+    })
   }, [measureRotation])
 }

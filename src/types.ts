@@ -69,7 +69,6 @@ export type ChartContextValue<TDatum> = {
   gridDimensions: GridDimensions
   primaryAxis: Axis<TDatum>
   secondaryAxes: Axis<TDatum>[]
-  axesInfo: AxesInfo
   series: Series<TDatum>[]
   orderedSeries: Series<TDatum>[]
   groupedDatums: Map<any, Datum<TDatum>[]>
@@ -225,6 +224,7 @@ export type AxisOptionsBase = {
   position?: Position
   minTickPaddingForRotation?: number
   tickLabelRotationDeg?: number
+  tickCount?: number
   innerBandPadding?: number
   outerBandPadding?: number
   minBandSize?: number
