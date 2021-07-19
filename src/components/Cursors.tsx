@@ -291,8 +291,8 @@ function Cursor<TDatum>(props: {
             top: 0,
             left: 0,
             transform: translate(
-              svgRect.left + gridDimensions.gridX,
-              svgRect.top + gridDimensions.gridY
+              svgRect.left + gridDimensions.left,
+              svgRect.top + gridDimensions.top
             ),
             opacity: show ? 1 : 0,
             transition: 'opacity .3s ease',

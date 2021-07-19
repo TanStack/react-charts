@@ -57,8 +57,8 @@ export default function buildAxisLinear<TDatum>(
 
   // Now we need to figure out the range
   const range: [number, number] = isVertical
-    ? [gridDimensions.gridHeight, 0]
-    : [0, gridDimensions.gridWidth]
+    ? [gridDimensions.height, 0]
+    : [0, gridDimensions.width]
 
   const outerRange: [number, number] = isVertical ? [height, 0] : [0, width]
 
@@ -386,9 +386,7 @@ function buildImpliedBandScale<TDatum>(
           return
         }
 
-        const r = [one, two].sort()
-
-        const diff = Math.abs(r[1] - r[0])
+        const diff = Math.abs(Math.max(one, two) - Math.min(one, two))
 
         if (diff < impliedBandWidth) {
           impliedBandWidth = diff

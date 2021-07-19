@@ -38,7 +38,7 @@ export default function AreaComponent<TDatum>({
   return (
     <g
       style={{
-        transform: translate(gridDimensions.gridX, gridDimensions.gridY),
+        transform: translate(gridDimensions.left, gridDimensions.top),
       }}
     >
       {allSeries.map((series, i) => {

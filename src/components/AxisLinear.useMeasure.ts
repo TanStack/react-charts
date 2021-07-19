@@ -1,7 +1,7 @@
 import React, { MutableRefObject } from 'react'
 
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import { Axis, GridDimensions, Position } from '../types'
+import { Axis, AxisDimension, GridDimensions, Position } from '../types'
 import useChartContext from '../utils/chartContext'
 
 const getElBox = (el: Element) => {
@@ -46,8 +46,8 @@ export default function useMeasure<TDatum>({
     }
 
     let gridSize = !axis.isVertical
-      ? gridDimensions.gridWidth
-      : gridDimensions.gridHeight
+      ? gridDimensions.width
+      : gridDimensions.height
 
     const staticLabelDims = Array.from(
       elRef.current.querySelectorAll('.Axis-Group.outer .tickLabel')
@@ -92,8 +92,8 @@ export default function useMeasure<TDatum>({
     elRef,
     axis.isVertical,
     axis.minTickPaddingForRotation,
-    gridDimensions.gridWidth,
-    gridDimensions.gridHeight,
+    gridDimensions.width,
+    gridDimensions.height,
     setShowRotated,
   ])
 
@@ -115,103 +115,52 @@ export default function useMeasure<TDatum>({
       return
     }
 
-    const newDimensions = {
+    const newDimensions: AxisDimension = {
       width: 0,
       height: 0,
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+      paddingLeft: 0,
+      paddingRight: 0,
     }
 
     const currentEl = elRef.current
 
-    const [innerDims] = ['inner'].map(inOrOut => {
-      const domainEl = currentEl.querySelector(`.Axis-Group.${inOrOut} .domain`)
+    const axisEl = currentEl.querySelector(`.Axis-Group.inner .domainAndTicks`)
+    const domainEl = currentEl.querySelector(`.Axis-Group.inner .domain`)
 
-      if (!domainEl) {
-        return
-      }
+    if (!axisEl || !domainEl) {
+      return
+    }
 
-      const domainDims = getElBox(domainEl)
+    const axisDims = getElBox(axisEl)
+    const domainDims = getElBox(domainEl)
 
-      const measureDims = Array.from(
-        currentEl.querySelectorAll(`.Axis-Group.${inOrOut} .tickLabel`)
-      ).map(el => getElBox(el))
-
-      if (!measureDims.length) {
-        return
-      }
-
-      // Determine the largest labels on the axis
-      let widestLabel = measureDims[0]
-      let tallestLabel = measureDims[0]
-
-      measureDims.forEach(d => {
-        if (d.width > 0 && d.width > widestLabel.width) {
-          widestLabel = d
-        }
-
-        if (d.height > 0 && d.height > tallestLabel.height) {
-          tallestLabel = d
-        }
-      })
-
-      return { domainDims, measureDims, widestLabel, tallestLabel }
-    })
-
-    if (!innerDims) {
+    if (!axisDims || !domainDims) {
       return
     }
 
     // Axis overflow measurements
     if (!axis.isVertical) {
-      if (innerDims.measureDims.length) {
-        const leftMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
-          labelDim.left < d.left ? labelDim : d
-        )
-        const rightMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
-          labelDim.right > d.right ? labelDim : d
-        )
-
-        newDimensions.left = Math.round(
-          Math.max(0, innerDims.domainDims.left - leftMostLabelDim?.left)
-        )
-
-        newDimensions.right = Math.round(
-          Math.max(0, rightMostLabelDim?.right - innerDims.domainDims.right)
-        )
-      }
-
-      newDimensions.height = Math.round(
-        // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        8 +
-          axis.minTickPaddingForRotation +
-          (innerDims.tallestLabel?.height ?? 0)
+      newDimensions.paddingLeft = Math.round(
+        Math.max(0, domainDims.left - axisDims?.left)
       )
+
+      newDimensions.paddingRight = Math.round(
+        Math.max(0, axisDims?.right - domainDims.right)
+      )
+
+      newDimensions.height = axisDims?.height
     } else {
-      if (innerDims.measureDims.length) {
-        const topMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
-          labelDim.top < d.top ? labelDim : d
-        )
-
-        const bottomMostLabelDim = innerDims.measureDims.reduce((d, labelDim) =>
-          labelDim.bottom > d.bottom ? labelDim : d
-        )
-
-        newDimensions.top = Math.round(
-          Math.max(0, innerDims.domainDims.top - topMostLabelDim?.top)
-        )
-
-        newDimensions.bottom = Math.round(
-          Math.max(0, bottomMostLabelDim?.bottom - innerDims.domainDims.bottom)
-        )
-      }
-
-      newDimensions.width = Math.round(
-        // Math.max(axis.tickSizeInner, axis.tickSizeOuter) +
-        8 + axis.minTickPaddingForRotation + (innerDims.widestLabel?.width ?? 0)
+      newDimensions.paddingTop = Math.round(
+        Math.max(0, domainDims.top - axisDims?.top)
       )
+
+      newDimensions.paddingBottom = Math.round(
+        Math.max(0, axisDims?.bottom - domainDims.bottom)
+      )
+
+      newDimensions.width = axisDims?.width
     }
 
     // Only update the axisDimensions if something has changed
@@ -236,7 +185,6 @@ export default function useMeasure<TDatum>({
     axis.id,
     axis.isVertical,
     axis.position,
-    axis.minTickPaddingForRotation,
     axisDimension,
     axisDimensions,
     elRef,
@@ -248,13 +196,13 @@ export default function useMeasure<TDatum>({
     // setTimeout(() => {
     window.requestAnimationFrame(() => {
       measureRotation()
-    })
-  }, [measureRotation])
-
-  useIsomorphicLayoutEffect(() => {
-    // setTimeout(() => {
-    window.requestAnimationFrame(() => {
       measureDimensions()
     })
   }, [measureRotation])
+
+  // useIsomorphicLayoutEffect(() => {
+  //   // setTimeout(() => {
+  //   window.requestAnimationFrame(() => {
+  //   })
+  // }, [measureRotation])
 }

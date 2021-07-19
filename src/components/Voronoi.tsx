@@ -215,7 +215,7 @@ function PrimaryVoronoi<TDatum>({
         {...{
           onMouseLeave: () => handleFocus(null),
           style: {
-            transform: translate(gridDimensions.gridX, gridDimensions.gridY),
+            transform: translate(gridDimensions.left, gridDimensions.top),
           },
         }}
       >
@@ -273,8 +273,8 @@ function PrimaryVoronoi<TDatum>({
     )
   }, [
     getOptions,
-    gridDimensions.gridX,
-    gridDimensions.gridY,
+    gridDimensions.left,
+    gridDimensions.top,
     groupedDatums,
     handleFocus,
     primaryAxis,

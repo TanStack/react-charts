@@ -9,6 +9,14 @@ export type ChartOptions<TDatum> = {
   data: UserSerie<TDatum>[]
   primaryAxis: AxisOptions<TDatum>
   secondaryAxes: AxisOptions<TDatum>[]
+  padding?:
+    | number
+    | {
+        left?: number
+        right?: number
+        top?: number
+        bottom?: number
+      }
   getSeriesStyle?: (
     series: Series<TDatum>,
     status: SeriesFocusStatus
@@ -62,6 +70,7 @@ export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
   | 'tooltip'
   | 'primaryCursor'
   | 'secondaryCursor'
+  | 'padding'
 >
 
 export type ChartContextValue<TDatum> = {
@@ -200,10 +209,10 @@ export type ChartOffset = {
 }
 
 export type AxisDimension = {
-  left: number
-  right: number
-  top: number
-  bottom: number
+  paddingLeft: number
+  paddingRight: number
+  paddingTop: number
+  paddingBottom: number
   width: number
   height: number
 }
@@ -442,10 +451,12 @@ export type StackDatum<TDatum> = {
 export type Measurement = Side | 'width' | 'height'
 
 export type GridDimensions = {
-  gridX: number
-  gridY: number
-  gridWidth: number
-  gridHeight: number
+  left: number
+  top: number
+  right: number
+  bottom: number
+  width: number
+  height: number
 }
 
 export type CursorOptions = {

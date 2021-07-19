@@ -1,4 +1,4 @@
-import { groups, sort } from 'd3-array'
+import { groups, sort, sum } from 'd3-array'
 import { stack, stackOffsetNone } from 'd3-shape'
 import React, { ComponentPropsWithoutRef } from 'react'
 
@@ -9,7 +9,6 @@ import Bar from '../seriesTypes/Bar'
 import Line from '../seriesTypes/Line'
 //
 import {
-  AxisDimension,
   AxisDimensions,
   AxisOptions,
   AxisOptionsWithScaleType,
@@ -18,7 +17,6 @@ import {
   ChartOptions,
   Datum,
   GridDimensions,
-  Measurement,
   RequiredChartOptions,
   Series,
   StackDatum,
@@ -60,6 +58,8 @@ const defaultColorScheme = [
   '#d44d99',
 ]
 
+const defaultPadding = 5
+
 function defaultChartOptions<TDatum>(
   options: ChartOptions<TDatum>
 ): RequiredChartOptions<TDatum> {
@@ -78,6 +78,7 @@ function defaultChartOptions<TDatum>(
     tooltip: options.tooltip ?? true,
     primaryCursor: options.primaryCursor ?? true,
     secondaryCursor: options.secondaryCursor ?? true,
+    padding: options.padding ?? defaultPadding,
   }
 }
 
@@ -141,11 +142,18 @@ export function Chart<TDatum>({
 
     const observer = new ResizeObserver(() => {
       const rect = containerEl?.getBoundingClientRect()
+      const styles = window.getComputedStyle(containerEl)
 
       if (rect) {
         setDims({
-          width: rect.width,
-          height: rect.height,
+          width:
+            rect.width -
+            parseInt(styles.borderLeftWidth) -
+            parseInt(styles.borderRightWidth),
+          height:
+            rect.height -
+            parseInt(styles.borderTopWidth) -
+            parseInt(styles.borderBottomWidth),
         })
       }
     })
@@ -285,40 +293,70 @@ function ChartInner<TDatum>({
   // useAtom<Datum<TDatum> | null>(focusedDatumAtom)
 
   const gridDimensions = React.useMemo((): GridDimensions => {
-    // Left
-    const [axesLeftWidth, axesLeftTop, axesLeftBottom] = (
-      ['width', 'top', 'bottom'] as Measurement[]
-    ).map(prop => sumAllDimensionProperties(axisDimensions.left, prop))
+    const padding = {
+      left:
+        typeof options.padding === 'object'
+          ? options.padding.left ?? defaultPadding
+          : options.padding,
+      right:
+        typeof options.padding === 'object'
+          ? options.padding.right ?? defaultPadding
+          : options.padding,
+      bottom:
+        typeof options.padding === 'object'
+          ? options.padding.bottom ?? defaultPadding
+          : options.padding,
+      top:
+        typeof options.padding === 'object'
+          ? options.padding.top ?? defaultPadding
+          : options.padding,
+    }
 
-    const [axesRightWidth, axesRightTop, axesRightBottom] = (
-      ['width', 'top', 'bottom'] as Measurement[]
-    ).map(prop => sumAllDimensionProperties(axisDimensions.right, prop))
+    const left =
+      padding.left +
+      Math.max(
+        sum(Object.values(axisDimensions.left), d => d.width),
+        sum(Object.values(axisDimensions.top), d => d.paddingLeft),
+        sum(Object.values(axisDimensions.bottom), d => d.paddingLeft)
+      )
 
-    const [axesTopHeight, axesTopLeft, axesTopRight] = (
-      ['height', 'left', 'right'] as Measurement[]
-    ).map(prop => sumAllDimensionProperties(axisDimensions.top, prop))
+    const top =
+      padding.top +
+      Math.max(
+        sum(Object.values(axisDimensions.top), d => d.height),
+        sum(Object.values(axisDimensions.left), d => d.paddingTop),
+        sum(Object.values(axisDimensions.right), d => d.paddingTop)
+      )
 
-    const [axesBottomHeight, axesBottomLeft, axesBottomRight] = (
-      ['height', 'left', 'right'] as Measurement[]
-    ).map(prop => sumAllDimensionProperties(axisDimensions.bottom, prop))
+    const right =
+      padding.right +
+      Math.max(
+        sum(Object.values(axisDimensions.right), d => d.width),
+        sum(Object.values(axisDimensions.top), d => d.paddingRight),
+        sum(Object.values(axisDimensions.bottom), d => d.paddingRight)
+      )
 
-    const gridX = Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft)
-    const gridY = Math.max(axesTopHeight, axesLeftTop, axesRightTop)
-    const gridWidth = Math.max(
-      0,
-      width -
-        Math.max(axesLeftWidth, axesTopLeft, axesBottomLeft) -
-        Math.max(axesRightWidth, axesTopRight, axesBottomRight)
-    )
-    const gridHeight = Math.max(
-      0,
-      height -
-        Math.max(axesTopHeight, axesLeftTop, axesRightTop) -
-        Math.max(axesBottomHeight, axesLeftBottom, axesRightBottom)
-    )
+    const bottom =
+      padding.bottom +
+      Math.max(
+        sum(Object.values(axisDimensions.bottom), d => d.height),
+        sum(Object.values(axisDimensions.left), d => d.paddingBottom),
+        sum(Object.values(axisDimensions.right), d => d.paddingBottom)
+      )
 
-    return { gridX, gridY, gridWidth, gridHeight }
-  }, [width, height, axisDimensions])
+    const gridWidth = Math.max(0, width - left - right)
+    const gridHeight = Math.max(0, height - top - bottom)
+
+    return { left, top, right, bottom, width: gridWidth, height: gridHeight }
+  }, [
+    options.padding,
+    axisDimensions.left,
+    axisDimensions.top,
+    axisDimensions.bottom,
+    axisDimensions.right,
+    width,
+    height,
+  ])
 
   const series = React.useMemo(() => {
     const series: Series<TDatum>[] = []
@@ -630,19 +668,6 @@ function ChartInner<TDatum>({
       </div>
     </ChartContextProvider>
   )
-}
-
-function sumAllDimensionProperties(
-  axisDimensions: Record<string, AxisDimension>,
-  side: Measurement
-) {
-  let sum = 0
-
-  Object.keys(axisDimensions).forEach(axisId => {
-    sum += axisDimensions[axisId]?.[side] || 0
-  })
-
-  return sum
 }
 
 function getFirstDefinedValue<TDatum>(
