@@ -10,12 +10,11 @@ export default function GroupingModes() {
     focused: null,
   });
 
-  const { data, grouping, elementType, randomizeData, Options } = useDemoConfig(
-    {
+  const { data, interactionMode, elementType, randomizeData, Options } =
+    useDemoConfig({
       series: 10,
-      show: ["elementType", "grouping"],
-    }
-  );
+      show: ["elementType", "interactionMode"],
+    });
 
   const primaryAxis = React.useMemo<
     AxisOptions<typeof data[number]["data"][number]>
@@ -49,7 +48,7 @@ export default function GroupingModes() {
         <Chart
           options={{
             data,
-            groupingMode: grouping,
+            interactionMode,
             primaryAxis,
             secondaryAxes,
 

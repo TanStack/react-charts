@@ -1,9 +1,11 @@
 import React from 'react'
+import { Delaunay } from 'd3-delaunay'
 
 //
 import { Datum } from '../types'
-import { getPrimary, translate } from '../utils/Utils'
+import { getPrimary, getX, getY, sortDatums, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
+import { line } from 'd3-shape'
 
 export default function Voronoi<TDatum>() {
   const { getOptions, focusedDatumState } = useChartContext<TDatum>()
@@ -17,7 +19,7 @@ export default function Voronoi<TDatum>() {
     primaryCursor,
     secondaryCursor,
     showVoronoi,
-    groupingMode,
+    interactionMode,
   } = getOptions()
 
   const handleFocus = React.useCallback(
@@ -36,7 +38,6 @@ export default function Voronoi<TDatum>() {
     secondaryCursor ||
     showVoronoi
 
-  // Don't render until we have all dependencies
   if (!needsVoronoi) {
     return null
   }
@@ -45,13 +46,11 @@ export default function Voronoi<TDatum>() {
     handleFocus,
   }
 
-  if (groupingMode === 'primary') {
-    return <PrimaryVoronoi {...props} />
+  if (interactionMode === 'closest') {
+    return <SingleVoronoi {...props} />
   }
 
-  return null
-
-  // return <ClosestVoronoi {...props} />
+  return <PrimaryVoronoi {...props} />
 }
 
 function PrimaryVoronoi<TDatum>({
@@ -65,20 +64,20 @@ function PrimaryVoronoi<TDatum>({
     secondaryAxes,
     getOptions,
     gridDimensions,
-    groupedDatums,
+    datumsByInteractionGroup,
   } = useChartContext<TDatum>()
 
   return React.useMemo(() => {
     const columns = series[0].datums
       .filter(datum => {
-        const primaryValue = primaryAxis.getValue(datum.originalDatum)
+        const primaryValue = datum.primaryValue
         return primaryValue !== 'undefined' && primaryValue !== null
       })
       .map((datum, i, all) => {
         const prev = all[i - 1]
         const next = all[i + 1]
 
-        const primaryValue = primaryAxis.getValue(datum.originalDatum)
+        const primaryValue = datum.primaryValue
         const primaryPx = getPrimary(datum, primaryAxis)
 
         let range = primaryAxis?.scale.range() ?? [0, 0]
@@ -95,27 +94,7 @@ function PrimaryVoronoi<TDatum>({
           primaryEnd = primaryPx + (nextPx - primaryPx) / 2
         }
 
-        const datums = groupedDatums.get(`${primaryValue}`) ?? []
-
-        datums.sort((a, b) => {
-          const aAxis = secondaryAxes.find(d => d.id === a.secondaryAxisId)
-          const bAxis = secondaryAxes.find(d => d.id === b.secondaryAxisId)
-
-          const aPx =
-            aAxis?.scale(
-              aAxis.stacked
-                ? a.stackData?.[1]
-                : aAxis?.getValue(a.originalDatum)
-            ) ?? NaN
-          const bPx =
-            bAxis?.scale(
-              bAxis.stacked
-                ? b.stackData?.[1]
-                : bAxis?.getValue(b.originalDatum)
-            ) ?? NaN
-
-          return aPx - bPx
-        })
+        let datums = datumsByInteractionGroup.get(`${primaryValue}`) ?? []
 
         return {
           primaryStart,
@@ -123,12 +102,7 @@ function PrimaryVoronoi<TDatum>({
           primaryPx,
           datumBoundaries: datums
             .filter(datum => {
-              const secondaryAxis = secondaryAxes.find(
-                d => d.id === datum.secondaryAxisId
-              )
-              const secondaryValue = secondaryAxis?.getValue(
-                datum.originalDatum
-              )
+              const secondaryValue = datum.secondaryValue
               return (
                 typeof secondaryValue !== 'undefined' && secondaryValue !== null
               )
@@ -170,10 +144,7 @@ function PrimaryVoronoi<TDatum>({
                 }
               }
 
-              const value =
-                secondaryAxis?.scale(
-                  secondaryAxis?.getValue(datum.originalDatum)
-                ) ?? NaN
+              const value = secondaryAxis?.scale(datum.secondaryValue) ?? NaN
 
               let range = secondaryAxis?.scale.range() ?? [0, 0]
 
@@ -187,8 +158,7 @@ function PrimaryVoronoi<TDatum>({
                 const prevAxis = secondaryAxes.find(
                   d => d.id === prev?.secondaryAxisId
                 )
-                const prevValue =
-                  prevAxis?.scale(prevAxis?.getValue(prev.originalDatum)) ?? NaN
+                const prevValue = prevAxis?.scale(prev.secondaryValue) ?? NaN
                 secondaryStart = value - (value - prevValue) / 2
               }
 
@@ -196,8 +166,7 @@ function PrimaryVoronoi<TDatum>({
                 const nextAxis = secondaryAxes.find(
                   d => d.id === next?.secondaryAxisId
                 )
-                const nextValue =
-                  nextAxis?.scale(nextAxis?.getValue(next.originalDatum)) ?? NaN
+                const nextValue = nextAxis?.scale(next.secondaryValue) ?? NaN
                 secondaryEnd = value + (nextValue - value) / 2
               }
 
@@ -275,7 +244,7 @@ function PrimaryVoronoi<TDatum>({
     getOptions,
     gridDimensions.left,
     gridDimensions.top,
-    groupedDatums,
+    datumsByInteractionGroup,
     handleFocus,
     primaryAxis,
     secondaryAxes,
@@ -283,77 +252,109 @@ function PrimaryVoronoi<TDatum>({
   ])
 }
 
-// function ClosestVoronoi({
-//   stackData,
-//   extent,
-//   handleFocus,
-//   showVoronoi,
-// }: {
-//   stackData: Series[]
-//   extent: number[][]
-//   handleFocus: (datum: Datum | null) => void
-//   showVoronoi: boolean
-// }) {
-//   let polygons = null
+const delaunayLineFn = line()
 
-//   const voronoiData: { x: number; y: number; datum: Datum }[] = []
+function SingleVoronoi<TDatum>({
+  handleFocus,
+}: {
+  handleFocus: (datum: Datum<TDatum> | null) => void
+}) {
+  const {
+    primaryAxis,
+    series,
+    secondaryAxes,
+    getOptions,
+    gridDimensions,
+    // datumsByInteractionGroup,
+  } = useChartContext<TDatum>()
 
-//   stackData.forEach(series => {
-//     series.datums
-//       .filter(d => d.defined)
-//       .forEach(datum => {
-//         datum.boundingPoints.forEach(boundingPoint => {
-//           if (
-//             typeof datum.x !== 'number' ||
-//             typeof datum.y !== 'number' ||
-//             Number.isNaN(datum.y) ||
-//             Number.isNaN(datum.x)
-//           ) {
-//             return
-//           }
-//           voronoiData.push({
-//             x: boundingPoint.x,
-//             y: boundingPoint.y,
-//             datum,
-//           })
-//         })
-//       })
-//   })
+  let polygons = null
 
-//   const delaunay = Delaunay.from(
-//     voronoiData,
-//     d => Math.max(d.x, 0),
-//     d => Math.max(d.y, 0)
-//   )
+  const voronoiData: { x: number; y: number; datum: Datum<TDatum> }[] = []
 
-//   const flatExtent = extent.flat().map(d => Math.max(d, 0))
+  series.forEach(serie => {
+    serie.datums
+      .filter(datum => {
+        const primaryValue = datum.primaryValue
+        const secondaryValue = datum.secondaryValue
+        return (
+          primaryValue !== 'undefined' &&
+          primaryValue !== null &&
+          secondaryValue !== 'undefined' &&
+          secondaryValue !== null
+        )
+      })
+      .forEach(datum => {
+        const secondaryAxis = secondaryAxes.find(
+          d => d.id === datum.secondaryAxisId
+        )
+        const x = getX(datum, primaryAxis, secondaryAxis!)
+        const y = getY(datum, primaryAxis, secondaryAxis!)
 
-//   const voronoi = delaunay.voronoi(flatExtent)
+        if (
+          typeof x !== 'number' ||
+          typeof y !== 'number' ||
+          Number.isNaN(y) ||
+          Number.isNaN(x)
+        ) {
+          return
+        }
 
-//   polygons = voronoi.cellPolygons()
+        voronoiData.push({
+          x,
+          y,
+          datum,
+        })
+      })
+  })
 
-//   polygons = Array.from(polygons)
+  const delaunay = Delaunay.from(
+    voronoiData,
+    d => Math.max(d.x, 0),
+    d => Math.max(d.y, 0)
+  )
 
-//   return (
-//     <g>
-//       {polygons.map((points, i) => {
-//         const index = points.index
-//         const datum = voronoiData[index].datum
-//         const path = lineFn(points as any) || undefined
-//         return (
-//           <Path
-//             key={i}
-//             d={path}
-//             className="action-voronoi"
-//             onMouseEnter={() => handleFocus(datum)}
-//             onMouseLeave={() => handleFocus(null)}
-//             style={{
-//               fill: randomFill(),
-//               opacity: showVoronoi ? 1 : 0,
-//             }}
-//           />
-//         )
-//       })}
-//     </g>
-//   )
-// }
+  const voronoi = delaunay.voronoi([
+    0,
+    0,
+    gridDimensions.width,
+    gridDimensions.height,
+  ])
+
+  polygons = voronoi.cellPolygons()
+
+  polygons = Array.from(polygons)
+
+  return (
+    <g
+      {...{
+        onMouseLeave: () => handleFocus(null),
+        style: {
+          transform: translate(gridDimensions.left, gridDimensions.top),
+        },
+      }}
+    >
+      {polygons.map((points, i) => {
+        const index = points.index
+        const datum = voronoiData[index].datum
+        const path = delaunayLineFn(points as any) || undefined
+        return (
+          <path
+            {...{
+              key: i,
+              d: path,
+              className: 'action-voronoi',
+              onMouseEnter: () => handleFocus(datum),
+              style: {
+                fill: getOptions().dark ? '#ffffff33' : 'rgba(0,0,0,0.2)',
+                strokeWidth: 1,
+                stroke: getOptions().dark ? 'white' : 'black',
+                opacity: getOptions().showVoronoi ? 1 : 0,
+              },
+            }}
+          />
+        )
+      })}
+    </g>
+  )
+}

@@ -40,11 +40,11 @@ function MyChart({
   activeSeriesIndex,
   setState,
 }: any) {
-  const { data, grouping, randomizeData } = useDemoConfig({
+  const { data, interactionMode, randomizeData } = useDemoConfig({
     series: 4,
-    grouping: "primary",
+    interactionMode: "primary",
     dataType: "ordinal",
-    show: ["elementType", "grouping"],
+    show: ["elementType", "interactionMode"],
   });
 
   const primaryAxis = React.useMemo<
@@ -77,7 +77,7 @@ function MyChart({
         <Chart
           options={{
             data,
-            groupingMode: grouping,
+            interactionMode,
             primaryAxis,
             secondaryAxes,
             getDatumStyle: (datum, status) =>

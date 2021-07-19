@@ -103,7 +103,9 @@ function Cursor<TDatum>(props: {
     d
       ? axis.stacked
         ? d.stackData?.[1]
-        : axis.getValue(d?.originalDatum)
+        : props.primary
+        ? d.primaryValue
+        : d.secondaryValue
       : undefined
 
   const datumValue = resolveValue(focusedDatum)

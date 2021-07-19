@@ -26,7 +26,7 @@ export type ChartOptions<TDatum> = {
     status: DatumFocusStatus
   ) => DatumStyles
   getSeriesOrder?: (series: Series<TDatum>[]) => Series<TDatum>[]
-  groupingMode?: GroupingMode
+  interactionMode?: InteractionMode
   showVoronoi?: boolean
   showDebugAxes?: boolean
   defaultColors?: string[]
@@ -60,27 +60,35 @@ export type ChartOptions<TDatum> = {
 export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
   ChartOptions<TDatum>,
   | 'getSeriesOrder'
-  | 'groupingMode'
+  | 'interactionMode'
+  | 'tooltipMode'
   | 'showVoronoi'
   | 'defaultColors'
   | 'initialWidth'
   | 'initialHeight'
   | 'useIntersectionObserver'
   | 'intersectionObserverThreshold'
-  | 'tooltip'
   | 'primaryCursor'
   | 'secondaryCursor'
   | 'padding'
 >
 
+export type ResolvedChartOptions<TDatum> = Omit<
+  RequiredChartOptions<TDatum>,
+  'tooltip'
+> & {
+  tooltip: ResolvedTooltipOptions<TDatum>
+}
+
 export type ChartContextValue<TDatum> = {
-  getOptions: () => RequiredChartOptions<TDatum>
+  getOptions: () => ResolvedChartOptions<TDatum>
   gridDimensions: GridDimensions
   primaryAxis: Axis<TDatum>
   secondaryAxes: Axis<TDatum>[]
   series: Series<TDatum>[]
   orderedSeries: Series<TDatum>[]
-  groupedDatums: Map<any, Datum<TDatum>[]>
+  datumsByInteractionGroup: Map<any, Datum<TDatum>[]>
+  datumsByTooltipGroup: Map<any, Datum<TDatum>[]>
   width: number
   height: number
   svgRef: RefObject<SVGSVGElement>
@@ -106,7 +114,9 @@ export type TooltipOptions<TDatum> = {
   align?: AlignMode
   alignPriority?: AlignPosition[]
   padding?: number
-  tooltipArrowPadding?: number
+  arrowPadding?: number
+  groupingMode?: TooltipGroupingMode
+  show?: boolean
   // anchor?: AnchorMode
   // arrowPosition?: AlignPosition
   render?: (props: TooltipRendererProps<TDatum>) => React.ReactNode
@@ -117,12 +127,7 @@ export type TooltipOptions<TDatum> = {
 
 export type ResolvedTooltipOptions<TDatum> = TSTB.Object.Required<
   TooltipOptions<TDatum>,
-  | 'align'
-  | 'alignPriority'
-  | 'padding'
-  | 'tooltipArrowPadding'
-  | 'anchor'
-  | 'render'
+  'align' | 'alignPriority' | 'padding' | 'arrowPadding' | 'anchor' | 'render'
 >
 
 export type SeriesStyles = CSSProperties & {
@@ -141,7 +146,8 @@ export type DatumStyles = CSSProperties & {
 
 export type Position = 'top' | 'right' | 'bottom' | 'left'
 
-export type GroupingMode = 'single' | 'series' | 'primary' | 'secondary'
+export type InteractionMode = 'closest' | 'primary'
+export type TooltipGroupingMode = 'single' | 'primary' | 'secondary' | 'series'
 
 export type AlignMode =
   | 'auto'
@@ -433,8 +439,11 @@ export type Datum<TDatum> = {
   index: number
   originalDatum: TDatum
   secondaryAxisId?: string
+  primaryValue?: any
+  secondaryValue?: any
   stackData?: StackDatum<TDatum>
-  group?: Datum<TDatum>[]
+  interactiveGroup?: Datum<TDatum>[]
+  tooltipGroup?: Datum<TDatum>[]
   style?: CSSProperties
   element?: Element | null
 }

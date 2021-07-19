@@ -14,10 +14,17 @@ import { useSpring } from '../hooks/useSpring'
 
 //
 
-function defaultTooltip<TDatum>(
-  options: TooltipOptions<TDatum> = {}
+export function defaultTooltip<TDatum>(
+  options: boolean | TooltipOptions<TDatum> = {}
 ): ResolvedTooltipOptions<TDatum> {
+  if (options === true) {
+    options = { show: true }
+  } else if (options === false) {
+    options = { show: false }
+  }
+
   return {
+    show: true,
     ...options,
     align: options.align ?? 'auto',
     alignPriority: options.alignPriority ?? [
@@ -31,7 +38,7 @@ function defaultTooltip<TDatum>(
       'bottom',
     ],
     padding: options.padding ?? 5,
-    tooltipArrowPadding: options.tooltipArrowPadding ?? 7,
+    arrowPadding: options.arrowPadding ?? 7,
     // anchor: options.anchor ?? 'closest',
     render: options.render ?? TooltipRenderer,
   }
@@ -50,19 +57,9 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
   const [focusedDatum] = focusedDatumState
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
-  const preTooltipOptions = getOptions().tooltip ?? true
-
   const secondaryAxis =
     secondaryAxes.find(d => d.id === latestFocusedDatum?.secondaryAxisId) ??
     secondaryAxes[0]
-
-  const tooltipOptions = React.useMemo(
-    () =>
-      defaultTooltip(
-        typeof preTooltipOptions === 'boolean' ? {} : preTooltipOptions
-      ),
-    [preTooltipOptions]
-  )
 
   const portalEl = usePortalElement()
 
@@ -159,7 +156,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
   //   },
   // })
 
-  const show = !!preTooltipOptions
+  const show = getOptions().tooltip.show
 
   const latestFit = useLatestWhen(anchor.fit, !!anchor.fit)
 
@@ -186,7 +183,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
                   }),
             }}
           >
-            {tooltipOptions.render({
+            {getOptions().tooltip.render({
               getOptions,
               focusedDatum: latestFocusedDatum,
               primaryAxis,

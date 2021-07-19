@@ -11,7 +11,8 @@ const options = {
   secondaryAxisStack: [true, false],
   primaryAxisShow: [true, false],
   secondaryAxisShow: [true, false],
-  grouping: ["single", "series", "primary", "secondary"],
+  interactionMode: ["primary", "closest"],
+  tooltipGroupingMode: ["single", "primary", "secondary", "series"],
   tooltipAnchor: [
     "closest",
     "top",
@@ -49,7 +50,8 @@ type PrimaryAxisPosition = typeof options["primaryAxisPosition"][number];
 type SecondaryAxisPosition = typeof options["secondaryAxisPosition"][number];
 type TooltipAnchor = typeof options["tooltipAnchor"][number];
 type TooltipAlign = typeof options["tooltipAlign"][number];
-type Grouping = typeof options["grouping"][number];
+type InteractionMode = typeof options["interactionMode"][number];
+type TooltipGroupingMode = typeof options["tooltipGroupingMode"][number];
 
 const optionKeys = Object.keys(options) as (keyof typeof options)[];
 
@@ -73,7 +75,8 @@ export default function useChartConfig({
   secondaryAxisShow = true,
   tooltipAnchor = "closest",
   tooltipAlign = "auto",
-  grouping = "primary",
+  interactionMode = "primary",
+  tooltipGroupingMode = "primary",
   snapCursor = true,
 }: {
   series: number;
@@ -95,7 +98,8 @@ export default function useChartConfig({
   secondaryAxisShow?: boolean;
   tooltipAnchor?: TooltipAnchor;
   tooltipAlign?: TooltipAlign;
-  grouping?: Grouping;
+  interactionMode?: InteractionMode;
+  tooltipGroupingMode?: TooltipGroupingMode;
   snapCursor?: boolean;
 }) {
   const [state, setState] = React.useState({
@@ -114,7 +118,8 @@ export default function useChartConfig({
     secondaryAxisShow,
     tooltipAnchor,
     tooltipAlign,
-    grouping,
+    interactionMode,
+    tooltipGroupingMode,
     snapCursor,
     datums,
     data: makeDataFrom(dataType, series, datums, useR),

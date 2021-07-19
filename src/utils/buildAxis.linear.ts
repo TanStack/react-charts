@@ -1,4 +1,5 @@
 import { extent, max, median, min, range as d3Range } from 'd3-array'
+import { stack, stackOffsetNone } from 'd3-shape'
 import {
   scaleLinear,
   scaleLog,
@@ -19,9 +20,11 @@ import {
   AxisTime,
   AxisTimeOptions,
   BuildAxisOptions,
+  Datum,
   GridDimensions,
   ResolvedAxisOptions,
   Series,
+  StackDatum,
 } from '../types'
 
 function defaultAxisOptions<TDatum>(
@@ -43,6 +46,7 @@ export default function buildAxisLinear<TDatum>(
   isPrimary: boolean,
   userOptions: BuildAxisOptions<TDatum>,
   series: Series<TDatum>[],
+  allDatums: Datum<TDatum>[],
   gridDimensions: GridDimensions,
   width: number,
   height: number
@@ -64,11 +68,27 @@ export default function buildAxisLinear<TDatum>(
 
   // Give the scale a home
   return options.scaleType === 'time' || options.scaleType === 'localTime'
-    ? buildTimeAxis(isPrimary, options, series, isVertical, range, outerRange)
+    ? buildTimeAxis(
+        isPrimary,
+        options,
+        series,
+        allDatums,
+        isVertical,
+        range,
+        outerRange
+      )
     : options.scaleType === 'linear' || options.scaleType === 'log'
-    ? buildLinearAxis(isPrimary, options, series, isVertical, range, outerRange)
+    ? buildLinearAxis(
+        isPrimary,
+        options,
+        series,
+        allDatums,
+        isVertical,
+        range,
+        outerRange
+      )
     : options.scaleType === 'band'
-    ? buildBandAxis(options, series, isVertical, range, outerRange)
+    ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
     : (() => {
         throw new Error('Invalid scale type')
       })()
@@ -78,6 +98,7 @@ function buildTimeAxis<TDatum>(
   isPrimary: boolean,
   options: ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
   series: Series<TDatum>[],
+  allDatums: Datum<TDatum>[],
   isVertical: boolean,
   range: [number, number],
   outerRange: [number, number]
@@ -87,11 +108,11 @@ function buildTimeAxis<TDatum>(
   // Now set the range
   const scale = scaleFn(range)
 
-  const allDatums = series.map(d => d.datums).flat()
-
-  let [minValue, maxValue] = extent(allDatums, datum =>
-    options.getValue(datum.originalDatum)
-  )
+  let [minValue, maxValue] = extent(allDatums, datum => {
+    const value = options.getValue(datum.originalDatum)
+    datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+    return value
+  })
 
   let shouldNice = true
 
@@ -120,7 +141,9 @@ function buildTimeAxis<TDatum>(
       options,
       series,
       range,
-      values: allDatums.map(d => options.getValue(d.originalDatum)),
+      values: allDatums.map(d =>
+        isPrimary ? d.primaryValue : d.secondaryValue
+      ),
     })
     throw new Error('Invalid scale min/max')
   }
@@ -184,21 +207,35 @@ function buildLinearAxis<TDatum>(
   isPrimary: boolean,
   options: ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
   series: Series<TDatum>[],
+  allDatums: Datum<TDatum>[],
   isVertical: boolean,
   range: [number, number],
   outerRange: [number, number]
 ): AxisLinear<TDatum> {
   const scale = options.scaleType === 'log' ? scaleLog() : scaleLinear()
 
-  const allDatums = series.map(d => d.datums).flat(2)
+  if (options.stacked) {
+    stackSeries(series, options)
+  }
 
   let [minValue, maxValue] = options.stacked
     ? extent(
         series
-          .map(s => s.datums.map(datum => datum.stackData ?? []))
+          .map(s =>
+            s.datums.map(datum => {
+              const value = options.getValue(datum.originalDatum)
+              datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+
+              return datum.stackData ?? []
+            })
+          )
           .flat(2) as unknown as number[]
       )
-    : extent(allDatums, datum => options.getValue(datum.originalDatum))
+    : extent(allDatums, datum => {
+        const value = options.getValue(datum.originalDatum)
+        datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+        return value
+      })
 
   let shouldNice = true
 
@@ -238,7 +275,9 @@ function buildLinearAxis<TDatum>(
       options,
       series,
       range,
-      values: allDatums.map(d => options.getValue(d.originalDatum)),
+      values: allDatums.map(d =>
+        isPrimary ? d.primaryValue : d.secondaryValue
+      ),
     })
     throw new Error('Invalid scale min/max')
   }
@@ -300,6 +339,7 @@ function buildLinearAxis<TDatum>(
 }
 
 function buildBandAxis<TDatum>(
+  isPrimary: boolean,
   options: ResolvedAxisOptions<AxisBandOptions<TDatum>>,
   series: Series<TDatum>[],
   isVertical: boolean,
@@ -311,7 +351,11 @@ function buildBandAxis<TDatum>(
       series
         .map(d => d.datums)
         .flat()
-        .map(datum => options.getValue(datum.originalDatum))
+        .map(datum => {
+          const value = options.getValue(datum.originalDatum)
+          datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+          return value
+        })
     )
   )
 
@@ -365,6 +409,45 @@ function buildBandAxis<TDatum>(
 
 //
 
+function stackSeries<TDatum>(
+  series: Series<TDatum>[],
+  axisOptions: AxisOptions<TDatum>
+) {
+  const axisSeries = series.filter(s => s.secondaryAxisId === axisOptions.id)
+  const seriesIndices = Object.keys(axisSeries)
+  const stacker = stack()
+    .keys(seriesIndices)
+    .value((_, seriesIndex, index) => {
+      const val = axisOptions.getValue(
+        axisSeries[Number(seriesIndex)].datums[index].originalDatum
+      )
+
+      if (typeof val === 'undefined' || val === null) {
+        return 0
+      }
+
+      return val
+    })
+    .offset(axisOptions.stackOffset ?? stackOffsetNone)
+
+  const stacked = stacker(
+    Array.from({
+      length: axisSeries.sort((a, b) => b.datums.length - a.datums.length)[0]
+        .datums.length,
+    })
+  )
+
+  stacked.forEach((s, sIndex) => {
+    s.forEach((datum, i) => {
+      // @ts-ignore
+      datum.data = axisSeries[sIndex].datums[i]
+
+      axisSeries[sIndex].datums[i].stackData =
+        datum as unknown as StackDatum<TDatum>
+    })
+  })
+}
+
 function buildImpliedBandScale<TDatum>(
   options: ResolvedAxisOptions<AxisOptions<TDatum>>,
   scale: ScaleTime<number, number, never> | ScaleLinear<number, number, never>,
@@ -377,10 +460,10 @@ function buildImpliedBandScale<TDatum>(
 
   series.forEach(serie => {
     serie.datums.forEach(d1 => {
-      const one = scale(options.getValue(d1.originalDatum) ?? NaN)
+      const one = scale(d1.primaryValue ?? NaN)
 
       serie.datums.forEach(d2 => {
-        const two = scale(options.getValue(d2.originalDatum) ?? NaN)
+        const two = scale(d2.primaryValue ?? NaN)
 
         if (one === two) {
           return

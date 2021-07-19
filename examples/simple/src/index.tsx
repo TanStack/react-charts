@@ -1,3 +1,10 @@
+import "./styles.css";
+import useLagRadar from "./useLagRadar";
+import React from "react";
+import ReactDOM from "react-dom";
+
+//
+
 import Area from "./components/Area";
 import Band from "./components/Band";
 import Bar from "./components/Bar";
@@ -5,16 +12,12 @@ import Bubble from "./components/Bubble";
 import CustomStyles from "./components/CustomStyles";
 import DarkMode from "./components/DarkMode";
 import DynamicContainer from "./components/DynamicContainer";
-import GroupingModes from "./components/GroupingModes";
+import InteractionMode from "./components/InteractionMode";
 import Line from "./components/Line";
 import MultipleAxes from "./components/MultipleAxes";
 import Steam from "./components/Steam";
 import BarHorizontal from "./components/BarHorizontal";
 import SparkChart from "./components/SparkChart";
-import "./styles.css";
-import useLagRadar from "./useLagRadar";
-import React from "react";
-import ReactDOM from "react-dom";
 import SyncedCursors from "./components/SyncedCursors";
 import StressTest from "./components/StressTest";
 
@@ -28,7 +31,7 @@ const components = [
   ["Steam", Steam],
   ["Spark Chart", SparkChart],
   ["Multiple Axes", MultipleAxes],
-  ["Grouping Modes", GroupingModes],
+  ["Interaction Modes", InteractionMode],
   ["Dark Mode", DarkMode],
   ["Dynamic / Overflow Container", DynamicContainer],
   ["Custom Styles", CustomStyles],

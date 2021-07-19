@@ -41,7 +41,7 @@ export default function Bubble() {
             data,
             primaryAxis,
             secondaryAxes,
-            groupingMode: "single",
+            interactionMode: "closest",
             getSeriesStyle: () => ({ line: { opacity: 0 } }),
             getDatumStyle: (datum) =>
               ({

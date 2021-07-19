@@ -8,7 +8,7 @@ import {
   AxisLinear,
   AxisTime,
   Datum,
-  RequiredChartOptions,
+  ResolvedChartOptions,
 } from '../types'
 
 //
@@ -23,7 +23,7 @@ const getBackgroundColor = (dark?: boolean) =>
 
 export type TooltipRendererProps<TDatum> = {
   focusedDatum: Datum<TDatum> | null
-  getOptions: () => RequiredChartOptions<TDatum>
+  getOptions: () => ResolvedChartOptions<TDatum>
   primaryAxis: Axis<TDatum>
   secondaryAxis: Axis<TDatum>
   getDatumStyle: (datum: Datum<TDatum>) => CSSProperties
@@ -45,9 +45,9 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
 
   const { primaryAxis, secondaryAxis, getDatumStyle, focusedDatum } = props
 
-  const { groupingMode, dark } = props.getOptions()
+  const { tooltip, dark } = props.getOptions()
 
-  const groupDatums = props.focusedDatum?.group ?? []
+  const groupDatums = props.focusedDatum?.tooltipGroup ?? []
 
   const resolvedShowCount = showCount % 2 === 0 ? showCount : showCount + 1
   const length = groupDatums.length
@@ -202,18 +202,18 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
             textAlign: 'center',
           }}
         >
-          {groupingMode === 'series' ? (
+          {tooltip.groupingMode === 'series' ? (
             <strong>{focusedDatum.seriesLabel}</strong>
-          ) : groupingMode === 'secondary' ? (
+          ) : tooltip.groupingMode === 'secondary' ? (
             <strong>
               {(secondaryAxis as AxisTime<any>).formatters.tooltip(
-                secondaryAxis.getValue(focusedDatum.originalDatum)
+                focusedDatum.secondaryValue
               )}
             </strong>
           ) : (
             <strong>
               {(primaryAxis as AxisTime<any>).formatters.tooltip(
-                primaryAxis.getValue(focusedDatum.originalDatum)
+                focusedDatum.primaryValue
               )}
             </strong>
           )}
@@ -266,11 +266,11 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                       />
                     </svg>
                   </td>
-                  {groupingMode === 'series' ? (
+                  {tooltip.groupingMode === 'series' ? (
                     <React.Fragment>
                       <td>
                         {(primaryAxis as AxisTime<any>).formatters.tooltip(
-                          primaryAxis.getValue(sortedDatum.originalDatum)
+                          sortedDatum.primaryValue
                         )}
                         : &nbsp;
                       </td>
@@ -280,11 +280,11 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                         }}
                       >
                         {(secondaryAxis as AxisTime<any>).formatters.tooltip(
-                          secondaryAxis.getValue(sortedDatum.originalDatum)
+                          sortedDatum.secondaryValue
                         )}
                       </td>
                     </React.Fragment>
-                  ) : groupingMode === 'secondary' ? (
+                  ) : tooltip.groupingMode === 'secondary' ? (
                     <React.Fragment>
                       <td>{sortedDatum.seriesLabel}: &nbsp;</td>
                       <td
@@ -293,7 +293,7 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                         }}
                       >
                         {(primaryAxis as AxisTime<any>).formatters.tooltip(
-                          primaryAxis.getValue(sortedDatum.originalDatum)
+                          sortedDatum.primaryValue
                         )}
                       </td>
                     </React.Fragment>
@@ -306,7 +306,7 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                         }}
                       >
                         {(secondaryAxis as AxisTime<any>).formatters.tooltip(
-                          secondaryAxis.getValue(sortedDatum.originalDatum)
+                          sortedDatum.secondaryValue
                         )}
                       </td>
                     </React.Fragment>
@@ -325,7 +325,8 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                 <td />
               </tr>
             ) : null}
-            {secondaryAxis.stacked && (focusedDatum.group ?? []).length > 1 ? (
+            {secondaryAxis.stacked &&
+            (focusedDatum.tooltipGroup ?? []).length > 1 ? (
               <tr>
                 <td
                   style={{
@@ -360,9 +361,7 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                   -1
                 )} */}
                   {(secondaryAxis as AxisLinear<any>).formatters.scale(
-                    sum(focusedDatum.group ?? [], d =>
-                      secondaryAxis.getValue(d.originalDatum)
-                    )
+                    sum(focusedDatum.tooltipGroup ?? [], d => d.secondaryValue)
                   )}
                 </td>
               </tr>

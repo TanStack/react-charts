@@ -1,5 +1,4 @@
 import { groups, sort, sum } from 'd3-array'
-import { stack, stackOffsetNone } from 'd3-shape'
 import React, { ComponentPropsWithoutRef } from 'react'
 
 import useGetLatest from '../hooks/useGetLatest'
@@ -26,13 +25,14 @@ import {
   materializeStyles,
   getSeriesStatus,
   getDatumStatus,
+  sortDatums,
 } from '../utils/Utils'
 import buildAxisLinear from '../utils/buildAxis.linear'
 import { ChartContextProvider } from '../utils/chartContext'
 import AxisLinear from './AxisLinear'
 // import Brush from './Brush'
 import Cursors from './Cursors'
-import Tooltip from './Tooltip'
+import Tooltip, { defaultTooltip } from './Tooltip'
 import Voronoi from './Voronoi'
 
 //
@@ -69,13 +69,12 @@ function defaultChartOptions<TDatum>(
     initialHeight: options.initialHeight ?? 200,
     getSeriesOrder:
       options.getSeriesOrder ?? ((series: Series<TDatum>[]) => series),
-    groupingMode: options.groupingMode ?? 'primary',
+    interactionMode: options.interactionMode ?? 'primary',
     showVoronoi: options.showVoronoi ?? false,
     defaultColors: options.defaultColors ?? defaultColorScheme,
     useIntersectionObserver: options.useIntersectionObserver ?? true,
     intersectionObserverRootMargin:
       options.intersectionObserverRootMargin ?? '1000px',
-    tooltip: options.tooltip ?? true,
     primaryCursor: options.primaryCursor ?? true,
     secondaryCursor: options.secondaryCursor ?? true,
     padding: options.padding ?? defaultPadding,
@@ -275,8 +274,30 @@ function ChartInner<TDatum>({
     )
   }, [options.data, options.secondaryAxes, primaryAxisOptions])
 
+  // Resolve Tooltip Option
+  const tooltipOptions = React.useMemo(() => {
+    const tooltipOptions = defaultTooltip(options?.tooltip)
+    tooltipOptions.groupingMode =
+      tooltipOptions.groupingMode ??
+      (() => {
+        if (options.interactionMode === 'closest') {
+          return 'single'
+        }
+        return 'primary'
+      })()
+
+    return tooltipOptions
+  }, [options.interactionMode, options?.tooltip])
+
+  options = {
+    ...options,
+    tooltip: tooltipOptions,
+  }
+
+  //
+
   const svgRef = React.useRef<SVGSVGElement>(null)
-  const getOptions = useGetLatest(options)
+  const getOptions = useGetLatest({ ...options, tooltip: tooltipOptions })
 
   const axisDimensionsState = React.useState<AxisDimensions>({
     left: {},
@@ -400,62 +421,24 @@ function ChartInner<TDatum>({
       }
     }
 
-    if (secondaryAxesOptions.some(axisOptions => axisOptions.stacked)) {
-      secondaryAxesOptions
-        .filter(d => d.stacked)
-        .forEach(secondaryAxis => {
-          const axisSeries = series.filter(
-            s => s.secondaryAxisId === secondaryAxis.id
-          )
-          const seriesIndices = Object.keys(axisSeries)
-          const stacker = stack()
-            .keys(seriesIndices)
-            .value((_, seriesIndex, index) => {
-              const val = secondaryAxis.getValue(
-                axisSeries[Number(seriesIndex)].datums[index].originalDatum
-              )
-
-              if (typeof val === 'undefined' || val === null) {
-                return 0
-              }
-
-              return val
-            })
-            .offset(secondaryAxis.stackOffset ?? stackOffsetNone)
-
-          const stacked = stacker(
-            Array.from({
-              length: axisSeries.sort(
-                (a, b) => b.datums.length - a.datums.length
-              )[0].datums.length,
-            })
-          )
-
-          stacked.forEach((s, sIndex) => {
-            s.forEach((datum, i) => {
-              // @ts-ignore
-              datum.data = axisSeries[sIndex].datums[i]
-
-              axisSeries[sIndex].datums[i].stackData =
-                datum as unknown as StackDatum<TDatum>
-            })
-          })
-        })
-    }
-
     return series
-  }, [options.data, secondaryAxesOptions])
+  }, [options.data])
+
+  let allDatums = React.useMemo(() => {
+    return series.map(s => s.datums).flat(2)
+  }, [series])
 
   const primaryAxis = React.useMemo(() => {
     return buildAxisLinear<TDatum>(
       true,
       primaryAxisOptions,
       series,
+      allDatums,
       gridDimensions,
       width,
       height
     )
-  }, [gridDimensions, height, primaryAxisOptions, series, width])
+  }, [allDatums, gridDimensions, height, primaryAxisOptions, series, width])
 
   const secondaryAxes = React.useMemo(() => {
     return secondaryAxesOptions.map(secondaryAxis => {
@@ -463,36 +446,67 @@ function ChartInner<TDatum>({
         false,
         secondaryAxis,
         series,
+        allDatums,
         gridDimensions,
         width,
         height
       )
     })
-  }, [gridDimensions, height, secondaryAxesOptions, series, width])
+  }, [allDatums, gridDimensions, height, secondaryAxesOptions, series, width])
 
-  const groupedDatums = React.useMemo(() => {
-    const groupedDatums = new Map<any, Datum<TDatum>[]>()
+  const [datumsByInteractionGroup, datumsByTooltipGroup] = React.useMemo(() => {
+    const datumsByInteractionGroup = new Map<any, Datum<TDatum>[]>()
+    const datumsByTooltipGroup = new Map<any, Datum<TDatum>[]>()
 
-    const allDatums = series.map(s => s.datums).flat(2)
+    let getInteractionKey = (datum: Datum<TDatum>) => `${datum.primaryValue}`
+    let getTooltipKey = (datum: Datum<TDatum>) => `${datum.primaryValue}`
+
+    if (options.interactionMode === 'closest') {
+      getInteractionKey = datum =>
+        `${datum.primaryValue}_${datum.secondaryValue}`
+    }
+
+    if (tooltipOptions.groupingMode === 'single') {
+      getTooltipKey = datum => `${datum.primaryValue}_${datum.secondaryValue}`
+    } else if (tooltipOptions.groupingMode === 'secondary') {
+      getTooltipKey = datum => `${datum.secondaryValue}`
+    } else if (tooltipOptions.groupingMode === 'series') {
+      getTooltipKey = datum => `${datum.seriesIndex}`
+    }
 
     allDatums.forEach(datum => {
-      const primaryValue = `${primaryAxis.getValue(datum.originalDatum)}`
+      const interactionKey = (getInteractionKey as Function)(datum)
+      const tooltipKey = (getTooltipKey as Function)(datum)
 
-      if (!groupedDatums.has(primaryValue)) {
-        groupedDatums.set(primaryValue, [])
+      if (!datumsByInteractionGroup.has(interactionKey)) {
+        datumsByInteractionGroup.set(interactionKey, [])
       }
 
-      groupedDatums.get(primaryValue)!.push(datum)
+      if (!datumsByTooltipGroup.has(tooltipKey)) {
+        datumsByTooltipGroup.set(tooltipKey, [])
+      }
+
+      datumsByInteractionGroup.get(interactionKey)!.push(datum)
+      datumsByTooltipGroup.get(tooltipKey)!.push(datum)
+    })
+
+    datumsByInteractionGroup.forEach((value, key) => {
+      datumsByInteractionGroup.set(key, sortDatums(value, secondaryAxes))
+    })
+
+    datumsByTooltipGroup.forEach((value, key) => {
+      datumsByTooltipGroup.set(key, sortDatums(value, secondaryAxes))
     })
 
     allDatums.forEach(datum => {
-      const primaryValue = `${primaryAxis.getValue(datum.originalDatum)}`
-
-      datum.group = groupedDatums.get(primaryValue)
+      const interactionKey = (getInteractionKey as Function)(datum)
+      const tooltipKey = (getTooltipKey as Function)(datum)
+      datum.interactiveGroup = datumsByInteractionGroup.get(interactionKey)
+      datum.tooltipGroup = datumsByTooltipGroup.get(tooltipKey)
     })
 
-    return groupedDatums
-  }, [primaryAxis, series])
+    return [datumsByInteractionGroup, datumsByTooltipGroup]
+  }, [allDatums, options.interactionMode, tooltipOptions.groupingMode])
 
   const getSeriesStatusStyle = React.useCallback(
     (series: Series<TDatum>, focusedDatum: Datum<TDatum> | null) => {
@@ -556,7 +570,8 @@ function ChartInner<TDatum>({
     secondaryAxes,
     series,
     orderedSeries,
-    groupedDatums,
+    datumsByInteractionGroup,
+    datumsByTooltipGroup,
     width,
     height,
     getSeriesStatusStyle,

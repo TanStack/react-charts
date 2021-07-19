@@ -28,7 +28,7 @@ export function getDatumStatus<TDatum>(
   }
 
   if (
-    datum.group?.some(groupDatum => {
+    datum.tooltipGroup?.some(groupDatum => {
       groupDatum.seriesId === focusedDatum?.seriesId &&
         groupDatum.index === focusedDatum?.index
     })
@@ -110,7 +110,7 @@ export function getSecondary<TDatum>(
     return secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
   }
 
-  return secondaryAxis.scale(secondaryAxis.getValue(datum.originalDatum)) ?? NaN
+  return secondaryAxis.scale(datum.secondaryValue) ?? NaN
 }
 
 export function getPrimary<TDatum>(
@@ -122,8 +122,7 @@ export function getPrimary<TDatum>(
   if (primaryAxis.stacked) {
     primary = primaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
   } else {
-    primary =
-      primaryAxis.scale(primaryAxis.getValue(datum.originalDatum)) ?? NaN
+    primary = primaryAxis.scale(datum.primaryValue) ?? NaN
   }
 
   if (primaryAxis.axisFamily === 'band') {
@@ -266,4 +265,21 @@ export function getTickPx<TDatum>(scale: Axis<TDatum>['scale'], value: any) {
   }
 
   return px
+}
+
+export function sortDatums<TDatum>(
+  datums: Datum<TDatum>[],
+  secondaryAxes: Axis<TDatum>[]
+) {
+  return [...datums].sort((a, b) => {
+    const aAxis = secondaryAxes.find(d => d.id === a.secondaryAxisId)
+    const bAxis = secondaryAxes.find(d => d.id === b.secondaryAxisId)
+
+    const aPx =
+      aAxis?.scale(aAxis.stacked ? a.stackData?.[1] : a.secondaryValue) ?? NaN
+    const bPx =
+      bAxis?.scale(bAxis.stacked ? b.stackData?.[1] : b.secondaryValue) ?? NaN
+
+    return aPx - bPx
+  })
 }
