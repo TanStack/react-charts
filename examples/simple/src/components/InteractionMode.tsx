@@ -44,6 +44,9 @@ export default function GroupingModes() {
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
       <br />
+      <em>Voronoi is shown for demonstration purposes</em>
+      <br />
+      <br />
       <ResizableBox>
         <Chart
           options={{
@@ -51,7 +54,7 @@ export default function GroupingModes() {
             interactionMode,
             primaryAxis,
             secondaryAxes,
-
+            showVoronoi: true,
             onClickDatum: (datum) => {
               if (datum) setState((old) => ({ ...old, clicked: datum as any }));
             },
