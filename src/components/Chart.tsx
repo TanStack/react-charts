@@ -647,6 +647,11 @@ function ChartInner<TDatum>({
           }}
           onClick={e => options.onClickDatum?.(focusedDatum, e)}
         >
+          <g className="axes">
+            {[primaryAxis, ...secondaryAxes].map(axis => (
+              <AxisLinear key={[axis.position, axis.id].join('')} {...axis} />
+            ))}
+          </g>
           <g
             className="Series"
             style={{
@@ -654,11 +659,6 @@ function ChartInner<TDatum>({
             }}
           >
             {seriesEl}
-          </g>
-          <g className="axes">
-            {[primaryAxis, ...secondaryAxes].map(axis => (
-              <AxisLinear key={[axis.position, axis.id].join('')} {...axis} />
-            ))}
           </g>
           <Voronoi />
           {options.renderSVG?.() ?? null}
