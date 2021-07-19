@@ -448,11 +448,6 @@ export type GridDimensions = {
   gridHeight: number
 }
 
-export type AxesInfo = {
-  xKey: 'primary' | 'secondary'
-  yKey: 'primary' | 'secondary'
-}
-
 export type CursorOptions = {
   value?: unknown
   show?: boolean

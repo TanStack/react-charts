@@ -9,7 +9,6 @@ import Bar from '../seriesTypes/Bar'
 import Line from '../seriesTypes/Line'
 //
 import {
-  AxesInfo,
   AxisDimension,
   AxisDimensions,
   AxisOptions,
