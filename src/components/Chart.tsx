@@ -70,7 +70,7 @@ function defaultChartOptions<TDatum>(
     getSeriesOrder:
       options.getSeriesOrder ?? ((series: Series<TDatum>[]) => series),
     interactionMode: options.interactionMode ?? 'primary',
-    showVoronoi: options.showVoronoi ?? true,
+    showVoronoi: options.showVoronoi ?? false,
     defaultColors: options.defaultColors ?? defaultColorScheme,
     useIntersectionObserver: options.useIntersectionObserver ?? true,
     intersectionObserverRootMargin:
