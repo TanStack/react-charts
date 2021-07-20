@@ -18,7 +18,6 @@ import {
   GridDimensions,
   RequiredChartOptions,
   Series,
-  StackDatum,
   UserSerie,
 } from '../types'
 import {

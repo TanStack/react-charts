@@ -3,13 +3,7 @@ import { Delaunay } from 'd3-delaunay'
 
 //
 import { Datum } from '../types'
-import {
-  getPrimary,
-  getX,
-  getY,
-  sortDatumsBySecondaryPx,
-  translate,
-} from '../utils/Utils'
+import { getPrimary, getX, getY, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 import { line } from 'd3-shape'
 
