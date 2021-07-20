@@ -25,6 +25,7 @@ export type TooltipRendererProps<TDatum> = {
   focusedDatum: Datum<TDatum> | null
   getOptions: () => ResolvedChartOptions<TDatum>
   primaryAxis: Axis<TDatum>
+  secondaryAxes: Axis<TDatum>[]
   secondaryAxis: Axis<TDatum>
   getDatumStyle: (datum: Datum<TDatum>) => CSSProperties
   anchor: ReturnType<typeof useAnchor>
@@ -325,47 +326,58 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                 <td />
               </tr>
             ) : null}
-            {secondaryAxis.stacked &&
-            (focusedDatum.tooltipGroup ?? []).length > 1 ? (
-              <tr>
-                <td
-                  style={{
-                    paddingTop: '5px',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      backgroundColor: dark
-                        ? 'rgba(0, 26, 39, 0.3)'
-                        : 'rgba(255,255,255,.2)',
-                      borderRadius: '50px',
-                    }}
-                  />
-                </td>
-                <td
-                  style={{
-                    paddingTop: '5px',
-                  }}
-                >
-                  Total: &nbsp;
-                </td>
-                <td
-                  style={{
-                    paddingTop: '5px',
-                  }}
-                >
-                  {/* {secondaryAxis.format(
+            {(focusedDatum.tooltipGroup ?? []).length > 1
+              ? props.secondaryAxes
+                  .filter(d => d.stacked)
+                  .map((secondaryAxis, i) => {
+                    return (
+                      <tr key={`${secondaryAxis.id}_${i}`}>
+                        <td
+                          style={{
+                            paddingTop: '5px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: '12px',
+                              height: '12px',
+                              backgroundColor: dark
+                                ? 'rgba(0, 26, 39, 0.3)'
+                                : 'rgba(255,255,255,.2)',
+                              borderRadius: '50px',
+                            }}
+                          />
+                        </td>
+                        <td
+                          style={{
+                            paddingTop: '5px',
+                          }}
+                        >
+                          {props.secondaryAxes.length > 1
+                            ? secondaryAxis.id ?? `Axis ${i + 1} `
+                            : ''}
+                          Total: &nbsp;
+                        </td>
+                        <td
+                          style={{
+                            paddingTop: '5px',
+                          }}
+                        >
+                          {/* {secondaryAxis.format(
                   [...focusedDatum.group].reverse()[0].totalValue,
                   -1
                 )} */}
-                  {(secondaryAxis as AxisLinear<any>).formatters.scale(
-                    sum(focusedDatum.tooltipGroup ?? [], d => d.secondaryValue)
-                  )}
-                </td>
-              </tr>
-            ) : null}
+                          {(secondaryAxis as AxisLinear<any>).formatters.scale(
+                            sum(
+                              focusedDatum.tooltipGroup ?? [],
+                              d => d.secondaryValue
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })
+              : null}
           </tbody>
         </table>
       </div>

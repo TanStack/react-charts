@@ -249,7 +249,7 @@ export type AxisOptionsBase = {
   show?: boolean
   stacked?: boolean
   stackOffset?: typeof stackOffsetNone
-  id?: string
+  id?: string | number
   styles?: CSSProperties & {
     line?: CSSProperties
     tick?: CSSProperties

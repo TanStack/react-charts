@@ -187,6 +187,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
               getOptions,
               focusedDatum: latestFocusedDatum,
               primaryAxis,
+              secondaryAxes,
               secondaryAxis,
               getDatumStyle: (datum: Datum<TDatum>) =>
                 getDatumStatusStyle(datum, focusedDatum),

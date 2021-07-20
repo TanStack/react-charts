@@ -25,7 +25,7 @@ import {
   materializeStyles,
   getSeriesStatus,
   getDatumStatus,
-  sortDatums,
+  sortDatumsBySecondaryPx,
 } from '../utils/Utils'
 import buildAxisLinear from '../utils/buildAxis.linear'
 import { ChartContextProvider } from '../utils/chartContext'
@@ -70,7 +70,7 @@ function defaultChartOptions<TDatum>(
     getSeriesOrder:
       options.getSeriesOrder ?? ((series: Series<TDatum>[]) => series),
     interactionMode: options.interactionMode ?? 'primary',
-    showVoronoi: options.showVoronoi ?? false,
+    showVoronoi: options.showVoronoi ?? true,
     defaultColors: options.defaultColors ?? defaultColorScheme,
     useIntersectionObserver: options.useIntersectionObserver ?? true,
     intersectionObserverRootMargin:
@@ -269,7 +269,10 @@ function ChartInner<TDatum>({
           optionsWithScaleType.stacked = true
         }
 
-        return { position: !i ? 'left' : 'right', ...optionsWithScaleType }
+        return {
+          position: !i ? 'left' : 'right',
+          ...optionsWithScaleType,
+        }
       }
     )
   }, [options.data, options.secondaryAxes, primaryAxisOptions])
@@ -491,11 +494,17 @@ function ChartInner<TDatum>({
     })
 
     datumsByInteractionGroup.forEach((value, key) => {
-      datumsByInteractionGroup.set(key, sortDatums(value, secondaryAxes))
+      datumsByInteractionGroup.set(
+        key,
+        sortDatumsBySecondaryPx(value, secondaryAxes)
+      )
     })
 
     datumsByTooltipGroup.forEach((value, key) => {
-      datumsByTooltipGroup.set(key, sortDatums(value, secondaryAxes))
+      datumsByTooltipGroup.set(
+        key,
+        sortDatumsBySecondaryPx(value, secondaryAxes)
+      )
     })
 
     allDatums.forEach(datum => {
@@ -506,7 +515,12 @@ function ChartInner<TDatum>({
     })
 
     return [datumsByInteractionGroup, datumsByTooltipGroup]
-  }, [allDatums, options.interactionMode, tooltipOptions.groupingMode])
+  }, [
+    allDatums,
+    options.interactionMode,
+    secondaryAxes,
+    tooltipOptions.groupingMode,
+  ])
 
   const getSeriesStatusStyle = React.useCallback(
     (series: Series<TDatum>, focusedDatum: Datum<TDatum> | null) => {

@@ -267,7 +267,7 @@ export function getTickPx<TDatum>(scale: Axis<TDatum>['scale'], value: any) {
   return px
 }
 
-export function sortDatums<TDatum>(
+export function sortDatumsBySecondaryPx<TDatum>(
   datums: Datum<TDatum>[],
   secondaryAxes: Axis<TDatum>[]
 ) {
@@ -277,6 +277,7 @@ export function sortDatums<TDatum>(
 
     const aPx =
       aAxis?.scale(aAxis.stacked ? a.stackData?.[1] : a.secondaryValue) ?? NaN
+
     const bPx =
       bAxis?.scale(bAxis.stacked ? b.stackData?.[1] : b.secondaryValue) ?? NaN
 

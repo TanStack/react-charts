@@ -3,7 +3,13 @@ import { Delaunay } from 'd3-delaunay'
 
 //
 import { Datum } from '../types'
-import { getPrimary, getX, getY, sortDatums, translate } from '../utils/Utils'
+import {
+  getPrimary,
+  getX,
+  getY,
+  sortDatumsBySecondaryPx,
+  translate,
+} from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 import { line } from 'd3-shape'
 
@@ -67,6 +73,8 @@ function PrimaryVoronoi<TDatum>({
     datumsByInteractionGroup,
   } = useChartContext<TDatum>()
 
+  const stackedVoronoi = secondaryAxes.length === 1 && secondaryAxes[0].stacked
+
   return React.useMemo(() => {
     const columns = series[0].datums
       .filter(datum => {
@@ -115,7 +123,7 @@ function PrimaryVoronoi<TDatum>({
                 d => d.id === datum.secondaryAxisId
               )
 
-              if (secondaryAxis?.stacked) {
+              if (stackedVoronoi) {
                 let range = secondaryAxis?.scale.range() ?? [0, 0]
 
                 let stackData = [datum.stackData?.[0], datum.stackData?.[1]]
@@ -144,7 +152,12 @@ function PrimaryVoronoi<TDatum>({
                 }
               }
 
-              const value = secondaryAxis?.scale(datum.secondaryValue) ?? NaN
+              const value =
+                secondaryAxis?.scale(
+                  secondaryAxis.stacked
+                    ? datum.stackData?.[1]
+                    : datum.secondaryValue
+                ) ?? NaN
 
               let range = secondaryAxis?.scale.range() ?? [0, 0]
 
@@ -158,7 +171,10 @@ function PrimaryVoronoi<TDatum>({
                 const prevAxis = secondaryAxes.find(
                   d => d.id === prev?.secondaryAxisId
                 )
-                const prevValue = prevAxis?.scale(prev.secondaryValue) ?? NaN
+                const prevValue =
+                  prevAxis?.scale(
+                    prevAxis.stacked ? prev.stackData?.[1] : prev.secondaryValue
+                  ) ?? NaN
                 secondaryStart = value - (value - prevValue) / 2
               }
 
@@ -166,7 +182,10 @@ function PrimaryVoronoi<TDatum>({
                 const nextAxis = secondaryAxes.find(
                   d => d.id === next?.secondaryAxisId
                 )
-                const nextValue = nextAxis?.scale(next.secondaryValue) ?? NaN
+                const nextValue =
+                  nextAxis?.scale(
+                    nextAxis.stacked ? next.stackData?.[1] : next.secondaryValue
+                  ) ?? NaN
                 secondaryEnd = value + (nextValue - value) / 2
               }
 
@@ -241,14 +260,15 @@ function PrimaryVoronoi<TDatum>({
       </g>
     )
   }, [
-    getOptions,
+    series,
     gridDimensions.left,
     gridDimensions.top,
-    datumsByInteractionGroup,
-    handleFocus,
     primaryAxis,
+    datumsByInteractionGroup,
     secondaryAxes,
-    series,
+    stackedVoronoi,
+    handleFocus,
+    getOptions,
   ])
 }
 
