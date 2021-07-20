@@ -20,8 +20,10 @@ type ResolvedCursorOptions = TSTB.Object.Required<
 
 //
 
-const getLineBackgroundColor = (dark?: boolean) =>
-  dark ? 'rgba(255,255,255,.3)' : 'rgba(0, 26, 39, 0.3)'
+const getLineBackgroundColor = (dark: boolean, bandWidth: number) =>
+  dark
+    ? `rgba(255,255,255,${bandWidth > 4 ? 0.15 : 0.3})`
+    : `rgba(0, 26, 39, ${bandWidth > 4 ? 0.15 : 0.3})`
 
 const getBackgroundColor = (dark?: boolean) =>
   dark ? 'rgba(255,255,255,.9)' : 'rgba(0, 26, 39, 0.9)'
@@ -311,7 +313,10 @@ function Cursor<TDatum>(props: {
                 position: 'absolute',
                 top: 0,
                 left: 0,
-                background: getLineBackgroundColor(getOptions().dark),
+                background: getLineBackgroundColor(
+                  getOptions().dark ?? false,
+                  bandWidth
+                ),
               }}
             />
           ) : null}
