@@ -117,12 +117,12 @@ function buildTimeAxis<TDatum>(
   let shouldNice = true
 
   if (typeof options.min === 'number') {
-    minValue = min([options.min, minValue as Date])
+    minValue = max([options.min, minValue as Date])
     shouldNice = false
   }
 
   if (typeof options.max === 'number') {
-    maxValue = max([options.max, maxValue as Date])
+    maxValue = min([options.max, maxValue as Date])
     shouldNice = false
   }
 
@@ -240,12 +240,12 @@ function buildLinearAxis<TDatum>(
   let shouldNice = true
 
   if (typeof options.min === 'number') {
-    minValue = min([options.min, minValue as number])
+    minValue = max([options.min, minValue as number])
     shouldNice = false
   }
 
   if (typeof options.max === 'number') {
-    maxValue = max([options.max, maxValue as number])
+    maxValue = min([options.max, maxValue as number])
     shouldNice = false
   }
 
