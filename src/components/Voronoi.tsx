@@ -201,9 +201,9 @@ function PrimaryVoronoi<TDatum>({
           },
         }}
       >
-        {columns.map(column => {
+        {columns.map((column, i) => {
           return (
-            <React.Fragment key={column.primaryPx}>
+            <React.Fragment key={`${column.primaryPx}_${i}`}>
               {column.datumBoundaries.map(datumBoundary => {
                 const x1 = !primaryAxis.isVertical
                   ? column.primaryStart
