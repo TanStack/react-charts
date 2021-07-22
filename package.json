@@ -132,7 +132,7 @@
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",
     "d3-array": "^2.12.1",
-    "d3-delaunay": "^6.0.2",
+    "d3-delaunay": "5.3.0",
     "d3-scale": "^3.3.0",
     "d3-shape": "^2.1.0",
     "d3-time": "^2.1.1",
