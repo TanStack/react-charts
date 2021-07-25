@@ -71,7 +71,10 @@ function PrimaryVoronoi<TDatum>({
 
   return React.useMemo(() => {
     const columns = series[0].datums
-      .filter(datum => {
+      .filter((datum, i, all) => {
+        if (all.findIndex(d => d.primaryValue === datum.primaryValue) !== i) {
+          return false
+        }
         const primaryValue = datum.primaryValue
         return primaryValue !== 'undefined' && primaryValue !== null
       })
@@ -203,8 +206,8 @@ function PrimaryVoronoi<TDatum>({
       >
         {columns.map((column, i) => {
           return (
-            <React.Fragment key={`${column.primaryPx}_${i}`}>
-              {column.datumBoundaries.map(datumBoundary => {
+            <g key={`${column.primaryPx}_${i}`}>
+              {column.datumBoundaries.map((datumBoundary, i) => {
                 const x1 = !primaryAxis.isVertical
                   ? column.primaryStart
                   : datumBoundary.secondaryStart
@@ -229,7 +232,7 @@ function PrimaryVoronoi<TDatum>({
                 return (
                   <rect
                     {...{
-                      key: `${column.primaryPx}_${datumBoundary.datum.seriesIndex}`,
+                      key: i,
                       x,
                       y,
                       width,
@@ -248,7 +251,7 @@ function PrimaryVoronoi<TDatum>({
                   />
                 )
               })}
-            </React.Fragment>
+            </g>
           )
         })}
       </g>

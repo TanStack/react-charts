@@ -526,7 +526,7 @@ function ChartInner<TDatum>({
       const base = {
         color:
           getOptions().defaultColors[
-            series.index % (getOptions().defaultColors.length - 1)
+            series.index % getOptions().defaultColors.length
           ],
       }
 
@@ -544,7 +544,7 @@ function ChartInner<TDatum>({
         ...series[datum.seriesIndex]?.style,
         color:
           getOptions().defaultColors[
-            datum.seriesIndex % (getOptions().defaultColors.length - 1)
+            datum.seriesIndex % getOptions().defaultColors.length
           ],
       }
 
