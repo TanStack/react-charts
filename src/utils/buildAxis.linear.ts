@@ -419,7 +419,7 @@ function stackSeries<TDatum>(
     .keys(seriesIndices)
     .value((_, seriesIndex, index) => {
       const val = axisOptions.getValue(
-        axisSeries[Number(seriesIndex)].datums[index].originalDatum
+        axisSeries[Number(seriesIndex)]?.datums[index]?.originalDatum
       )
 
       if (typeof val === 'undefined' || val === null) {
