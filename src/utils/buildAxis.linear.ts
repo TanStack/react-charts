@@ -418,9 +418,13 @@ function stackSeries<TDatum>(
   const stacker = stack()
     .keys(seriesIndices)
     .value((_, seriesIndex, index) => {
-      const val = axisOptions.getValue(
+      const originalDatum =
         axisSeries[Number(seriesIndex)]?.datums[index]?.originalDatum
-      )
+
+      const val =
+        typeof originalDatum !== 'undefined'
+          ? axisOptions.getValue(originalDatum)
+          : 0
 
       if (typeof val === 'undefined' || val === null) {
         return 0
@@ -439,11 +443,13 @@ function stackSeries<TDatum>(
 
   stacked.forEach((s, sIndex) => {
     s.forEach((datum, i) => {
-      // @ts-ignore
-      datum.data = axisSeries[sIndex].datums[i]
+      if (axisSeries[sIndex].datums[i]) {
+        // @ts-ignore
+        datum.data = axisSeries[sIndex].datums[i]
 
-      axisSeries[sIndex].datums[i].stackData =
-        datum as unknown as StackDatum<TDatum>
+        axisSeries[sIndex].datums[i].stackData =
+          datum as unknown as StackDatum<TDatum>
+      }
     })
   })
 }
