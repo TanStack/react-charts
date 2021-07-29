@@ -1,5 +1,10 @@
+body {
+  background: rgba(0, 0, 0, 0.02);
+}
+
 .react-resizable {
   max-width: 100%;
+  background: white;
 }
 
 .react-resizable-handle {

@@ -117,15 +117,14 @@ export function getPrimary<TDatum>(
   datum: Datum<TDatum>,
   primaryAxis: Axis<TDatum>
 ): number {
-  let primary: number
-
-  if (primaryAxis.stacked) {
-    primary = primaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
-  } else {
-    primary = primaryAxis.scale(datum.primaryValue) ?? NaN
-  }
+  let primary = primaryAxis.scale(datum.primaryValue) ?? NaN
 
   if (primaryAxis.axisFamily === 'band') {
+    if (primaryAxis.stacked) {
+      primary =
+        primary + (primaryAxis.seriesBandScale(datum.seriesIndex) ?? NaN)
+    }
+
     primary = primary + getPrimaryLength(datum, primaryAxis) / 2
   }
 
@@ -146,13 +145,17 @@ export function getPrimaryLength<TDatum>(
   primaryAxis: Axis<TDatum>
 ) {
   if (primaryAxis.axisFamily === 'band') {
+    const bandWidth = primaryAxis.stacked
+      ? primaryAxis.seriesBandScale.bandwidth()
+      : primaryAxis.scale.bandwidth()
+
     return Math.min(
-      Math.max(primaryAxis.scale.bandwidth(), primaryAxis.minBandSize ?? 1),
+      Math.max(bandWidth, primaryAxis.minBandSize ?? 1),
       primaryAxis.maxBandSize ?? 99999999
     )
   }
 
-  return Math.max(primaryAxis.bandScale!.bandwidth(), 1)
+  return Math.max(primaryAxis.primaryBandScale!.bandwidth(), 1)
 }
 
 export function getSecondaryLength<TDatum>(

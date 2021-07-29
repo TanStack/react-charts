@@ -41,7 +41,7 @@ import Voronoi from './Voronoi'
 const defaultColorScheme = [
   '#0f83ab',
   '#faa43a',
-  '#ff4e4e',
+  '#fd6868',
   '#53cfc9',
   '#a2d925',
   '#decf3f',
@@ -263,7 +263,7 @@ function ChartInner<TDatum>({
         if (
           typeof optionsWithScaleType.stacked === 'undefined' &&
           optionsWithScaleType.elementType &&
-          ['bar', 'area'].includes(optionsWithScaleType.elementType)
+          ['area'].includes(optionsWithScaleType.elementType)
         ) {
           optionsWithScaleType.stacked = true
         }
@@ -275,6 +275,13 @@ function ChartInner<TDatum>({
       }
     )
   }, [options.data, options.secondaryAxes, primaryAxisOptions])
+
+  if (
+    primaryAxisOptions.scaleType === 'band' &&
+    !secondaryAxesOptions.some(axisOptions => axisOptions.stacked)
+  ) {
+    primaryAxisOptions.stacked = primaryAxisOptions.stacked ?? true
+  }
 
   // Resolve Tooltip Option
   const tooltipOptions = React.useMemo(() => {

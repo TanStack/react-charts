@@ -8,6 +8,7 @@ import ReactDOM from "react-dom";
 import Area from "./components/Area";
 import Band from "./components/Band";
 import Bar from "./components/Bar";
+import BarStacked from "./components/BarStacked";
 import Bubble from "./components/Bubble";
 import CustomStyles from "./components/CustomStyles";
 import DarkMode from "./components/DarkMode";
@@ -17,6 +18,7 @@ import Line from "./components/Line";
 import MultipleAxes from "./components/MultipleAxes";
 import Steam from "./components/Steam";
 import BarHorizontal from "./components/BarHorizontal";
+import BarHorizontalStacked from "./components/BarHorizontalStacked";
 import SparkChart from "./components/SparkChart";
 import SyncedCursors from "./components/SyncedCursors";
 import StressTest from "./components/StressTest";
@@ -24,7 +26,9 @@ import StressTest from "./components/StressTest";
 const components = [
   ["Line", Line],
   ["Bar", Bar],
+  ["Bar (Stacked)", BarStacked],
   ["Bar (Horizontal)", BarHorizontal],
+  ["Bar (Horizontal + Stacked)", BarHorizontalStacked],
   ["Band", Band],
   ["Area", Area],
   ["Bubble", Bubble],

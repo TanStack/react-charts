@@ -242,6 +242,8 @@ export type AxisOptionsBase = {
   tickCount?: number
   innerBandPadding?: number
   outerBandPadding?: number
+  innerSeriesBandPadding?: number
+  outerSeriesBandPadding?: number
   minBandSize?: number
   maxBandSize?: number
   minDomainLength?: number
@@ -346,6 +348,8 @@ export type ResolvedAxisOptions<TAxisOptions> = TSTB.Object.Required<
   | 'tickLabelRotationDeg'
   | 'innerBandPadding'
   | 'outerBandPadding'
+  | 'innerSeriesBandPadding'
+  | 'outerSeriesBandPadding'
   | 'show'
   | 'stacked'
 >
@@ -365,7 +369,8 @@ export type AxisTime<TDatum> = Omit<
   axisFamily: 'time'
   scale: ScaleTime<number, number, never>
   outerScale: ScaleTime<number, number, never>
-  bandScale?: ScaleBand<number>
+  primaryBandScale?: ScaleBand<number>
+  seriesBandScale?: ScaleBand<number>
   formatters: {
     default: (value: Date) => string
     scale: (value: Date) => string
@@ -381,7 +386,8 @@ export type AxisLinear<TDatum> = Omit<
   axisFamily: 'linear'
   scale: ScaleLinear<number, number, never>
   outerScale: ScaleLinear<number, number, never>
-  bandScale?: ScaleBand<number>
+  primaryBandScale?: ScaleBand<number>
+  seriesBandScale?: ScaleBand<number>
   formatters: {
     default: (value: ChartValue<any>) => string
     scale: (value: number) => string
@@ -397,6 +403,7 @@ export type AxisBand<TDatum> = Omit<
   axisFamily: 'band'
   scale: ScaleBand<any>
   outerScale: ScaleBand<any>
+  seriesBandScale: ScaleBand<number>
   formatters: {
     default: (value: any) => string
     scale: (value: any) => string

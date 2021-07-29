@@ -8,6 +8,7 @@ import {
   scaleBand,
   ScaleTime,
   ScaleLinear,
+  ScaleBand,
 } from 'd3-scale'
 
 import {
@@ -30,13 +31,18 @@ import {
 function defaultAxisOptions<TDatum>(
   options: BuildAxisOptions<TDatum>
 ): ResolvedAxisOptions<AxisOptions<TDatum>> {
+  const innerBandPadding =
+    options.innerBandPadding ?? options.stacked ? 0.3 : 0.6
+  const outerBandPadding = options.outerBandPadding ?? 0.2
   return {
     ...options,
     elementType: options.elementType ?? 'line',
     minTickPaddingForRotation: options.minTickPaddingForRotation ?? 10,
     tickLabelRotationDeg: options.tickLabelRotationDeg ?? 60,
-    innerBandPadding: options.innerBandPadding ?? 0.6,
-    outerBandPadding: options.outerBandPadding ?? 0.2,
+    innerBandPadding,
+    outerBandPadding,
+    innerSeriesBandPadding: options.innerSeriesBandPadding ?? 0,
+    outerSeriesBandPadding: options.outerSeriesBandPadding ?? 0.3,
     show: options.show ?? true,
     stacked: options.stacked ?? false,
   }
@@ -162,8 +168,12 @@ function buildTimeAxis<TDatum>(
   const outerScale = scale.copy().range(outerRange)
 
   // Supplmentary band scale
-  const bandScale = isPrimary
-    ? buildImpliedBandScale(options, scale, series, range)
+  const primaryBandScale = isPrimary
+    ? buildPrimaryBandScale(options, scale, series, range)
+    : undefined
+
+  const seriesBandScale = primaryBandScale
+    ? buildSeriesBandScale(options, primaryBandScale, series)
     : undefined
 
   const defaultFormat = scale.tickFormat()
@@ -198,7 +208,8 @@ function buildTimeAxis<TDatum>(
     scale,
     range,
     outerScale,
-    bandScale,
+    primaryBandScale,
+    seriesBandScale,
     formatters: formatters,
   }
 }
@@ -297,8 +308,12 @@ function buildLinearAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
-  const bandScale = isPrimary
-    ? buildImpliedBandScale(options, scale, series, range)
+  const primaryBandScale = isPrimary
+    ? buildPrimaryBandScale(options, scale, series, range)
+    : undefined
+
+  const seriesBandScale = primaryBandScale
+    ? buildSeriesBandScale(options, primaryBandScale, series)
     : undefined
 
   const defaultFormat = scale.tickFormat()
@@ -333,7 +348,8 @@ function buildLinearAxis<TDatum>(
     scale,
     range,
     outerScale,
-    bandScale,
+    primaryBandScale,
+    seriesBandScale,
     formatters,
   }
 }
@@ -371,6 +387,8 @@ function buildBandAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
+  const seriesBandScale = buildSeriesBandScale(options, scale, series)
+
   const defaultFormat = (d: { toString: () => string }) => d
 
   const formatters = {} as AxisBand<TDatum>['formatters']
@@ -404,6 +422,7 @@ function buildBandAxis<TDatum>(
     range,
     outerScale,
     formatters,
+    seriesBandScale,
   }
 }
 
@@ -454,7 +473,7 @@ function stackSeries<TDatum>(
   })
 }
 
-function buildImpliedBandScale<TDatum>(
+function buildPrimaryBandScale<TDatum>(
   options: ResolvedAxisOptions<AxisOptions<TDatum>>,
   scale: ScaleTime<number, number, never> | ScaleLinear<number, number, never>,
   series: Series<TDatum>[],
@@ -488,10 +507,34 @@ function buildImpliedBandScale<TDatum>(
 
   const bandDomain = d3Range(bandRange / impliedBandWidth)
 
-  const bandScale = scaleBand(bandDomain, range)
+  const primaryBandScale = scaleBand(bandDomain, range)
     .round(false)
     .paddingOuter(options.outerBandPadding ?? 0)
     .paddingInner(options.innerBandPadding ?? 0)
 
-  return bandScale
+  return primaryBandScale
+}
+
+function buildSeriesBandScale<TDatum>(
+  options: ResolvedAxisOptions<AxisOptions<TDatum>>,
+  primaryBandScale: ScaleBand<number>,
+  series: Series<TDatum>[]
+) {
+  const bandDomain = d3Range(series.length)
+
+  const seriesBandScale = scaleBand(bandDomain, [
+    0,
+    primaryBandScale.bandwidth(),
+  ])
+    .round(false)
+    .paddingOuter(
+      options.outerSeriesBandPadding ??
+        (options.outerBandPadding ? options.outerBandPadding / 2 : 0)
+    )
+    .paddingInner(
+      options.innerSeriesBandPadding ??
+        (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
+    )
+
+  return seriesBandScale
 }

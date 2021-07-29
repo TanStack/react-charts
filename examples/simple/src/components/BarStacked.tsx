@@ -3,9 +3,9 @@ import useDemoConfig from "../useDemoConfig";
 import React from "react";
 import { AxisOptions, Chart } from "react-charts";
 
-export default function Bar() {
+export default function BarStacked() {
   const { data, randomizeData } = useDemoConfig({
-    series: 3,
+    series: 10,
     dataType: "ordinal",
   });
 
@@ -13,7 +13,6 @@ export default function Bar() {
     AxisOptions<typeof data[number]["data"][number]>
   >(
     () => ({
-      position: "left",
       getValue: (datum) => datum.primary,
     }),
     []
@@ -24,8 +23,8 @@ export default function Bar() {
   >(
     () => [
       {
-        position: "bottom",
         getValue: (datum) => datum.secondary,
+        stacked: true,
       },
     ],
     []
