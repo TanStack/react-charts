@@ -29,6 +29,7 @@ export default function Band() {
         show: false,
         getValue: (datum) => datum.secondary,
         stackOffset: stackOffsetWiggle,
+        stacked: true,
       },
     ],
     []
