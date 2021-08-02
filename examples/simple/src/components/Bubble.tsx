@@ -25,6 +25,7 @@ export default function Bubble() {
     () => [
       {
         getValue: (datum) => datum.secondary,
+        elementType: "bubble",
       },
     ],
     []
@@ -42,7 +43,6 @@ export default function Bubble() {
             primaryAxis,
             secondaryAxes,
             interactionMode: "closest",
-            getSeriesStyle: () => ({ line: { opacity: 0 } }),
             getDatumStyle: (datum) =>
               ({
                 circle: { r: datum.originalDatum.radius },

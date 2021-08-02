@@ -29,6 +29,7 @@ export type ChartOptions<TDatum> = {
   interactionMode?: InteractionMode
   showVoronoi?: boolean
   showDebugAxes?: boolean
+  memoizeSeries?: boolean
   defaultColors?: string[]
   initialWidth?: number
   initialHeight?: number
@@ -232,8 +233,8 @@ export type AxisDimensions = {
 
 export type AxisOptionsBase = {
   primaryAxisId?: string
-  elementType?: 'line' | 'area' | 'bar'
-  showDatumElements?: boolean
+  elementType?: 'line' | 'area' | 'bar' | 'bubble'
+  showDatumElements?: boolean | 'onFocus'
   curve?: CurveFactory
   invert?: boolean
   position?: Position
@@ -366,6 +367,7 @@ export type AxisTime<TDatum> = Omit<
   AxisBase & ResolvedAxisOptions<AxisTimeOptions<TDatum>>,
   'format'
 > & {
+  isPrimary?: boolean
   axisFamily: 'time'
   scale: ScaleTime<number, number, never>
   outerScale: ScaleTime<number, number, never>
@@ -383,6 +385,7 @@ export type AxisLinear<TDatum> = Omit<
   AxisBase & ResolvedAxisOptions<AxisLinearOptions<TDatum>>,
   'format'
 > & {
+  isPrimary?: boolean
   axisFamily: 'linear'
   scale: ScaleLinear<number, number, never>
   outerScale: ScaleLinear<number, number, never>
@@ -400,9 +403,11 @@ export type AxisBand<TDatum> = Omit<
   AxisBase & ResolvedAxisOptions<AxisBandOptions<TDatum>>,
   'format'
 > & {
+  isPrimary?: boolean
   axisFamily: 'band'
   scale: ScaleBand<any>
   outerScale: ScaleBand<any>
+  primaryBandScale: ScaleBand<number>
   seriesBandScale: ScaleBand<number>
   formatters: {
     default: (value: any) => string

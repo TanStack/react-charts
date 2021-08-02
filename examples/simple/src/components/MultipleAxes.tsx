@@ -10,7 +10,7 @@ export default function MultipleAxes() {
   });
 
   // @ts-ignore
-  data.forEach((d, i) => (d.secondaryAxisId = i % 2 === 0 ? "2" : undefined));
+  data.forEach((d, i) => (d.secondaryAxisId = i % 3 === 0 ? "2" : undefined));
 
   const primaryAxis = React.useMemo<
     AxisOptions<typeof data[number]["data"][number]>
@@ -28,6 +28,7 @@ export default function MultipleAxes() {
       {
         getValue: (datum) => datum.secondary,
         elementType: "bar",
+        // stacked: true,
       },
       {
         id: "2",

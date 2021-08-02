@@ -3,11 +3,11 @@ import React, { ComponentPropsWithoutRef } from 'react'
 
 import useGetLatest from '../hooks/useGetLatest'
 import useIsomorphicLayoutEffect from '../hooks/useIsomorphicLayoutEffect'
-import Area from '../seriesTypes/Area'
-import Bar from '../seriesTypes/Bar'
+import Bar, { getPrimary } from '../seriesTypes/Bar'
 import Line from '../seriesTypes/Line'
 //
 import {
+  Axis,
   AxisDimensions,
   AxisOptions,
   AxisOptionsWithScaleType,
@@ -24,7 +24,6 @@ import {
   materializeStyles,
   getSeriesStatus,
   getDatumStatus,
-  sortDatumsBySecondaryPx,
 } from '../utils/Utils'
 import buildAxisLinear from '../utils/buildAxis.linear'
 import { ChartContextProvider } from '../utils/chartContext'
@@ -234,12 +233,12 @@ function ChartInner<TDatum>({
 
   const primaryAxisOptions = React.useMemo((): BuildAxisOptions<TDatum> => {
     const firstValue = getFirstDefinedValue(options.primaryAxis, options.data)
-    const optionsWithScaleType = axisOptionsWithScaleType(
+    const axisOptions = axisOptionsWithScaleType(
       options.primaryAxis,
       firstValue
     )
 
-    return { position: 'bottom', ...optionsWithScaleType }
+    return { position: 'bottom', ...axisOptions }
   }, [options.data, options.primaryAxis])
 
   const secondaryAxesOptions = React.useMemo(() => {
@@ -247,41 +246,31 @@ function ChartInner<TDatum>({
       (secondaryAxis, i): BuildAxisOptions<TDatum> => {
         const firstValue = getFirstDefinedValue(secondaryAxis, options.data)
 
-        const optionsWithScaleType = axisOptionsWithScaleType(
-          secondaryAxis,
-          firstValue
-        )
+        const axisOptions = axisOptionsWithScaleType(secondaryAxis, firstValue)
 
-        if (!optionsWithScaleType.elementType) {
+        if (!axisOptions.elementType) {
           if (primaryAxisOptions.scaleType === 'band') {
-            optionsWithScaleType.elementType = 'bar'
-          } else if (optionsWithScaleType.stacked) {
-            optionsWithScaleType.elementType = 'area'
+            axisOptions.elementType = 'bar'
+          } else if (axisOptions.stacked) {
+            axisOptions.elementType = 'area'
           }
         }
 
         if (
-          typeof optionsWithScaleType.stacked === 'undefined' &&
-          optionsWithScaleType.elementType &&
-          ['area'].includes(optionsWithScaleType.elementType)
+          typeof axisOptions.stacked === 'undefined' &&
+          axisOptions.elementType &&
+          ['area'].includes(axisOptions.elementType)
         ) {
-          optionsWithScaleType.stacked = true
+          axisOptions.stacked = true
         }
 
         return {
           position: !i ? 'left' : 'right',
-          ...optionsWithScaleType,
+          ...axisOptions,
         }
       }
     )
   }, [options.data, options.secondaryAxes, primaryAxisOptions])
-
-  if (
-    primaryAxisOptions.scaleType === 'band' &&
-    !secondaryAxesOptions.some(axisOptions => axisOptions.stacked)
-  ) {
-    primaryAxisOptions.stacked = primaryAxisOptions.stacked ?? true
-  }
 
   // Resolve Tooltip Option
   const tooltipOptions = React.useMemo(() => {
@@ -467,12 +456,27 @@ function ChartInner<TDatum>({
     const datumsByInteractionGroup = new Map<any, Datum<TDatum>[]>()
     const datumsByTooltipGroup = new Map<any, Datum<TDatum>[]>()
 
-    let getInteractionKey = (datum: Datum<TDatum>) => `${datum.primaryValue}`
+    let getInteractionPrimary = (datum: Datum<TDatum>) => {
+      if (secondaryAxes.every(d => d.elementType === 'bar' && !d.stacked)) {
+        const secondaryAxis = secondaryAxes.find(
+          d => d.id === datum.secondaryAxisId
+        )!
+
+        if (secondaryAxis.elementType === 'bar' && !secondaryAxis.stacked) {
+          return getPrimary(datum, primaryAxis, secondaryAxis)
+        }
+      }
+
+      return datum.primaryValue
+    }
+
+    let getInteractionKey = (datum: Datum<TDatum>) =>
+      `${getInteractionPrimary(datum)}`
     let getTooltipKey = (datum: Datum<TDatum>) => `${datum.primaryValue}`
 
     if (options.interactionMode === 'closest') {
       getInteractionKey = datum =>
-        `${datum.primaryValue}_${datum.secondaryValue}`
+        `${getInteractionPrimary(datum)}_${datum.secondaryValue}`
     }
 
     if (tooltipOptions.groupingMode === 'single') {
@@ -610,8 +614,6 @@ function ChartInner<TDatum>({
     [orderedSeries, secondaryAxes]
   )
 
-  let memoizeSeries = !options.getDatumStyle && !options.getSeriesStyle
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   let getSeriesInfo = () => ({
     primaryAxis,
@@ -628,7 +630,7 @@ function ChartInner<TDatum>({
     [primaryAxis, secondaryAxes, seriesByAxisId]
   )
 
-  if (memoizeSeries) {
+  if (options.memoizeSeries) {
     getSeriesInfo = getMemoizedSeriesInfo
   }
 
@@ -643,14 +645,15 @@ function ChartInner<TDatum>({
 
       const { elementType } = secondaryAxis
       const Component = (() => {
-        if (elementType === 'line') {
+        if (
+          elementType === 'line' ||
+          elementType === 'bubble' ||
+          elementType === 'area'
+        ) {
           return Line
         }
         if (elementType === 'bar') {
           return Bar
-        }
-        if (elementType === 'area') {
-          return Area
         }
         throw new Error('Invalid elementType')
       })()
@@ -746,4 +749,22 @@ function axisOptionsWithScaleType<TDatum>(
   }
 
   return { ...options, scaleType } as AxisOptionsWithScaleType<TDatum>
+}
+
+function sortDatumsBySecondaryPx<TDatum>(
+  datums: Datum<TDatum>[],
+  secondaryAxes: Axis<TDatum>[]
+) {
+  return [...datums].sort((a, b) => {
+    const aAxis = secondaryAxes.find(d => d.id === a.secondaryAxisId)
+    const bAxis = secondaryAxes.find(d => d.id === b.secondaryAxisId)
+
+    const aPx =
+      aAxis?.scale(aAxis.stacked ? a.stackData?.[1] : a.secondaryValue) ?? NaN
+
+    const bPx =
+      bAxis?.scale(bAxis.stacked ? b.stackData?.[1] : b.secondaryValue) ?? NaN
+
+    return aPx - bPx
+  })
 }

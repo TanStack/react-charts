@@ -31,18 +31,15 @@ import {
 function defaultAxisOptions<TDatum>(
   options: BuildAxisOptions<TDatum>
 ): ResolvedAxisOptions<AxisOptions<TDatum>> {
-  const innerBandPadding =
-    options.innerBandPadding ?? options.stacked ? 0.3 : 0.6
-  const outerBandPadding = options.outerBandPadding ?? 0.2
   return {
     ...options,
     elementType: options.elementType ?? 'line',
     minTickPaddingForRotation: options.minTickPaddingForRotation ?? 10,
     tickLabelRotationDeg: options.tickLabelRotationDeg ?? 60,
-    innerBandPadding,
-    outerBandPadding,
-    innerSeriesBandPadding: options.innerSeriesBandPadding ?? 0,
-    outerSeriesBandPadding: options.outerSeriesBandPadding ?? 0.3,
+    innerBandPadding: options.innerBandPadding ?? 0.5,
+    outerBandPadding: options.outerBandPadding ?? 0.2,
+    innerSeriesBandPadding: options.innerSeriesBandPadding ?? 0.2,
+    outerSeriesBandPadding: options.outerSeriesBandPadding ?? 0,
     show: options.show ?? true,
     stacked: options.stacked ?? false,
   }
@@ -387,7 +384,13 @@ function buildBandAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
-  const seriesBandScale = buildSeriesBandScale(options, scale, series)
+  const primaryBandScale = scale
+
+  const seriesBandScale = buildSeriesBandScale(
+    options,
+    primaryBandScale,
+    series
+  )
 
   const defaultFormat = (d: { toString: () => string }) => d
 
@@ -422,6 +425,7 @@ function buildBandAxis<TDatum>(
     range,
     outerScale,
     formatters,
+    primaryBandScale,
     seriesBandScale,
   }
 }

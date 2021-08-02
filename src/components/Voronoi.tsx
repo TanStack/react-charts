@@ -2,10 +2,11 @@ import React from 'react'
 import { Delaunay } from 'd3-delaunay'
 
 //
-import { Datum } from '../types'
-import { getPrimary, getX, getY, translate } from '../utils/Utils'
+import { Axis, Datum } from '../types'
+import { translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 import { line } from 'd3-shape'
+import { getPrimaryGroupLength, getPrimaryLength } from '../seriesTypes/Bar'
 
 export default function Voronoi<TDatum>() {
   const { getOptions, focusedDatumState } = useChartContext<TDatum>()
@@ -60,7 +61,6 @@ function PrimaryVoronoi<TDatum>({
 }) {
   const {
     primaryAxis,
-    series,
     secondaryAxes,
     getOptions,
     gridDimensions,
@@ -70,120 +70,105 @@ function PrimaryVoronoi<TDatum>({
   const stackedVoronoi = secondaryAxes.length === 1 && secondaryAxes[0].stacked
 
   return React.useMemo(() => {
-    const columns = series[0].datums
-      .filter((datum, i, all) => {
-        if (all.findIndex(d => d.primaryValue === datum.primaryValue) !== i) {
-          return false
+    const firsts = Array.from(datumsByInteractionGroup.entries()).map(
+      d => d[1][0]
+    )
+
+    let preColumns = Array.from(datumsByInteractionGroup.entries())
+      .map(([_, datums]) => datums)
+      .filter((datums, i) => {
+        const datum = datums[0]
+
+        if (!datum) {
+          return
         }
+
         const primaryValue = datum.primaryValue
         return primaryValue !== 'undefined' && primaryValue !== null
       })
-      .map((datum, i, all) => {
-        const prev = all[i - 1]
-        const next = all[i + 1]
+      .sort((a, b) => {
+        const aAxis = secondaryAxes.find(d => d.id === a[0].secondaryAxisId)!
+        const bAxis = secondaryAxes.find(d => d.id === b[0].secondaryAxisId)!
 
-        const primaryValue = datum.primaryValue
-        const primaryPx = getPrimary(datum, primaryAxis)
+        const aPx = getPrimary(a[0], primaryAxis, aAxis)
+        const bPx = getPrimary(b[0], primaryAxis, bAxis)
 
-        let range = primaryAxis?.scale.range() ?? [0, 0]
+        return aPx - bPx
+      })
 
-        let [primaryStart, primaryEnd] = range
+    if (primaryAxis.isVertical) {
+      preColumns.reverse()
+    }
 
-        if (prev) {
-          const prevPx = getPrimary(prev, primaryAxis)
-          primaryStart = primaryPx - (primaryPx - prevPx) / 2
-        }
+    const columns = preColumns.map((datums, i, all) => {
+      const datum = datums[0]
 
-        if (next) {
-          const nextPx = getPrimary(next, primaryAxis)
-          primaryEnd = primaryPx + (nextPx - primaryPx) / 2
-        }
+      const prev = all[i - 1]
+      const next = all[i + 1]
 
-        let datums = datumsByInteractionGroup.get(`${primaryValue}`) ?? []
+      const secondaryAxis = secondaryAxes.find(
+        d => d.id === datum.secondaryAxisId
+      )!
+      const primaryPx = getPrimary(datum, primaryAxis, secondaryAxis)
 
-        return {
-          primaryStart,
-          primaryEnd,
-          primaryPx,
-          datumBoundaries: datums
-            .filter(datum => {
-              const secondaryValue = datum.secondaryValue
-              return (
-                typeof secondaryValue !== 'undefined' && secondaryValue !== null
-              )
-            })
-            .map((datum, i, all) => {
-              const prev = all[i - 1]
-              const next = all[i + 1]
+      let range = primaryAxis?.scale.range() ?? [0, 0]
 
-              const secondaryAxis = secondaryAxes.find(
-                d => d.id === datum.secondaryAxisId
-              )
+      let [primaryStart, primaryEnd] = range
 
-              if (stackedVoronoi) {
-                let range = secondaryAxis?.scale.range() ?? [0, 0]
+      if (prev) {
+        const secondaryAxis = secondaryAxes.find(
+          d => d.id === prev[0].secondaryAxisId
+        )!
+        const prevPx = getPrimary(prev[0], primaryAxis, secondaryAxis)
+        primaryStart = primaryPx - (primaryPx - prevPx) / 2
+      }
 
-                let stackData = [datum.stackData?.[0], datum.stackData?.[1]]
+      if (next) {
+        const secondaryAxis = secondaryAxes.find(
+          d => d.id === next[0].secondaryAxisId
+        )!
+        const nextPx = getPrimary(next[0], primaryAxis, secondaryAxis)
+        primaryEnd = primaryPx + (nextPx - primaryPx) / 2
+      }
 
-                if (secondaryAxis?.isVertical) {
-                  range.reverse()
-                  stackData.reverse()
-                }
+      return {
+        primaryStart,
+        primaryEnd,
+        primaryPx,
+        datumBoundaries: datums
+          .filter(datum => {
+            const secondaryValue = datum.secondaryValue
+            return (
+              typeof secondaryValue !== 'undefined' && secondaryValue !== null
+            )
+          })
+          .map((datum, i, all) => {
+            const prev = all[i - 1]
+            const next = all[i + 1]
 
-                let [secondaryStart, secondaryEnd] = range
+            const secondaryAxis = secondaryAxes.find(
+              d => d.id === datum.secondaryAxisId
+            )
 
-                if (prev) {
-                  secondaryStart =
-                    secondaryAxis?.scale(stackData[0] ?? NaN) ?? NaN
-                }
-
-                if (next) {
-                  secondaryEnd =
-                    secondaryAxis?.scale(stackData[1] ?? NaN) ?? NaN
-                }
-
-                return {
-                  secondaryStart,
-                  secondaryEnd,
-                  datum,
-                }
-              }
-
-              const value =
-                secondaryAxis?.scale(
-                  secondaryAxis.stacked
-                    ? datum.stackData?.[1]
-                    : datum.secondaryValue
-                ) ?? NaN
-
+            if (stackedVoronoi) {
               let range = secondaryAxis?.scale.range() ?? [0, 0]
+
+              let stackData = [datum.stackData?.[0], datum.stackData?.[1]]
 
               if (secondaryAxis?.isVertical) {
                 range.reverse()
+                stackData.reverse()
               }
 
               let [secondaryStart, secondaryEnd] = range
 
               if (prev) {
-                const prevAxis = secondaryAxes.find(
-                  d => d.id === prev?.secondaryAxisId
-                )
-                const prevValue =
-                  prevAxis?.scale(
-                    prevAxis.stacked ? prev.stackData?.[1] : prev.secondaryValue
-                  ) ?? NaN
-                secondaryStart = value - (value - prevValue) / 2
+                secondaryStart =
+                  secondaryAxis?.scale(stackData[0] ?? NaN) ?? NaN
               }
 
               if (next) {
-                const nextAxis = secondaryAxes.find(
-                  d => d.id === next?.secondaryAxisId
-                )
-                const nextValue =
-                  nextAxis?.scale(
-                    nextAxis.stacked ? next.stackData?.[1] : next.secondaryValue
-                  ) ?? NaN
-                secondaryEnd = value + (nextValue - value) / 2
+                secondaryEnd = secondaryAxis?.scale(stackData[1] ?? NaN) ?? NaN
               }
 
               return {
@@ -191,9 +176,53 @@ function PrimaryVoronoi<TDatum>({
                 secondaryEnd,
                 datum,
               }
-            }),
-        }
-      })
+            }
+
+            const value =
+              secondaryAxis?.scale(
+                secondaryAxis.stacked
+                  ? datum.stackData?.[1]
+                  : datum.secondaryValue
+              ) ?? NaN
+
+            let range = secondaryAxis?.scale.range() ?? [0, 0]
+
+            if (secondaryAxis?.isVertical) {
+              range.reverse()
+            }
+
+            let [secondaryStart, secondaryEnd] = range
+
+            if (prev) {
+              const prevAxis = secondaryAxes.find(
+                d => d.id === prev?.secondaryAxisId
+              )
+              const prevValue =
+                prevAxis?.scale(
+                  prevAxis.stacked ? prev.stackData?.[1] : prev.secondaryValue
+                ) ?? NaN
+              secondaryStart = value - (value - prevValue) / 2
+            }
+
+            if (next) {
+              const nextAxis = secondaryAxes.find(
+                d => d.id === next?.secondaryAxisId
+              )
+              const nextValue =
+                nextAxis?.scale(
+                  nextAxis.stacked ? next.stackData?.[1] : next.secondaryValue
+                ) ?? NaN
+              secondaryEnd = value + (nextValue - value) / 2
+            }
+
+            return {
+              secondaryStart,
+              secondaryEnd,
+              datum,
+            }
+          }),
+      }
+    })
 
     return (
       <g
@@ -257,12 +286,11 @@ function PrimaryVoronoi<TDatum>({
       </g>
     )
   }, [
-    series,
+    datumsByInteractionGroup,
     gridDimensions.left,
     gridDimensions.top,
-    primaryAxis,
-    datumsByInteractionGroup,
     secondaryAxes,
+    primaryAxis,
     stackedVoronoi,
     handleFocus,
     getOptions,
@@ -374,4 +402,54 @@ function SingleVoronoi<TDatum>({
       })}
     </g>
   )
+}
+
+function getX<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getSecondary(datum, secondaryAxis)
+    : getPrimary(datum, primaryAxis, secondaryAxis)
+}
+
+function getY<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  return primaryAxis.isVertical
+    ? getPrimary(datum, primaryAxis, secondaryAxis)
+    : getSecondary(datum, secondaryAxis)
+}
+
+function getPrimary<TDatum>(
+  datum: Datum<TDatum>,
+  primaryAxis: Axis<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  let primary = primaryAxis.scale(datum.primaryValue) ?? NaN
+
+  if (secondaryAxis.elementType === 'bar') {
+    if (!secondaryAxis.stacked) {
+      primary += primaryAxis.seriesBandScale!(datum.seriesIndex) ?? NaN
+      primary += getPrimaryLength(datum, primaryAxis, secondaryAxis) / 2
+    } else {
+      primary += getPrimaryGroupLength(datum, primaryAxis) / 2
+    }
+  }
+
+  return primary
+}
+
+function getSecondary<TDatum>(
+  datum: Datum<TDatum>,
+  secondaryAxis: Axis<TDatum>
+): number {
+  if (secondaryAxis.stacked) {
+    return secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
+  }
+
+  return secondaryAxis.scale(datum.secondaryValue) ?? NaN
 }

@@ -13,7 +13,7 @@ export default function StressTest() {
       liveData,
       liveDataInterval,
       showPoints,
-      dynamicStyles,
+      memoizeSeries,
     },
     setState,
   ] = React.useState({
@@ -24,7 +24,7 @@ export default function StressTest() {
     liveData: false,
     liveDataInterval: 1000,
     showPoints: true,
-    dynamicStyles: true,
+    memoizeSeries: false,
   });
 
   const { data, randomizeData } = useDemoConfig({
@@ -141,19 +141,19 @@ export default function StressTest() {
           checked={showPoints}
           onChange={(e) => {
             e.persist();
-            setState((old) => ({ ...old, showPoints: e.target.checked }));
+            setState((old) => ({ ...old, showPoints: !!e.target.checked }));
           }}
         />
       </label>
       <br />
       <label>
-        Dynamic Styles:{" "}
+        Memoize Series:{" "}
         <input
           type="checkbox"
-          checked={dynamicStyles}
+          checked={memoizeSeries}
           onChange={(e) => {
             e.persist();
-            setState((old) => ({ ...old, dynamicStyles: e.target.checked }));
+            setState((old) => ({ ...old, memoizeSeries: !!e.target.checked }));
           }}
         />
       </label>
@@ -165,7 +165,7 @@ export default function StressTest() {
           checked={liveData}
           onChange={(e) => {
             e.persist();
-            setState((old) => ({ ...old, liveData: e.target.checked }));
+            setState((old) => ({ ...old, liveData: !!e.target.checked }));
           }}
         />
       </label>
@@ -202,16 +202,15 @@ export default function StressTest() {
               data,
               primaryAxis,
               secondaryAxes,
-              getSeriesStyle: dynamicStyles
-                ? (series) => ({
-                    opacity:
-                      activeSeriesIndex > -1
-                        ? series.index === activeSeriesIndex
-                          ? 1
-                          : 0.1
-                        : 1,
-                  })
-                : undefined,
+              memoizeSeries,
+              getSeriesStyle: (series) => ({
+                opacity:
+                  activeSeriesIndex > -1
+                    ? series.index === activeSeriesIndex
+                      ? 1
+                      : 0.1
+                    : 1,
+              }),
               primaryCursor: {
                 value: primaryCursorValue,
                 onChange: (value) => {

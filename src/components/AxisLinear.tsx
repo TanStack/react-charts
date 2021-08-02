@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Axis, AxisLinear } from '../types'
-import { getTickPx, translate } from '../utils/Utils'
+import { translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
 import useMeasure from './AxisLinear.useMeasure'
@@ -228,4 +228,16 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
       {renderAxis(true)}
     </g>
   ) : null
+}
+
+function getTickPx<TDatum>(scale: Axis<TDatum>['scale'], value: any) {
+  let px = scale(value) ?? NaN
+
+  // @ts-ignore
+  if (scale.bandwidth) {
+    // @ts-ignore
+    return px + scale.bandwidth() / 2
+  }
+
+  return px
 }

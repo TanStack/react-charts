@@ -47,7 +47,7 @@ export default function SyncedCursors() {
           2
         )}
       </pre>
-      <ResizableBox height={200}>
+      <ResizableBox height={100} width={200}>
         <Chart
           options={{
             data,
@@ -68,7 +68,8 @@ export default function SyncedCursors() {
           }}
         />
       </ResizableBox>
-      <ResizableBox height={200}>
+      <div style={{ height: "1rem" }} />
+      <ResizableBox height={160} width={300}>
         <Chart
           options={{
             data,
@@ -89,7 +90,8 @@ export default function SyncedCursors() {
           }}
         />
       </ResizableBox>
-      <ResizableBox height={200}>
+      <div style={{ height: "1rem" }} />
+      <ResizableBox height={300} width={500}>
         <Chart
           options={{
             data,
