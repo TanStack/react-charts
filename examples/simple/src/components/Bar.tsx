@@ -40,7 +40,6 @@ export default function Bar() {
             data,
             primaryAxis,
             secondaryAxes,
-            showVoronoi: true,
           }}
         />
       </ResizableBox>
