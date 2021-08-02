@@ -70,13 +70,9 @@ function PrimaryVoronoi<TDatum>({
   const stackedVoronoi = secondaryAxes.length === 1 && secondaryAxes[0].stacked
 
   return React.useMemo(() => {
-    const firsts = Array.from(datumsByInteractionGroup.entries()).map(
-      d => d[1][0]
-    )
-
     let preColumns = Array.from(datumsByInteractionGroup.entries())
       .map(([_, datums]) => datums)
-      .filter((datums, i) => {
+      .filter(datums => {
         const datum = datums[0]
 
         if (!datum) {
