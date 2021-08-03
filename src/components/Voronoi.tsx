@@ -69,6 +69,10 @@ function PrimaryVoronoi<TDatum>({
 
   const stackedVoronoi = secondaryAxes.length === 1 && secondaryAxes[0].stacked
 
+  const useBarPx = secondaryAxes.every(
+    d => d.elementType === 'bar' && !d.stacked
+  )
+
   return React.useMemo(() => {
     let preColumns = Array.from(datumsByInteractionGroup.entries())
       .map(([_, datums]) => datums)
@@ -86,8 +90,8 @@ function PrimaryVoronoi<TDatum>({
         const aAxis = secondaryAxes.find(d => d.id === a[0].secondaryAxisId)!
         const bAxis = secondaryAxes.find(d => d.id === b[0].secondaryAxisId)!
 
-        const aPx = getPrimary(a[0], primaryAxis, aAxis)
-        const bPx = getPrimary(b[0], primaryAxis, bAxis)
+        const aPx = getPrimary(a[0], primaryAxis, aAxis, useBarPx)
+        const bPx = getPrimary(b[0], primaryAxis, bAxis, useBarPx)
 
         return aPx - bPx
       })
@@ -105,7 +109,7 @@ function PrimaryVoronoi<TDatum>({
       const secondaryAxis = secondaryAxes.find(
         d => d.id === datum.secondaryAxisId
       )!
-      const primaryPx = getPrimary(datum, primaryAxis, secondaryAxis)
+      const primaryPx = getPrimary(datum, primaryAxis, secondaryAxis, useBarPx)
 
       let range = primaryAxis?.scale.range() ?? [0, 0]
 
@@ -115,7 +119,7 @@ function PrimaryVoronoi<TDatum>({
         const secondaryAxis = secondaryAxes.find(
           d => d.id === prev[0].secondaryAxisId
         )!
-        const prevPx = getPrimary(prev[0], primaryAxis, secondaryAxis)
+        const prevPx = getPrimary(prev[0], primaryAxis, secondaryAxis, useBarPx)
         primaryStart = primaryPx - (primaryPx - prevPx) / 2
       }
 
@@ -123,7 +127,7 @@ function PrimaryVoronoi<TDatum>({
         const secondaryAxis = secondaryAxes.find(
           d => d.id === next[0].secondaryAxisId
         )!
-        const nextPx = getPrimary(next[0], primaryAxis, secondaryAxis)
+        const nextPx = getPrimary(next[0], primaryAxis, secondaryAxis, useBarPx)
         primaryEnd = primaryPx + (nextPx - primaryPx) / 2
       }
 
@@ -283,10 +287,11 @@ function PrimaryVoronoi<TDatum>({
     )
   }, [
     datumsByInteractionGroup,
+    primaryAxis,
     gridDimensions.left,
     gridDimensions.top,
     secondaryAxes,
-    primaryAxis,
+    useBarPx,
     stackedVoronoi,
     handleFocus,
     getOptions,
@@ -313,6 +318,10 @@ function SingleVoronoi<TDatum>({
 
   const voronoiData: { x: number; y: number; datum: Datum<TDatum> }[] = []
 
+  const useBarPx = secondaryAxes.every(
+    d => d.elementType === 'bar' && !d.stacked
+  )
+
   series.forEach(serie => {
     serie.datums
       .filter(datum => {
@@ -329,8 +338,8 @@ function SingleVoronoi<TDatum>({
         const secondaryAxis = secondaryAxes.find(
           d => d.id === datum.secondaryAxisId
         )
-        const x = getX(datum, primaryAxis, secondaryAxis!)
-        const y = getY(datum, primaryAxis, secondaryAxis!)
+        const x = getX(datum, primaryAxis, secondaryAxis!, useBarPx)
+        const y = getY(datum, primaryAxis, secondaryAxis!, useBarPx)
 
         if (
           typeof x !== 'number' ||
@@ -403,31 +412,34 @@ function SingleVoronoi<TDatum>({
 function getX<TDatum>(
   datum: Datum<TDatum>,
   primaryAxis: Axis<TDatum>,
-  secondaryAxis: Axis<TDatum>
+  secondaryAxis: Axis<TDatum>,
+  useBarPx: boolean
 ): number {
   return primaryAxis.isVertical
     ? getSecondary(datum, secondaryAxis)
-    : getPrimary(datum, primaryAxis, secondaryAxis)
+    : getPrimary(datum, primaryAxis, secondaryAxis, useBarPx)
 }
 
 function getY<TDatum>(
   datum: Datum<TDatum>,
   primaryAxis: Axis<TDatum>,
-  secondaryAxis: Axis<TDatum>
+  secondaryAxis: Axis<TDatum>,
+  useBarPx: boolean
 ): number {
   return primaryAxis.isVertical
-    ? getPrimary(datum, primaryAxis, secondaryAxis)
+    ? getPrimary(datum, primaryAxis, secondaryAxis, useBarPx)
     : getSecondary(datum, secondaryAxis)
 }
 
 function getPrimary<TDatum>(
   datum: Datum<TDatum>,
   primaryAxis: Axis<TDatum>,
-  secondaryAxis: Axis<TDatum>
+  secondaryAxis: Axis<TDatum>,
+  useBarPx: boolean
 ): number {
   let primary = primaryAxis.scale(datum.primaryValue) ?? NaN
 
-  if (secondaryAxis.elementType === 'bar') {
+  if (useBarPx && secondaryAxis.elementType === 'bar') {
     if (!secondaryAxis.stacked) {
       primary += primaryAxis.seriesBandScale!(datum.seriesIndex) ?? NaN
       primary += getPrimaryLength(datum, primaryAxis, secondaryAxis) / 2

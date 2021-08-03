@@ -380,6 +380,8 @@ function ChartInner<TDatum>({
   const series = React.useMemo(() => {
     const series: Series<TDatum>[] = []
 
+    const indicesByAxisId: Record<string, number> = {}
+
     for (
       let seriesIndex = 0;
       seriesIndex < options.data.length;
@@ -392,6 +394,12 @@ function ChartInner<TDatum>({
       const originalDatums = originalSeries.data
       const datums = []
 
+      indicesByAxisId[`${secondaryAxisId}`] =
+        indicesByAxisId[`${secondaryAxisId}`] ?? 0
+      const seriesIndexPerAxis = indicesByAxisId[`${secondaryAxisId}`]
+
+      indicesByAxisId[`${secondaryAxisId}`]++
+
       for (
         let datumIndex = 0;
         datumIndex < originalDatums.length;
@@ -401,6 +409,7 @@ function ChartInner<TDatum>({
         datums[datumIndex] = {
           originalSeries,
           seriesIndex,
+          seriesIndexPerAxis,
           seriesId,
           seriesLabel,
           secondaryAxisId,
@@ -414,6 +423,7 @@ function ChartInner<TDatum>({
         index: seriesIndex,
         id: seriesId,
         label: seriesLabel,
+        indexPerAxis: seriesIndexPerAxis,
         secondaryAxisId,
         datums,
       }
@@ -528,6 +538,7 @@ function ChartInner<TDatum>({
   }, [
     allDatums,
     options.interactionMode,
+    primaryAxis,
     secondaryAxes,
     tooltipOptions.groupingMode,
   ])

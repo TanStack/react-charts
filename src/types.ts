@@ -436,6 +436,7 @@ export type UserSerie<TDatum> = {
 export type Series<TDatum> = {
   originalSeries: UserSerie<TDatum>
   index: number
+  indexPerAxis: number
   id: string
   label: string
   secondaryAxisId?: string
@@ -451,6 +452,7 @@ export type Datum<TDatum> = {
   index: number
   originalDatum: TDatum
   secondaryAxisId?: string
+  seriesIndexPerAxis: number
   primaryValue?: any
   secondaryValue?: any
   stackData?: StackDatum<TDatum>

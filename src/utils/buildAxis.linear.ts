@@ -359,6 +359,8 @@ function buildBandAxis<TDatum>(
   range: [number, number],
   outerRange: [number, number]
 ): AxisBand<TDatum> {
+  series = series.filter(d => d.secondaryAxisId === options.id)
+
   const domain = Array.from(
     new Set(
       series
@@ -524,7 +526,9 @@ function buildSeriesBandScale<TDatum>(
   primaryBandScale: ScaleBand<number>,
   series: Series<TDatum>[]
 ) {
-  const bandDomain = d3Range(series.length)
+  const bandDomain = d3Range(
+    series.filter(d => d.secondaryAxisId === options.id).length
+  )
 
   const seriesBandScale = scaleBand(bandDomain, [
     0,
@@ -540,5 +544,8 @@ function buildSeriesBandScale<TDatum>(
         (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
     )
 
-  return seriesBandScale
+  const scale = (seriesIndex: number) =>
+    seriesBandScale(series.find(d => d.index === seriesIndex)!?.indexPerAxis)
+
+  return Object.assign(scale, seriesBandScale)
 }

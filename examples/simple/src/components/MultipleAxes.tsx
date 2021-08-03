@@ -5,12 +5,12 @@ import { AxisOptions, Chart } from "react-charts";
 
 export default function MultipleAxes() {
   const { data, randomizeData } = useDemoConfig({
-    series: 10,
+    series: 6,
     dataType: "time",
   });
 
   // @ts-ignore
-  data.forEach((d, i) => (d.secondaryAxisId = i % 3 === 0 ? "2" : undefined));
+  data.forEach((d, i) => (d.secondaryAxisId = i > 2 ? "2" : undefined));
 
   const primaryAxis = React.useMemo<
     AxisOptions<typeof data[number]["data"][number]>
