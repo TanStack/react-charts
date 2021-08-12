@@ -122,12 +122,12 @@ function buildTimeAxis<TDatum>(
 
   // see https://stackoverflow.com/a/2831422
   if (Object.prototype.toString.call(options.min) === '[object Date]') {
-    minValue = min([options.min, minValue as Date])
+    minValue = min([options.min, minValue] as Date[])
     shouldNice = false
   }
 
   if (Object.prototype.toString.call(options.max) === '[object Date]') {
-    maxValue = max([options.max, maxValue as Date])
+    maxValue = max([options.max, maxValue] as Date[])
     shouldNice = false
   }
 

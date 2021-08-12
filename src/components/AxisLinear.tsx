@@ -107,6 +107,15 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
       }
     })
 
+    // For vertical axis find height, for horizontal width
+    // if not enough ticks, default to 0
+    const bandDim =
+      ticks.length > 1
+        ? axis.isVertical
+          ? ticks[0].from.y - ticks[1].from.y
+          : ticks[1].from.x - ticks[0].from.x
+        : 0
+
     return (
       <g
         key={`Axis-Group ${isOuter ? 'outer' : 'inner'}`}
@@ -198,6 +207,23 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
               )
             })}
           </g>
+          {axis.alternatingBackgroundColor ? (
+            <g className="background-bands">
+              {ticks.map((tick, i) => {
+                return !isOuter && i % 2 ? (
+                  <rect
+                    key={`vx-band-${tick}-${i}`}
+                    fill={axis.alternatingBackgroundColor}
+                    // the shift to the left by bandDim is so that each band is drawn "to the left" of the tick (none will overflow)
+                    x={axis.isVertical ? tick.from.x : tick.to.x - bandDim}
+                    y={axis.isVertical ? tick.from.y : tick.gridTo.y}
+                    width={axis.isVertical ? tick.gridTo.x : bandDim}
+                    height={axis.isVertical ? bandDim : tick.from.y}
+                  ></rect>
+                ) : null
+              })}
+            </g>
+          ) : null}
           <g className="grid">
             {ticks.map((tick, i) => {
               return (
@@ -209,7 +235,7 @@ export default function AxisLinearComp<TDatum>(axis: Axis<TDatum>) {
                       x2={tick.gridTo.x}
                       y2={tick.gridTo.y}
                       stroke={
-                        dark ? 'rgba(255,255,255, .05)' : 'rgba(0,0,0, .05)'
+                        dark ? 'rgba(255,255,255, .05)' : 'rgba(0,0,0, .05'
                       }
                     />
                   ) : null}

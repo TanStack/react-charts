@@ -250,6 +250,7 @@ export type AxisOptionsBase = {
   maxBandSize?: number
   minDomainLength?: number
   showGrid?: boolean
+  alternatingBackgroundColor?: string
   show?: boolean
   stacked?: boolean
   stackOffset?: typeof stackOffsetNone

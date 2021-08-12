@@ -24,6 +24,7 @@ export default function Line() {
     () => [
       {
         getValue: (datum) => datum.secondary,
+        alternatingBackgroundColor: "#f5f5f5",
       },
     ],
     []
