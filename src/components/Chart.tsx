@@ -201,6 +201,7 @@ export function Chart<TDatum>({
       {...rest}
       className={`ReactChart ${className || ''}`}
       style={{
+        fontFamily: 'sans-serif',
         ...style,
         position: 'absolute',
         width,
@@ -686,11 +687,7 @@ function ChartInner<TDatum>({
 
   return (
     <ChartContextProvider value={useGetLatest(contextValue)}>
-      <div
-        style={{
-          fontFamily: 'sans-serif',
-        }}
-      >
+      <div>
         <svg
           ref={svgRef}
           style={{

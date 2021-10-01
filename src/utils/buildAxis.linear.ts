@@ -42,6 +42,7 @@ function defaultAxisOptions<TDatum>(
     outerSeriesBandPadding: options.outerSeriesBandPadding ?? 0,
     show: options.show ?? true,
     stacked: options.stacked ?? false,
+    shouldNice: options.shouldNice ?? true,
   }
 }
 
@@ -119,24 +120,25 @@ function buildTimeAxis<TDatum>(
     return value
   })
 
-  let shouldNice = true
+  let shouldNice = options.shouldNice
 
-  if (typeof options.min === 'number') {
+  // see https://stackoverflow.com/a/2831422
+  if (Object.prototype.toString.call(options.min) === '[object Date]') {
     minValue = min([options.min, minValue as Date])
     shouldNice = false
   }
 
-  if (typeof options.max === 'number') {
+  if (Object.prototype.toString.call(options.max) === '[object Date]') {
     maxValue = max([options.max, maxValue as Date])
     shouldNice = false
   }
 
-  if (typeof options.hardMin === 'number') {
+  if (Object.prototype.toString.call(options.hardMin) === '[object Date]') {
     minValue = options.hardMin
     shouldNice = false
   }
 
-  if (typeof options.hardMax === 'number') {
+  if (Object.prototype.toString.call(options.hardMax) === '[object Date]') {
     maxValue = options.hardMax
     shouldNice = false
   }
@@ -250,7 +252,7 @@ function buildLinearAxis<TDatum>(
         return value
       })
 
-  let shouldNice = true
+  let shouldNice = options.shouldNice
 
   if (typeof options.min === 'number') {
     minValue = min([options.min, minValue as number])

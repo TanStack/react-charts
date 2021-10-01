@@ -241,6 +241,7 @@ export type AxisOptionsBase = {
   minTickPaddingForRotation?: number
   tickLabelRotationDeg?: number
   tickCount?: number
+  shouldNice?: boolean
   innerBandPadding?: number
   outerBandPadding?: number
   innerSeriesBandPadding?: number
