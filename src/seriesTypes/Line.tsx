@@ -2,7 +2,7 @@ import { area, line } from 'd3-shape'
 import React from 'react'
 
 import { Axis, Series, Datum } from '../types'
-import { translate } from '../utils/Utils'
+import { isDefined, translate } from '../utils/Utils'
 import useChartContext from '../utils/chartContext'
 //
 import { monotoneX } from '../utils/curveMonotone'
@@ -36,30 +36,35 @@ export default function Line<TDatum>({
       {allSeries.map((series, i) => {
         const style = getSeriesStatusStyle(series, focusedDatum)
 
-        const areaPath =
-          secondaryAxis.elementType === 'area'
-            ? area<Datum<TDatum>>(
-                datum => getPrimary(datum, primaryAxis) ?? NaN,
-                datum =>
-                  clampPxToAxis(
-                    getSecondaryStart(datum, secondaryAxis) ?? NaN,
-                    secondaryAxis
-                  ),
-                datum =>
-                  clampPxToAxis(
-                    getSecondary(datum, secondaryAxis) ?? NaN,
-                    secondaryAxis
-                  )
-              ).curve(curve)(series.datums) ?? undefined
-            : undefined
+        let areaPath: null | string = null
+
+        if (secondaryAxis.elementType === 'area') {
+          const _x = (datum: Datum<TDatum>) => getPrimary(datum, primaryAxis)
+          const _y1 = (datum: Datum<TDatum>) =>
+            clampPxToAxis(
+              getSecondaryStart(datum, secondaryAxis),
+              secondaryAxis
+            )
+          const _y2 = (datum: Datum<TDatum>) =>
+            clampPxToAxis(getSecondary(datum, secondaryAxis), secondaryAxis)
+          const areaFn = area<Datum<TDatum>>(_x, _y1, _y2).curve(curve)
+
+          areaFn.defined(datum =>
+            [_x(datum), _y1(datum), _y2(datum)].every(isDefined)
+          )
+
+          areaPath = areaFn(series.datums)
+        }
+
+        const _x = (datum: Datum<TDatum>) => getPrimary(datum, primaryAxis)
+        const _y = (datum: Datum<TDatum>) => getSecondary(datum, secondaryAxis)
+        const lineFn = line<Datum<TDatum>>(_x, _y).curve(curve)
+        lineFn.defined(datum => [_x(datum), _y(datum)].every(isDefined))
 
         const linePath =
           secondaryAxis.elementType === 'area' ||
           secondaryAxis.elementType === 'line'
-            ? line<Datum<TDatum>>(
-                datum => getPrimary(datum, primaryAxis) ?? NaN,
-                datum => getSecondary(datum, secondaryAxis) ?? NaN
-              ).curve(curve)(series.datums) ?? undefined
+            ? lineFn(series.datums) ?? undefined
             : undefined
 
         const showDatumElements =
@@ -112,8 +117,8 @@ export default function Line<TDatum>({
                   ref={el => {
                     datum.element = el
                   }}
-                  cx={getX(datum, primaryAxis, secondaryAxis)}
-                  cy={getY(datum, primaryAxis, secondaryAxis)}
+                  cx={getX(datum, primaryAxis, secondaryAxis) || 0}
+                  cy={getY(datum, primaryAxis, secondaryAxis) || 0}
                   style={{
                     // @ts-ignore
                     r: radius,

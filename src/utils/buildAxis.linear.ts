@@ -108,6 +108,8 @@ function buildTimeAxis<TDatum>(
 ): AxisTime<TDatum> {
   const scaleFn = options.scaleType === 'localTime' ? scaleTime : scaleUtc
 
+  let isInvalid = false
+
   // Now set the range
   const scale = scaleFn(range)
 
@@ -140,7 +142,7 @@ function buildTimeAxis<TDatum>(
   }
 
   if (minValue === undefined || maxValue === undefined) {
-    console.info({
+    console.info('Invalid scale min/max was detect for a chart:', {
       options,
       series,
       range,
@@ -148,7 +150,7 @@ function buildTimeAxis<TDatum>(
         isPrimary ? d.primaryValue : d.secondaryValue
       ),
     })
-    throw new Error('Invalid scale min/max')
+    isInvalid = true
   }
 
   // Set the domain
@@ -200,6 +202,7 @@ function buildTimeAxis<TDatum>(
 
   return {
     ...options,
+    isInvalid,
     axisFamily: 'time',
     isVertical,
     scale,
@@ -221,6 +224,8 @@ function buildLinearAxis<TDatum>(
   outerRange: [number, number]
 ): AxisLinear<TDatum> {
   const scale = options.scaleType === 'log' ? scaleLog() : scaleLinear()
+
+  let isInvalid = false
 
   if (options.stacked) {
     stackSeries(series, options)
@@ -279,7 +284,8 @@ function buildLinearAxis<TDatum>(
   }
 
   if (minValue === undefined || maxValue === undefined) {
-    console.info({
+    isInvalid = true
+    console.info('Invalid scale min/max', {
       options,
       series,
       range,
@@ -287,7 +293,9 @@ function buildLinearAxis<TDatum>(
         isPrimary ? d.primaryValue : d.secondaryValue
       ),
     })
-    throw new Error('Invalid scale min/max')
+    minValue = minValue ?? 0
+    maxValue = maxValue ?? 0
+    // throw new Error('Invalid scale min/max')
   }
 
   // Set the domain
@@ -340,6 +348,7 @@ function buildLinearAxis<TDatum>(
 
   return {
     ...options,
+    isInvalid,
     axisFamily: 'linear',
     isVertical,
     scale,
@@ -360,6 +369,8 @@ function buildBandAxis<TDatum>(
   outerRange: [number, number]
 ): AxisBand<TDatum> {
   series = series.filter(d => d.secondaryAxisId === options.id)
+
+  let isInvalid = false
 
   const domain = Array.from(
     new Set(
@@ -421,6 +432,7 @@ function buildBandAxis<TDatum>(
 
   return {
     ...options,
+    isInvalid,
     axisFamily: 'band',
     isVertical,
     scale,

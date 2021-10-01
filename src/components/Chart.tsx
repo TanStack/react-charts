@@ -669,6 +669,10 @@ function ChartInner<TDatum>({
         throw new Error('Invalid elementType')
       })()
 
+      if (primaryAxis.isInvalid || secondaryAxis.isInvalid) {
+        return null
+      }
+
       return (
         <Component
           key={axisId ?? '__default__'}

@@ -70,3 +70,7 @@ function normalizeColor(
     fill: style.fill || style.color || defaults.fill || defaults.color,
   }
 }
+
+export function isDefined(num: number) {
+  return typeof num === 'number' && !Number.isNaN(num)
+}

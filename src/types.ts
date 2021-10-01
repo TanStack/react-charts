@@ -368,6 +368,7 @@ export type AxisTime<TDatum> = Omit<
   'format'
 > & {
   isPrimary?: boolean
+  isInvalid: boolean
   axisFamily: 'time'
   scale: ScaleTime<number, number, never>
   outerScale: ScaleTime<number, number, never>
@@ -386,6 +387,7 @@ export type AxisLinear<TDatum> = Omit<
   'format'
 > & {
   isPrimary?: boolean
+  isInvalid: boolean
   axisFamily: 'linear'
   scale: ScaleLinear<number, number, never>
   outerScale: ScaleLinear<number, number, never>
@@ -404,6 +406,7 @@ export type AxisBand<TDatum> = Omit<
   'format'
 > & {
   isPrimary?: boolean
+  isInvalid: boolean
   axisFamily: 'band'
   scale: ScaleBand<any>
   outerScale: ScaleBand<any>

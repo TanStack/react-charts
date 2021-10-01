@@ -113,7 +113,7 @@ const Home = props => {
                       <div className="leading-none">
                         <sup>
                           * Okay, there is a time and place for them, but not
-                          often and certainlly not here 😜.
+                          often and certainly not here 😜.
                         </sup>
                       </div>
                     </div>
