@@ -20,7 +20,7 @@ type Series = {
 
 const data: Series[] = [
   {
-    label: 'React Charts",
+    label: 'React Charts',
     data: [
       {
         date: new Date(),
@@ -30,7 +30,7 @@ const data: Series[] = [
     ]
   },
   {
-    label: 'React Query",
+    label: 'React Query',
     data: [
       {
         date: new Date(),
