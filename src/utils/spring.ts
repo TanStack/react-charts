@@ -13,6 +13,9 @@ type Solution = {
 const epsilon = 0.001
 
 function almostEqual(a: number, b: number) {
+  if (Number.isNaN(a) && Number.isNaN(b)) {
+    return true
+  }
   return a > b - epsilon && a < b + epsilon
 }
 
