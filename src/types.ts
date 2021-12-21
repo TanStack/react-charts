@@ -267,6 +267,7 @@ export type AxisTimeOptions<TDatum> = AxisOptionsBase & {
   max?: Date
   hardMin?: Date
   hardMax?: Date
+  padBandRange?: boolean
   formatters?: {
     scale?: (
       value: Date,
