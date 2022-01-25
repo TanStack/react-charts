@@ -56,7 +56,7 @@ const data = React.useMemo(
 )
 ```
 
-The individual datums in a series' `data` array can be anything you want! Just remember that most of the types for React Query will require you to pass the type of your `Datum`s as the first generic type to work correctly.
+The individual datums in a series' `data` array can be anything you want! Just remember that most of the types for React Charts will require you to pass the type of your `Datum`s as the first generic type to work correctly.
 
 ## Axes
 
