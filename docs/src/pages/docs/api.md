@@ -199,7 +199,7 @@ const data = [
 ]
 ```
 
-The **primaryAxis** and **secondaryAxes** props should be a function that returns and implements a getter function called getValue.
+The **primaryAxis** and **secondaryAxes** Should have a prop called getValue, which is a getter function that returns the axis value for the datum. Example:
 
 ```javascript
 const primaryAxis = React.useMemo(
