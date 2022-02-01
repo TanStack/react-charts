@@ -219,6 +219,16 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
+**options.initialHeight** and **options.initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+
+**options.interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+
+**options.showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
+
+**options.getSeriesOrder** expect a function, This option will allows you to reorder the series if you want.
+
+**options.primaryCursor** and **options.secundaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
+
 ### Curve Types
 
 All element types that support lines or curves can be configured by passing any `curve` generator function as the `AxisOptions<TDatum>['curve']` option. By default, horizontal and vertical series default to using `monotoneX` and `monotoneY` curves, respectively. More information can be found at [`d3-shape curves`](https://github.com/d3/d3-shape#curves)
