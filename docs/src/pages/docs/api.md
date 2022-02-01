@@ -153,7 +153,7 @@ const secondaryAxes = React.useMemo(
 
 ### Chart Component Props
 
-The Chart component props can be passed in its option property object:
+The Chart component props can be passed in its **options** property object:
 
 ```javascript
 <Chart
@@ -199,7 +199,7 @@ const data = [
 ]
 ```
 
-The **primaryAxis** and **secondaryAxes** Should have a prop called getValue, which is a getter function that returns the axis value for the datum. Example:
+The **primaryAxis** and **secondaryAxes** options, should have a prop called getValue, which is a getter function that returns the axis value for the datum. Example:
 
 ```javascript
 const primaryAxis = React.useMemo(
@@ -219,15 +219,15 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-**options.initialHeight** and **options.initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
 
-**options.interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+**interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
-**options.showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
+**showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
 
-**options.getSeriesOrder** expect a function, This option will allows you to reorder the series if you want.
+**getSeriesOrder** expect a function, this option will allows you to reorder the series if you want.
 
-**options.primaryCursor** and **options.secundaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
+**primaryCursor** and **secundaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
 ### Curve Types
 
