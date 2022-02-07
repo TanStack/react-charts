@@ -60,12 +60,12 @@ The individual datums in a series' `data` array can be anything you want! Just r
 
 ## Axes
 
-React Charts uses axes to configure a fair amount of the chart. Axes handle many things like:
+React Charts use axes to configure a fair amount of the charts. Axes handle many things like:
 
 - Accessing chart values from your series' `Datum`s
 - Optionally positioning your axis on the grid
-- Optionsally configuring the scale type for your axis
-- Optionsally configuring the element type for series that are tied to your axis
+- Optionally configuring the scale type for your axis
+- Optionally configuring the element type for series that are tied to your axis
 
 To date, we have the following scale types available:
 
@@ -150,6 +150,84 @@ const secondaryAxes = React.useMemo(
   []
 )
 ```
+
+### Chart Component Props
+
+The Chart component props can be passed in its **options** property object:
+
+```javascript
+<Chart
+  options={{
+    data,
+    primaryAxis,
+    secondaryAxes,
+  }}
+/>
+```
+
+The data property should be an array of series, each series should be an array of objects.
+Each object should have two properties, by convention called primary and secondary, but it can be named as you want. One of these properties will be used as the primary axis and the other as the secondary axes.
+
+```javascript
+const data = [
+  {
+    label: 'Series 1',
+    data: [
+      {
+        primary: '2022-02-03T00:00:00.000Z',
+        likes: 130,
+      },
+      {
+        primary: '2022-03-03T00:00:00.000Z',
+        likes: 150,
+      },
+    ],
+  },
+  {
+    label: 'Series 2',
+    data: [
+      {
+        primary: '2022-04-03T00:00:00.000Z',
+        likes: 200,
+      },
+      {
+        primary: '2022-05-03T00:00:00.000Z',
+        likes: 250,
+      },
+    ],
+  },
+]
+```
+
+The **primaryAxis** and **secondaryAxes** options, should have a prop called getValue, which is a getter function that returns the axis value for the datum. Example:
+
+```javascript
+const primaryAxis = React.useMemo(
+  () => ({
+    getValue: (datum: { primary: string }) => datum.primary,
+  }),
+  []
+)
+const secondaryAxes = React.useMemo(
+  () => [
+    {
+      getValue: (datum: { likes: number }) => datum.likes,
+      elementType: 'area',
+    },
+  ],
+  []
+)
+```
+
+**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+
+**interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+
+**showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
+
+**getSeriesOrder** expect a function, this option will allows you to reorder the series if you want.
+
+**primaryCursor** and **secundaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
 ### Curve Types
 
