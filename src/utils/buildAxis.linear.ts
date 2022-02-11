@@ -168,7 +168,7 @@ function buildTimeAxis<TDatum>(
 
   const outerScale = scale.copy().range(outerRange)
 
-  // Supplmentary band scale
+  // Supplementary band scale
   const primaryBandScale = isPrimary
     ? buildPrimaryBandScale(options, scale, series, range)
     : undefined
@@ -176,6 +176,19 @@ function buildTimeAxis<TDatum>(
   const seriesBandScale = primaryBandScale
     ? buildSeriesBandScale(options, primaryBandScale, series)
     : undefined
+
+  const primaryBandWidth = primaryBandScale?.bandwidth()
+
+  if (options.padBandRange && primaryBandWidth) {
+    const bandStart = scale.invert(0)
+    const bandEnd = scale.invert(primaryBandWidth)
+    const diff = bandEnd.valueOf() - bandStart.valueOf()
+
+    scale.domain([
+      new Date(scale.domain()[0].valueOf() - diff / 2),
+      new Date(scale.domain()[1].valueOf() + diff / 2),
+    ])
+  }
 
   const defaultFormat = scale.tickFormat()
 

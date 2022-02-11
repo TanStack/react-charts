@@ -41,23 +41,13 @@ export default function BarComponent<TDatum>({
             {series.datums.map((datum, i) => {
               const dataStyle = getDatumStatusStyle(datum, focusedDatum)
 
-              const x = clampPxToAxis(
-                0,
+              const [x, width] = clampPxToAxis(
                 getRectX(datum, primaryAxis, secondaryAxis) ?? NaN,
-                xAxis
-              )
-              const y = clampPxToAxis(
-                0,
-                getRectY(datum, primaryAxis, secondaryAxis) ?? NaN,
-                yAxis
-              )
-              const width = clampPxToAxis(
-                x,
                 getWidth(datum, primaryAxis, secondaryAxis) ?? NaN,
                 xAxis
               )
-              const height = clampPxToAxis(
-                y,
+              const [y, height] = clampPxToAxis(
+                getRectY(datum, primaryAxis, secondaryAxis) ?? NaN,
                 getHeight(datum, primaryAxis, secondaryAxis) ?? NaN,
                 yAxis
               )
@@ -216,12 +206,22 @@ function getSecondary<TDatum>(
   return secondaryAxis.scale(datum.secondaryValue) ?? NaN
 }
 
-function clampPxToAxis<TDatum>(base: number, px: number, axis: Axis<TDatum>) {
+function clampPxToAxis<TDatum>(
+  startPx: number,
+  lengthPx: number,
+  axis: Axis<TDatum>
+) {
   const range = axis.scale.range()
 
   if (axis.isVertical) {
     range.reverse()
   }
 
-  return Math.max(range[0], Math.min(px, range[1] - base))
+  const safe = (num: number) => Math.max(range[0], Math.min(num, range[1]))
+
+  const safeStart = safe(startPx)
+  const safeEnd = safe(startPx + lengthPx)
+  const safeLength = safeEnd - safeStart
+
+  return [safeStart, safeLength] as const
 }

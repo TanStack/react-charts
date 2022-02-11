@@ -17,6 +17,8 @@ export default function MultipleAxes() {
   >(
     () => ({
       getValue: (datum) => datum.primary as unknown as Date,
+      // Pad the automatically detected time scale with half of the band-size
+      padBandRange: true,
     }),
     []
   );
