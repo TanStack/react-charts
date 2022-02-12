@@ -493,8 +493,12 @@ function stackSeries<TDatum>(
     })
   )
 
-  stacked.forEach((s, sIndex) => {
-    s.forEach((datum, i) => {
+  for (let sIndex = 0; sIndex < stacked.length; sIndex++) {
+    const s = stacked[sIndex]
+
+    for (let i = 0; i < s.length; i++) {
+      const datum = s[i]
+
       if (axisSeries[sIndex].datums[i]) {
         // @ts-ignore
         datum.data = axisSeries[sIndex].datums[i]
@@ -502,8 +506,8 @@ function stackSeries<TDatum>(
         axisSeries[sIndex].datums[i].stackData =
           datum as unknown as StackDatum<TDatum>
       }
-    })
-  })
+    }
+  }
 }
 
 function buildPrimaryBandScale<TDatum>(
@@ -516,15 +520,19 @@ function buildPrimaryBandScale<TDatum>(
 
   let impliedBandWidth: number = Math.max(...range)
 
-  series.forEach(serie => {
-    serie.datums.forEach(d1 => {
+  for (let i = 0; i < series.length; i++) {
+    const serie = series[i]
+
+    for (let j = 0; j < serie.datums.length; j++) {
+      const d1 = serie.datums[j]
       const one = scale(d1.primaryValue ?? NaN)
 
-      serie.datums.forEach(d2 => {
+      for (let k = 0; k < serie.datums.length; k++) {
+        const d2 = serie.datums[k]
         const two = scale(d2.primaryValue ?? NaN)
 
         if (one === two) {
-          return
+          continue
         }
 
         const diff = Math.abs(Math.max(one, two) - Math.min(one, two))
@@ -532,9 +540,9 @@ function buildPrimaryBandScale<TDatum>(
         if (diff < impliedBandWidth) {
           impliedBandWidth = diff
         }
-      })
-    })
-  })
+      }
+    }
+  }
 
   const bandRange = Math.max(...range)
 

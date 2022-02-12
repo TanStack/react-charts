@@ -109,6 +109,7 @@ export type ChartContextValue<TDatum> = {
     Datum<TDatum> | null,
     React.Dispatch<React.SetStateAction<Datum<TDatum> | null>>
   ]
+  isInteractingState: [boolean, React.Dispatch<React.SetStateAction<boolean>>]
 }
 
 export type TooltipOptions<TDatum> = {

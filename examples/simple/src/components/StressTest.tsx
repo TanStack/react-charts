@@ -14,6 +14,8 @@ export default function StressTest() {
       liveDataInterval,
       showPoints,
       memoizeSeries,
+      height,
+      showAxes,
     },
     setState,
   ] = React.useState({
@@ -25,6 +27,8 @@ export default function StressTest() {
     liveDataInterval: 1000,
     showPoints: true,
     memoizeSeries: false,
+    height: 100,
+    showAxes: true,
   });
 
   const { data, randomizeData } = useDemoConfig({
@@ -41,8 +45,9 @@ export default function StressTest() {
   >(
     () => ({
       getValue: (datum) => datum.primary as unknown as Date,
+      show: showAxes,
     }),
-    []
+    [showAxes]
   );
 
   const secondaryAxes = React.useMemo<
@@ -52,9 +57,10 @@ export default function StressTest() {
       {
         getValue: (datum) => datum.secondary,
         showDatumElements: showPoints,
+        show: showAxes,
       },
     ],
-    [showPoints]
+    [showAxes, showPoints]
   );
 
   React.useEffect(() => {
@@ -145,6 +151,17 @@ export default function StressTest() {
           }}
         />
       </label>
+      <label>
+        Show Axes:{" "}
+        <input
+          type="checkbox"
+          checked={showAxes}
+          onChange={(e) => {
+            e.persist();
+            setState((old) => ({ ...old, showAxes: !!e.target.checked }));
+          }}
+        />
+      </label>
       <br />
       <label>
         Memoize Series:{" "}
@@ -192,11 +209,21 @@ export default function StressTest() {
         </select>
       </label>
       <br />
+      <label>
+        Chart Height
+        <input
+          type="number"
+          value={height}
+          onChange={(e) => {
+            setState((old) => ({ ...old, height: parseInt(e.target.value) }));
+          }}
+        />
+      </label>
       <button onClick={randomizeData}>Randomize Data</button>
       <br />
       <br />
       {[...new Array(chartCount)].map((d, i) => (
-        <ResizableBox key={i} height={100}>
+        <ResizableBox key={i} height={height}>
           <Chart
             options={{
               data,

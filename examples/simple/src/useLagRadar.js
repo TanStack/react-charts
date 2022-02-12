@@ -34,9 +34,9 @@ function lagRadar(config = {}) {
 
   const styles = document.createTextNode(`
     .lagRadar {
-  pointer-events: none;
-}
-.lagRadar-sweep > * {
+      pointer-events: none;
+    }
+    .lagRadar-sweep > * {
       shape-rendering: crispEdges;
     }
     .lagRadar-face {

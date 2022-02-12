@@ -307,6 +307,9 @@ function ChartInner<TDatum>({
 
   const [axisDimensions] = axisDimensionsState
 
+  const isInteractingState = React.useState<boolean>(false)
+  const [isInteracting] = isInteractingState
+
   const focusedDatumState = React.useState<Datum<TDatum> | null>(null)
   const [focusedDatum] = focusedDatumState
 
@@ -464,11 +467,19 @@ function ChartInner<TDatum>({
   }, [allDatums, gridDimensions, height, secondaryAxesOptions, series, width])
 
   const [datumsByInteractionGroup, datumsByTooltipGroup] = React.useMemo(() => {
+    if (!isInteracting) {
+      return [new Map(), new Map()]
+    }
+
     const datumsByInteractionGroup = new Map<any, Datum<TDatum>[]>()
     const datumsByTooltipGroup = new Map<any, Datum<TDatum>[]>()
 
+    const allBarAndNotStacked = secondaryAxes.every(
+      d => d.elementType === 'bar' && !d.stacked
+    )
+
     let getInteractionPrimary = (datum: Datum<TDatum>) => {
-      if (secondaryAxes.every(d => d.elementType === 'bar' && !d.stacked)) {
+      if (allBarAndNotStacked) {
         const secondaryAxis = secondaryAxes.find(
           d => d.id === datum.secondaryAxisId
         )!
@@ -537,6 +548,7 @@ function ChartInner<TDatum>({
 
     return [datumsByInteractionGroup, datumsByTooltipGroup]
   }, [
+    isInteracting,
     allDatums,
     options.interactionMode,
     primaryAxis,
@@ -615,6 +627,7 @@ function ChartInner<TDatum>({
     axisDimensionsState,
     focusedDatumState,
     svgRef,
+    isInteractingState,
   }
 
   const seriesByAxisId = React.useMemo(
@@ -696,6 +709,12 @@ function ChartInner<TDatum>({
             overflow: options.brush ? 'hidden' : 'visible',
           }}
           onClick={e => options.onClickDatum?.(focusedDatum, e)}
+          onMouseEnter={() => {
+            isInteractingState[1](true)
+          }}
+          onMouseLeave={() => {
+            isInteractingState[1](false)
+          }}
         >
           <g className="axes">
             {[primaryAxis, ...secondaryAxes].map(axis => (

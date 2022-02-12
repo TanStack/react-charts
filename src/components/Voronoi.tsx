@@ -9,9 +9,11 @@ import { line } from 'd3-shape'
 import { getPrimaryGroupLength, getPrimaryLength } from '../seriesTypes/Bar'
 
 export default function Voronoi<TDatum>() {
-  const { getOptions, focusedDatumState } = useChartContext<TDatum>()
+  const { getOptions, focusedDatumState, isInteractingState } =
+    useChartContext<TDatum>()
 
   const [, setFocusedDatum] = focusedDatumState
+  const [isInteracting] = isInteractingState
 
   const {
     onFocusDatum,
@@ -32,12 +34,13 @@ export default function Voronoi<TDatum>() {
   )
 
   const needsVoronoi =
-    onFocusDatum ||
-    onClickDatum ||
-    tooltip ||
-    primaryCursor ||
-    secondaryCursor ||
-    showVoronoi
+    isInteracting &&
+    (showVoronoi ||
+      onFocusDatum ||
+      onClickDatum ||
+      tooltip ||
+      primaryCursor ||
+      secondaryCursor)
 
   if (!needsVoronoi) {
     return null
