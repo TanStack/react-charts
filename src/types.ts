@@ -10,13 +10,13 @@ export type ChartOptions<TDatum> = {
   primaryAxis: AxisOptions<TDatum>
   secondaryAxes: AxisOptions<TDatum>[]
   padding?:
-    | number
-    | {
-        left?: number
-        right?: number
-        top?: number
-        bottom?: number
-      }
+  | number
+  | {
+    left?: number
+    right?: number
+    top?: number
+    bottom?: number
+  }
   getSeriesStyle?: (
     series: Series<TDatum>,
     status: SeriesFocusStatus
@@ -53,9 +53,9 @@ export type ChartOptions<TDatum> = {
   tooltip?: boolean | TooltipOptions<TDatum>
   useIntersectionObserver?: boolean
   intersectionObserverRootMargin?:
-    | `${number}px`
-    | `${number}px ${number}px`
-    | `${number}px ${number}px ${number}px ${number}px`
+  | `${number}px`
+  | `${number}px ${number}px`
+  | `${number}px ${number}px ${number}px ${number}px`
 }
 
 export type RequiredChartOptions<TDatum> = TSTB.Object.Required<
@@ -493,7 +493,6 @@ export type CursorOptions = {
   show?: boolean
   showLine?: boolean
   showLabel?: boolean
-  axisId?: string
   onChange?: (value: any) => void
 }
 
