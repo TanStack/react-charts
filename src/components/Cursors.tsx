@@ -93,9 +93,9 @@ function Cursor<TDatum>(props: {
   const [focusedDatum] = focusedDatumState
   const latestFocusedDatum = useLatestWhen(focusedDatum, !!focusedDatum)
 
-  const secondaryAxis = secondaryAxes.find(
-    d => d.id === props.options.axisId || latestFocusedDatum?.secondaryAxisId
-  )!
+  const secondaryAxis =
+    secondaryAxes.find(d => d.id === latestFocusedDatum?.secondaryAxisId) ??
+    secondaryAxes[0]
 
   const axis = props.primary ? primaryAxis : secondaryAxis
 

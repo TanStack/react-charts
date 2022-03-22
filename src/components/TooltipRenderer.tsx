@@ -44,7 +44,13 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
     return null
   }
 
-  const { primaryAxis, secondaryAxis, getDatumStyle, focusedDatum } = props
+  const {
+    primaryAxis,
+    secondaryAxis,
+    getDatumStyle,
+    focusedDatum,
+    secondaryAxes,
+  } = props
 
   const { tooltip, dark } = props.getOptions()
 
@@ -239,6 +245,10 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
             {visibleSortedGroupDatums.map((sortedDatum, i) => {
               const active = sortedDatum === focusedDatum
 
+              const datumSecondaryAxis = secondaryAxes.find(
+                d => d.id === sortedDatum.secondaryAxisId
+              )
+
               return (
                 <tr
                   key={i}
@@ -280,9 +290,9 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                           textAlign: 'right',
                         }}
                       >
-                        {(secondaryAxis as AxisTime<any>).formatters.tooltip(
-                          sortedDatum.secondaryValue
-                        )}
+                        {(
+                          datumSecondaryAxis as AxisTime<any>
+                        ).formatters.tooltip(sortedDatum.secondaryValue)}
                       </td>
                     </React.Fragment>
                   ) : tooltip.groupingMode === 'secondary' ? (
@@ -306,9 +316,9 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
                           textAlign: 'right',
                         }}
                       >
-                        {(secondaryAxis as AxisTime<any>).formatters.tooltip(
-                          sortedDatum.secondaryValue
-                        )}
+                        {(
+                          datumSecondaryAxis as AxisTime<any>
+                        ).formatters.tooltip(sortedDatum.secondaryValue)}
                       </td>
                     </React.Fragment>
                   )}

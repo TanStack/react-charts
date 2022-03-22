@@ -73,16 +73,16 @@ export default function buildAxisLinear<TDatum>(
   // Give the scale a home
   return options.scaleType === 'time' || options.scaleType === 'localTime'
     ? buildTimeAxis(
-        isPrimary,
-        options,
-        series,
-        allDatums,
-        isVertical,
-        range,
-        outerRange
-      )
+      isPrimary,
+      options,
+      series,
+      allDatums,
+      isVertical,
+      range,
+      outerRange
+    )
     : options.scaleType === 'linear' || options.scaleType === 'log'
-    ? buildLinearAxis(
+      ? buildLinearAxis(
         isPrimary,
         options,
         series,
@@ -91,11 +91,11 @@ export default function buildAxisLinear<TDatum>(
         range,
         outerRange
       )
-    : options.scaleType === 'band'
-    ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
-    : (() => {
-        throw new Error('Invalid scale type')
-      })()
+      : options.scaleType === 'band'
+        ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
+        : (() => {
+          throw new Error('Invalid scale type')
+        })()
 }
 
 function buildTimeAxis<TDatum>(
@@ -110,6 +110,11 @@ function buildTimeAxis<TDatum>(
   const scaleFn = options.scaleType === 'localTime' ? scaleTime : scaleUtc
 
   let isInvalid = false
+
+  series = isPrimary ? series : series
+    .filter(s => s.secondaryAxisId === options.id)
+
+  allDatums = isPrimary ? allDatums : allDatums.filter(d => d.secondaryAxisId === options.id)
 
   // Now set the range
   const scale = scaleFn(range)
@@ -144,7 +149,7 @@ function buildTimeAxis<TDatum>(
   }
 
   if (minValue === undefined || maxValue === undefined) {
-    console.info('Invalid scale min/max was detect for a chart:', {
+    console.info('Invalid scale min/max', {
       options,
       series,
       range,
@@ -242,28 +247,32 @@ function buildLinearAxis<TDatum>(
 
   let isInvalid = false
 
+  series = isPrimary ? series : series
+    .filter(s => s.secondaryAxisId === options.id)
+
+  allDatums = isPrimary ? allDatums : allDatums.filter(d => d.secondaryAxisId === options.id)
+
   if (options.stacked) {
     stackSeries(series, options)
   }
 
   let [minValue, maxValue] = options.stacked
     ? extent(
-        series
-          .map(s =>
-            s.datums.map(datum => {
-              const value = options.getValue(datum.originalDatum)
-              datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
-
-              return datum.stackData ?? []
-            })
-          )
-          .flat(2) as unknown as number[]
-      )
+      series
+        .map(s =>
+          s.datums.map(datum => {
+            const value = options.getValue(datum.originalDatum)
+            datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+            return datum.stackData ?? []
+          })
+        )
+        .flat(2) as unknown as number[]
+    )
     : extent(allDatums, datum => {
-        const value = options.getValue(datum.originalDatum)
-        datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
-        return value
-      })
+      const value = options.getValue(datum.originalDatum)
+      datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+      return value
+    })
 
   let shouldNice = options.shouldNice
 
@@ -310,7 +319,7 @@ function buildLinearAxis<TDatum>(
     })
     minValue = minValue ?? 0
     maxValue = maxValue ?? 0
-    // throw new Error('Invalid scale min/max')
+    // throw new Error('Invalid scale min/max'
   }
 
   // Set the domain
@@ -465,13 +474,12 @@ function stackSeries<TDatum>(
   series: Series<TDatum>[],
   axisOptions: AxisOptions<TDatum>
 ) {
-  const axisSeries = series.filter(s => s.secondaryAxisId === axisOptions.id)
-  const seriesIndices = Object.keys(axisSeries)
+  const seriesIndices = Object.keys(series)
   const stacker = stack()
     .keys(seriesIndices)
     .value((_, seriesIndex, index) => {
       const originalDatum =
-        axisSeries[Number(seriesIndex)]?.datums[index]?.originalDatum
+        series[Number(seriesIndex)]?.datums[index]?.originalDatum
 
       const val =
         typeof originalDatum !== 'undefined'
@@ -488,7 +496,7 @@ function stackSeries<TDatum>(
 
   const stacked = stacker(
     Array.from({
-      length: axisSeries.sort((a, b) => b.datums.length - a.datums.length)[0]
+      length: series.sort((a, b) => b.datums.length - a.datums.length)[0]
         .datums.length,
     })
   )
@@ -499,11 +507,11 @@ function stackSeries<TDatum>(
     for (let i = 0; i < s.length; i++) {
       const datum = s[i]
 
-      if (axisSeries[sIndex].datums[i]) {
+      if (series[sIndex].datums[i]) {
         // @ts-ignore
-        datum.data = axisSeries[sIndex].datums[i]
+        datum.data = series[sIndex].datums[i]
 
-        axisSeries[sIndex].datums[i].stackData =
+        series[sIndex].datums[i].stackData =
           datum as unknown as StackDatum<TDatum>
       }
     }
@@ -561,9 +569,7 @@ function buildSeriesBandScale<TDatum>(
   primaryBandScale: ScaleBand<number>,
   series: Series<TDatum>[]
 ) {
-  const bandDomain = d3Range(
-    series.filter(d => d.secondaryAxisId === options.id).length
-  )
+  const bandDomain = d3Range(series.length)
 
   const seriesBandScale = scaleBand(bandDomain, [
     0,
@@ -572,11 +578,11 @@ function buildSeriesBandScale<TDatum>(
     .round(false)
     .paddingOuter(
       options.outerSeriesBandPadding ??
-        (options.outerBandPadding ? options.outerBandPadding / 2 : 0)
+      (options.outerBandPadding ? options.outerBandPadding / 2 : 0)
     )
     .paddingInner(
       options.innerSeriesBandPadding ??
-        (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
+      (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
     )
 
   const scale = (seriesIndex: number) =>
