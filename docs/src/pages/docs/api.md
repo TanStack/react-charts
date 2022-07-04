@@ -135,7 +135,7 @@ If you'd like to have a custom height and width in the client side you may have 
 
 `getSeriesOrder` expect a function, this option will allows you to reorder the series if you want.
 
-`primaryCursor` and `secundaryCursor` take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
+`primaryCursor` and `secondaryCursor` take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
 ## Axes
 
@@ -306,7 +306,7 @@ const secondaryAxes = React.useMemo(
 
 **getSeriesOrder** expect a function, this option will allows you to reorder the series if you want.
 
-**primaryCursor** and **secundaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
+**primaryCursor** and **secondaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
 ### Curve Types
 
