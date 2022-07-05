@@ -192,7 +192,10 @@ function getSecondaryStart<TDatum>(
     return secondaryAxis.scale(datum.stackData?.[0] ?? NaN) ?? NaN
   }
 
-  return secondaryAxis.scale(0) ?? NaN
+  return (
+    secondaryAxis.scale(datum.secondaryValue < 0 ? datum.secondaryValue : 0) ??
+    NaN
+  )
 }
 
 function getSecondary<TDatum>(
@@ -203,7 +206,10 @@ function getSecondary<TDatum>(
     return secondaryAxis.scale(datum.stackData?.[1] ?? NaN) ?? NaN
   }
 
-  return secondaryAxis.scale(datum.secondaryValue) ?? NaN
+  return (
+    secondaryAxis.scale(datum.secondaryValue < 0 ? 0 : datum.secondaryValue) ??
+    NaN
+  )
 }
 
 function clampPxToAxis<TDatum>(
