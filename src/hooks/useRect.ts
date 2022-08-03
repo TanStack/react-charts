@@ -1,4 +1,3 @@
-import observeRect from '@reach/observe-rect'
 import React from 'react'
 
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
@@ -39,14 +38,14 @@ export default function useRect(
       return
     }
 
-    const observer = observeRect(element as Element, (newRect: DOMRect) => {
-      setRect(newRect)
+    const observer = new ResizeObserver((entries) => {
+      setRect(entries[0]?.contentRect)
     })
 
-    observer.observe()
+    observer.observe(element as Element)
 
     return () => {
-      observer.unobserve()
+      observer.unobserve(element as Element)
     }
   }, [element, enabled])
 
