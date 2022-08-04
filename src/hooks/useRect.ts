@@ -3,10 +3,19 @@ import React from 'react'
 export default function useRect(
   element: Element | null | undefined,
   enabled: boolean
-) {
+): DOMRect {
   const rerender = React.useReducer(() => ({}), [])[1]
 
-  const rectRef = React.useRef<DOMRect>()
+  const rectRef = React.useRef<DOMRect>({
+    width: 0,
+    height: 0,
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+  } as DOMRect)
 
   const measure = React.useCallback(() => {
     if (element) {
@@ -43,7 +52,7 @@ export default function useRect(
     measure()
     rerender()
 
-    const observer = new ResizeObserver(entries => {
+    const observer = new ResizeObserver(() => {
       measure()
       rerender()
     })
