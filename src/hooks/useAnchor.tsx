@@ -1,6 +1,6 @@
 import React from 'react'
 
-import useRect, { HasBoundingClientRect } from './useRect'
+import useRect from './useRect'
 
 //
 
@@ -76,9 +76,9 @@ export function useAnchor(options: {
   show: boolean
   useLargest?: boolean
   side: SideOption | SideOption[]
-  portalEl: HasBoundingClientRect | null | undefined
-  anchorEl: HasBoundingClientRect | null | undefined
-  tooltipEl: HasBoundingClientRect | null | undefined
+  portalEl: Element | null | undefined
+  anchorEl: Element | null | undefined
+  tooltipEl: Element | null | undefined
 }) {
   const portalDims = useRect(options.portalEl, options.show)
   const anchorDims = useRect(options.anchorEl, options.show)

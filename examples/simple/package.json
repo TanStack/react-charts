@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "start": "rescripts start",
-    "build": "rescripts build",
+    "start": "SKIP_PREFLIGHT_CHECK=true rescripts start",
+    "build": "SKIP_PREFLIGHT_CHECK=true rescripts build",
     "test": "rescripts test",
     "eject": "rescripts eject",
     "serve": "serve build -s -p 3001"

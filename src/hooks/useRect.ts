@@ -1,45 +1,51 @@
 import React from 'react'
 
-import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect'
-
-export type HasBoundingClientRect = {
-  getBoundingClientRect: () => DOMRect
-}
-
 export default function useRect(
-  node: HasBoundingClientRect | null | undefined,
+  element: Element | null | undefined,
   enabled: boolean
 ) {
-  const [element, setElement] = React.useState(node)
+  const rerender = React.useReducer(() => ({}), [])[1]
 
-  let [rect, setRect] = React.useState<DOMRect>({
-    width: 0,
-    height: 0,
-  } as DOMRect)
+  const rectRef = React.useRef<DOMRect>()
 
-  const rectRef = React.useRef(rect)
-
-  rectRef.current = rect
-
-  useIsomorphicLayoutEffect(() => {
-    if (node !== element) {
-      setElement(node)
+  const measure = React.useCallback(() => {
+    if (element) {
+      rectRef.current = element.getBoundingClientRect()
     }
-  })
+  }, [element])
 
-  useIsomorphicLayoutEffect(() => {
-    if (enabled && element) {
-      setRect(element.getBoundingClientRect())
-    }
-  }, [element, enabled])
+  if (!rectRef.current) {
+    measure()
+  }
 
   React.useEffect(() => {
     if (!element || !enabled) {
       return
     }
 
-    const observer = new ResizeObserver((entries) => {
-      setRect(entries[0]?.contentRect)
+    const cb = () => {
+      measure()
+      rerender()
+    }
+
+    document.addEventListener('scroll', cb)
+
+    return () => {
+      document.removeEventListener('scroll', cb)
+    }
+  }, [element, enabled, measure, rerender])
+
+  React.useEffect(() => {
+    if (!element || !enabled) {
+      return
+    }
+
+    measure()
+    rerender()
+
+    const observer = new ResizeObserver(entries => {
+      measure()
+      rerender()
     })
 
     observer.observe(element as Element)
@@ -47,7 +53,7 @@ export default function useRect(
     return () => {
       observer.unobserve(element as Element)
     }
-  }, [element, enabled])
+  }, [element, enabled, measure, rerender])
 
   // const resolvedRect = React.useMemo(() => {
   //   if (!element || !(element as Element).tagName) {
@@ -74,5 +80,5 @@ export default function useRect(
   //   }
   // }, [element, rect])
 
-  return rect
+  return rectRef.current
 }

@@ -82,25 +82,21 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     const width = anchorRect.width ?? 0
     const height = anchorRect.height ?? 0
 
-    const box = {
-      x: translateY,
-      y: translateX,
-      top: translateY,
-      left: translateX,
-      bottom: translateY + width,
-      right: translateX + height,
-      width: width,
-      height: height,
-      toJSON: () => ({} as DOMRect),
-    }
+    const el = document.createElement('div')
 
-    box.toJSON = () => box
+    el.getBoundingClientRect = () =>
+      ({
+        x: translateX,
+        y: translateY,
+        width: width,
+        height: height,
+        top: translateY,
+        left: translateX,
+        bottom: translateY + width,
+        right: translateX + height,
+      } as any)
 
-    return {
-      getBoundingClientRect: () => {
-        return box
-      },
-    }
+    return el
   }, [latestFocusedDatum?.element, svgRect])
 
   const anchor = useAnchor({

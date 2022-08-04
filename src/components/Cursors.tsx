@@ -69,8 +69,12 @@ export default function Cursors<TDatum>() {
 
   return (
     <>
-     {resolvedPrimaryOptions.show &&  <Cursor primary options={resolvedPrimaryOptions} />}
-     {resolvedSecondaryOptions.show &&  <Cursor options={resolvedSecondaryOptions} />}
+      {resolvedPrimaryOptions.show && (
+        <Cursor primary options={resolvedPrimaryOptions} />
+      )}
+      {resolvedSecondaryOptions.show && (
+        <Cursor options={resolvedSecondaryOptions} />
+      )}
     </>
   )
 }
