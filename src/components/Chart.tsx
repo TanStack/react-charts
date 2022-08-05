@@ -70,7 +70,7 @@ function defaultChartOptions<TDatum>(
     interactionMode: options.interactionMode ?? 'primary',
     showVoronoi: options.showVoronoi ?? false,
     defaultColors: options.defaultColors ?? defaultColorScheme,
-    useIntersectionObserver: options.useIntersectionObserver ?? true,
+    useIntersectionObserver: options.useIntersectionObserver ?? false,
     intersectionObserverRootMargin:
       options.intersectionObserverRootMargin ?? '1000px',
     primaryCursor: options.primaryCursor ?? true,
@@ -162,7 +162,7 @@ export function Chart<TDatum>({
     }
   }, [containerEl])
 
-  const [isIntersecting, setIsIntersecting] = React.useState(false)
+  const [isIntersecting, setIsIntersecting] = React.useState(true)
 
   React.useEffect(() => {
     if (!containerEl || !options.useIntersectionObserver) return
@@ -208,9 +208,9 @@ export function Chart<TDatum>({
         height,
       }}
     >
-      {isIntersecting ? (
+      {options.useIntersectionObserver && !isIntersecting ? null : (
         <ChartInner options={options} {...{ width, height }} />
-      ) : null}
+      )}
     </div>
   )
 }
