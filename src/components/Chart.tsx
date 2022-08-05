@@ -162,7 +162,7 @@ export function Chart<TDatum>({
     }
   }, [containerEl])
 
-  const [isIntersecting, setIsIntersecting] = React.useState(true)
+  const [isIntersecting, setIsIntersecting] = React.useState(false)
 
   React.useEffect(() => {
     if (!containerEl || !options.useIntersectionObserver) return
