@@ -4,7 +4,6 @@ body {
 
 .react-resizable {
   max-width: 100%;
-  background: white;
 }
 
 .react-resizable-handle {
