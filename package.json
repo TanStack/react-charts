@@ -80,6 +80,7 @@
     "@svgr/rollup": "^5.4.0",
     "@testing-library/react": "^12.0.0",
     "@types/d3-delaunay": "^6.0.0",
+    "@types/d3-time-format": "^4.0.0",
     "@types/jest": "^26.0.4",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
@@ -135,6 +136,7 @@
     "d3-scale": "^3.3.0",
     "d3-shape": "^2.1.0",
     "d3-time": "^2.1.1",
+    "d3-time-format": "^4.1.0",
     "ts-toolbelt": "^9.6.0"
   }
 }

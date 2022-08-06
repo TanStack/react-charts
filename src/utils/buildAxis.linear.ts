@@ -12,6 +12,18 @@ import {
 } from 'd3-scale'
 
 import {
+  timeSecond,
+  timeMinute,
+  timeHour,
+  timeDay,
+  timeMonth,
+  timeWeek,
+  timeYear,
+} from 'd3-time'
+
+import { timeFormat } from 'd3-time-format'
+
+import {
   Axis,
   AxisBand,
   AxisBandOptions,
@@ -73,16 +85,6 @@ export default function buildAxisLinear<TDatum>(
   // Give the scale a home
   return options.scaleType === 'time' || options.scaleType === 'localTime'
     ? buildTimeAxis(
-      isPrimary,
-      options,
-      series,
-      allDatums,
-      isVertical,
-      range,
-      outerRange
-    )
-    : options.scaleType === 'linear' || options.scaleType === 'log'
-      ? buildLinearAxis(
         isPrimary,
         options,
         series,
@@ -91,11 +93,21 @@ export default function buildAxisLinear<TDatum>(
         range,
         outerRange
       )
-      : options.scaleType === 'band'
-        ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
-        : (() => {
-          throw new Error('Invalid scale type')
-        })()
+    : options.scaleType === 'linear' || options.scaleType === 'log'
+    ? buildLinearAxis(
+        isPrimary,
+        options,
+        series,
+        allDatums,
+        isVertical,
+        range,
+        outerRange
+      )
+    : options.scaleType === 'band'
+    ? buildBandAxis(isPrimary, options, series, isVertical, range, outerRange)
+    : (() => {
+        throw new Error('Invalid scale type')
+      })()
 }
 
 function buildTimeAxis<TDatum>(
@@ -111,10 +123,13 @@ function buildTimeAxis<TDatum>(
 
   let isInvalid = false
 
-  series = isPrimary ? series : series
-    .filter(s => s.secondaryAxisId === options.id)
+  series = isPrimary
+    ? series
+    : series.filter(s => s.secondaryAxisId === options.id)
 
-  allDatums = isPrimary ? allDatums : allDatums.filter(d => d.secondaryAxisId === options.id)
+  allDatums = isPrimary
+    ? allDatums
+    : allDatums.filter(d => d.secondaryAxisId === options.id)
 
   // Now set the range
   const scale = scaleFn(range)
@@ -124,6 +139,87 @@ function buildTimeAxis<TDatum>(
     datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
     return value
   })
+
+  // Here, we find the maximum context (in descending order from year
+  // down to millisecond) needed to understand the
+  // dates in this dataset. If the min/max dates span multiples of
+  // any of the time units OR if the max date resides in a different
+  // unit boundary than today's, we use that unit as context.
+
+  const unitScale = [
+    'millisecond',
+    'second',
+    'minute',
+    'hour',
+    'day',
+    'month',
+    'year',
+  ] as const
+
+  let autoFormatStr: string
+
+  if (minValue && maxValue) {
+    if (
+      timeYear.count(minValue, maxValue) > 0 ||
+      +timeYear.floor(maxValue) < +timeYear()
+    ) {
+      autoFormatStr = '%b %-d, %Y %-I:%M:%S.%L %p'
+    } else if (
+      timeMonth.count(minValue, maxValue) > 0 ||
+      +timeMonth.floor(maxValue) < +timeMonth()
+    ) {
+      autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
+    } else if (
+      timeDay.count(minValue, maxValue) > 0 ||
+      +timeDay.floor(maxValue) < +timeDay()
+    ) {
+      autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
+    } else if (
+      timeHour.count(minValue, maxValue) > 0 ||
+      +timeHour.floor(maxValue) < +timeHour()
+    ) {
+      autoFormatStr = '%-I:%M:%S.%L %p'
+    } else if (
+      timeMinute.count(minValue, maxValue) > 0 ||
+      +timeMinute.floor(maxValue) < +timeMinute()
+    ) {
+      autoFormatStr = '%-I:%M:%S.%L'
+    } else if (
+      timeSecond.count(minValue, maxValue) > 0 ||
+      +timeSecond.floor(maxValue) < +timeSecond()
+    ) {
+      autoFormatStr = '%L'
+    }
+  }
+
+  const contextFormat = (format: string, date: Date) => {
+    if (timeSecond(date) < date) {
+      // milliseconds - Do not remove any context
+      return timeFormat(format)(date)
+    }
+    if (timeMinute(date) < date) {
+      // seconds - remove potential milliseconds
+      return timeFormat(format.replace(/\.%L.*?(\s|$)/, ' '))(date)
+    }
+    if (timeHour(date) < date) {
+      // minutes - remove potential seconds and milliseconds
+      return timeFormat(format.replace(/:%S.*?(\s|$)/, ' '))(date)
+    }
+    if (timeDay(date) < date) {
+      // hours - remove potential minutes and seconds and milliseconds
+      return timeFormat(format.replace(/:%M.*?(\s|$)/, ' '))(date)
+    }
+    if (timeMonth(date) < date) {
+      // days  - remove potential hours, minutes, seconds and milliseconds
+      return timeFormat(format.replace(/%I.*/, ''))(date)
+    }
+    if (timeYear(date) < date) {
+      // months - remove potential days, hours, minutes, seconds and milliseconds
+      return timeFormat(format.replace(/%e, .*?(\s|$)/, ''))(date)
+    }
+    // years
+    return timeFormat('%Y')(date)
+  }
 
   let shouldNice = options.shouldNice
 
@@ -195,13 +291,13 @@ function buildTimeAxis<TDatum>(
     ])
   }
 
-  const defaultFormat = scale.tickFormat()
-
   const formatters = {} as AxisTime<TDatum>['formatters']
+
+  const defaultFormat = scale.tickFormat()
 
   const scaleFormat = (value: Date) =>
     options.formatters?.scale?.(value, { ...formatters, scale: undefined }) ??
-    defaultFormat(value)
+    contextFormat(autoFormatStr, value)
 
   const tooltipFormat = (value: Date) =>
     options.formatters?.tooltip?.(value, {
@@ -211,7 +307,7 @@ function buildTimeAxis<TDatum>(
 
   const cursorFormat = (value: Date) =>
     options.formatters?.cursor?.(value, { ...formatters, cursor: undefined }) ??
-    tooltipFormat(value)
+    scaleFormat(value)
 
   Object.assign(formatters, {
     default: defaultFormat,
@@ -247,10 +343,13 @@ function buildLinearAxis<TDatum>(
 
   let isInvalid = false
 
-  series = isPrimary ? series : series
-    .filter(s => s.secondaryAxisId === options.id)
+  series = isPrimary
+    ? series
+    : series.filter(s => s.secondaryAxisId === options.id)
 
-  allDatums = isPrimary ? allDatums : allDatums.filter(d => d.secondaryAxisId === options.id)
+  allDatums = isPrimary
+    ? allDatums
+    : allDatums.filter(d => d.secondaryAxisId === options.id)
 
   if (options.stacked) {
     stackSeries(series, options)
@@ -258,21 +357,21 @@ function buildLinearAxis<TDatum>(
 
   let [minValue, maxValue] = options.stacked
     ? extent(
-      series
-        .map(s =>
-          s.datums.map(datum => {
-            const value = options.getValue(datum.originalDatum)
-            datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
-            return datum.stackData ?? []
-          })
-        )
-        .flat(2) as unknown as number[]
-    )
+        series
+          .map(s =>
+            s.datums.map(datum => {
+              const value = options.getValue(datum.originalDatum)
+              datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+              return datum.stackData ?? []
+            })
+          )
+          .flat(2) as unknown as number[]
+      )
     : extent(allDatums, datum => {
-      const value = options.getValue(datum.originalDatum)
-      datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
-      return value
-    })
+        const value = options.getValue(datum.originalDatum)
+        datum[isPrimary ? 'primaryValue' : 'secondaryValue'] = value
+        return value
+      })
 
   let shouldNice = options.shouldNice
 
@@ -496,8 +595,8 @@ function stackSeries<TDatum>(
 
   const stacked = stacker(
     Array.from({
-      length: series.sort((a, b) => b.datums.length - a.datums.length)[0]
-        .datums.length,
+      length: series.sort((a, b) => b.datums.length - a.datums.length)[0].datums
+        .length,
     })
   )
 
@@ -578,11 +677,11 @@ function buildSeriesBandScale<TDatum>(
     .round(false)
     .paddingOuter(
       options.outerSeriesBandPadding ??
-      (options.outerBandPadding ? options.outerBandPadding / 2 : 0)
+        (options.outerBandPadding ? options.outerBandPadding / 2 : 0)
     )
     .paddingInner(
       options.innerSeriesBandPadding ??
-      (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
+        (options.innerBandPadding ? options.innerBandPadding / 2 : 0)
     )
 
   const scale = (seriesIndex: number) =>

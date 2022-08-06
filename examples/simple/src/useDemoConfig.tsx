@@ -191,6 +191,7 @@ function makeSeries(
 ) {
   const start = 0;
   const startDate = new Date();
+  // startDate.setFullYear(2020);
   startDate.setUTCHours(0);
   startDate.setUTCMinutes(0);
   startDate.setUTCSeconds(0);
