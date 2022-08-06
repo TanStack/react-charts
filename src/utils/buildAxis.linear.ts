@@ -124,8 +124,8 @@ function buildTimeAxis<TDatum>(
   range: [number, number],
   outerRange: [number, number]
 ): AxisTime<TDatum> {
-  const isLocal = options.scaleType !== 'localTime'
-  const scaleFn = options.scaleType === 'localTime' ? scaleTime : scaleUtc
+  const isLocal = options.scaleType === 'localTime'
+  const scaleFn = isLocal ? scaleTime : scaleUtc
 
   let isInvalid = false
 
