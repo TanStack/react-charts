@@ -18,6 +18,12 @@ import {
   timeDay,
   timeMonth,
   timeYear,
+  utcYear,
+  utcMonth,
+  utcDay,
+  utcHour,
+  utcMinute,
+  utcSecond,
 } from 'd3-time'
 
 import { timeFormat } from 'd3-time-format'
@@ -118,6 +124,7 @@ function buildTimeAxis<TDatum>(
   range: [number, number],
   outerRange: [number, number]
 ): AxisTime<TDatum> {
+  const isLocal = options.scaleType !== 'localTime'
   const scaleFn = options.scaleType === 'localTime' ? scaleTime : scaleUtc
 
   let isInvalid = false
@@ -147,62 +154,80 @@ function buildTimeAxis<TDatum>(
 
   let autoFormatStr: string
 
+  const units = isLocal
+    ? {
+        year: timeYear,
+        month: timeMonth,
+        day: timeDay,
+        hour: timeHour,
+        minute: timeMinute,
+        second: timeSecond,
+      }
+    : {
+        year: utcYear,
+        month: utcMonth,
+        day: utcDay,
+        hour: utcHour,
+        minute: utcMinute,
+        second: utcSecond,
+      }
+
   if (minValue && maxValue) {
     if (
-      timeYear.count(minValue, maxValue) > 0 ||
-      +timeYear.floor(maxValue) < +timeYear()
+      units.year.count(minValue, maxValue) > 0 ||
+      +units.year.floor(maxValue) < +units.year()
     ) {
       autoFormatStr = '%b %-d, %Y %-I:%M:%S.%L %p'
     } else if (
-      timeMonth.count(minValue, maxValue) > 0 ||
-      +timeMonth.floor(maxValue) < +timeMonth()
+      units.month.count(minValue, maxValue) > 0 ||
+      +units.month.floor(maxValue) < +units.month()
     ) {
       autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
     } else if (
-      timeDay.count(minValue, maxValue) > 0 ||
-      +timeDay.floor(maxValue) < +timeDay()
+      units.day.count(minValue, maxValue) > 0 ||
+      +units.day.floor(maxValue) < +units.day()
     ) {
       autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
     } else if (
-      timeHour.count(minValue, maxValue) > 0 ||
-      +timeHour.floor(maxValue) < +timeHour()
+      units.hour.count(minValue, maxValue) > 0 ||
+      +units.hour.floor(maxValue) < +units.hour()
     ) {
       autoFormatStr = '%-I:%M:%S.%L %p'
     } else if (
-      timeMinute.count(minValue, maxValue) > 0 ||
-      +timeMinute.floor(maxValue) < +timeMinute()
+      units.minute.count(minValue, maxValue) > 0 ||
+      +units.minute.floor(maxValue) < +units.minute()
     ) {
       autoFormatStr = '%-I:%M:%S.%L'
     } else if (
-      timeSecond.count(minValue, maxValue) > 0 ||
-      +timeSecond.floor(maxValue) < +timeSecond()
+      units.second.count(minValue, maxValue) > 0 ||
+      +units.second.floor(maxValue) < +units.second()
     ) {
       autoFormatStr = '%L'
     }
   }
 
   const contextFormat = (format: string, date: Date) => {
-    if (timeSecond(date) < date) {
+    if (units.second(date) < date) {
       // milliseconds - Do not remove any context
       return timeFormat(format)(date)
     }
-    if (timeMinute(date) < date) {
+    if (units.minute(date) < date) {
       // seconds - remove potential milliseconds
       return timeFormat(format.replace(/\.%L.*?(\s|$)/, ' '))(date)
     }
-    if (timeHour(date) < date) {
+    if (units.hour(date) < date) {
       // minutes - remove potential seconds and milliseconds
       return timeFormat(format.replace(/:%S.*?(\s|$)/, ' '))(date)
     }
-    if (timeDay(date) < date) {
+    if (units.day(date) < date) {
       // hours - remove potential minutes and seconds and milliseconds
       return timeFormat(format.replace(/:%M.*?(\s|$)/, ' '))(date)
     }
-    if (timeMonth(date) < date) {
+    if (units.month(date) < date) {
       // days  - remove potential hours, minutes, seconds and milliseconds
       return timeFormat(format.replace(/%I.*/, ''))(date)
     }
-    if (timeYear(date) < date) {
+    if (units.year(date) < date) {
       // months - remove potential days, hours, minutes, seconds and milliseconds
       return timeFormat(format.replace(/%e, .*?(\s|$)/, ''))(date)
     }
