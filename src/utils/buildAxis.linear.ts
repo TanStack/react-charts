@@ -17,7 +17,6 @@ import {
   timeHour,
   timeDay,
   timeMonth,
-  timeWeek,
   timeYear,
 } from 'd3-time'
 
@@ -145,16 +144,6 @@ function buildTimeAxis<TDatum>(
   // dates in this dataset. If the min/max dates span multiples of
   // any of the time units OR if the max date resides in a different
   // unit boundary than today's, we use that unit as context.
-
-  const unitScale = [
-    'millisecond',
-    'second',
-    'minute',
-    'hour',
-    'day',
-    'month',
-    'year',
-  ] as const
 
   let autoFormatStr: string
 
