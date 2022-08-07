@@ -231,7 +231,7 @@ function buildTimeAxis<TDatum>(
     }
     if (units.year(date) < date) {
       // months - remove potential days, hours, minutes, seconds and milliseconds
-      return timeFormat(trimFormat(format.replace(/%-d.*?(\s|$)/, '')))(date)
+      return timeFormat(trimFormat(format.replace(/%-d.*/, '')))(date)
     }
     // years
     return timeFormat('%Y')(date)
