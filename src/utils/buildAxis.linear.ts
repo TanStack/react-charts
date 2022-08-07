@@ -175,36 +175,38 @@ function buildTimeAxis<TDatum>(
   if (minValue && maxValue) {
     if (
       units.year.count(minValue, maxValue) > 0 ||
-      +units.year.floor(maxValue) < +units.year()
+      units.year.floor(maxValue) < units.year()
     ) {
       autoFormatStr = '%b %-d, %Y %-I:%M:%S.%L %p'
     } else if (
       units.month.count(minValue, maxValue) > 0 ||
-      +units.month.floor(maxValue) < +units.month()
+      units.month.floor(maxValue) < units.month()
     ) {
       autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
     } else if (
       units.day.count(minValue, maxValue) > 0 ||
-      +units.day.floor(maxValue) < +units.day()
+      units.day.floor(maxValue) < units.day()
     ) {
       autoFormatStr = '%b %-d, %-I:%M:%S.%L %p'
     } else if (
       units.hour.count(minValue, maxValue) > 0 ||
-      +units.hour.floor(maxValue) < +units.hour()
+      units.hour.floor(maxValue) < units.hour()
     ) {
       autoFormatStr = '%-I:%M:%S.%L %p'
     } else if (
       units.minute.count(minValue, maxValue) > 0 ||
-      +units.minute.floor(maxValue) < +units.minute()
+      units.minute.floor(maxValue) < units.minute()
     ) {
       autoFormatStr = '%-I:%M:%S.%L'
     } else if (
       units.second.count(minValue, maxValue) > 0 ||
-      +units.second.floor(maxValue) < +units.second()
+      units.second.floor(maxValue) < units.second()
     ) {
       autoFormatStr = '%L'
     }
   }
+
+  const trimFormat = (str: string) => str.trim().replace(/(,$|^,)/, '')
 
   const contextFormat = (format: string, date: Date) => {
     if (units.second(date) < date) {
@@ -213,23 +215,23 @@ function buildTimeAxis<TDatum>(
     }
     if (units.minute(date) < date) {
       // seconds - remove potential milliseconds
-      return timeFormat(format.replace(/\.%L.*?(\s|$)/, ' '))(date)
+      return timeFormat(trimFormat(format.replace(/\.%L.*?(\s|$)/, '')))(date)
     }
     if (units.hour(date) < date) {
       // minutes - remove potential seconds and milliseconds
-      return timeFormat(format.replace(/:%S.*?(\s|$)/, ' '))(date)
+      return timeFormat(trimFormat(format.replace(/:%S.*?(\s|$)/, '')))(date)
     }
     if (units.day(date) < date) {
       // hours - remove potential minutes and seconds and milliseconds
-      return timeFormat(format.replace(/:%M.*?(\s|$)/, ' '))(date)
+      return timeFormat(trimFormat(format.replace(/:%M.*?(\s|$)/, '')))(date)
     }
     if (units.month(date) < date) {
       // days  - remove potential hours, minutes, seconds and milliseconds
-      return timeFormat(format.replace(/%I.*/, ''))(date)
+      return timeFormat(trimFormat(format.replace(/%-I.*/, '')))(date)
     }
     if (units.year(date) < date) {
       // months - remove potential days, hours, minutes, seconds and milliseconds
-      return timeFormat(format.replace(/%e, .*?(\s|$)/, ''))(date)
+      return timeFormat(trimFormat(format.replace(/%-d.*?(\s|$)/, '')))(date)
     }
     // years
     return timeFormat('%Y')(date)
