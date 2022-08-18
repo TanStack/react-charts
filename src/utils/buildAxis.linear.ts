@@ -26,7 +26,7 @@ import {
   utcSecond,
 } from 'd3-time'
 
-import { timeFormat } from 'd3-time-format'
+import { timeFormat, utcFormat } from 'd3-time-format'
 
 import {
   Axis,
@@ -206,35 +206,42 @@ function buildTimeAxis<TDatum>(
     }
   }
 
+  const resolvedTimeFormat = isLocal ? timeFormat : utcFormat
   const trimFormat = (str: string) => str.trim().replace(/(,$|^,)/, '')
 
   const contextFormat = (format: string, date: Date) => {
     if (units.second(date) < date) {
       // milliseconds - Do not remove any context
-      return timeFormat(format)(date)
+      return resolvedTimeFormat(format)(date)
     }
     if (units.minute(date) < date) {
       // seconds - remove potential milliseconds
-      return timeFormat(trimFormat(format.replace(/\.%L.*?(\s|$)/, '')))(date)
+      return resolvedTimeFormat(
+        trimFormat(format.replace(/\.%L.*?(\s|$)/, ''))
+      )(date)
     }
     if (units.hour(date) < date) {
       // minutes - remove potential seconds and milliseconds
-      return timeFormat(trimFormat(format.replace(/:%S.*?(\s|$)/, '')))(date)
+      return resolvedTimeFormat(trimFormat(format.replace(/:%S.*?(\s|$)/, '')))(
+        date
+      )
     }
     if (units.day(date) < date) {
       // hours - remove potential minutes and seconds and milliseconds
-      return timeFormat(trimFormat(format.replace(/:%M.*?(\s|$)/, '')))(date)
+      return resolvedTimeFormat(trimFormat(format.replace(/:%M.*?(\s|$)/, '')))(
+        date
+      )
     }
     if (units.month(date) < date) {
       // days  - remove potential hours, minutes, seconds and milliseconds
-      return timeFormat(trimFormat(format.replace(/%-I.*/, '')))(date)
+      return resolvedTimeFormat(trimFormat(format.replace(/%-I.*/, '')))(date)
     }
     if (units.year(date) < date) {
       // months - remove potential days, hours, minutes, seconds and milliseconds
-      return timeFormat(trimFormat(format.replace(/%-d.*/, '')))(date)
+      return resolvedTimeFormat(trimFormat(format.replace(/%-d.*/, '')))(date)
     }
     // years
-    return timeFormat('%Y')(date)
+    return resolvedTimeFormat('%Y')(date)
   }
 
   let shouldNice = options.shouldNice
