@@ -11,7 +11,7 @@ You will, however, need general knowledge of:
 
 - Your data. If you don't know the data you want to visualize, you're not going to get far at all!
 
-It's optional for basic charting, but if you really want to be productive, you'll want understand:
+It's optional for basic charting, but if you really want to be productive, you'll want to understand:
 
 - High-level Scale Architypes, the differences in what they do, and why you would use one over the other. Again, you do not need to know how to build your own scales or use `d3-scale`, but knowing the concepts and ideas behind scale types like `time`, `linear/continuous`, and `ordinal/band` will go a long way. [Learn more at Observerble](https://observablehq.com/@d3/learn-d3-scales).
 
