@@ -40,7 +40,7 @@ export default function useRect(
     document.addEventListener('scroll', cb, true)
 
     return () => {
-      document.removeEventListener('scroll', cb)
+      document.removeEventListener('scroll', cb, true)
     }
   }, [element, enabled, measure, rerender])
 
