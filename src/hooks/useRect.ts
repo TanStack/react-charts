@@ -37,7 +37,7 @@ export default function useRect(
       rerender()
     }
 
-    document.addEventListener('scroll', cb)
+    document.addEventListener('scroll', cb, true)
 
     return () => {
       document.removeEventListener('scroll', cb)
