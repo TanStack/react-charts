@@ -298,13 +298,13 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes.
 
-**interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+**interactionMode** expect an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
 **showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
 
-**getSeriesOrder** expect a function, this option will allows you to reorder the series if you want.
+**getSeriesOrder** expect a function, this option will allow you to reorder the series if you want.
 
 **primaryCursor** and **secondaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
