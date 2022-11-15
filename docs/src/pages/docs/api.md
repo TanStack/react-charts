@@ -152,7 +152,7 @@ To date, we have the following scale types available:
 - `band` - A banded axis commonly used to plot categories or ordinal information. Works well as the **primary** axis for bar charts with ordinal domains.
 - `time` - A continuous axis used for plotting UTC `Date`s on an evenly distributed scale. Works well as a **primary** axis.
 - `timeLocal` - Similar to the `time` scale, but uses localized `Date` objects instead of UTC. Works well as a **primary** axis.
-- `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis
+- `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis.
 
 Axes are a required component of a React Chart. Both a `primaryAxis` and at least one axis vis `secondaryAxes` must be configured.
 
@@ -298,7 +298,7 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes.
+**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side, you may have a wrapper div that sets the width and height CSS attributes.
 
 **interactionMode** expect an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
