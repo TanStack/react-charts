@@ -28,7 +28,7 @@ const data = [
 ]
 ```
 
-Visualization data can come in practically any shape and size, so **memoization of data into this shape is almost always necessary**.
+Visualization of data can come in practically any shape and size, so **memoization of data into this shape is almost always necessary**.
 
 ```tsx
 const data = React.useMemo(
@@ -63,7 +63,7 @@ The individual datums in a series' `data` array can be anything you want! Just r
 The Chart component props can be passed in its `options` property object:
 
 ```javascript
-<Chart
+<
   options={{
     data,
     primaryAxis,
@@ -131,7 +131,6 @@ If you'd like to have a custom height and width in the client side you may have 
 
 `interactionMode` expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
-`showVoronoi` expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
 
 `getSeriesOrder` expect a function, this option will allows you to reorder the series if you want.
 
@@ -141,20 +140,20 @@ If you'd like to have a custom height and width in the client side you may have 
 
 React Charts use axes to configure a fair amount of the charts. Axes handle many things like:
 
-- Accessing chart values from your series' `Datum`s
-- Optionally positioning your axis on the grid
-- Optionally configuring the scale type for your axis
-- Optionally configuring the element type for series that are tied to your axis
+- Accessing chart values from your series' `Datum`'s.
+- Optionally positioning your axis on the grid.
+- Optionally configuring the scale type for your axis.
+- Optionally configuring the element type for series that are tied to your axis.
 
 To date, we have the following scale types available:
 
 - `linear` - A continuous axis used for plotting numerical data on an evenly distributed scale. Works well both as a **primary and secondary** axis.
 - `band` - A banded axis commonly used to plot categories or ordinal information. Works well as the **primary** axis for bar charts with ordinal domains.
-- `time` - A continuous axis used for plotting UTC `Date`s on an evenly distributed scale. Works well as a **primary** axis.
+- `time` - A continuous axis used for plotting UTC `Date`'s on an evenly distributed scale. Works well as a **primary** axis.
 - `timeLocal` - Similar to the `time` scale, but uses localized `Date` objects instead of UTC. Works well as a **primary** axis.
 - `log` - A continuous axis used for plotting numerical data on a logarithmically distributed scale. Works well as a **secondary** axis.
 
-Axes are a required component of a React Chart. Both a `primaryAxis` and at least one axis vis `secondaryAxes` must be configured.
+Axes are a required component of React Charts. Both `primaryAxis` and at least one axis vis `secondaryAxes` must be configured.
 
 ```javascript
 import { Chart } from 'react-charts'
@@ -245,7 +244,7 @@ The Chart component props can be passed in its **options** property object:
 ```
 
 The data property should be an array of series, each series should be an array of objects.
-Each object should have two properties, by convention called primary and secondary, but it can be named as you want. One of these properties will be used as the primary axis and the other as the secondary axes.
+Each object should have two properties, by convention called primary and secondary, but it can be named as you want. One of these properties will be used as the primary axis and the other one as the secondary axes.
 
 ```javascript
 const data = [
@@ -300,17 +299,17 @@ const secondaryAxes = React.useMemo(
 
 **initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side, you may have a wrapper div that sets the width and height CSS attributes.
 
-**interactionMode** expect an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+**interactionMode** expects an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
-**showVoronoi** expect a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
+**showVoronoi** expects a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
 
-**getSeriesOrder** expect a function, this option will allow you to reorder the series if you want.
+**getSeriesOrder** expects a function, this option will allow you to reorder the series if you want.
 
 **primaryCursor** and **secondaryCursor** take the options that configure the line/rectangle that is drawn underneath your cursor when you hover over the chart. When both are used, it produces a kind of cross-hair. Both are set to true by default.
 
 ### Curve Types
 
-All element types that support lines or curves can be configured by passing any `curve` generator function as the `AxisOptions<TDatum>['curve']` option. By default, horizontal and vertical series default to using `monotoneX` and `monotoneY` curves, respectively. More information can be found at [`d3-shape curves`](https://github.com/d3/d3-shape#curves)
+All element types that support lines or curves can be configured by passing any `curve` generator function as the `AxisOptions<TDatum>['curve']` option. By default, horizontal and vertical series default to using `monotoneX` and `monotoneY` curves, respectively. More information can be found at [`d3-shape curves`](https://github.com/d3/d3-shape#curves).
 
 # API
 
