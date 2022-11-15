@@ -7,7 +7,7 @@ title: API
 
 ## Memoize your Props!
 
-The React Charts `<Chart>` component has a few options that need to be **stable** or **memoized using either `React.useMemo` or `React.useCallback`**. Using an unstable option incorrectly shouldn't severly break any basic functionality, but could results in infinite change-detection loops in your app or at the very least, your charts will be severly non-performant. If an option says it needs to be stable, it's not kidding around!
+The React Charts `<Chart>` component has a few options that needs to be **stable** or **memoized using either `React.useMemo` or `React.useCallback`**. Using an unstable option incorrectly shouldn't severly break any basic functionality, but could results in infinite change-detection loops in your app or at the very least, your charts will be severly non-performant. If an option says it needs to be stable, it's not kidding around!
 
 ## Data Model
 
@@ -126,7 +126,7 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-The `initialHeight` and `initialWidth` expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR only.
+The `initialHeight` and `initialWidth` expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only.
 If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
 
 `interactionMode` expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
@@ -206,14 +206,14 @@ function MyChart() {
 Secondary axes for the most part are automatic, but can be optionally configured to render their respective series using 3 different element types using the `AxisOptions<TDatum>['scaleType']` property:
 
 - `line`
-  - 1 Line per series (optional, eg. for Bubble/Scatter charts)
-  - 1 Circle per datum (optional)
+  - 1 Line per series. (optional, eg. for Bubble/Scatter charts)
+  - 1 Circle per datum. (optional)
 - `area`
-  - 1 Enclosed area per series
-  - 1 Line per series (optional)
-  - 1 Circle per datum (optional)
+  - 1 Enclosed area per series.
+  - 1 Line per series (optional).
+  - 1 Circle per datum (optional).
 - `bar`
-  - 1 Rectangle per datum
+  - 1 Rectangle per datum.
 
 Example
 
@@ -297,7 +297,7 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side, you may have a wrapper div that sets the width and height CSS attributes.
+**initialHeight** and **initialWidth** expects a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side, you may have a wrapper div that sets the width and height CSS attributes.
 
 **interactionMode** expects an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
