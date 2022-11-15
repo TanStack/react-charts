@@ -127,7 +127,7 @@ const secondaryAxes = React.useMemo(
 ```
 
 The `initialHeight` and `initialWidth` expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only.
-If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes.
 
 `interactionMode` expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
@@ -299,7 +299,7 @@ const secondaryAxes = React.useMemo(
 
 **initialHeight** and **initialWidth** expects a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side, you may have a wrapper div that sets the width and height CSS attributes.
 
-**interactionMode** expects an string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
+**interactionMode** expects a string which can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
 **showVoronoi** expects a boolean, it's a debug option to visualize the interaction click-map that sits on top of the chart.
 
@@ -309,7 +309,7 @@ const secondaryAxes = React.useMemo(
 
 ### Curve Types
 
-All element types that support lines or curves can be configured by passing any `curve` generator function as the `AxisOptions<TDatum>['curve']` option. By default, horizontal and vertical series default to using `monotoneX` and `monotoneY` curves, respectively. More information can be found at [`d3-shape curves`](https://github.com/d3/d3-shape#curves).
+All element types that support lines or curves can be configured by passing any `curve` generator function as the `AxisOptions<TDatum>['curve']` option. By default, horizontal and vertical series default to using `monotoneX` and `monotoneY` curves, respectively. More information can be found at [d3-shape curves](https://github.com/d3/d3-shape#curves).
 
 # API
 
