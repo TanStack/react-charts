@@ -138,5 +138,8 @@
     "d3-time": "^2.1.1",
     "d3-time-format": "^4.1.0",
     "ts-toolbelt": "^9.6.0"
+  },
+  "resolutions": {
+    "d3-scale/d3-interpolate/d3-color": "^3.1.0"
   }
 }
