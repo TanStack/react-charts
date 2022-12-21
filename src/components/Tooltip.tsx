@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 
 import { useAnchor } from '../hooks/useAnchor'
 import useLatestWhen from '../hooks/useLatestWhen'
@@ -11,6 +10,7 @@ import useChartContext from '../utils/chartContext'
 import TooltipRenderer from './TooltipRenderer'
 import useRect from '../hooks/useRect'
 import { useSpring } from '../hooks/useSpring'
+import Portal from './Portal';
 
 //
 
@@ -44,7 +44,7 @@ export function defaultTooltip<TDatum>(
   }
 }
 
-export default function Tooltip<TDatum>(): React.ReactPortal | null {
+export default function Tooltip<TDatum>(): JSX.Element | null {
   const {
     focusedDatumState,
     getOptions,
@@ -63,7 +63,8 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
 
   const portalEl = usePortalElement()
 
-  const [tooltipEl, setTooltipEl] = React.useState<HTMLDivElement | null>()
+  const tooltipRef = React.useRef<HTMLDivElement | null>(null)
+  const tooltipInnerRef = React.useRef<HTMLDivElement | null>(null)
 
   const svgRect = useRect(svgRef.current, !!focusedDatum?.element)
 
@@ -103,7 +104,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
     show: !!focusedDatum,
     portalEl,
     anchorEl,
-    tooltipEl,
+    tooltipEl: tooltipInnerRef.current,
     side: ['right', 'left', 'top', 'bottom'],
   })
 
@@ -111,8 +112,6 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
   const latestStableAnchor = useLatestWhen(anchor, !!anchor.fit) ?? anchor
 
   const { visibility, ...anchorStyle } = latestStableAnchor.style
-
-  const tooltipRef = React.useRef<HTMLDivElement | null>(null)
 
   const immediate = Number.isNaN(previousAnchor?.style.left)
 
@@ -157,7 +156,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
   const latestFit = useLatestWhen(anchor.fit, !!anchor.fit)
 
   return show && portalEl
-    ? ReactDOM.createPortal(
+    ? (<Portal>
         <div
           ref={tooltipRef}
           style={{
@@ -167,7 +166,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
           }}
         >
           <div
-            ref={el => setTooltipEl(el)}
+            ref={() => tooltipInnerRef}
             style={{
               fontFamily: 'sans-serif',
               ...(latestFit?.startKey === 'left'
@@ -190,8 +189,7 @@ export default function Tooltip<TDatum>(): React.ReactPortal | null {
               anchor,
             })}
           </div>
-        </div>,
-        portalEl
-      )
+        </div>
+      </Portal>)
     : null
 }
