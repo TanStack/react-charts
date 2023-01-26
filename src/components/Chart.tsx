@@ -796,12 +796,14 @@ function sortDatumsBySecondaryPx<TDatum>(
     const bPx =
       bAxis?.scale(bAxis.stacked ? b.stackData?.[1] : b.secondaryValue) ?? NaN
 
-    return aPx > bPx
-      ? 1
-      : aPx < bPx
-      ? -1
-      : a.seriesIndex > b.seriesIndex
-      ? 1
-      : -1
+    if ((aAxis || bAxis)?.stacked) {
+      return a.seriesIndex > b.seriesIndex
+        ? 1
+        : a.seriesIndex < b.seriesIndex
+        ? -1
+        : 0
+    }
+
+    return aPx > bPx ? 1 : aPx < bPx ? -1 : 0
   })
 }
