@@ -786,6 +786,15 @@ function sortDatumsBySecondaryPx<TDatum>(
   datums: Datum<TDatum>[],
   secondaryAxes: Axis<TDatum>[]
 ) {
+  if (secondaryAxes.every(d => d.stacked)) {
+    const differingInverts =
+      secondaryAxes.some(d => d.invert) && secondaryAxes.some(d => !d.invert)
+
+    if (!differingInverts) {
+      return datums
+    }
+  }
+
   return [...datums].sort((a, b) => {
     const aAxis = secondaryAxes.find(d => d.id === a.secondaryAxisId)
     const bAxis = secondaryAxes.find(d => d.id === b.secondaryAxisId)
@@ -795,14 +804,6 @@ function sortDatumsBySecondaryPx<TDatum>(
 
     const bPx =
       bAxis?.scale(bAxis.stacked ? b.stackData?.[1] : b.secondaryValue) ?? NaN
-
-    if ((aAxis || bAxis)?.stacked) {
-      return a.seriesIndex > b.seriesIndex
-        ? 1
-        : a.seriesIndex < b.seriesIndex
-        ? -1
-        : 0
-    }
 
     return aPx > bPx ? 1 : aPx < bPx ? -1 : 0
   })
