@@ -126,8 +126,8 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-The `initialHeight` and `initialWidth` expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR only.
-If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+The `initialHeight` and `initialWidth` expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only.
+If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes.
 
 `interactionMode` expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
@@ -298,7 +298,7 @@ const secondaryAxes = React.useMemo(
 )
 ```
 
-**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available SSR onoly. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes
+**initialHeight** and **initialWidth** expect a number, a default value is applied for each of those, 300 and 200 respectively. It's important to mention that these options are available for SSR only. If you'd like to have a custom height and width in the client side you may have a wrapper div that sets the width and height CSS attributes.
 
 **interactionMode** expect an string wich can be "primary" or "closest". It's been using for the tooltip position. By default, primary is being set.
 
