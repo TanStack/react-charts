@@ -7,7 +7,7 @@ title: API
 
 ## Memoize your Props!
 
-The React Charts `<Chart>` component has a few options that need to be **stable** or **memoized using either `React.useMemo` or `React.useCallback`**. Using an unstable option incorrectly shouldn't severly break any basic functionality, but could results in infinite change-detection loops in your app or at the very least, your charts will be severly non-performant. If an option says it needs to be stable, it's not kidding around!
+The React Charts `<Chart>` component has a few options that need to be **stable** or **memoized using either `React.useMemo` or `React.useCallback`**. Using an unstable option incorrectly shouldn't severely break any basic functionality, but could result in infinite change-detection loops in your app or at the very least, your charts will be severely non-performant. If an option says it needs to be stable, it's not kidding around!
 
 ## Data Model
 
