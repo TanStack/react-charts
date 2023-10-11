@@ -647,34 +647,40 @@ function buildPrimaryBandScale<TDatum>(
   range: [number, number]
 ) {
   // Find the two closest points along axis
+  // Do not allow the band to be smaller than single pixel of the output range
 
   let impliedBandWidth: number = Math.max(...range)
+  const bandRange: number = Math.max(...range)
 
-  for (let i = 0; i < series.length; i++) {
-    const serie = series[i]
+  ;(() => {
+    for (let i = 0; i < series.length; i++) {
+      const serie = series[i]
 
-    for (let j = 0; j < serie.datums.length; j++) {
-      const d1 = serie.datums[j]
-      const one = scale(d1.primaryValue ?? NaN)
+      for (let j = 0; j < serie.datums.length; j++) {
+        const d1 = serie.datums[j]
+        const one = scale(d1.primaryValue ?? NaN)
 
-      for (let k = 0; k < serie.datums.length; k++) {
-        const d2 = serie.datums[k]
-        const two = scale(d2.primaryValue ?? NaN)
+        for (let k = 0; k < serie.datums.length; k++) {
+          const d2 = serie.datums[k]
+          const two = scale(d2.primaryValue ?? NaN)
 
-        if (one === two) {
-          continue
-        }
+          if (one === two) {
+            continue
+          }
 
-        const diff = Math.abs(Math.max(one, two) - Math.min(one, two))
+          const diff = Math.abs(Math.max(one, two) - Math.min(one, two))
 
-        if (diff < impliedBandWidth) {
-          impliedBandWidth = diff
+          if (diff < impliedBandWidth) {
+            impliedBandWidth = Math.max(diff, bandRange)
+
+            if (impliedBandWidth === bandRange) {
+              return
+            }
+          }
         }
       }
     }
-  }
-
-  const bandRange = Math.max(...range)
+  })()
 
   const bandDomain = d3Range(bandRange / impliedBandWidth)
 
