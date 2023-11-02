@@ -54,7 +54,9 @@ function TooltipRenderer<TDatum>(props: TooltipRendererProps<TDatum>) {
 
   const { tooltip, dark } = props.getOptions()
 
-  const groupDatums = props.focusedDatum?.tooltipGroup ?? []
+  const groupDatums = (props.focusedDatum?.tooltipGroup ?? []).filter(
+    datum => tooltip.showDatumInTooltip?.(datum) ?? true
+  )
 
   const resolvedShowCount = showCount % 2 === 0 ? showCount : showCount + 1
   const length = groupDatums.length
