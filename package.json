@@ -141,5 +141,12 @@
   },
   "resolutions": {
     "d3-scale/d3-interpolate/d3-color": "^3.1.0"
+  },
+  "overrides": {
+    "d3-scale": {
+      "d3-interpolate": {
+        "d3-color": "^3.1.0"
+      }
+    }
   }
 }
