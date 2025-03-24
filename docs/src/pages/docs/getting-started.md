@@ -45,7 +45,7 @@ const data: Series[] = [
 - `primaryAxis: AxisOptions<TDatum>`
   - Primary Value Accessor
 - `secondaryAxes: AxisOptions<TDatum>[]`
-  - Primary Value Accessor
+  - Secondary Value Accessor
 
 ```tsx
 function App() {
