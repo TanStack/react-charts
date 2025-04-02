@@ -15,5 +15,8 @@ export function ChartContextProvider<TDatum>({
 }
 
 export default function useChartContext<TDatum>() {
-  return React.useContext(chartContext)() as ChartContextValue<TDatum>
+  const ctx = React.useContext(chartContext)() as ChartContextValue<TDatum>
+  if (!ctx)
+    throw new Error('useChartContext can only be used within a Chart Provider')
+  return ctx as ChartContextValue<TDatum>
 }
