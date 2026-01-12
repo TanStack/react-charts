@@ -7,7 +7,7 @@ export function useSpring(
   config: [number, number, number],
   cb: (x: number) => void,
   immediate?: boolean,
-  debug?: boolean
+  _debug?: boolean
 ) {
   const springRef = React.useRef(new Spring(value, ...config))
   const getValue = useGetLatest(value)
@@ -17,16 +17,22 @@ export function useSpring(
     return springRef.current.done()
   })
 
-  // Immediate
+  const prevRef = React.useRef<any>()
+  const changed = prevRef.current !== value
+
   React.useEffect(() => {
-    if (immediate) {
-      springRef.current.snap(getValue())
+    if (changed) {
+      if (immediate) {
+        springRef.current.snap(getValue())
+        startRaf()
+        return
+      }
+      springRef.current.setEnd(value)
       startRaf()
-      return
     }
-    springRef.current.setEnd(value)
-    startRaf()
-  }, [debug, getValue, immediate, startRaf, stopRaf, value])
+
+    prevRef.current = value
+  })
 
   React.useEffect(() => {
     return () => {
@@ -54,3 +60,5 @@ export function useRaf(callback: () => any) {
     ),
   ]
 }
+
+// Test

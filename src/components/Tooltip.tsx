@@ -41,6 +41,7 @@ export function defaultTooltip<TDatum>(
     arrowPadding: options.arrowPadding ?? 7,
     // anchor: options.anchor ?? 'closest',
     render: options.render ?? TooltipRenderer,
+    showDatumInTooltip: options.showDatumInTooltip ?? (() => true),
   }
 }
 

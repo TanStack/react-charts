@@ -124,7 +124,8 @@ export type TooltipOptions<TDatum> = {
   render?: (props: TooltipRendererProps<TDatum>) => React.ReactNode
   // formatSecondary?: (d: unknown) => string | number
   // formatTertiary?: (d: unknown) => string | number
-  invert?: boolean
+  invert?: boolean,
+  showDatumInTooltip?: (datum: Datum<TDatum>) => boolean
 }
 
 export type ResolvedTooltipOptions<TDatum> = TSTB.Object.Required<
